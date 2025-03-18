@@ -206,6 +206,44 @@ app.post('/zh_wikipedia/get_item_content', async (req, res) => {
     }
 })
 
+// 从[英文]维基百科搜索条目
+app.post('/en_wikipedia/search_item', async (req, res) => {
+    const { item } = req.body;
+
+    if (!item) {
+        return res.status(400).send('Invalid input: "item" is required');
+    }
+
+    const searchUrl = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${item}&format=json`;
+
+    try {
+        const response = await axios.get(searchUrl);
+        res.send(response.data);
+    } catch (error) {
+        console.error(`Error searching Wikipedia: ${error.message}`);
+        res.status(500).send(`Error searching Wikipedia: ${error.message}`);
+    }
+})
+
+// 从[英文]维基百科获取词条内容
+app.post('/en_wikipedia/get_item_content', async (req, res) => {
+    const { item } = req.body;
+
+    if (!item) {
+        return res.status(400).send('Invalid input: "item" is required');
+    }
+
+    const wikipediaUrl = `https://en.wikipedia.org/w/api.php?action=query&prop=extracts&titles=${item}&explaintext&format=json`;
+
+    try {
+        const response = await axios.get(wikipediaUrl);
+        res.send(response.data);
+    } catch (error) {
+        console.error(`Error searching Wikipedia: ${error.message}`);
+        res.status(500).send(`Error searching Wikipedia: ${error.message}`);
+    }
+})
+
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
 })
