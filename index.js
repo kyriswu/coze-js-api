@@ -145,6 +145,29 @@ app.post('/parseUrlContent', async (req, res) => {
     }
 })
 
+app.post('/google_search', async (req, res) => {
+    const { q, cx } = req.body;
+
+    if (!q) {
+        return res.status(400).send('Invalid input: "q" and "cx" are required');
+    }
+
+    if (!cx) {
+        cx = "93d449f1c4ff047bc"    // 默认使用我的自定义搜索引擎
+    }
+
+    const apiKey = 'AIzaSyDURdhjtCaZo8oJyjmeNz8Hr5YVEx6TRLI';
+    const searchUrl = `https://customsearch.googleapis.com/customsearch/v1?q=${encodeURIComponent(q)}&cx=${cx}&key=${apiKey}`;
+
+    try {
+        const response = await axios.get(searchUrl);
+        res.send(response.data);
+    } catch (error) {
+        console.error(`Error performing Google search: ${error.message}`);
+        res.status(500).send(`Error performing Google search: ${error.message}`);
+    }
+})
+
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
 })
