@@ -157,7 +157,7 @@ app.post('/google_search', async (req, res) => {
     }
 
     const apiKey = 'AIzaSyDURdhjtCaZo8oJyjmeNz8Hr5YVEx6TRLI';
-    const searchUrl = `https://customsearch.googleapis.com/customsearch/v1?q=${encodeURIComponent(q)}&cx=${cx}&key=${apiKey}`;
+    const searchUrl = `https://customsearch.googleapis.com/customsearch/v1?q=${encodeURIComponent(q)}&cx=${cx}&key=${apiKey}&safe=active`;
 
     try {
         const response = await axios.get(searchUrl);
