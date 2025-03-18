@@ -146,7 +146,7 @@ app.post('/parseUrlContent', async (req, res) => {
 })
 
 app.post('/google_search', async (req, res) => {
-    const { q, cx } = req.body;
+    let { q, cx } = req.body;
 
     if (!q) {
         return res.status(400).send('Invalid input: "q" and "cx" are required');
