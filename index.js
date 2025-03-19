@@ -297,7 +297,11 @@ app.post('/google/search/web', async (req, res) => {
             const url = _url ? _url.href : '';
             return { title, image, snippet, url };
         }).filter(item => item.title); // 过滤掉 title 为空的;
-        res.send(result_list);
+        res.send({
+            code: 0,
+            msg: 'Success',
+            data: result_list
+        });
     } catch (error) {
         console.error(`Error performing Google search: ${error.message}`);
         res.status(500).send(`Error performing Google search: ${error.message}`);
