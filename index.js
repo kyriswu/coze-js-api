@@ -198,7 +198,8 @@ app.post('/zh_wikipedia/get_item_content', async (req, res) => {
     const wikipediaUrl = `https://zh.wikipedia.org/w/api.php?action=query&prop=extracts&titles=${item}&explaintext&format=json`;
 
     try {
-        const response = await axios.get(wikipediaUrl);
+        let response = await axios.get(wikipediaUrl);
+        response.data.query.pages = Object.values(response.data.query.pages);
         res.send(response.data);
     } catch (error) {
         console.error(`Error searching Wikipedia: ${error.message}`);
@@ -236,8 +237,9 @@ app.post('/en_wikipedia/get_item_content', async (req, res) => {
     const wikipediaUrl = `https://en.wikipedia.org/w/api.php?action=query&prop=extracts&titles=${item}&explaintext&format=json`;
 
     try {
-        const response = await axios.get(wikipediaUrl);
-        res.send(response.data);
+        let response = await axios.get(wikipediaUrl);
+        response.data.query.pages = Object.values(response.data.query.pages);
+        res.send(response.data.query.pages);
     } catch (error) {
         console.error(`Error searching Wikipedia: ${error.message}`);
         res.status(500).send(`Error searching Wikipedia: ${error.message}`);
