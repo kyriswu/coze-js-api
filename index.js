@@ -219,7 +219,8 @@ app.post('/en_wikipedia/search_item', async (req, res) => {
 
     try {
         const response = await axios.get(searchUrl);
-        res.send(response.data);
+        const pages = Object.values(response.data.query.pages);
+        res.send(pages[0]);
     } catch (error) {
         console.error(`Error searching Wikipedia: ${error.message}`);
         res.status(500).send(`Error searching Wikipedia: ${error.message}`);
