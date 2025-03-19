@@ -168,6 +168,29 @@ app.post('/google_search', async (req, res) => {
     }
 })
 
+app.post('/google_search_image', async (req, res) => {
+    let { q, cx } = req.body;
+
+    if (!q) {
+        return res.status(400).send('Invalid input: "q" and "cx" are required');
+    }
+
+    if (!cx) {
+        cx = "93d449f1c4ff047bc"    // 默认使用我的自定义搜索引擎
+    }
+
+    const apiKey = 'AIzaSyDURdhjtCaZo8oJyjmeNz8Hr5YVEx6TRLI';
+    const searchUrl = `https://customsearch.googleapis.com/customsearch/v1?q=${encodeURIComponent(q)}&cx=${cx}&key=${apiKey}&safe=active&searchType=image`;
+
+    try {
+        const response = await axios.get(searchUrl);
+        res.send(response.data);
+    } catch (error) {
+        console.error(`Error performing Google search: ${error.message}`);
+        res.status(500).send(`Error performing Google search: ${error.message}`);
+    }
+})
+
 // 从维基百科搜索条目
 app.post('/zh_wikipedia/search_item', async (req, res) => {
     const { item } = req.body;
