@@ -269,6 +269,43 @@ app.post('/en_wikipedia/get_item_content', async (req, res) => {
     }
 })
 
+app.post('/google/search/web', async (req, res) => {
+    let { q } = req.body;
+
+    if (!q) {
+        return res.status(400).send('Invalid input: "q" is required');
+    }
+
+    const searchUrl = `https://cse.google.com/cse?cx=93d449f1c4ff047bc#gsc.tab=0&gsc.q=${q}&gsc.sort=`;
+
+    try {
+        const x_api_key = "f528f374df3f44c1b62d005f81f63fab"
+        const encodedUrl = encodeURIComponent(searchUrl);
+        const scrapingAntUrl = `https://api.scrapingant.com/v2/general?url=${encodedUrl}&x-api-key=${x_api_key}`;
+        const response = await axios.get(scrapingAntUrl);
+        let HtmlContent = response.data;
+        const dom = new JSDOM(HtmlContent);
+        const { document } = dom.window;
+        const result_list = Array.from(document.querySelectorAll('div.gsc-webResult.gsc-result')).map(div => {
+            const _title = div.querySelector('a.gs-title');
+            const title = _title ? _title.textContent.trim() : '';
+            const _image = div.querySelector('img.gs-image');
+            const image = _image ? _image.src : '';
+            const _snippet = div.querySelector('div.gs-snippet');
+            const snippet = _snippet ? _snippet.textContent.trim() : '';
+            const _url = div.querySelector('a.gs-title');
+            const url = _url ? _url.href : '';
+            return { title, image, snippet, url };
+        }).filter(item => item.title); // 过滤掉 title 为空的;
+        res.send(result_list);
+    } catch (error) {
+        console.error(`Error performing Google search: ${error.message}`);
+        res.status(500).send(`Error performing Google search: ${error.message}`);
+    }
+
+
+})
+
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
 })
