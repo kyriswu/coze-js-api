@@ -218,26 +218,6 @@ app.post('/zh_wikipedia/get_item_content', async (req, res) => {
         return res.status(400).send('Invalid input: "item" is required');
     }
 
-    const wikipediaUrl = `https://zh.wikipedia.org/w/api.php?action=query&prop=extracts&titles=${item}&explaintext&format=json`;
-
-    try {
-        let response = await axios.get(wikipediaUrl);
-        response.data.query.pages = Object.values(response.data.query.pages);
-        res.send(response.data);
-    } catch (error) {
-        console.error(`Error searching Wikipedia: ${error.message}`);
-        res.status(500).send(`Error searching Wikipedia: ${error.message}`);
-    }
-})
-
-// 从维基百科获取词条内容
-app.post('/zh_wikipedia/get_item_content_2', async (req, res) => {
-    const { item } = req.body;
-
-    if (!item) {
-        return res.status(400).send('Invalid input: "item" is required');
-    }
-
     const wikipediaUrl = `https://zh.wikipedia.org/w/api.php?action=query&prop=extracts&titles=${item}&explaintext&format=json&redirects`;
 
     try {
