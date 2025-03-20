@@ -161,7 +161,17 @@ app.post('/google_search', async (req, res) => {
 
     try {
         const response = await axios.get(searchUrl);
-        res.send(response.data);
+        const items = response.data.items;
+        const result_list = items.map(item => ({
+            title: item.title,
+            snippet: item.snippet,
+            link: item.link
+        }));
+        res.send({
+            code: 0,
+            msg: 'Success',
+            data: result_list
+        });
     } catch (error) {
         console.error(`Error performing Google search: ${error.message}`);
         res.status(500).send(`Error performing Google search: ${error.message}`);
