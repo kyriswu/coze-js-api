@@ -326,6 +326,7 @@ app.post('/google/search/image', async (req, res) => {
     }
 
     const searchUrl = `https://cse.google.com/cse?cx=93d449f1c4ff047bc#gsc.tab=1&gsc.q=${q}&gsc.sort=`;
+    //在页面中执行js代码，获取图片搜索结果（base64encode）
     const js_snippet = `ZG9jdW1lbnQucXVlcnlTZWxlY3RvckFsbCgnZGl2LmdzYy1pbWFnZVJlc3VsdC5nc2MtaW1hZ2VSZXN1bHQtcG9wdXAuZ3NjLXJlc3VsdCcpLmZvckVhY2goZWwgPT4gewogICAgY29uc3QgdGFyZ2V0ID0gZWwucXVlcnlTZWxlY3RvcignYSwgaW1nLCBidXR0b24nKSB8fCBlbDsKICAgIGNvbnN0IGV2ZW50ID0gbmV3IE1vdXNlRXZlbnQoJ2NsaWNrJywgeyBidWJibGVzOiB0cnVlLCBjYW5jZWxhYmxlOiB0cnVlIH0pOwogICAgdGFyZ2V0LmRpc3BhdGNoRXZlbnQoZXZlbnQpOwp9KTsK`
 
     try {
