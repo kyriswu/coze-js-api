@@ -156,7 +156,7 @@ app.post('/google_search', async (req, res) => {
         cx = "93d449f1c4ff047bc"    // 默认使用我的自定义搜索引擎
     }
 
-    const apiKey = 'AIzaSyDURdhjtCaZo8oJyjmeNz8Hr5YVEx6TRLI';
+    const apiKey = 'AIzaSyAw5rOQ8yF5Hkd8oTzd0-jQSTMMTGgC51E';
     const searchUrl = `https://customsearch.googleapis.com/customsearch/v1?q=${encodeURIComponent(q)}&cx=${cx}&key=${apiKey}&safe=active`;
 
     try {
