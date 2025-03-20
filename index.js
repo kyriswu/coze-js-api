@@ -276,7 +276,7 @@ app.post('/google/search/web', async (req, res) => {
         return res.status(400).send('Invalid input: "q" is required');
     }
 
-    const searchUrl = `https://cse.google.com/cse?cx=93d449f1c4ff047bc#gsc.tab=0&gsc.q=${q}&gsc.sort=`;
+    const searchUrl = `https://cse.google.com/cse?cx=93d449f1c4ff047bc#gsc.tab=0&gsc.q=${encodeURIComponent(q)}&gsc.sort=`;
 
     try {
         const x_api_key = "f528f374df3f44c1b62d005f81f63fab"
