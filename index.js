@@ -326,11 +326,12 @@ app.post('/google/search/image', async (req, res) => {
     }
 
     const searchUrl = `https://cse.google.com/cse?cx=93d449f1c4ff047bc#gsc.tab=1&gsc.q=${q}&gsc.sort=`;
+    const js_snippet = `ZG9jdW1lbnQucXVlcnlTZWxlY3RvckFsbCgnZGl2LmdzYy1pbWFnZVJlc3VsdC5nc2MtaW1hZ2VSZXN1bHQtcG9wdXAuZ3NjLXJlc3VsdCcpLmZvckVhY2goZWwgPT4gewogICAgY29uc3QgdGFyZ2V0ID0gZWwucXVlcnlTZWxlY3RvcignYSwgaW1nLCBidXR0b24nKSB8fCBlbDsKICAgIGNvbnN0IGV2ZW50ID0gbmV3IE1vdXNlRXZlbnQoJ2NsaWNrJywgeyBidWJibGVzOiB0cnVlLCBjYW5jZWxhYmxlOiB0cnVlIH0pOwogICAgdGFyZ2V0LmRpc3BhdGNoRXZlbnQoZXZlbnQpOwp9KTsK`
 
     try {
         const x_api_key = "f528f374df3f44c1b62d005f81f63fab"
         const encodedUrl = encodeURIComponent(searchUrl);
-        const scrapingAntUrl = `https://api.scrapingant.com/v2/general?url=${encodedUrl}&x-api-key=${x_api_key}`;
+        const scrapingAntUrl = `https://api.scrapingant.com/v2/general?url=${encodedUrl}&x-api-key=${x_api_key}&js_snippet=${js_snippet}`;
         const response = await axios.get(scrapingAntUrl);
         let HtmlContent = response.data;
         const dom = new JSDOM(HtmlContent);
@@ -338,10 +339,11 @@ app.post('/google/search/image', async (req, res) => {
         const result_list = Array.from(document.querySelectorAll('div.gsc-imageResult.gsc-imageResult-popup.gsc-result')).map(div => {
             const _title = div.querySelector('div.gs-image-box a.gs-image img');
             const title = _title ? _title.title : '';
-            const _image_url = div.querySelector('div.gs-imagePreviewArea img.gs-imagePreview');
-            const image_url = _image_url ? _image_url.src : '';
-            const _size = div.querySelector('div.gs-size.gs-ellipsis');
-            const size = _size ? _size.textContent.trim() : '';
+            const _image = div.querySelector('a.gs-previewLink img');
+            const image_url = _image ? _image.src : '';
+            const width = _image.width;
+            const height = _image.height;
+            const size = `${width}x${height}`;
             const _source = div.querySelector('div.gs-visibleUrl');
             const source = _source ? _source.textContent.trim() : '';
             return { title, image_url, size, source };
