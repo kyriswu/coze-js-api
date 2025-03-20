@@ -338,7 +338,7 @@ app.post('/google/search/image', async (req, res) => {
         const result_list = Array.from(document.querySelectorAll('div.gsc-imageResult.gsc-imageResult-popup.gsc-result')).map(div => {
             const _title = div.querySelector('div.gs-image-box a.gs-image img');
             const title = _title ? _title.title : '';
-            const _image_url = div.querySelector('div.gs-image-box a.gs-image img');
+            const _image_url = div.querySelector('img.gs-imagePreview');
             const image_url = _image_url ? _image_url.src : '';
             const _size = div.querySelector('div.gs-size.gs-ellipsis');
             const size = _size ? _size.textContent.trim() : '';
