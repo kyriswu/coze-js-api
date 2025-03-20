@@ -306,8 +306,45 @@ app.post('/google/search/web', async (req, res) => {
         console.error(`Error performing Google search: ${error.message}`);
         res.status(500).send(`Error performing Google search: ${error.message}`);
     }
+})
 
+app.post('/google/search/image', async (req, res) => {
+    let { q } = req.body;
 
+    if (!q) {
+        return res.status(400).send('Invalid input: "q" is required');
+    }
+
+    const searchUrl = `https://cse.google.com/cse?cx=93d449f1c4ff047bc#gsc.tab=1&gsc.q=${q}&gsc.sort=`;
+
+    try {
+        const x_api_key = "f528f374df3f44c1b62d005f81f63fab"
+        const encodedUrl = encodeURIComponent(searchUrl);
+        const scrapingAntUrl = `https://api.scrapingant.com/v2/general?url=${encodedUrl}&x-api-key=${x_api_key}`;
+        const response = await axios.get(scrapingAntUrl);
+        let HtmlContent = response.data;
+        const dom = new JSDOM(HtmlContent);
+        const { document } = dom.window;
+        const result_list = Array.from(document.querySelectorAll('div.gsc-imageResult.gsc-imageResult-popup.gsc-result')).map(div => {
+            const _title = div.querySelector('div.gs-image-box a.gs-image img');
+            const title = _title ? _title.title : '';
+            const _image_url = div.querySelector('div.gs-image-box a.gs-image img');
+            const image_url = _image_url ? _image_url.src : '';
+            const _size = div.querySelector('div.gs-size.gs-ellipsis');
+            const size = _size ? _size.textContent.trim() : '';
+            const _source = div.querySelector('div.gs-visibleUrl');
+            const source = _source ? _source.textContent.trim() : '';
+            return { title, image_url, size, source };
+        }).filter(item => item.image_url); // 过滤掉 title 为空的;
+        res.send({
+            code: 0,
+            msg: 'Success',
+            data: result_list
+        });
+    } catch (error) {
+        console.error(`Error performing Google search: ${error.message}`);
+        res.status(500).send(`Error performing Google search: ${error.message}`);
+    }
 })
 
 app.listen(port, () => {
