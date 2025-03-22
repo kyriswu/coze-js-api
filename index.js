@@ -360,6 +360,25 @@ app.post('/google/search/image', async (req, res) => {
     }
 })
 
+app.post('/jina_reader', async (req, res) => {
+    let { url } = req.body;
+
+    if (!url) {
+        return res.status(400).send('Invalid input: "url" is required');
+    }
+    try {
+        const response = await axios.get(`https://r.jina.ai/${url}`);
+        res.send({
+            code: 0,
+            msg: 'Success',
+            data: response.data
+        });
+    } catch (error) {
+        console.error(`Error fetching data from Jina Reader: ${error.message}`);
+        res.status(500).send(`Error fetching data from Jina Reader: ${error.message}`);
+    }
+})
+
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
 })
