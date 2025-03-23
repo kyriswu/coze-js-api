@@ -280,6 +280,7 @@ app.post('/en_wikipedia/get_item_content', async (req, res) => {
 })
 
 app.post('/google/search/web', async (req, res) => {
+    console.log(req.headers);
     let { q } = req.body;
 
     if (!q) {
