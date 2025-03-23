@@ -7,6 +7,7 @@ const { Readability, isProbablyReaderable } = require('@mozilla/readability');
 const { URL } = require('url');
 const app = express()
 const port = 3000
+const environment = process.env.NODE_ENV || 'development';
 
 app.use(express.json())
 
@@ -44,6 +45,21 @@ const urlHandlers = {
     },
     // 其它 URL 处理函数……
 };
+
+const redis = require('./utils/redisClient');
+// 从 Redis 中获取用户使用量
+async function getUsage(key) {
+    let value = await redis.get(key);
+    if (value === null) {
+        // 不存在，创建 key 并设置初始值
+        await redis.set(key, 0, 'EX', 86400);
+        value = 0;
+        console.log(`键 ${key} 不存在，已创建并初始化为 0`);
+    } else {
+        console.log(`键 ${key} 已存在，当前值为 ${value}`);
+    }
+    return value;
+}
 
 /**
  * 过滤 Markdown 文档中的图片、换行符和超链接（只保留文本）。
@@ -147,7 +163,7 @@ app.post('/parseUrlContent', async (req, res) => {
 
 app.post('/google_search', async (req, res) => {
     let { q, cx } = req.body;
-
+    console.log(req.body);
     if (!q) {
         return res.status(400).send('Invalid input: "q" and "cx" are required');
     }
@@ -155,6 +171,20 @@ app.post('/google_search', async (req, res) => {
     if (!cx) {
         cx = "93d449f1c4ff047bc"    // 默认使用我的自定义搜索引擎
     }
+
+    const key = environment === 'online' ? req.headers['user-identity'] : 'test';
+
+    // if(environment === "online"){
+        getUsage(key).then(usage => {
+            if(usage>10){
+                res.send({
+                    code: 0,
+                    msg: '维护成本大，为了避免滥用，每人每天只能使用10次，谢谢理解！',
+                    data: result_list
+                });
+            }
+        });
+    // } 
 
     const apiKey = 'AIzaSyAw5rOQ8yF5Hkd8oTzd0-jQSTMMTGgC51E';
     const searchUrl = `https://customsearch.googleapis.com/customsearch/v1?q=${encodeURIComponent(q)}&cx=${cx}&key=${apiKey}&safe=active`;
@@ -167,6 +197,7 @@ app.post('/google_search', async (req, res) => {
             snippet: item.snippet,
             link: item.link
         }));
+        redis.incr(key);//每次调用增加一次
         res.send({
             code: 0,
             msg: 'Success',
