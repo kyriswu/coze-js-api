@@ -175,15 +175,14 @@ app.post('/google_search', async (req, res) => {
     const key = environment === 'online' ? req.headers['user-identity'] : 'test';
 
     if(environment === "online"){
-        getUsage(key).then(usage => {
-            if(usage>10){
-                return res.send({
-                    code: 0,
-                    msg: '维护成本大，为了避免滥用，每人每天只能使用10次，谢谢理解！',
-                    data:[]
-                });
-            }
-        });
+        const usage = await getUsage(key);
+        if (usage > 10) {
+            return res.send({
+                code: 0,
+                msg: '维护成本大，为了避免滥用，每人每天只能使用10次，谢谢理解！技术支持B站：小吴爱折腾',
+                data: []
+            });
+        }
     } 
 
     const apiKey = 'AIzaSyAw5rOQ8yF5Hkd8oTzd0-jQSTMMTGgC51E';
@@ -197,7 +196,7 @@ app.post('/google_search', async (req, res) => {
             snippet: item.snippet,
             link: item.link
         }));
-        redis.incr(key);//每次调用增加一次
+        await redis.incr(key);//每次调用增加一次
         return res.send({
             code: 0,
             msg: 'Success',
