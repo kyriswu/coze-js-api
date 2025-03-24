@@ -13,6 +13,18 @@ services:
       - NODE_ENV=online
     networks:
       - my-net
+    restart: always
+
+  my-redis:
+    image: redis:latest
+    volumes:
+      - redis-data:/data
+    networks:
+      - my-net
+    restart: always
+
+volumes:
+  redis-data:
 
 networks:
   my-net:
