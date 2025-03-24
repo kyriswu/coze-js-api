@@ -180,7 +180,7 @@ app.post('/google_search', async (req, res) => {
                 res.send({
                     code: 0,
                     msg: '维护成本大，为了避免滥用，每人每天只能使用10次，谢谢理解！',
-                    data: result_list
+                    data:[]
                 });
             }
         });
