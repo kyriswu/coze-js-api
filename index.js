@@ -198,14 +198,18 @@ app.post('/google_search', async (req, res) => {
             link: item.link
         }));
         redis.incr(key);//每次调用增加一次
-        res.send({
+        return res.send({
             code: 0,
             msg: 'Success',
             data: result_list
         });
     } catch (error) {
         console.error(`Error performing Google search: ${error.message}`);
-        res.status(500).send(`Error performing Google search: ${error.message}`);
+        return res.send({
+            code: -1,
+            msg: `Error: ${error.message}`,
+            data: []
+        });
     }
 })
 
