@@ -1,1 +1,1 @@
-git pull && docker-compose down && docker rmi node:22.10.0 && docker-compose up -d
+git pull && docker compose down && docker rmi node:22.10.0 && docker compose up -d
