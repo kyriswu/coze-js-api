@@ -2,7 +2,7 @@ const Redis = require('ioredis');
 
 
 // 根据环境变量设置 Redis 主机
-const redisHost = process.env.NODE_ENV === 'online' ? 'host.docker.internal' : 'localhost';
+const redisHost = process.env.NODE_ENV === 'online' ? 'my-redis' : 'localhost';
 
 // 创建 Redis 客户端
 const redis = new Redis({

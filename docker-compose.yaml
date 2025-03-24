@@ -8,6 +8,12 @@ services:
       - .:/app
     ports:
       - "3000:3000"
-    command: sh -c "npm install && NODE_ENV=online node index.js"
+    command: sh -c "npm install && node index.js"
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=online
+    networks:
+      - my-net
+
+networks:
+  my-net:
+    driver: bridge

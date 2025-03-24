@@ -1,9 +1,10 @@
 依赖：安装好docker环境
-1.先启动redis
-本地启动redis
-docker run -d --name my-redis -p 6379:6379 redis:latest
-服务器启动redis
-docker run -d --name my-redis -p 127.0.0.1:6379:6379 redis:latest
-2.启动项目
-sh start.sh
-zVkEr8T67iCJ2sc9N5
+### 本地部署流程
+1. docker run -d --name my-redis -p 6379:6379 redis:latest
+### 服务器部署流程
+1. docker network create my-net 
+1. docker run -d --name my-redis --network my-net redis:latest
+
+### 启动项目
+本地：node index.js
+远程：sh start.sh
