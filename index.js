@@ -179,7 +179,7 @@ app.post('/google_search', async (req, res) => {
         if (usage > 10) {
             return res.send({
                 code: 0,
-                msg: '维护成本大，为了避免滥用，每人每天只能使用10次，谢谢理解！技术支持B站：小吴爱折腾',
+                msg: '维护成本大，为了避免滥用，每人每天只能使用10次，谢谢理解！B站：小吴爱折腾',
                 data: []
             });
         }
@@ -321,6 +321,18 @@ app.post('/google/search/web', async (req, res) => {
         return res.status(400).send('Invalid input: "q" is required');
     }
 
+    const key = environment === 'online' ? req.headers['user-identity'] : 'test';
+    if(environment === "online"){
+        const usage = await getUsage(key);
+        if (usage > 10) {
+            return res.send({
+                code: 0,
+                msg: '维护成本大，为了避免滥用，每人每天只能使用10次，谢谢理解！技术支持B站：小吴爱折腾',
+                data: []
+            });
+        }
+    }
+
     const searchUrl = `https://cse.google.com/cse?cx=93d449f1c4ff047bc#gsc.tab=0&gsc.q=${encodeURIComponent(q)}&gsc.sort=`;
 
     try {
@@ -342,7 +354,8 @@ app.post('/google/search/web', async (req, res) => {
             const url = _url ? _url.href : '';
             return { title, image, snippet, url };
         }).filter(item => item.title); // 过滤掉 title 为空的;
-        res.send({
+        await redis.incr(key);//每次调用增加一次
+        return res.send({
             code: 0,
             msg: 'Success',
             data: result_list
