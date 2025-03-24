@@ -309,7 +309,7 @@ async function checkGoogleSearchUsage(req, res) {
         if (usage > 10) {
             return res.send({
                 code: 0,
-                msg: '维护成本大，为了避免滥用，每人每天只能免费使用10次，谢谢理解！技术支持B站：小吴爱折腾',
+                msg: '维护成本大，为了避免滥用，每人每天只能免费使用10次，谢谢理解！',
                 data: []
             });
         }
