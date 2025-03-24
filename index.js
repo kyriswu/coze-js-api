@@ -177,12 +177,11 @@ app.post('/google_search', async (req, res) => {
     if(environment === "online"){
         getUsage(key).then(usage => {
             if(usage>10){
-                res.send({
+                return res.send({
                     code: 0,
                     msg: '维护成本大，为了避免滥用，每人每天只能使用10次，谢谢理解！',
                     data:[]
                 });
-                return;
             }
         });
     } 
