@@ -172,7 +172,14 @@ app.post('/google_search', async (req, res) => {
         cx = "93d449f1c4ff047bc"    // 默认使用我的自定义搜索引擎
     }
 
-    const key = await checkGoogleSearchUsage(req, res);
+    const key = environment === 'online' ? req.headers['user-identity'] : 'test';
+    const canSearch = await canSearchGoogle(key);
+    if (!canSearch) {
+        return res.send({
+            code: 0,
+            msg: '维护成本大，每天只能使用10次，谢谢理解'
+        }); 
+    }
 
     const apiKey = 'AIzaSyAw5rOQ8yF5Hkd8oTzd0-jQSTMMTGgC51E';
     const searchUrl = `https://customsearch.googleapis.com/customsearch/v1?q=${encodeURIComponent(q)}&cx=${cx}&key=${apiKey}&safe=active`;
@@ -302,19 +309,15 @@ app.post('/en_wikipedia/get_item_content', async (req, res) => {
     }
 })
 
-async function checkGoogleSearchUsage(req, res) {
-    const key = environment === 'online' ? req.headers['user-identity'] : 'test';
+// 判断是否可使用 Google 搜索
+async function canSearchGoogle(key) {
     if(environment === "online"){
         const usage = await getUsage(key);
         if (usage > 10) {
-            return res.send({
-                code: 0,
-                msg: '维护成本大，为了避免滥用，每人每天只能免费使用10次，谢谢理解！',
-                data: []
-            });
+            return false
         }
     }
-    return key;
+    return true;
 }
 
 app.post('/google/search/web', async (req, res) => {
@@ -325,7 +328,14 @@ app.post('/google/search/web', async (req, res) => {
         return res.status(400).send('Invalid input: "q" is required');
     }
 
-    const key = await checkGoogleSearchUsage(req, res);
+    const key = environment === 'online' ? req.headers['user-identity'] : 'test';
+    const canSearch = await canSearchGoogle(key);
+    if (!canSearch) {
+        return res.send({
+            code: 0,
+            msg: '维护成本大，每天只能使用10次，谢谢理解'
+        }); 
+    }
 
     const searchUrl = `https://cse.google.com/cse?cx=93d449f1c4ff047bc#gsc.tab=0&gsc.q=${encodeURIComponent(q)}&gsc.sort=`;
 
