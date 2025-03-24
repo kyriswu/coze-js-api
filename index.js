@@ -172,7 +172,7 @@ app.post('/google_search', async (req, res) => {
         cx = "93d449f1c4ff047bc"    // 默认使用我的自定义搜索引擎
     }
 
-    await checkGoogleSearchUsage(req, res);
+    const key = await checkGoogleSearchUsage(req, res);
 
     const apiKey = 'AIzaSyAw5rOQ8yF5Hkd8oTzd0-jQSTMMTGgC51E';
     const searchUrl = `https://customsearch.googleapis.com/customsearch/v1?q=${encodeURIComponent(q)}&cx=${cx}&key=${apiKey}&safe=active`;
@@ -314,6 +314,7 @@ async function checkGoogleSearchUsage(req, res) {
             });
         }
     }
+    return key;
 }
 
 app.post('/google/search/web', async (req, res) => {
@@ -324,7 +325,7 @@ app.post('/google/search/web', async (req, res) => {
         return res.status(400).send('Invalid input: "q" is required');
     }
 
-    await checkGoogleSearchUsage(req, res);
+    const key = await checkGoogleSearchUsage(req, res);
 
     const searchUrl = `https://cse.google.com/cse?cx=93d449f1c4ff047bc#gsc.tab=0&gsc.q=${encodeURIComponent(q)}&gsc.sort=`;
 
