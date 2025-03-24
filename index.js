@@ -174,7 +174,7 @@ app.post('/google_search', async (req, res) => {
 
     const key = environment === 'online' ? req.headers['user-identity'] : 'test';
 
-    // if(environment === "online"){
+    if(environment === "online"){
         getUsage(key).then(usage => {
             if(usage>10){
                 res.send({
@@ -182,9 +182,10 @@ app.post('/google_search', async (req, res) => {
                     msg: '维护成本大，为了避免滥用，每人每天只能使用10次，谢谢理解！',
                     data:[]
                 });
+                return;
             }
         });
-    // } 
+    } 
 
     const apiKey = 'AIzaSyAw5rOQ8yF5Hkd8oTzd0-jQSTMMTGgC51E';
     const searchUrl = `https://customsearch.googleapis.com/customsearch/v1?q=${encodeURIComponent(q)}&cx=${cx}&key=${apiKey}&safe=active`;
