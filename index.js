@@ -177,7 +177,7 @@ app.post('/google_search', async (req, res) => {
     if (!canSearch) {
         return res.send({
             code: 0,
-            msg: '维护成本大，每天只能使用10次，谢谢理解'
+            msg: '维护成本大，为避免滥用，每天只能使用10次，谢谢理解'
         }); 
     }
 
@@ -333,7 +333,7 @@ app.post('/google/search/web', async (req, res) => {
     if (!canSearch) {
         return res.send({
             code: 0,
-            msg: '维护成本大，每天只能使用10次，谢谢理解'
+            msg: '维护成本大，为避免滥用，每天只能使用10次，谢谢理解'
         }); 
     }
 
@@ -428,6 +428,87 @@ app.post('/jina_reader', async (req, res) => {
     } catch (error) {
         console.error(`Error fetching data from Jina Reader: ${error.message}`);
         res.status(500).send(`Error fetching data from Jina Reader: ${error.message}`);
+    }
+})
+
+
+function htmlToQuerySelector(htmlString) {
+    // 为了保证解析正确，我们将传入的 html 包裹在 <body> 中
+    const dom = new JSDOM(`<body>${htmlString}</body>`);
+    const body = dom.window.document.body;
+  
+    let selectorParts = [];
+    let element = body.firstElementChild;
+    
+    // 遍历嵌套的每一级标签
+    while (element) {
+      let part = element.tagName.toLowerCase();
+      
+      // 如果存在 class，则添加到选择器中
+      if (element.className) {
+        // 多个 class 按空白字符拆分
+        const classes = element.className.trim().split(/\s+/);
+        classes.forEach(cls => {
+          part += `.${cls}`;
+        });
+      }
+      
+      // 对除了 class 的其他属性，添加 [attr="value"] 形式
+      Array.from(element.attributes).forEach(attr => {
+        if (attr.name === 'class') return; // 已处理
+        part += `[${attr.name}="${attr.value}"]`;
+      });
+      
+      selectorParts.push(part);
+      // 假设输入为嵌套结构，取第一个子元素继续
+      element = element.firstElementChild;
+    }
+    
+    // 拼接成一个选择器，空格表示后代选择器
+    return selectorParts.join(' ');
+  }
+  
+  // 示例使用
+//   const htmlInput = `
+//   <div class="gsc-webResult gsc-result">
+//     <div>
+//       <div class="abc" note-type="article">
+//   `;
+//   console.log(htmlToQuerySelector(htmlInput));
+
+app.post('/parse_html', async (req, res) => {
+    let { url, parser } = req.body;
+
+    if (!url || !parser) {
+        return res.status(400).send('url and parser are required');
+    }
+
+
+    const htmlInput = parser;
+    const parserSelector = htmlToQuerySelector(htmlInput);
+    console.log(parserSelector);
+
+
+    try {
+        const x_api_key = "f528f374df3f44c1b62d005f81f63fab"
+        const encodedUrl = encodeURIComponent(url);
+        const scrapingAntUrl = `https://api.scrapingant.com/v2/general?url=${encodedUrl}&x-api-key=${x_api_key}`;
+        const response = await axios.get(scrapingAntUrl);
+        let HtmlContent = response.data;
+        const dom = new JSDOM(HtmlContent);
+        const { document } = dom.window;
+        const result_list = Array.from(document.querySelectorAll(parserSelector)).map(element => {
+            const htmlContent = element.outerHTML
+            return { htmlContent };
+        }); 
+        return res.send({
+            code: 0,
+            msg: 'Success',
+            data: result_list
+        });
+    } catch (error) {
+        console.error(`Error performing Google search: ${error.message}`);
+        res.status(500).send(`Error performing Google search: ${error.message}`);
     }
 })
 
