@@ -483,6 +483,17 @@ app.post('/parse_html', async (req, res) => {
         return res.status(400).send('url and parser are required');
     }
 
+    const unsupportedDomains = ['douyin.com', 'xiaohongshu.com', 'bilibili.com', 'google.com'];
+    const parsedUrl = new URL(url);
+    const domain = parsedUrl.hostname;
+
+    if (unsupportedDomains.some(unsupportedDomain => domain.includes(unsupportedDomain))) {
+        return res.send({
+            code: 0,
+            msg: '拒绝访问！请输入其他网站链接'
+        });
+    }
+
 
     const htmlInput = parser;
     const parserSelector = htmlToQuerySelector(htmlInput);
