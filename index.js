@@ -47,6 +47,7 @@ const urlHandlers = {
 };
 
 const redis = require('./utils/redisClient');
+const { parse } = require('path');
 // 从 Redis 中获取用户使用量
 async function getUsage(key) {
     let value = await redis.get(key);
@@ -468,19 +469,31 @@ function htmlToQuerySelector(htmlString) {
     return selectorParts.join(' ');
   }
   
-  // 示例使用
-//   const htmlInput = `
-//   <div class="gsc-webResult gsc-result">
-//     <div>
-//       <div class="abc" note-type="article">
-//   `;
-//   console.log(htmlToQuerySelector(htmlInput));
+function isValidXPath(xpath) {
+    try {
+        const dom = new JSDOM(HtmlContent);
+        const { document, window } = dom.window;
+        let result = document.evaluate(xpath, document, null, window.XPathResult.ANY_TYPE, null);
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
 
 app.post('/parse_html', async (req, res) => {
-    let { url, parser } = req.body;
+    let { url, parser, xpath } = req.body;
 
-    if (!url || !parser) {
-        return res.status(400).send('url and parser are required');
+    if (!url) {
+        return res.status(400).send('url is required');
+    }
+    if (!parser && !xpath) {
+        return res.status(400).send('parser or xpath is required');
+    }
+    if (xpath && !isValidXPath(xpath)){
+        return res.send({
+            code: 0,
+            msg: '再确认下xpath是否正确，或者有没有把xpath和parser混用'
+        });
     }
 
     const unsupportedDomains = ['douyin.com', 'xiaohongshu.com', 'bilibili.com', 'google.com'];
@@ -494,12 +507,6 @@ app.post('/parse_html', async (req, res) => {
         });
     }
 
-
-    const htmlInput = parser;
-    const parserSelector = htmlToQuerySelector(htmlInput);
-    console.log(parserSelector);
-
-
     try {
         const x_api_key = "f528f374df3f44c1b62d005f81f63fab"
         const encodedUrl = encodeURIComponent(url);
@@ -507,19 +514,40 @@ app.post('/parse_html', async (req, res) => {
         const response = await axios.get(scrapingAntUrl);
         let HtmlContent = response.data;
         const dom = new JSDOM(HtmlContent);
-        const { document } = dom.window;
-        const result_list = Array.from(document.querySelectorAll(parserSelector)).map(element => {
-            const htmlContent = element.outerHTML
-            return { htmlContent };
-        }); 
+        const { document, window } = dom.window;
+
+        let result_list = [];
+
+        if (xpath) {
+            const result = document.evaluate(
+                xpath, 
+                document, 
+                null, 
+                window.XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, // 使用 window.XPathResult
+                null
+            );
+            // Iterate over the results
+            for (let i = 0; i < result.snapshotLength; i++) {
+                const element = result.snapshotItem(i);
+                result_list.push({ htmlContent: element.outerHTML });
+            }
+        } else if (parse) {
+            const domSelector = parser;
+            const parserSelector = htmlToQuerySelector(domSelector);
+            result_list = Array.from(document.querySelectorAll(parserSelector)).map(element => {
+                console.log(parserSelector);
+                return { htmlContent: element.outerHTML };
+            }); 
+        }
+
         return res.send({
             code: 0,
             msg: 'Success',
             data: result_list
         });
     } catch (error) {
-        console.error(`Error performing Google search: ${error.message}`);
-        res.status(500).send(`Error performing Google search: ${error.message}`);
+        console.error(`Error: ${error}`);
+        res.status(500).send(`Error: ${error.message}`);
     }
 })
 
