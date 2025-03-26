@@ -467,17 +467,6 @@ function htmlToQuerySelector(htmlString) {
     
     // 拼接成一个选择器，空格表示后代选择器
     return selectorParts.join(' ');
-  }
-  
-function isValidXPath(xpath) {
-    try {
-        const dom = new JSDOM(HtmlContent);
-        const { document, window } = dom.window;
-        let result = document.evaluate(xpath, document, null, window.XPathResult.ANY_TYPE, null);
-        return true;
-    } catch (e) {
-        return false;
-    }
 }
 
 app.post('/parse_html', async (req, res) => {
@@ -488,12 +477,6 @@ app.post('/parse_html', async (req, res) => {
     }
     if (!parser && !xpath) {
         return res.status(400).send('parser or xpath is required');
-    }
-    if (xpath && !isValidXPath(xpath)){
-        return res.send({
-            code: 0,
-            msg: '再确认下xpath是否正确，或者有没有把xpath和parser混用'
-        });
     }
 
     const unsupportedDomains = ['douyin.com', 'xiaohongshu.com', 'bilibili.com', 'google.com'];
