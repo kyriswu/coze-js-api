@@ -479,7 +479,7 @@ app.post('/parse_html', async (req, res) => {
         return res.status(400).send('parser or xpath is required');
     }
 
-    const unsupportedDomains = ['douyin.com', 'xiaohongshu.com', 'bilibili.com', 'google.com'];
+    const unsupportedDomains = ['xiaohongshu.com', 'bilibili.com', 'google.com'];
     const parsedUrl = new URL(url);
     const domain = parsedUrl.hostname;
 
