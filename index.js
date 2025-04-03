@@ -178,7 +178,7 @@ app.post('/google_search', async (req, res) => {
     if (!canSearch) {
         return res.send({
             code: 0,
-            msg: '维护成本大，为避免滥用，每天只能使用10次，谢谢理解'
+            msg: '维护成本大，为避免滥用，每天只能使用5次，谢谢理解'
         }); 
     }
 
@@ -314,7 +314,7 @@ app.post('/en_wikipedia/get_item_content', async (req, res) => {
 async function canSearchGoogle(key) {
     if(environment === "online"){
         const usage = await getUsage(key);
-        if (usage > 10) {
+        if (usage > 5) {
             return false
         }
     }
@@ -325,7 +325,7 @@ async function canSearchGoogle(key) {
 async function canUseHtmlParse(key) {
     if(environment === "online"){
         const usage = await getUsage(key);
-        if (usage > 10) {
+        if (usage > 5) {
             return false
         }
     }
@@ -345,7 +345,7 @@ app.post('/google/search/web', async (req, res) => {
     if (!canSearch) {
         return res.send({
             code: 0,
-            msg: '维护成本大，为避免滥用，每天只能使用10次，谢谢理解'
+            msg: '维护成本大，为避免滥用，每天只能使用5次，谢谢理解'
         }); 
     }
 
