@@ -495,7 +495,7 @@ app.post('/parse_html', async (req, res) => {
     if (!canParse) {
         return res.send({
             code: -1,
-            msg: '维护成本大，为避免滥用，每天只能使用10次，您今天已经用光了！谢谢理解！'
+            msg: '感谢大家对本插件的喜爱，但由于维护成本大，为避免滥用，每天只能使用5次，您今天已经用光了！谢谢理解！'
         }); 
     }
 
