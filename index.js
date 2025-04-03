@@ -321,6 +321,17 @@ async function canSearchGoogle(key) {
     return true;
 }
 
+// 判断是否可使用 HTML解析 功能
+async function canUseHtmlParse(key) {
+    if(environment === "online"){
+        const usage = await getUsage(key);
+        if (usage > 10) {
+            return false
+        }
+    }
+    return true;
+}
+
 app.post('/google/search/web', async (req, res) => {
     console.log(req.headers);
     let { q } = req.body;
@@ -479,6 +490,16 @@ app.post('/parse_html', async (req, res) => {
         return res.status(400).send('parser or xpath is required');
     }
 
+    const key = environment === 'online' ? "html_parser_" + req.headers['user-identity'] : 'test';
+    const canParse = await canUseHtmlParse(key);
+    if (!canParse) {
+        return res.send({
+            code: -1,
+            msg: '维护成本大，为避免滥用，每天只能使用10次，谢谢理解！'
+        }); 
+    }
+
+
     const unsupportedDomains = ['xiaohongshu.com', 'bilibili.com', 'google.com'];
     const parsedUrl = new URL(url);
     const domain = parsedUrl.hostname;
@@ -486,7 +507,7 @@ app.post('/parse_html', async (req, res) => {
     if (unsupportedDomains.some(unsupportedDomain => domain.includes(unsupportedDomain))) {
         return res.send({
             code: 0,
-            msg: '拒绝访问！请输入其他网站链接'
+            msg: '拒绝访问！请输入其他网站链接！'
         });
     }
 
@@ -522,6 +543,8 @@ app.post('/parse_html', async (req, res) => {
                 return { htmlContent: element.outerHTML };
             }); 
         }
+
+        await redis.incr(key);//每次调用增加一次
 
         return res.send({
             code: 0,
