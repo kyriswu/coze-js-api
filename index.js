@@ -562,7 +562,11 @@ app.post('/wyy/hot_comment', async (req, res) => {
     try {
         const url = "https://keai.icu/apiwyy/apitext"
         const response = await axios.get(url);
-        res.send(response.data);
+        res.send({
+            code: 0,
+            msg: 'Success',
+            data: response.data
+        })
     } catch (error) {
         console.error(`Error searching Netease Music: ${error.message}`);
         res.status(500).send(`Error searching Netease Music: ${error.message}`);
