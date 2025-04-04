@@ -557,6 +557,19 @@ app.post('/parse_html', async (req, res) => {
     }
 })
 
+app.post('/wyy/hot_comment', async (req, res) => {
+
+    try {
+        const url = "https://keai.icu/apiwyy/apitext"
+        const response = await axios.get(url);
+        res.send(response.data);
+    } catch (error) {
+        console.error(`Error searching Netease Music: ${error.message}`);
+        res.status(500).send(`Error searching Netease Music: ${error.message}`);
+    }
+    
+})
+
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
 })
