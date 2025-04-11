@@ -480,8 +480,12 @@ function htmlToQuerySelector(htmlString) {
     return selectorParts.join(' ');
 }
 
+function toBase64(str) {
+    return Buffer.from(str, 'utf-8').toString('base64');
+}
+
 app.post('/parse_html', async (req, res) => {
-    let { url, parser, xpath, cookieStr } = req.body;
+    let { url, parser, xpath, cookieStr, js_snippet } = req.body;
 
     if (!url) {
         return res.status(400).send('url is required');
@@ -518,10 +522,11 @@ app.post('/parse_html', async (req, res) => {
         if (cookieStr) {
             // 处理 cookieStr
             cookieStr = cookieStr.replace(/;\s+/g, ';');
-            
             scrapingAntUrl += `&cookies=${cookieStr}`;
-            
-            console.log(scrapingAntUrl);
+        }
+        if (js_snippet) {
+            js_snippet = toBase64(js_snippet);
+            scrapingAntUrl += `&js_snippet=${js_snippet}`;
         }
         const response = await axios.get(scrapingAntUrl);
         let HtmlContent = response.data;
