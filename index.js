@@ -500,7 +500,7 @@ app.post('/parse_html', async (req, res) => {
     }
 
 
-    const unsupportedDomains = ['xiaohongshu.com', 'bilibili.com', 'google.com'];
+    const unsupportedDomains = ['bilibili.com', 'google.com'];
     const parsedUrl = new URL(url);
     const domain = parsedUrl.hostname;
 
@@ -517,8 +517,11 @@ app.post('/parse_html', async (req, res) => {
         let scrapingAntUrl = `https://api.scrapingant.com/v2/general?url=${encodedUrl}&x-api-key=${x_api_key}`;
         if (cookieStr) {
             // 处理 cookieStr
-            cookieStr = cookieStr.replace(/\s+/g, '');
+            cookieStr = cookieStr.replace(/;\s+/g, ';');
+            
             scrapingAntUrl += `&cookies=${cookieStr}`;
+            
+            console.log(scrapingAntUrl);
         }
         const response = await axios.get(scrapingAntUrl);
         let HtmlContent = response.data;
