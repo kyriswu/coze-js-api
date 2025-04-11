@@ -323,7 +323,7 @@ async function canSearchGoogle(key) {
 
 // 判断是否可使用 HTML解析 功能
 async function canUseHtmlParse(key) {
-    if(environment === "online" || key !== '9ae1b679c3c2c89fe4998ab523533d33'){
+    if(environment === "online"){
         const usage = await getUsage(key);
         if (usage > 5) {
             return false
@@ -494,15 +494,16 @@ app.post('/parse_html', async (req, res) => {
         return res.status(400).send('parser or xpath is required');
     }
 
-    const key = environment === 'online' ? "html_parser_" + req.headers['user-identity'] : 'test';
-    const canParse = await canUseHtmlParse(key);
-    if (!canParse) {
-        return res.send({
-            code: -1,
-            msg: '感谢大家对本插件的喜爱，但由于维护成本大，为避免滥用，每天只能使用5次，您今天已经用光了！谢谢理解！'
-        }); 
+    if (req.headers['user-identity'] !== '9ae1b679c3c2c89fe4998ab523533d33'){
+        const key = environment === 'online' ? "html_parser_" + req.headers['user-identity'] : 'test';
+        const canParse = await canUseHtmlParse(key);
+        if (!canParse) {
+            return res.send({
+                code: -1,
+                msg: '感谢大家对本插件的喜爱，但由于维护成本大，为避免滥用，每天只能使用5次，您今天已经用光了！谢谢理解！'
+            }); 
+        }
     }
-
 
     const unsupportedDomains = ['bilibili.com', 'google.com'];
     const parsedUrl = new URL(url);
