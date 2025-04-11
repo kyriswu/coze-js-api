@@ -494,9 +494,10 @@ app.post('/parse_html', async (req, res) => {
         return res.status(400).send('parser or xpath is required');
     }
 
-    if (req.headers['user-identity'] !== '9ae1b679c3c2c89fe4998ab523533d33'){
-        const key = environment === 'online' ? "html_parser_" + req.headers['user-identity'] : 'test';
-        const canParse = await canUseHtmlParse(key);
+    
+    const key = environment === 'online' ? "html_parser_" + req.headers['user-identity'] : 'test';
+    const canParse = await canUseHtmlParse(key);
+    if (req.headers['user-identity'] !== '9ae1b679c3c2c89fe4998ab523533d33'){//过滤掉我自己
         if (!canParse) {
             return res.send({
                 code: -1,
@@ -504,6 +505,7 @@ app.post('/parse_html', async (req, res) => {
             }); 
         }
     }
+    
 
     const unsupportedDomains = ['bilibili.com', 'google.com'];
     const parsedUrl = new URL(url);
