@@ -323,7 +323,7 @@ async function canSearchGoogle(key) {
 
 // 判断是否可使用 HTML解析 功能
 async function canUseHtmlParse(key) {
-    if(environment === "online"){
+    if(environment === "online" || key != '9ae1b679c3c2c89fe4998ab523533d33'){
         const usage = await getUsage(key);
         if (usage > 5) {
             return false
