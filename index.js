@@ -481,7 +481,7 @@ function htmlToQuerySelector(htmlString) {
 }
 
 app.post('/parse_html', async (req, res) => {
-    let { url, parser, xpath } = req.body;
+    let { url, parser, xpath, cookieStr } = req.body;
 
     if (!url) {
         return res.status(400).send('url is required');
@@ -514,7 +514,12 @@ app.post('/parse_html', async (req, res) => {
     try {
         const x_api_key = "f528f374df3f44c1b62d005f81f63fab"
         const encodedUrl = encodeURIComponent(url);
-        const scrapingAntUrl = `https://api.scrapingant.com/v2/general?url=${encodedUrl}&x-api-key=${x_api_key}`;
+        let scrapingAntUrl = `https://api.scrapingant.com/v2/general?url=${encodedUrl}&x-api-key=${x_api_key}`;
+        if (cookieStr) {
+            // 处理 cookieStr
+            cookieStr = cookieStr.replace(/\s+/g, '');
+            scrapingAntUrl += `&cookies=${cookieStr}`;
+        }
         const response = await axios.get(scrapingAntUrl);
         let HtmlContent = response.data;
         const dom = new JSDOM(HtmlContent);
