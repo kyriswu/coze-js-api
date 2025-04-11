@@ -527,6 +527,7 @@ app.post('/parse_html', async (req, res) => {
         }
         if (js_snippet) {
             js_snippet = toBase64(js_snippet);
+            console.log(js_snippet);
             scrapingAntUrl += `&js_snippet=${js_snippet}`;
         }
         const response = await axios.get(scrapingAntUrl);
