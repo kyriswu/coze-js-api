@@ -616,7 +616,7 @@ app.post('/openai-hub/chat/completions', async (req, res) => {
 
     try {
         const response = await axios.post(
-            'https://cdn.openai-hub.com/v1/chat/completions',
+            'https://api.openai-hub.com/v1/chat/completions',
             {
                 model,
                 messages,
