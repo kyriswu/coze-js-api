@@ -591,6 +591,56 @@ app.post('/wyy/hot_comment', async (req, res) => {
     
 })
 
+app.post('/openai-hub/chat/completions', async (req, res) => {
+    const { model, system_prompt, user_prompt, temperature, api_key} = req.body;
+
+    if (!model) {
+        return res.status(400).send('Invalid input: "model" is required');
+    }
+
+    if (!system_prompt && !user_prompt) {
+        return res.status(400).send('Invalid input: "system_prompt" or "user_prompt" is required');
+    }
+
+    if (!api_key) {
+        return res.status(400).send('Invalid input: "api_key" is required');
+    }
+
+    const messages = [{
+        role: 'system',
+        content: system_prompt || 'You are a helpful assistant.'
+    }, {
+        role: 'user',
+        content: user_prompt || 'Hello, how can you help me?'   
+    }];
+
+    try {
+        const response = await axios.post(
+            'https://api.openai-hub.com/v1/chat/completions',
+            {
+                model,
+                messages,
+                temperature: temperature || 0.8 // 默认值为 0.8
+            },
+            {
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${api_key}` // 替换为您的 API 密钥
+                }
+            }
+        );
+
+        res.send({
+            code: 0,
+            msg: 'Success',
+            data: response.data
+        });
+    } catch (error) {
+        console.error(`Error calling OpenAI API: ${error.message}`);
+        res.status(500).send(`Error calling OpenAI API: ${error.message}`);
+    }
+});
+
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
 })
