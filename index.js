@@ -38,6 +38,7 @@ const urlHandlers = {
       //默认处理函数
         const filteredDom = filterHtmlContent(dom);
         const article = _readability(filteredDom);
+        console.log(article.htmlContent)
         const turndownService = new TurndownService().use(turndownPluginGfm.gfm);
         let markdown = turndownService.turndown(article);
         content = filterMarkdown(markdown);
