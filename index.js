@@ -425,6 +425,13 @@ app.post('/google/search/image', async (req, res) => {
 })
 
 app.post('/jina_reader', async (req, res) => {
+    
+    console.log(await axios.get('https://proxy.webshare.io/api/v2/profile', {
+        headers: {
+            Authorization: 'Token shy2cqhv7p6qlx71r64ltg5teje2ywddl7sjsgc1'
+        }
+    }))
+    
     let { url } = req.body;
 
     if (!url) {
