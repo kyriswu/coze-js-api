@@ -435,14 +435,6 @@ app.post('/jina_reader', async (req, res) => {
         const response = await axios.get(`https://r.jina.ai/${url}`, {
             headers: {
             'Authorization': 'Bearer jina_dcde2f155b9c47dab25090b59f2abb1ekVm99fbB3WLg5CyT8eQm7dQPaSGx'
-            },
-            proxy: {
-            host: 'p.webshare.io',
-            port: 80,
-            auth: {
-            username: 'umwhniat-rotate',
-            password: 'eudczfs5mkzt'
-            }
             }
         });
         res.send({
