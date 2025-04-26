@@ -70,9 +70,9 @@ async function getUsage(key) {
  */
 function filterMarkdown(markdown) {
     // 1. 删除嵌入链接的图片
-    markdown = markdown.replace(/\[!\[.*?\]\(.*?\)\]\(.*?\)/g, '');
+    // markdown = markdown.replace(/\[!\[.*?\]\(.*?\)\]\(.*?\)/g, '');
     // 2. 删除独立图片语法
-    markdown = markdown.replace(/!\[.*?\]\(.*?\)/g, '');
+    // markdown = markdown.replace(/!\[.*?\]\(.*?\)/g, '');
     // 3. 替换超链接，仅保留链接文本
     markdown = markdown.replace(/\[([^\]]+)\]\(.*?\)/g, '$1');
     // 4. 删除所有换行符
@@ -110,53 +110,94 @@ function filterHtmlContent(dom) {
     return dom;
 }
 
-app.post('/parseUrlContent', async (req, res) => {
-    const urls = req.body.urls
+// app.post('/parseUrlContent', async (req, res) => {
+//     const urls = req.body.urls
 
-    if (!Array.isArray(urls) || urls.length === 0) {
-        return res.status(400).send('Invalid input: "urls" should be a non-empty array')
+//     if (!Array.isArray(urls) || urls.length === 0) {
+//         return res.status(400).send('Invalid input: "urls" should be a non-empty array')
+//     }
+
+//     const x_api_key = "f528f374df3f44c1b62d005f81f63fab"
+
+//     try {
+//         // The following requests are executed concurrently
+//         const results = await Promise.all(urls.map(async (url) => {
+//             try {
+//                 let content = "" //最终返回的内容
+//                 // --时间点1--
+//                 const time1 = new Date();
+//                 console.log('时间点1:', time1.toLocaleString('zh-CN', { hour12: false }));
+
+//                 const encodedUrl = encodeURIComponent(url);
+//                 const scrapingAntUrl = `https://api.scrapingant.com/v2/general?url=${encodedUrl}&x-api-key=${x_api_key}`;
+//                 const response = await axios.get(scrapingAntUrl);
+//                 let HtmlContent = response.data;
+//                 const dom = new JSDOM(HtmlContent);
+
+//                 // --时间点2--
+//                 const time2 = new Date();
+//                 // console.log('时间点2:', time2.toLocaleString('zh-CN', { hour12: false }));
+
+//                 const timeDiff = (time2 - time1) / 1000;
+//                 console.log(`时间点1和时间点2的时差: ${timeDiff}秒`);
+
+//                 const myURL = new URL(url);
+//                 const hostname = myURL.hostname;
+//                 if (urlHandlers[hostname]) {
+//                     content = urlHandlers[hostname](dom);
+//                 } else {
+//                     content = urlHandlers['default'](dom);
+//                 }
+
+//                 // --时间点3--
+//                 return { url, content }
+//             } catch (error) {
+//                 console.error(`Error scraping URL ${url}: ${error.message}`);
+//                 throw error;
+//             }
+//         }))
+//         res.send(results)
+//     } catch (error) {
+//         res.status(500).send(`Error scraping web pages: ${error.message}`)
+//     }
+// })
+
+app.post('/parseUrlContent', async (req, res) => {
+    const url = req.body.url
+
+    if (!url) {
+        return res.status(400).send('Invalid input: "url" should be a non-empty array')
     }
 
     const x_api_key = "f528f374df3f44c1b62d005f81f63fab"
 
     try {
-        // The following requests are executed concurrently
-        const results = await Promise.all(urls.map(async (url) => {
-            try {
-                let content = "" //最终返回的内容
-                // --时间点1--
-                const time1 = new Date();
-                console.log('时间点1:', time1.toLocaleString('zh-CN', { hour12: false }));
+        let content = "" //最终返回的内容
+        // --时间点1--
+        const time1 = new Date();
+        console.log('时间点1:', time1.toLocaleString('zh-CN', { hour12: false }));
 
-                const encodedUrl = encodeURIComponent(url);
-                const scrapingAntUrl = `https://api.scrapingant.com/v2/general?url=${encodedUrl}&x-api-key=${x_api_key}`;
-                const response = await axios.get(scrapingAntUrl);
-                let HtmlContent = response.data;
-                const dom = new JSDOM(HtmlContent);
+        const encodedUrl = encodeURIComponent(url);
+        const scrapingAntUrl = `https://api.scrapingant.com/v2/general?url=${encodedUrl}&x-api-key=${x_api_key}`;
+        const response = await axios.get(scrapingAntUrl);
+        let HtmlContent = response.data;
+        const dom = new JSDOM(HtmlContent);
 
-                // --时间点2--
-                const time2 = new Date();
-                // console.log('时间点2:', time2.toLocaleString('zh-CN', { hour12: false }));
+        // --时间点2--
+        const time2 = new Date();
+        // console.log('时间点2:', time2.toLocaleString('zh-CN', { hour12: false }));
 
-                const timeDiff = (time2 - time1) / 1000;
-                console.log(`时间点1和时间点2的时差: ${timeDiff}秒`);
+        const timeDiff = (time2 - time1) / 1000;
+        console.log(`时间点1和时间点2的时差: ${timeDiff}秒`);
 
-                const myURL = new URL(url);
-                const hostname = myURL.hostname;
-                if (urlHandlers[hostname]) {
-                    content = urlHandlers[hostname](dom);
-                } else {
-                    content = urlHandlers['default'](dom);
-                }
-
-                // --时间点3--
-                return { url, content }
-            } catch (error) {
-                console.error(`Error scraping URL ${url}: ${error.message}`);
-                throw error;
-            }
-        }))
-        res.send(results)
+        const myURL = new URL(url);
+        const hostname = myURL.hostname;
+        if (urlHandlers[hostname]) {
+            content = urlHandlers[hostname](dom);
+        } else {
+            content = urlHandlers['default'](dom);
+        }
+        res.send(content)
     } catch (error) {
         res.status(500).send(`Error scraping web pages: ${error.message}`)
     }
@@ -443,8 +484,8 @@ app.post('/jina_reader', async (req, res) => {
             data: response.data
         });
     } catch (error) {
-        console.error(`Error fetching data from Jina Reader: ${error.message}`);
-        res.status(500).send(`Error fetching data from Jina Reader: ${error.message}`);
+        console.error(`Error: ${error.message}`);
+        res.status(500).send(`Error: ${error.message}`);
     }
 })
 
