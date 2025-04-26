@@ -425,12 +425,19 @@ app.post('/google/search/image', async (req, res) => {
 })
 
 app.post('/jina_reader', async (req, res) => {
+
+    const webshare_url = new URL('https://proxy.webshare.io/api/v2/proxy/list/')
+        url.searchParams.append('mode', 'direct')
+        url.searchParams.append('page', '1')
+        url.searchParams.append('page_size', '25')
     
-    console.log(await axios.get('https://proxy.webshare.io/api/v2/profile', {
+    const proxy_list = await axios.get(webshare_url.href, {
         headers: {
             Authorization: 'Token shy2cqhv7p6qlx71r64ltg5teje2ywddl7sjsgc1'
         }
-    }))
+    })
+
+    console.log(proxy_list.data.results);
     
     let { url } = req.body;
 
