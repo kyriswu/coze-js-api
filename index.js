@@ -5,6 +5,7 @@ const TurndownService = require('@joplin/turndown');
 const turndownPluginGfm = require('@joplin/turndown-plugin-gfm');
 const { Readability, isProbablyReaderable } = require('@mozilla/readability');
 const { URL } = require('url');
+const unkey = require('./utils/unkey');
 const app = express()
 const port = 3000
 const environment = process.env.NODE_ENV || 'development';
@@ -532,8 +533,8 @@ function toBase64(str) {
 }
 
 app.post('/parse_html', async (req, res) => {
-    let { url, parser, xpath, cookieStr, js_snippet } = req.body;
-
+    let { url, parser, xpath, cookieStr, js_snippet, api_key } = req.body;
+    const api_id = "api_413Kmmitqy3qaDo4";
     if (!url) {
         return res.status(400).send('url is required');
     }
@@ -541,15 +542,34 @@ app.post('/parse_html', async (req, res) => {
         return res.status(400).send('parser or xpath is required');
     }
 
-    
-    const key = environment === 'online' ? "html_parser_" + req.headers['user-identity'] : 'test';
-    const canParse = await canUseHtmlParse(key);
-    if (req.headers['user-identity'] !== '9ae1b679c3c2c89fe4998ab523533d33'){//过滤掉我自己
-        if (!canParse) {
+    //免费版的key
+    const free_key = environment === 'online' ? "html_parser_" + req.headers['user-identity'] : 'test';
+
+    if(api_key){
+        //付费版
+        const { keyId, valid, remaining, code } = await unkey.verifyKey(api_id, api_key, 0);
+        if (!valid) {
             return res.send({
                 code: -1,
-                msg: '感谢大家对本插件的喜爱，但由于维护成本大，为避免滥用，每天只能使用5次，您今天已经用光了！谢谢理解！'
+                msg: 'API Key 无效或已过期，请检查后重试！'
             }); 
+        }
+        if (remaining == 0) {
+            return res.send({
+                code: -1,
+                msg: 'API Key 使用次数已用完，请联系作者续费！'
+            }); 
+        }
+    }else{
+        //免费版
+        const canParse = await canUseHtmlParse(free_key);
+        if (req.headers['user-identity'] !== '9ae1b679c3c2c89fe4998ab523533d33'){//过滤掉我自己
+            if (!canParse) {
+                return res.send({
+                    code: -1,
+                    msg: '免费版每天限量5次，感谢理解！如需付费使用，请联系作者！【B站:小吴爱折腾】'
+                }); 
+            }
         }
     }
     
@@ -608,7 +628,12 @@ app.post('/parse_html', async (req, res) => {
             }); 
         }
 
-        await redis.incr(key);//每次调用增加一次
+        if (api_key) {
+            //付费版
+            await unkey.verifyKey(api_id, api_key, 1);
+        }else{
+            await redis.incr(free_key);//每次调用增加一次
+        }
 
         return res.send({
             code: 0,
