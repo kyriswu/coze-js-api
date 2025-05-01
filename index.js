@@ -544,8 +544,8 @@ app.post('/parse_html', async (req, res) => {
 
     //免费版的key
     const free_key = environment === 'online' ? "html_parser_" + req.headers['user-identity'] : 'test';
-
     if(api_key){
+        console.log("api_key:", api_key);
         //付费版
         const { keyId, valid, remaining, code } = await unkey.verifyKey(api_id, api_key, 0);
         if (!valid) {
@@ -562,6 +562,7 @@ app.post('/parse_html', async (req, res) => {
         }
     }else{
         //免费版
+        console.log("免费版");
         const canParse = await canUseHtmlParse(free_key);
         if (req.headers['user-identity'] !== '9ae1b679c3c2c89fe4998ab523533d33'){//过滤掉我自己
             if (!canParse) {
