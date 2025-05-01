@@ -628,16 +628,19 @@ app.post('/parse_html', async (req, res) => {
             }); 
         }
 
+        let msg = "";
         if (api_key) {
             //付费版
-            await unkey.verifyKey(api_id, api_key, 1);
+            const { remaining } = await unkey.verifyKey(api_id, api_key, 1);
+            msg = `API Key 剩余调用次数：${remaining}`;
         }else{
             await redis.incr(free_key);//每次调用增加一次
+            msg = `今日免费使用次数：${5 - await getUsage(free_key)}`;
         }
 
         return res.send({
             code: 0,
-            msg: 'Success',
+            msg: msg,
             data: result_list
         });
     } catch (error) {
