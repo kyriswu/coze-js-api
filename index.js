@@ -544,8 +544,8 @@ app.post('/parse_html', async (req, res) => {
 
     //免费版的key
     const free_key = environment === 'online' ? "html_parser_" + req.headers['user-identity'] : 'test';
+    console.log("api_key:", api_key);
     if(api_key){
-        console.log("api_key:", api_key);
         //付费版
         const { keyId, valid, remaining, code } = await unkey.verifyKey(api_id, api_key, 0);
         if (!valid) {
