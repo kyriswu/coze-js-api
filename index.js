@@ -1,5 +1,6 @@
 const express = require('express')
 const axios = require('axios')
+const cheerio = require('cheerio')
 const { JSDOM } = require('jsdom');
 const TurndownService = require('@joplin/turndown');
 const turndownPluginGfm = require('@joplin/turndown-plugin-gfm');
@@ -533,12 +534,12 @@ function toBase64(str) {
 }
 
 app.post('/parse_html', async (req, res) => {
-    let { url, parser, xpath, cookieStr, js_snippet, api_key } = req.body;
+    let { url, selector, xpath, api_key } = req.body;
     const api_id = "api_413Kmmitqy3qaDo4";
     if (!url) {
         return res.status(400).send('url is required');
     }
-    if (!parser && !xpath) {
+    if (!selector && !xpath) {
         return res.status(400).send('parser or xpath is required');
     }
 
@@ -586,21 +587,15 @@ app.post('/parse_html', async (req, res) => {
     }
 
     try {
+
+        let HtmlContent = "";
+
         const x_api_key = "f528f374df3f44c1b62d005f81f63fab"
         const encodedUrl = encodeURIComponent(url);
         let scrapingAntUrl = `https://api.scrapingant.com/v2/general?url=${encodedUrl}&x-api-key=${x_api_key}`;
-        if (cookieStr) {
-            // 处理 cookieStr
-            cookieStr = cookieStr.replace(/;\s+/g, ';');
-            scrapingAntUrl += `&cookies=${cookieStr}`;
-        }
-        if (js_snippet) {
-            js_snippet = toBase64(js_snippet);
-            console.log(js_snippet);
-            scrapingAntUrl += `&js_snippet=${js_snippet}`;
-        }
         const response = await axios.get(scrapingAntUrl);
-        let HtmlContent = response.data;
+        HtmlContent = response.data;
+        
         const dom = new JSDOM(HtmlContent);
         const { document, window } = dom.window;
 
@@ -619,8 +614,8 @@ app.post('/parse_html', async (req, res) => {
                 const element = result.snapshotItem(i);
                 result_list.push({ htmlContent: element.outerHTML });
             }
-        } else if (parse) {
-            const domSelector = parser;
+        } else if (selector) {
+            const domSelector = selector;
             const parserSelector = htmlToQuerySelector(domSelector);
             result_list = Array.from(document.querySelectorAll(parserSelector)).map(element => {
                 console.log(parserSelector);
