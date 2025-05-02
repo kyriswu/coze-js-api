@@ -378,20 +378,39 @@ async function canUseHtmlParse(key) {
 
 app.post('/google/search/web', async (req, res) => {
     console.log(req.headers);
-    let { q } = req.body;
+    let { q, api_key} = req.body;
+    const api_id = "api_41vHKzNmXf5xx23f";
 
     if (!q) {
         return res.status(400).send('Invalid input: "q" is required');
     }
 
-    const key = environment === 'online' ? req.headers['user-identity'] : 'test';
-    const canSearch = await canSearchGoogle(key);
-    if (!canSearch) {
-        return res.send({
-            code: 0,
-            msg: '维护成本大，为避免滥用，每天只能使用5次，谢谢理解'
-        }); 
+    //免费版的key
+    const free_key = environment === 'online' ? req.headers['user-identity'] : 'test';
+    if (api_key) {
+        const { keyId, valid, remaining, code } = await unkey.verifyKey(api_id, api_key, 0);
+        if (!valid) {
+            return res.send({
+                code: -1,
+                msg: 'API Key 无效或已过期，请检查后重试！'
+            }); 
+        }
+        if (remaining == 0) {
+            return res.send({
+                code: -1,
+                msg: 'API Key 使用次数已用完，请联系作者续费！'
+            }); 
+        }
+    }else{
+        const canSearch = await canSearchGoogle(free_key);
+        if (!canSearch) {
+            return res.send({
+                code: 0,
+                msg: '维护成本大，为避免滥用，每天只能使用5次，请联系作者！【B站:小吴爱折腾】'
+            }); 
+        }
     }
+    
 
     const searchUrl = `https://cse.google.com/cse?cx=93d449f1c4ff047bc#gsc.tab=0&gsc.q=${encodeURIComponent(q)}&gsc.sort=`;
 
@@ -414,10 +433,20 @@ app.post('/google/search/web', async (req, res) => {
             const url = _url ? _url.href : '';
             return { title, image, snippet, url };
         }).filter(item => item.title); // 过滤掉 title 为空的;
-        await redis.incr(key);//每次调用增加一次
+
+        let msg = "";
+        if (api_key) {
+            //付费版
+            const { remaining } = await unkey.verifyKey(api_id, api_key, 1);
+            msg = `API Key 剩余调用次数：${remaining}`;
+        }else{
+            await redis.incr(free_key);//每次调用增加一次
+            msg = `今日免费使用次数：${5 - await getUsage(free_key)}`;
+        }
+
         return res.send({
             code: 0,
-            msg: 'Success',
+            msg: msg,
             data: result_list
         });
     } catch (error) {
@@ -568,7 +597,7 @@ app.post('/parse_html', async (req, res) => {
             if (!canParse) {
                 return res.send({
                     code: -1,
-                    msg: '免费版每天限量5次，感谢理解！如需付费使用，请联系作者！【B站:小吴爱折腾】'
+                    msg: '免费版每天限量5次，付费可以解锁更多次数，请联系作者！【B站:小吴爱折腾】'
                 }); 
             }
         }
