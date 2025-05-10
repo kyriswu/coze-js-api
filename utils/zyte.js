@@ -6,6 +6,7 @@ const zyte = {
                 "https://api.zyte.com/v1/extract",
                 {
                     "url": url,  
+                    "geolocation": 'CN',
                     "browserHtml": true,
                   "actions": actions
                 },
