@@ -901,6 +901,33 @@ app.post('/web/click', async (req, res) => {
     });
 })
 
+//生成zyte等待元素出现的代码
+app.post('/web/waitForSelector', async (req, res) => {
+    const { type, value} = req.body;
+    if (!type || !value) {
+        return res.status(400).send('Invalid input: "type" and "value" are required');
+    }
+    return res.send({
+        code: 0,
+        msg: 'Success',
+        data: JSON.stringify(zyte.gen_waitForSelector_code(type, value))
+    });
+})
+
+//zyte等待
+app.post('/web/waitForTimeout', async (req, res) => {
+const { timeout } = req.timeout;
+    if (!timeout) {
+        return res.status(400).send('Invalid input: "timeout" are required');
+    }
+    return res.send({
+        code: 0,
+        msg: 'Success',
+        data: JSON.stringify(zyte.gen_waitForTimeout_code(timeout))
+    });
+})
+
+
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
 })
