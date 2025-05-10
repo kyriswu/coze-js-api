@@ -788,7 +788,7 @@ app.post('/google/search/web', async (req, res) => {
         }
         return res.send({
             code: 0,
-            msg: msg,
+            msg: "Success",
             data: data.results
         });
     })
