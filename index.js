@@ -828,7 +828,7 @@ app.post('/web/extract', async (req, res) => {
     action = JSON.parse(action);//本次动作
     actions.push(zyte.gen_waitForSelector_code(action.selector.type, action.selector.value));
     actions.push(action)
-    actions.push(zyte.gen_waitForTimeout_code(3))
+    actions.push(zyte.gen_waitForTimeout_code(4))
 
     try {
 
