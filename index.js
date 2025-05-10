@@ -797,10 +797,14 @@ app.post('/google/search/web', async (req, res) => {
 
 //生成zyte点击元素的代码
 app.post('/web/click', async (req, res) => {
+    const { type, value} = req.body;
+    if (!type || !value) {
+        return res.status(400).send('Invalid input: "type" and "value" are required');
+    }
     return res.send({
         code: 0,
         msg: 'Success',
-        data: zyte.gen_click_code()
+        data: JSON.stringify(zyte.gen_click_code(type, value))
     });
 })
 
