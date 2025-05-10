@@ -916,7 +916,7 @@ app.post('/web/waitForSelector', async (req, res) => {
 
 //zyte等待
 app.post('/web/waitForTimeout', async (req, res) => {
-const { timeout } = req.timeout;
+const { timeout } = req.body;
     if (!timeout) {
         return res.status(400).send('Invalid input: "timeout" are required');
     }
