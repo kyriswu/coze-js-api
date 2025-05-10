@@ -565,7 +565,10 @@ function toBase64(str) {
 }
 
 app.post('/parse_html', async (req, res) => {
-    let { url, selector, xpath, api_key, actions } = req.body;
+    let { url, selector, xpath, api_key, action } = req.body;
+    if (action) {
+        return await zyteExtract(req, res);
+    }
     const api_id = "api_413Kmmitqy3qaDo4";
     if (!url) {
         return res.status(400).send('url is required');
@@ -576,7 +579,6 @@ app.post('/parse_html', async (req, res) => {
 
     //免费版的key
     const free_key = environment === 'online' ? "html_parser_" + req.headers['user-identity'] : 'test';
-    console.log(req.body);
     if(api_key){
         //付费版
         const { keyId, valid, remaining, code } = await unkey.verifyKey(api_id, api_key, 0);
@@ -603,18 +605,6 @@ app.post('/parse_html', async (req, res) => {
                 }); 
             }
         }
-    }
-    
-
-    const unsupportedDomains = ['bilibili.com', 'google.com'];
-    const parsedUrl = new URL(url);
-    const domain = parsedUrl.hostname;
-
-    if (unsupportedDomains.some(unsupportedDomain => domain.includes(unsupportedDomain))) {
-        return res.send({
-            code: 0,
-            msg: '拒绝访问！请输入其他网站链接！'
-        });
     }
 
     try {
@@ -795,9 +785,8 @@ app.post('/google/search/web', async (req, res) => {
     })
 })
 
-// zyte
-// 解析网页内容
-app.post('/web/extract', async (req, res) => {
+// zyte解析网页内容
+async function zyteExtract(req, res) {
     let { url, selector, xpath, api_key, action } = req.body;
     if (!url) {
         return res.status(400).send('url is required');
@@ -808,19 +797,32 @@ app.post('/web/extract', async (req, res) => {
 
     //unkey的api_id
     const unkey_api_id = "api_413Kmmitqy3qaDo4";
-    //付费版
-    const { keyId, valid, remaining, code } = await unkey.verifyKey(unkey_api_id, api_key, 0);
-    if (!valid) {
-        return res.send({
-            code: -1,
-            msg: 'API Key 无效或已过期，请检查后重试！'
-        }); 
-    }
-    if (remaining == 0) {
-        return res.send({
-            code: -1,
-            msg: 'API Key 使用次数已用完，请联系作者续费！'
-        }); 
+    //免费版的redis_key，用于限制用户的使用次数
+    const free_key = environment === 'online' ? "html_parser_" + req.headers['user-identity'] : 'test';
+    if(api_key){
+        //付费版
+        const { keyId, valid, remaining, code } = await unkey.verifyKey(unkey_api_id, api_key, 0);
+        if (!valid) {
+            return res.send({
+                code: -1,
+                msg: 'API Key 无效或已过期，请检查后重试！'
+            }); 
+        }
+        if (remaining == 0) {
+            return res.send({
+                code: -1,
+                msg: 'API Key 使用次数已用完，请联系作者续费！'
+            }); 
+        }
+    }else{
+        //免费版
+        const canParse = await canUseHtmlParse(free_key);
+        if (!canParse) {
+            return res.send({
+                code: -1,
+                msg: '免费版每天限量5次，付费可以解锁更多次数，请联系作者！【B站:小吴爱折腾】'
+            }); 
+        }
     }
 
     //处理action
@@ -828,43 +830,48 @@ app.post('/web/extract', async (req, res) => {
     action = JSON.parse(action);//本次动作
     actions.push(zyte.gen_waitForSelector_code(action.selector.type, action.selector.value));
     actions.push(action)
-    actions.push(zyte.gen_waitForTimeout_code(4))
+    actions.push(zyte.gen_waitForTimeout_code(5))
 
     try {
-
-        let HtmlContent = await zyte.extract(url, actions);
-        const dom = new JSDOM(HtmlContent);
-        const { document, window } = dom.window;
-
+        let msg = "";
         let result_list = [];
+        let {error, HtmlContent} = await zyte.extract(url, actions);
+        if (error) {
+            msg = error;
+        }else{
+            const dom = new JSDOM(HtmlContent);
+            const { document, window } = dom.window;
 
-        if (xpath) {
-            const result = document.evaluate(
-                xpath, 
-                document, 
-                null, 
-                window.XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, // 使用 window.XPathResult
-                null
-            );
-            // Iterate over the results
-            for (let i = 0; i < result.snapshotLength; i++) {
-                const element = result.snapshotItem(i);
-                result_list.push({ htmlContent: element.outerHTML });
+            if (xpath) {
+                const result = document.evaluate(
+                    xpath, 
+                    document, 
+                    null, 
+                    window.XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, // 使用 window.XPathResult
+                    null
+                );
+                // Iterate over the results
+                for (let i = 0; i < result.snapshotLength; i++) {
+                    const element = result.snapshotItem(i);
+                    result_list.push({ htmlContent: element.outerHTML });
+                }
+            } else if (selector) {
+                const domSelector = selector;
+                const parserSelector = htmlToQuerySelector(domSelector);
+                result_list = Array.from(document.querySelectorAll(parserSelector)).map(element => {
+                    console.log(parserSelector);
+                    return { htmlContent: element.outerHTML };
+                }); 
             }
-        } else if (selector) {
-            const domSelector = selector;
-            const parserSelector = htmlToQuerySelector(domSelector);
-            result_list = Array.from(document.querySelectorAll(parserSelector)).map(element => {
-                console.log(parserSelector);
-                return { htmlContent: element.outerHTML };
-            }); 
         }
 
-        let msg = "";
         if (api_key) {
             //付费版
             const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
-            msg = `API Key 剩余调用次数：${remaining}`;
+            msg += ` API Key 剩余调用次数：${remaining}`;
+        }else{
+            await redis.incr(free_key);//每次调用增加一次
+            msg = `今日免费使用次数：${5 - await getUsage(free_key)}`;
         }
 
         return res.send({
@@ -876,6 +883,9 @@ app.post('/web/extract', async (req, res) => {
         console.error(`Error: ${error}`);
         res.status(500).send(`Error: ${error.message}`);
     }
+}
+app.post('/web/extract', async (req, res) => {
+    await zyteExtract(req, res);
 })
 
 //生成zyte点击元素的代码

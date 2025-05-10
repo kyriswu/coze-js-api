@@ -13,8 +13,19 @@ const zyte = {
                 auth: { username: 'e902926b10234494aceec622c90ba286' }
             }
         );
+        const hasError = response.data.actions.some(action => {
+            if (action.error) {
+                console.log("Error in action: ", action.error);
+                return true; // Exit .some() iteration
+            }
+            return false;
+        });
+
+        if (hasError) {
+            return {error:response.data.actions.find(action => action.error).error, HtmlContent:null};
+        }
         const browserHtml = response.data.browserHtml
-        return browserHtml
+        return {error:null, HtmlContent:browserHtml}
     },
     gen_waitForSelector_code: function (type, value) {
         return {
