@@ -795,6 +795,89 @@ app.post('/google/search/web', async (req, res) => {
     })
 })
 
+// zyte
+// 解析网页内容
+app.post('/web/extract', async (req, res) => {
+    let { url, selector, xpath, api_key, action } = req.body;
+    if (!url) {
+        return res.status(400).send('url is required');
+    }
+    if (!selector && !xpath) {
+        return res.status(400).send('parser or xpath is required');
+    }
+
+    //unkey的api_id
+    const unkey_api_id = "api_413Kmmitqy3qaDo4";
+    //付费版
+    const { keyId, valid, remaining, code } = await unkey.verifyKey(unkey_api_id, api_key, 0);
+    if (!valid) {
+        return res.send({
+            code: -1,
+            msg: 'API Key 无效或已过期，请检查后重试！'
+        }); 
+    }
+    if (remaining == 0) {
+        return res.send({
+            code: -1,
+            msg: 'API Key 使用次数已用完，请联系作者续费！'
+        }); 
+    }
+
+    //处理action
+    let actions = [];//完整的动作列表
+    action = JSON.parse(action);//本次动作
+    actions.push(zyte.gen_waitForSelector_code(action.selector.type, action.selector.value));
+    actions.push(action)
+    actions.push(zyte.gen_waitForTimeout_code(3))
+
+    try {
+
+        let HtmlContent = await zyte.extract(url, actions);
+        const dom = new JSDOM(HtmlContent);
+        const { document, window } = dom.window;
+
+        let result_list = [];
+
+        if (xpath) {
+            const result = document.evaluate(
+                xpath, 
+                document, 
+                null, 
+                window.XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, // 使用 window.XPathResult
+                null
+            );
+            // Iterate over the results
+            for (let i = 0; i < result.snapshotLength; i++) {
+                const element = result.snapshotItem(i);
+                result_list.push({ htmlContent: element.outerHTML });
+            }
+        } else if (selector) {
+            const domSelector = selector;
+            const parserSelector = htmlToQuerySelector(domSelector);
+            result_list = Array.from(document.querySelectorAll(parserSelector)).map(element => {
+                console.log(parserSelector);
+                return { htmlContent: element.outerHTML };
+            }); 
+        }
+
+        let msg = "";
+        if (api_key) {
+            //付费版
+            const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
+            msg = `API Key 剩余调用次数：${remaining}`;
+        }
+
+        return res.send({
+            code: 0,
+            msg: msg,
+            data: result_list
+        });
+    } catch (error) {
+        console.error(`Error: ${error}`);
+        res.status(500).send(`Error: ${error.message}`);
+    }
+})
+
 //生成zyte点击元素的代码
 app.post('/web/click', async (req, res) => {
     const { type, value} = req.body;

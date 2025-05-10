@@ -1,3 +1,5 @@
+const axios = require('axios')
+
 const zyte = {
     extract: async function (url,actions) {
         const response = await axios.post( 
@@ -14,14 +16,13 @@ const zyte = {
         const browserHtml = response.data.browserHtml
         return browserHtml
     },
-    gen_waitForSelector_code: function (type,value,delay) {
+    gen_waitForSelector_code: function (type,value) {
         return {
             "action": "waitForSelector",
             "selector": {
                 "type": type,
                 "value": value,
             },
-            "delay": delay
         }
     },
     gen_click_code: function (type,value) {
@@ -31,6 +32,12 @@ const zyte = {
                 "type": type,
                 "value": value,
             },
+        }
+    },
+    gen_waitForTimeout_code: function (timeout) {
+        return {
+            "action": "waitForTimeout",
+            "timeout": timeout
         }
     },
 };
