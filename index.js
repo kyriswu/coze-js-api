@@ -828,9 +828,14 @@ async function zyteExtract(req, res) {
     //处理action
     let actions = [];//完整的动作列表
     action = JSON.parse(action);//本次动作
-    actions.push(zyte.gen_waitForSelector_code(action.selector.type, action.selector.value));
-    actions.push(action)
-    actions.push(zyte.gen_waitForTimeout_code(5))
+    action.forEach((item) => {
+        if (item.action === "click") {
+            actions.push(zyte.gen_waitForSelector_code(item.selector.type, item.selector.value));
+            actions.push(item)
+        }else{
+            actions.push(item)
+        }
+    })
 
     try {
         let msg = "";
@@ -897,7 +902,7 @@ app.post('/web/click', async (req, res) => {
     return res.send({
         code: 0,
         msg: 'Success',
-        data: JSON.stringify(zyte.gen_click_code(type, value))
+        data: zyte.gen_click_code(type, value)
     });
 })
 
@@ -910,7 +915,7 @@ app.post('/web/waitForSelector', async (req, res) => {
     return res.send({
         code: 0,
         msg: 'Success',
-        data: JSON.stringify(zyte.gen_waitForSelector_code(type, value))
+        data: zyte.gen_waitForSelector_code(type, value)
     });
 })
 
@@ -923,7 +928,7 @@ const { timeout } = req.body;
     return res.send({
         code: 0,
         msg: 'Success',
-        data: JSON.stringify(zyte.gen_waitForTimeout_code(timeout))
+        data: zyte.gen_waitForTimeout_code(timeout)
     });
 })
 
