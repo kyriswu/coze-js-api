@@ -52,6 +52,7 @@ const urlHandlers = {
 const redis = require('./utils/redisClient');
 const { parse } = require('path');
 const search1api = require('./utils/search1api');
+const zyte = require('./utils/zyte');
 // 从 Redis 中获取用户使用量
 async function getUsage(key) {
     let value = await redis.get(key);
@@ -564,7 +565,7 @@ function toBase64(str) {
 }
 
 app.post('/parse_html', async (req, res) => {
-    let { url, selector, xpath, api_key } = req.body;
+    let { url, selector, xpath, api_key, actions } = req.body;
     const api_id = "api_413Kmmitqy3qaDo4";
     if (!url) {
         return res.status(400).send('url is required');
@@ -792,6 +793,15 @@ app.post('/google/search/web', async (req, res) => {
             data: data.results
         });
     })
+})
+
+//生成zyte点击元素的代码
+app.post('/web/click', async (req, res) => {
+    return res.send({
+        code: 0,
+        msg: 'Success',
+        data: zyte.gen_click_code()
+    });
 })
 
 app.listen(port, () => {
