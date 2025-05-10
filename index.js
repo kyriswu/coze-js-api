@@ -51,6 +51,7 @@ const urlHandlers = {
 
 const redis = require('./utils/redisClient');
 const { parse } = require('path');
+const search1api = require('./utils/search1api');
 // 从 Redis 中获取用户使用量
 async function getUsage(key) {
     let value = await redis.get(key);
@@ -376,126 +377,126 @@ async function canUseHtmlParse(key) {
     return true;
 }
 
-app.post('/google/search/web', async (req, res) => {
-    console.log(req.headers);
-    let { q, api_key} = req.body;
-    const api_id = "api_41vHKzNmXf5xx23f";
+// app.post('/google/search/web', async (req, res) => {
+//     console.log(req.headers);
+//     let { q, api_key} = req.body;
+//     const api_id = "api_41vHKzNmXf5xx23f";
 
-    if (!q) {
-        return res.status(400).send('Invalid input: "q" is required');
-    }
+//     if (!q) {
+//         return res.status(400).send('Invalid input: "q" is required');
+//     }
 
-    //免费版的key
-    const free_key = environment === 'online' ? req.headers['user-identity'] : 'test';
-    if (api_key) {
-        const { keyId, valid, remaining, code } = await unkey.verifyKey(api_id, api_key, 0);
-        if (!valid) {
-            return res.send({
-                code: -1,
-                msg: 'API Key 无效或已过期，请检查后重试！'
-            }); 
-        }
-        if (remaining == 0) {
-            return res.send({
-                code: -1,
-                msg: 'API Key 使用次数已用完，请联系作者续费！'
-            }); 
-        }
-    }else{
-        const canSearch = await canSearchGoogle(free_key);
-        if (!canSearch) {
-            return res.send({
-                code: 0,
-                msg: '维护成本大，为避免滥用，每天只能使用5次，请联系作者！【B站:小吴爱折腾】'
-            }); 
-        }
-    }
+//     //免费版的key
+//     const free_key = environment === 'online' ? req.headers['user-identity'] : 'test';
+//     if (api_key) {
+//         const { keyId, valid, remaining, code } = await unkey.verifyKey(api_id, api_key, 0);
+//         if (!valid) {
+//             return res.send({
+//                 code: -1,
+//                 msg: 'API Key 无效或已过期，请检查后重试！'
+//             }); 
+//         }
+//         if (remaining == 0) {
+//             return res.send({
+//                 code: -1,
+//                 msg: 'API Key 使用次数已用完，请联系作者续费！'
+//             }); 
+//         }
+//     }else{
+//         const canSearch = await canSearchGoogle(free_key);
+//         if (!canSearch) {
+//             return res.send({
+//                 code: 0,
+//                 msg: '维护成本大，为避免滥用，每天只能使用5次，请联系作者！【B站:小吴爱折腾】'
+//             }); 
+//         }
+//     }
     
 
-    const searchUrl = `https://cse.google.com/cse?cx=93d449f1c4ff047bc#gsc.tab=0&gsc.q=${encodeURIComponent(q)}&gsc.sort=`;
+//     const searchUrl = `https://cse.google.com/cse?cx=93d449f1c4ff047bc#gsc.tab=0&gsc.q=${encodeURIComponent(q)}&gsc.sort=`;
 
-    try {
-        const x_api_key = "f528f374df3f44c1b62d005f81f63fab"
-        const encodedUrl = encodeURIComponent(searchUrl);
-        const scrapingAntUrl = `https://api.scrapingant.com/v2/general?url=${encodedUrl}&x-api-key=${x_api_key}`;
-        const response = await axios.get(scrapingAntUrl);
-        let HtmlContent = response.data;
-        const dom = new JSDOM(HtmlContent);
-        const { document } = dom.window;
-        const result_list = Array.from(document.querySelectorAll('div.gsc-webResult.gsc-result')).map(div => {
-            const _title = div.querySelector('a.gs-title');
-            const title = _title ? _title.textContent.trim() : '';
-            const _image = div.querySelector('img.gs-image');
-            const image = _image ? _image.src : '';
-            const _snippet = div.querySelector('div.gs-snippet');
-            const snippet = _snippet ? _snippet.textContent.trim() : '';
-            const _url = div.querySelector('a.gs-title');
-            const url = _url ? _url.href : '';
-            return { title, image, snippet, url };
-        }).filter(item => item.title); // 过滤掉 title 为空的;
+//     try {
+//         const x_api_key = "f528f374df3f44c1b62d005f81f63fab"
+//         const encodedUrl = encodeURIComponent(searchUrl);
+//         const scrapingAntUrl = `https://api.scrapingant.com/v2/general?url=${encodedUrl}&x-api-key=${x_api_key}`;
+//         const response = await axios.get(scrapingAntUrl);
+//         let HtmlContent = response.data;
+//         const dom = new JSDOM(HtmlContent);
+//         const { document } = dom.window;
+//         const result_list = Array.from(document.querySelectorAll('div.gsc-webResult.gsc-result')).map(div => {
+//             const _title = div.querySelector('a.gs-title');
+//             const title = _title ? _title.textContent.trim() : '';
+//             const _image = div.querySelector('img.gs-image');
+//             const image = _image ? _image.src : '';
+//             const _snippet = div.querySelector('div.gs-snippet');
+//             const snippet = _snippet ? _snippet.textContent.trim() : '';
+//             const _url = div.querySelector('a.gs-title');
+//             const url = _url ? _url.href : '';
+//             return { title, image, snippet, url };
+//         }).filter(item => item.title); // 过滤掉 title 为空的;
 
-        let msg = "";
-        if (api_key) {
-            //付费版
-            const { remaining } = await unkey.verifyKey(api_id, api_key, 1);
-            msg = `API Key 剩余调用次数：${remaining}`;
-        }else{
-            await redis.incr(free_key);//每次调用增加一次
-            msg = `今日免费使用次数：${5 - await getUsage(free_key)}`;
-        }
+//         let msg = "";
+//         if (api_key) {
+//             //付费版
+//             const { remaining } = await unkey.verifyKey(api_id, api_key, 1);
+//             msg = `API Key 剩余调用次数：${remaining}`;
+//         }else{
+//             await redis.incr(free_key);//每次调用增加一次
+//             msg = `今日免费使用次数：${5 - await getUsage(free_key)}`;
+//         }
 
-        return res.send({
-            code: 0,
-            msg: msg,
-            data: result_list
-        });
-    } catch (error) {
-        console.error(`Error performing Google search: ${error.message}`);
-        res.status(500).send(`Error performing Google search: ${error.message}`);
-    }
-})
+//         return res.send({
+//             code: 0,
+//             msg: msg,
+//             data: result_list
+//         });
+//     } catch (error) {
+//         console.error(`Error performing Google search: ${error.message}`);
+//         res.status(500).send(`Error performing Google search: ${error.message}`);
+//     }
+// })
 
-app.post('/google/search/image', async (req, res) => {
-    let { q } = req.body;
+// app.post('/google/search/image', async (req, res) => {
+//     let { q } = req.body;
 
-    if (!q) {
-        return res.status(400).send('Invalid input: "q" is required');
-    }
+//     if (!q) {
+//         return res.status(400).send('Invalid input: "q" is required');
+//     }
 
-    const searchUrl = `https://cse.google.com/cse?cx=93d449f1c4ff047bc#gsc.tab=1&gsc.q=${q}&gsc.sort=`;
-    //在页面中执行js代码，获取图片搜索结果（base64encode）
-    const js_snippet = `ZG9jdW1lbnQucXVlcnlTZWxlY3RvckFsbCgnZGl2LmdzYy1pbWFnZVJlc3VsdC5nc2MtaW1hZ2VSZXN1bHQtcG9wdXAuZ3NjLXJlc3VsdCcpLmZvckVhY2goZWwgPT4gewogICAgY29uc3QgdGFyZ2V0ID0gZWwucXVlcnlTZWxlY3RvcignYSwgaW1nLCBidXR0b24nKSB8fCBlbDsKICAgIGNvbnN0IGV2ZW50ID0gbmV3IE1vdXNlRXZlbnQoJ2NsaWNrJywgeyBidWJibGVzOiB0cnVlLCBjYW5jZWxhYmxlOiB0cnVlIH0pOwogICAgdGFyZ2V0LmRpc3BhdGNoRXZlbnQoZXZlbnQpOwp9KTsK`
+//     const searchUrl = `https://cse.google.com/cse?cx=93d449f1c4ff047bc#gsc.tab=1&gsc.q=${q}&gsc.sort=`;
+//     //在页面中执行js代码，获取图片搜索结果（base64encode）
+//     const js_snippet = `ZG9jdW1lbnQucXVlcnlTZWxlY3RvckFsbCgnZGl2LmdzYy1pbWFnZVJlc3VsdC5nc2MtaW1hZ2VSZXN1bHQtcG9wdXAuZ3NjLXJlc3VsdCcpLmZvckVhY2goZWwgPT4gewogICAgY29uc3QgdGFyZ2V0ID0gZWwucXVlcnlTZWxlY3RvcignYSwgaW1nLCBidXR0b24nKSB8fCBlbDsKICAgIGNvbnN0IGV2ZW50ID0gbmV3IE1vdXNlRXZlbnQoJ2NsaWNrJywgeyBidWJibGVzOiB0cnVlLCBjYW5jZWxhYmxlOiB0cnVlIH0pOwogICAgdGFyZ2V0LmRpc3BhdGNoRXZlbnQoZXZlbnQpOwp9KTsK`
 
-    try {
-        const x_api_key = "f528f374df3f44c1b62d005f81f63fab"
-        const encodedUrl = encodeURIComponent(searchUrl);
-        const scrapingAntUrl = `https://api.scrapingant.com/v2/general?url=${encodedUrl}&x-api-key=${x_api_key}&js_snippet=${js_snippet}`;
-        const response = await axios.get(scrapingAntUrl);
-        let HtmlContent = response.data;
-        const dom = new JSDOM(HtmlContent);
-        const { document } = dom.window;
-        const result_list = Array.from(document.querySelectorAll('div.gsc-imageResult.gsc-imageResult-popup.gsc-result')).map(div => {
-            const _title = div.querySelector('div.gs-image-box a.gs-image img');
-            const title = _title ? _title.title : '';
-            const _image = div.querySelector('a.gs-previewLink img');
-            const image_url = _image ? _image.src : '';
-            const width = _image.width;
-            const height = _image.height;
-            const size = `${width}x${height}`;
-            const _source = div.querySelector('div.gs-visibleUrl');
-            const source = _source ? _source.textContent.trim() : '';
-            return { title, image_url, size, source };
-        }).filter(item => item.image_url); // 过滤掉 title 为空的;
-        res.send({
-            code: 0,
-            msg: 'Success',
-            data: result_list
-        });
-    } catch (error) {
-        console.error(`Error performing Google search: ${error.message}`);
-        res.status(500).send(`Error performing Google search: ${error.message}`);
-    }
-})
+//     try {
+//         const x_api_key = "f528f374df3f44c1b62d005f81f63fab"
+//         const encodedUrl = encodeURIComponent(searchUrl);
+//         const scrapingAntUrl = `https://api.scrapingant.com/v2/general?url=${encodedUrl}&x-api-key=${x_api_key}&js_snippet=${js_snippet}`;
+//         const response = await axios.get(scrapingAntUrl);
+//         let HtmlContent = response.data;
+//         const dom = new JSDOM(HtmlContent);
+//         const { document } = dom.window;
+//         const result_list = Array.from(document.querySelectorAll('div.gsc-imageResult.gsc-imageResult-popup.gsc-result')).map(div => {
+//             const _title = div.querySelector('div.gs-image-box a.gs-image img');
+//             const title = _title ? _title.title : '';
+//             const _image = div.querySelector('a.gs-previewLink img');
+//             const image_url = _image ? _image.src : '';
+//             const width = _image.width;
+//             const height = _image.height;
+//             const size = `${width}x${height}`;
+//             const _source = div.querySelector('div.gs-visibleUrl');
+//             const source = _source ? _source.textContent.trim() : '';
+//             return { title, image_url, size, source };
+//         }).filter(item => item.image_url); // 过滤掉 title 为空的;
+//         res.send({
+//             code: 0,
+//             msg: 'Success',
+//             data: result_list
+//         });
+//     } catch (error) {
+//         console.error(`Error performing Google search: ${error.message}`);
+//         res.status(500).send(`Error performing Google search: ${error.message}`);
+//     }
+// })
 
 app.post('/jina_reader', async (req, res) => {
     
@@ -739,6 +740,59 @@ app.post('/openai-hub/chat/completions', async (req, res) => {
         res.status(500).send(`Error calling OpenAI API: ${error.message}`);
     }
 });
+
+
+app.post('/google/search/web', async (req, res) => {
+    const { q, api_key} = req.body;
+    const api_id = "api_41vHKzNmXf5xx23f";
+
+    if (!q) {
+        return res.status(400).send('Invalid input: "q" is required');
+    }
+
+    //免费版的key
+    const free_key = environment === 'online' ? req.headers['user-identity'] : 'test';
+    if (api_key) {
+        const { keyId, valid, remaining, code } = await unkey.verifyKey(api_id, api_key, 0);
+        if (!valid) {
+            return res.send({
+                code: -1,
+                msg: 'API Key 无效或已过期，请检查后重试！'
+            }); 
+        }
+        if (remaining == 0) {
+            return res.send({
+                code: -1,
+                msg: 'API Key 使用次数已用完，请联系作者续费！'
+            }); 
+        }
+    }else{
+        const canSearch = await canSearchGoogle(free_key);
+        if (!canSearch) {
+            return res.send({
+                code: 0,
+                msg: '维护成本大，为避免滥用，每天只能使用5次，请联系作者！【B站:小吴爱折腾】'
+            }); 
+        }
+    }
+
+    search1api.search(q).then(async (data) => {
+        let msg = "";
+        if (api_key) {
+            //付费版
+            const { remaining } = await unkey.verifyKey(api_id, api_key, 1);
+            msg = `API Key 剩余调用次数：${remaining}`;
+        }else{
+            await redis.incr(free_key);//每次调用增加一次
+            msg = `今日免费使用次数：${5 - await getUsage(free_key)}`;
+        }
+        return res.send({
+            code: 0,
+            msg: msg,
+            data: data.results
+        });
+    })
+})
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
