@@ -58,7 +58,10 @@ async function getUsage(key) {
     let value = await redis.get(key);
     if (value === null) {
         // 不存在，创建 key 并设置初始值
-        await redis.set(key, 0, 'EX', 86400);
+        const now = new Date();
+        const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const secondsSinceMidnight = Math.floor((now - midnight) / 1000);
+        await redis.set(key, 0, 'EX', secondsSinceMidnight);
         value = 0;
         console.log(`键 ${key} 不存在，已创建并初始化为 0`);
     } else {
