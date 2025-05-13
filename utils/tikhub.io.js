@@ -93,7 +93,11 @@ const th_bilibili = {
         try {
             const response = await axios(config)
             const videoInfo = response.data.data.data
-            const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
+            var msg = null
+            if (api_key) {
+                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
+                msg = `API Key 剩余调用次数：${remaining}`;
+            }
 
             if (videoInfo.subtitle.subtitles.length == 0) {
                 return res.send({msg: "该视频没有字幕"})
@@ -107,7 +111,7 @@ const th_bilibili = {
                 }
                 const subtitleContent = await subtitleResponse.json();
                 return res.send({
-                    msg: `API Key 剩余调用次数：${remaining}`,
+                    msg: msg,
                     data: subtitleContent,
                 })
             }
