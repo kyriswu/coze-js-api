@@ -53,6 +53,7 @@ const redis = require('./utils/redisClient');
 const { parse } = require('path');
 const search1api = require('./utils/search1api');
 const zyte = require('./utils/zyte');
+const { th_bilibili, th_youtube } = require('./utils/tikhub.io');
 // 从 Redis 中获取用户使用量
 async function getUsage(key) {
     let value = await redis.get(key);
@@ -935,6 +936,7 @@ const { timeout } = req.body;
     });
 })
 
+app.post('/bilibili/subtitle', th_bilibili.fetch_one_video_v2);
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
