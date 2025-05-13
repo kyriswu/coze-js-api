@@ -21,6 +21,21 @@ const search1api = {
 
         const data = await response.json();
         return data
+    },
+    sitemap: async function (url) {
+        const response = await fetch('https://api.search1api.com/sitemap', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer 91E80D9E-9C0A-4BFF-861A-913A339A2489'
+            },
+            body: JSON.stringify({
+            "url": url
+            })
+        });
+
+        const data = await response.json();
+        return data
     }
 };
 

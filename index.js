@@ -897,6 +897,52 @@ app.post('/web/extract', async (req, res) => {
     await zyteExtract(req, res);
 })
 
+app.post('/get_sitemap', async (req, res) => {
+    const { url, api_key } = req.body;
+    const unkey_api_id = "api_413Kmmitqy3qaDo4";
+    if (!url) {
+        return res.status(400).send('Invalid input: "url" is required');
+    }
+
+    //==验证==
+    const redis_key = req.headers['user-identity'] ? 'get_sitemap_'+req.headers['user-identity'] : 'get_sitemap';
+    const value = await redis.get(redis_key);
+    if (value === null) {
+        const now = new Date();
+        const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const secondsSinceMidnight = Math.floor((now - midnight) / 1000);
+        await redis.set(redis_key, 0, 'EX', secondsSinceMidnight);
+    }else{
+        if(!api_key){
+            return res.send({msg: "维护成本大，每天免费使用1次，购买api_key解锁更多次数，需要请请联系作者【B站：小吴爱折腾】"})
+        }else{
+            const { keyId, valid, remaining, code } = await unkey.verifyKey(unkey_api_id, api_key, 0);
+            if (!valid) {
+                return res.send({
+                    msg: 'API Key 无效或已过期，请检查后重试！'
+                }); 
+            }
+            if (remaining == 0) {
+                return res.send({
+                    msg: 'API Key 使用次数已用完，请联系作者续费！'
+                }); 
+            }
+        }
+    }
+    
+    const sitemap = await search1api.sitemap(url);
+    var msg = null
+    if (api_key) {
+        const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
+        msg = `API Key 剩余调用次数：${remaining}`;
+    }
+    return res.send({
+        code: 0,
+        msg: msg,
+        data: sitemap
+    });
+})
+
 //生成zyte点击元素的代码
 app.post('/web/click', async (req, res) => {
     const { type, value} = req.body;
