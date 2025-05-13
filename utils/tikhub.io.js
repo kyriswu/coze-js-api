@@ -23,13 +23,13 @@ const th_bilibili = {
     fetch_one_video_v2: async function (req, res) {
         var url = req.body.url
         if (!url) {
-            return res.status(400).send({msg: "url is required"})
+            return res.send({msg: "url is required"})
         }
 
         // 1. 从链接中提取出 BV 号
         const matched = url.match(/\/video\/(BV[0-9A-Za-z]+)/i);
         if (!matched) {
-            return res.status(400).send({msg: "无法从链接中提取 BV 号"})
+            return res.send({msg: "无法从链接中提取 BV 号"})
         }
         const bvid = matched[1];
 
@@ -44,7 +44,7 @@ const th_bilibili = {
         const json = await response.json();
         console.log(json)
         if (json.code != 0) {
-            return res.status(400).send({msg: "视频不存在或已被删除"})
+            return res.send({msg: "视频不存在或已被删除"})
         }
         // 3. 解析 aid 和 cid
         const aid = json.data.aid;
@@ -63,14 +63,14 @@ const th_bilibili = {
             const videoInfo = response.data.data.data
             console.log(videoInfo)
             if (videoInfo.subtitle.subtitles.length == 0) {
-                return res.status(400).send({msg: "该视频没有字幕"})
+                return res.send({msg: "该视频没有字幕"})
             }else{
                 const subtitleUrl = "https:" + videoInfo.subtitle.subtitles[0].subtitle_url;
                 const subtitleResponse = await fetch(subtitleUrl, { 
                     headers: { 'Accept': 'application/json' }
                 });
                 if (!subtitleResponse.ok) {
-                    return res.status(400).send({msg: "字幕内容获取失败"});
+                    return res.send({msg: "字幕内容获取失败"});
                 }
                 const subtitleContent = await subtitleResponse.json();
                 return res.send({
@@ -79,7 +79,7 @@ const th_bilibili = {
             }
         } catch (error) {
             console.log(error)
-            return res.status(500).send({msg: "服务器错误，请重试"})
+            return res.send({msg: "服务器错误，请重试"})
         }
     },
 }
