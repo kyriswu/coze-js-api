@@ -1,7 +1,9 @@
 const axios = require('axios');
-const e = require('express');
+const unkey = require('./unkey');
+const redis = require('./redisClient');
 
-const api_token = "k500F2ou70UEuXsHzWKAolU82AYOsIfGsK5N5ivGrXNC+VY2TN8qyjynJg=="
+const tikhub_api_token = "k500F2ou70UEuXsHzWKAolU82AYOsIfGsK5N5ivGrXNC+VY2TN8qyjynJg=="
+const unkey_api_id = "api_413Kmmitqy3qaDo4"
 
 const th_youtube = {
     get_video_info: async function (url, actions) {
@@ -21,6 +23,7 @@ const th_youtube = {
 
 const th_bilibili = {
     fetch_one_video_v2: async function (req, res) {
+        var api_key = req.body.api_key
         var url = req.body.url
         if (!url) {
             return res.send({msg: "url is required"})
@@ -50,18 +53,48 @@ const th_bilibili = {
         const aid = json.data.aid;
         const cid = json.data.pages[0].cid;
 
+
+        //==验证==
+        const redis_key = req.headers['user-identity'] ? 'th_bilibili_'+req.headers['user-identity'] : 'test';
+        const value = await redis.get(redis_key);
+        if (value === null) {
+            // 不存在，创建 key 并设置初始值
+            const now = new Date();
+            const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const secondsSinceMidnight = Math.floor((now - midnight) / 1000);
+            await redis.set(redis_key, 0, 'EX', secondsSinceMidnight);
+        }else{
+            if(!api_key){
+                return res.send({msg: "维护成本大，每天免费使用1次，购买api_key解锁更多次数，需要请请联系作者【B站：小吴爱折腾】"})
+            }else{
+                const { keyId, valid, remaining, code } = await unkey.verifyKey(unkey_api_id, api_key, 0);
+                if (!valid) {
+                    return res.send({
+                        msg: 'API Key 无效或已过期，请检查后重试！'
+                    }); 
+                }
+                if (remaining == 0) {
+                    return res.send({
+                        msg: 'API Key 使用次数已用完，请联系作者续费！'
+                    }); 
+                }
+            }
+        }
+
+
         var config = {
             method: 'get',
             url: `https://api.tikhub.io/api/v1/bilibili/web/fetch_one_video_v2?a_id=${aid}&c_id=${cid}`,
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": "Bearer " + api_token
+                "Authorization": "Bearer " + tikhub_api_token
             }
         };
         try {
             const response = await axios(config)
             const videoInfo = response.data.data.data
-            console.log(videoInfo)
+            const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
+
             if (videoInfo.subtitle.subtitles.length == 0) {
                 return res.send({msg: "该视频没有字幕"})
             }else{
@@ -74,6 +107,7 @@ const th_bilibili = {
                 }
                 const subtitleContent = await subtitleResponse.json();
                 return res.send({
+                    msg: `API Key 剩余调用次数：${remaining}`,
                     data: subtitleContent,
                 })
             }
