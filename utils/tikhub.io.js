@@ -21,13 +21,20 @@ const th_youtube = {
 
 const th_bilibili = {
     fetch_one_video_v2: async function (req, res) {
-        var BV = req.body.BV
-        if (!BV) {
-            return res.status(400).send({msg: "BV is required"})
+        var url = req.body.url
+        if (!url) {
+            return res.status(400).send({msg: "url is required"})
         }
 
+        // 1. 从链接中提取出 BV 号
+        const matched = url.match(/\/video\/(BV[0-9A-Za-z]+)/i);
+        if (!matched) {
+            return res.status(400).send({msg: "无法从链接中提取 BV 号"})
+        }
+        const bvid = matched[1];
+
         // 2. 调用 B 站接口获取信息
-        const apiUrl = `https://api.bilibili.com/x/web-interface/view?bvid=${BV}`;
+        const apiUrl = `https://api.bilibili.com/x/web-interface/view?bvid=${bvid}`;
         const response = await fetch(apiUrl, { 
             headers: { 'Accept': 'application/json' }
         });
@@ -35,6 +42,7 @@ const th_bilibili = {
         //     throw new Error(`接口请求失败：${response.status}`);
         // }
         const json = await response.json();
+        console.log(json)
         if (json.code != 0) {
             return res.status(400).send({msg: "视频不存在或已被删除"})
         }
@@ -53,6 +61,7 @@ const th_bilibili = {
         try {
             const response = await axios(config)
             const videoInfo = response.data.data.data
+            console.log(videoInfo)
             if (videoInfo.subtitle.subtitles.length == 0) {
                 return res.status(400).send({msg: "该视频没有字幕"})
             }else{
