@@ -21,13 +21,13 @@ const th_youtube = {
 
 const th_bilibili = {
     fetch_one_video_v2: async function (req, res) {
-        var video_id = req.body.video_id
-        if (!video_id) {
-            return res.status(400).send({msg: "video_id is required"})
+        var BV = req.body.BV
+        if (!BV) {
+            return res.status(400).send({msg: "BV is required"})
         }
 
         // 2. 调用 B 站接口获取信息
-        const apiUrl = `https://api.bilibili.com/x/web-interface/view?bvid=${video_id}`;
+        const apiUrl = `https://api.bilibili.com/x/web-interface/view?bvid=${BV}`;
         const response = await fetch(apiUrl, { 
             headers: { 'Accept': 'application/json' }
         });
