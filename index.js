@@ -513,7 +513,7 @@ app.post('/jina_reader', async (req, res) => {
     try {
         const response = await axios.get(`https://r.jina.ai/${url}`, {
             headers: {
-            'Authorization': 'Bearer jina_dcde2f155b9c47dab25090b59f2abb1ekVm99fbB3WLg5CyT8eQm7dQPaSGx'
+            'Authorization': 'Bearer jina_4631fe20e0fc408aafba69e4c1ddbb5fNzIjfDfnxo1y6sOgO8d3mbXKGo3l'
             }
         });
         res.send({
