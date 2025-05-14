@@ -665,6 +665,7 @@ app.post('/parse_html', async (req, res) => {
         });
     } catch (error) {
         console.error(`Error: ${error}`);
+        console.error(`Stack trace: ${error.stack}`);
         res.status(500).send(`Error: ${error.message}`);
     }
 })
@@ -791,12 +792,15 @@ app.post('/google/search/web', async (req, res) => {
 
 // zyte解析网页内容
 async function zyteExtract(req, res) {
-    let { url, selector, xpath, api_key, action } = req.body;
+    let { url, selector, xpath, api_key, action, screenshot } = req.body;
     if (!url) {
         return res.status(400).send('url is required');
     }
     if (!selector && !xpath) {
         return res.status(400).send('parser or xpath is required');
+    }
+    if (screenshot !== true) {
+        screenshot = false;
     }
 
     //unkey的api_id
@@ -844,34 +848,32 @@ async function zyteExtract(req, res) {
     try {
         let msg = "";
         let result_list = [];
-        let {error, HtmlContent} = await zyte.extract(url, actions);
-        if (error) {
-            msg = error;
-        }else{
-            const dom = new JSDOM(HtmlContent);
-            const { document, window } = dom.window;
+        let {error, HtmlContent} = await zyte.extract(url, actions, screenshot);
+        
+        console.log(error);
 
-            if (xpath) {
-                const result = document.evaluate(
-                    xpath, 
-                    document, 
-                    null, 
-                    window.XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, // 使用 window.XPathResult
-                    null
-                );
-                // Iterate over the results
-                for (let i = 0; i < result.snapshotLength; i++) {
-                    const element = result.snapshotItem(i);
-                    result_list.push({ htmlContent: element.outerHTML });
-                }
-            } else if (selector) {
-                const domSelector = selector;
-                const parserSelector = htmlToQuerySelector(domSelector);
-                result_list = Array.from(document.querySelectorAll(parserSelector)).map(element => {
-                    console.log(parserSelector);
-                    return { htmlContent: element.outerHTML };
-                }); 
+        const dom = new JSDOM(HtmlContent);
+        const { document, window } = dom.window;
+
+        if (xpath) {
+            const result = document.evaluate(
+                xpath, 
+                document, 
+                null, 
+                window.XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, // 使用 window.XPathResult
+                null
+            );
+            // Iterate over the results
+            for (let i = 0; i < result.snapshotLength; i++) {
+                const element = result.snapshotItem(i);
+                result_list.push({ htmlContent: element.outerHTML });
             }
+        } else if (selector) {
+            // const domSelector = selector;
+            // const parserSelector = htmlToQuerySelector(domSelector);
+            result_list = Array.from(document.querySelectorAll(selector)).map(element => {
+                return { htmlContent: element.outerHTML };
+            }); 
         }
 
         if (api_key) {

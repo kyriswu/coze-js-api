@@ -1,29 +1,32 @@
 const axios = require('axios')
 
 const zyte = {
-    extract: async function (url, actions) {
+    extract: async function (url, actions, screenshot) {
         const response = await axios.post(
             "https://api.zyte.com/v1/extract",
             {
                 "url": url,
                 "browserHtml": true,
-                "actions": actions
+                "actions": actions,
+                "screenshot": screenshot,
             },
             {
                 auth: { username: 'e902926b10234494aceec622c90ba286' }
             }
         );
-        const hasError = response.data.actions.some(action => {
-            if (action.error) {
-                console.log("Error in action: ", action.error);
-                return true; // Exit .some() iteration
-            }
-            return false;
-        });
 
-        if (hasError) {
-            return {error:response.data.actions.find(action => action.error).error, HtmlContent:null};
-        }
+        // const hasError = response.data.actions.some(action => {
+        //     if (action.error) {
+        //         console.log("Error in action: ", action.error);
+        //         return true; // Exit .some() iteration
+        //     }
+        //     return false;
+        // });
+
+        // if (hasError) {
+        //     return {error:response.data.actions.find(action => action.error).error, HtmlContent:null};
+        // }
+
         const browserHtml = response.data.browserHtml
         return {error:null, HtmlContent:browserHtml}
     },
