@@ -515,7 +515,8 @@ app.post('/jina_reader', async (req, res) => {
             headers: {
             'Authorization': 'Bearer jina_4631fe20e0fc408aafba69e4c1ddbb5fNzIjfDfnxo1y6sOgO8d3mbXKGo3l',
             'X-Proxy-Url': 'http://umwhniat-rotate:eudczfs5mkzt@p.webshare.io:80',
-            'X-Engine': 'browser'
+            'X-Timeout': '30',
+            'X-Base': 'final'
             },
             // proxy: {
             //     protocol: 'http',
