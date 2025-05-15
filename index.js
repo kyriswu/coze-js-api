@@ -514,6 +514,15 @@ app.post('/jina_reader', async (req, res) => {
         const response = await axios.get(`https://r.jina.ai/${url}`, {
             headers: {
             'Authorization': 'Bearer jina_4631fe20e0fc408aafba69e4c1ddbb5fNzIjfDfnxo1y6sOgO8d3mbXKGo3l'
+            },
+            proxy: {
+                protocol: 'http',
+                host: 'p.webshare.io',
+                port: 80,
+                auth: {
+                    username: 'umwhniat-rotate',
+                    password: 'eudczfs5mkzt'
+                }
             }
         });
         res.send({
@@ -523,33 +532,6 @@ app.post('/jina_reader', async (req, res) => {
         });
     } catch (error) {
         console.error(`Error: ${error.message}`);
-        res.status(500).send(`Error: ${error.message}`);
-    }
-})
-
-app.post('/proxytest', async (req, res) => {
-         try {
-        const response = await axios.get(`https://www.17fpv.com`, {
-            headers: {
-            'Authorization': 'Bearer jina_4631fe20e0fc408aafba69e4c1ddbb5fNzIjfDfnxo1y6sOgO8d3mbXKGo3l'
-            },
-            proxy: {
-            protocol: 'http',
-            host: 'p.webshare.io',
-            port: 80,
-            auth: {
-                username: 'umwhniat-rotate',
-                password: 'eudczfs5mkzt'
-            }
-            }
-        });
-        res.send({
-            code: 0,
-            msg: 'Success',
-            data: response.data
-        });
-    } catch (error) {
-        console.error(`Error: ${error}`);
         res.status(500).send(`Error: ${error.message}`);
     }
 })
