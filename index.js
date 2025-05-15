@@ -650,10 +650,7 @@ app.post('/parse_html', async (req, res) => {
                 result_list.push({ htmlContent: element.outerHTML });
             }
         } else if (selector) {
-            const domSelector = selector;
-            const parserSelector = htmlToQuerySelector(domSelector);
-            result_list = Array.from(document.querySelectorAll(parserSelector)).map(element => {
-                console.log(parserSelector);
+            result_list = Array.from(document.querySelectorAll(selector)).map(element => {
                 return { htmlContent: element.outerHTML };
             }); 
         }
