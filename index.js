@@ -527,6 +527,30 @@ app.post('/jina_reader', async (req, res) => {
     }
 })
 
+app.post('/proxytest', async (req, res) => {
+        const fetch = require('node-fetch');
+        const { HttpProxyAgent } = require('http-proxy-agent');
+
+        const proxy = new HttpProxyAgent('http://umwhniat-rotate:eudczfs5mkzt@p.webshare.io:80');
+
+        try {
+            const response = await fetch('https://17fpv.com', { agent: proxy });
+            const data = await response.json();
+            return res.send({
+                code: 0,
+                msg: 'Success',
+                data: data
+            });
+        } catch (error) {
+            console.error('Error:', error);
+            return res.status(500).send({
+                code: -1,
+                msg: 'Error fetching data',
+                error: error.message
+            });
+        }
+})
+
 
 function htmlToQuerySelector(htmlString) {
     // 为了保证解析正确，我们将传入的 html 包裹在 <body> 中
