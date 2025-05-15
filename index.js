@@ -528,27 +528,30 @@ app.post('/jina_reader', async (req, res) => {
 })
 
 app.post('/proxytest', async (req, res) => {
-        const fetch = require('node-fetch');
-        const { HttpProxyAgent } = require('http-proxy-agent');
-
-        const proxy = new HttpProxyAgent('http://umwhniat-rotate:eudczfs5mkzt@p.webshare.io:80');
-
-        try {
-            const response = await fetch('https://17fpv.com', { agent: proxy });
-            const data = await response.json();
-            return res.send({
-                code: 0,
-                msg: 'Success',
-                data: data
-            });
-        } catch (error) {
-            console.error('Error:', error);
-            return res.status(500).send({
-                code: -1,
-                msg: 'Error fetching data',
-                error: error.message
-            });
-        }
+         try {
+        const response = await axios.get(`https://www.17fpv.com`, {
+            headers: {
+            'Authorization': 'Bearer jina_4631fe20e0fc408aafba69e4c1ddbb5fNzIjfDfnxo1y6sOgO8d3mbXKGo3l'
+            },
+            proxy: {
+            protocol: 'http',
+            host: 'p.webshare.io',
+            port: 80,
+            auth: {
+                username: 'umwhniat-rotate',
+                password: 'eudczfs5mkzt'
+            }
+            }
+        });
+        res.send({
+            code: 0,
+            msg: 'Success',
+            data: response.data
+        });
+    } catch (error) {
+        console.error(`Error: ${error}`);
+        res.status(500).send(`Error: ${error.message}`);
+    }
 })
 
 
