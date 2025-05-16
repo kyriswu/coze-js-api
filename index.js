@@ -538,48 +538,6 @@ app.post('/jina_reader', async (req, res) => {
     }
 })
 
-app.post('/jina_reader_test', async (req, res) => {
-    
-    let { url } = req.body;
-
-    if (!url) {
-        return res.status(400).send('Invalid input: "url" is required');
-    }
-    const https = require('https');
-
-    const options = {
-        hostname: 'r.jina.ai',
-        path: '/' + url,
-        method: 'GET',
-        headers: {
-            'Authorization': 'Bearer jina_244ca6436ced4fbba4fc6761a933abc77H_rA5y7mcR6jlg1d9Dv07Qvv1rY',
-            'X-Engine': 'browser',
-            'X-Timeout': '60'
-        },
-        agent: new https.Agent({
-            host: 'p.webshare.io',
-            port: 80,
-            auth: 'umwhniat-rotate:eudczfs5mkzt'
-        })
-    };
-
-console.log(options);
-
-const _req = https.request(options, _res => {
-    let data = '';
-    _res.on('data', chunk => {
-        data += chunk;
-    });
-
-    _res.on('end', () => {
-        res.send(data);
-    });
-});
-
-_req.end();
-
-})
-
 
 function htmlToQuerySelector(htmlString) {
     // 为了保证解析正确，我们将传入的 html 包裹在 <body> 中
