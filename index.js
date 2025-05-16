@@ -513,7 +513,7 @@ app.post('/jina_reader', async (req, res) => {
     try {
         const response = await axios.get(`https://r.jina.ai/${url}`, {
             headers: {
-            'Authorization': 'Bearer jina_4631fe20e0fc408aafba69e4c1ddbb5fNzIjfDfnxo1y6sOgO8d3mbXKGo3l',
+            'Authorization': 'Bearer jina_244ca6436ced4fbba4fc6761a933abc77H_rA5y7mcR6jlg1d9Dv07Qvv1rY',
             'X-Timeout': '60',
             'X-Base': 'final'
             },
@@ -536,6 +536,42 @@ app.post('/jina_reader', async (req, res) => {
         console.error(`Error: ${error.message}`);
         res.status(500).send(`Error: ${error.message}`);
     }
+})
+
+app.post('/jina_reader_test', async (req, res) => {
+    
+    let { url } = req.body;
+
+    if (!url) {
+        return res.status(400).send('Invalid input: "url" is required');
+    }
+    const https = require('https');
+
+const options = {
+  hostname: 'r.jina.ai',
+  path: '/https://www.toutiao.com/article/7503097983110709798/?log_from=1a9eed0aa90f68_1747384154034',
+  method: 'GET',
+  headers: {
+    'Authorization': 'Bearer jina_244ca6436ced4fbba4fc6761a933abc77H_rA5y7mcR6jlg1d9Dv07Qvv1rY',
+    'X-Engine': 'browser',
+    'X-Timeout': '60'
+  }
+};
+
+const _req = https.request(options, _res => {
+  let data = '';
+  _res.on('data', chunk => {
+    data += chunk;
+  });
+
+  _res.on('end', () => {
+    console.log(data);
+    return res.send(data)
+  });
+});
+
+_req.end();
+
 })
 
 
