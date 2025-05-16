@@ -636,16 +636,26 @@ function toBase64(str) {
 
 app.post('/parse_html', async (req, res) => {
     let { url, selector, xpath, api_key, action } = req.body;
-    if (action) {
-        return await zyteExtract(req, res);
-    }
-    const api_id = "api_413Kmmitqy3qaDo4";
     if (!url) {
         return res.status(400).send('url is required');
     }
     if (!selector && !xpath) {
         return res.status(400).send('parser or xpath is required');
     }
+    //判断是否是合法的url   
+    try {
+        new URL(url); // Validate URL format
+    } catch (error) {
+        return res.send({
+            code: -1,
+            msg: 'url格式不正确，请检查后重试！'
+        });
+    }
+
+    if (action) {
+        return await zyteExtract(req, res);
+    }
+    const api_id = "api_413Kmmitqy3qaDo4";
 
     //免费版的key
     const free_key = environment === 'online' ? "html_parser_" + req.headers['user-identity'] : 'test';
@@ -686,7 +696,7 @@ app.post('/parse_html', async (req, res) => {
         let scrapingAntUrl = `https://api.scrapingant.com/v2/general?url=${encodedUrl}&x-api-key=${x_api_key}`;
         const response = await axios.get(scrapingAntUrl);
         HtmlContent = response.data;
-        
+
         const dom = new JSDOM(HtmlContent);
         const { document, window } = dom.window;
 
@@ -708,6 +718,7 @@ app.post('/parse_html', async (req, res) => {
         } else if (selector) {
             const domSelector = selector;
             const parserSelector = htmlToQuerySelector(domSelector);
+            console.log(parserSelector)
             result_list = Array.from(document.querySelectorAll(parserSelector)).map(element => {
                 return { htmlContent: element.outerHTML };
             }); 
@@ -731,6 +742,14 @@ app.post('/parse_html', async (req, res) => {
     } catch (error) {
         console.error(`Error: ${error}`);
         console.error(`Stack trace: ${error.stack}`);
+        if (error.response) {
+            console.error(`Response status: ${error.response.status}`);
+            console.error(`Response data: ${JSON.stringify(error.response.data)}`);
+            return res.send({
+                code: -1,
+                msg: "请求失败，请检查url和参数是否正确！",
+            })
+        }
         res.status(500).send(`Error: ${error.message}`);
     }
 })
