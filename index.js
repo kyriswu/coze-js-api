@@ -546,7 +546,7 @@ app.post('/jina_reader_test', async (req, res) => {
     if (!url) {
         return res.status(400).send('Invalid input: "url" is required');
     }
-    // const https = require('https');
+    const https = require('https');
 
     const options = {
         hostname: 'r.jina.ai',
@@ -557,11 +557,11 @@ app.post('/jina_reader_test', async (req, res) => {
             'X-Engine': 'browser',
             'X-Timeout': '60'
         },
-        // agent: new https.Agent({
-        //     host: 'p.webshare.io',
-        //     port: 80,
-        //     auth: 'umwhniat-rotate:eudczfs5mkzt'
-        // })
+        agent: new https.Agent({
+            host: 'p.webshare.io',
+            port: 80,
+            auth: 'umwhniat-rotate:eudczfs5mkzt'
+        })
     };
 
     const _req = https.request(options, _res => {
