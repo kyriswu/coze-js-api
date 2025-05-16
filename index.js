@@ -575,6 +575,10 @@ app.post('/jina_reader_test', async (req, res) => {
         });
     });
 
+    _req.on('error', (e) => {
+        console.error(`Problem with request: ${e.message}`);
+    });
+
     _req.end();
 
 })
