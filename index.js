@@ -519,15 +519,15 @@ app.post('/jina_reader', async (req, res) => {
             'X-Base': 'final',
             'X-Engine': 'broswer',
             },
-            proxy: {
-                protocol: 'http',
-                host: 'p.webshare.io',
-                port: 80,
-                auth: {
-                    username: 'umwhniat-rotate',
-                    password: 'eudczfs5mkzt'
-                }
-            }
+            // proxy: {
+            //     protocol: 'http',
+            //     host: 'p.webshare.io',
+            //     port: 80,
+            //     auth: {
+            //         username: 'umwhniat-rotate',
+            //         password: 'eudczfs5mkzt'
+            //     }
+            // }
         });
         res.send({
             code: 0,
