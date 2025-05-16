@@ -567,7 +567,7 @@ const _req = https.request(options, _res => {
   });
 
   _res.on('end', () => {
-    return res.send(data)
+    res.send(data)
   });
 });
 
