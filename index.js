@@ -503,43 +503,43 @@ async function canUseHtmlParse(key) {
 //     }
 // })
 
-app.post('/jina_reader', async (req, res) => {
+// app.post('/jina_reader', async (req, res) => {
     
-    let { url } = req.body;
+//     let { url } = req.body;
 
-    if (!url) {
-        return res.status(400).send('Invalid input: "url" is required');
-    }
-    try {
-        const response = await axios.get(`https://r.jina.ai/${url}`, {
-            headers: {
-            'Authorization': 'Bearer jina_244ca6436ced4fbba4fc6761a933abc77H_rA5y7mcR6jlg1d9Dv07Qvv1rY',
-            'X-Timeout': '60',
-            'X-Base': 'final'
-            },
-            proxy: {
-                protocol: 'http',
-                host: 'p.webshare.io',
-                port: 80,
-                auth: {
-                    username: 'umwhniat-rotate',
-                    password: 'eudczfs5mkzt'
-                }
-            }
-        });
-        res.send({
-            code: 0,
-            msg: 'Success',
-            data: response.data
-        });
-    } catch (error) {
-        console.error(`Error: ${error.message}`);
-        res.status(500).send(`Error: ${error.message}`);
-    }
-})
+//     if (!url) {
+//         return res.status(400).send('Invalid input: "url" is required');
+//     }
+//     try {
+//         const response = await axios.get(`https://r.jina.ai/${url}`, {
+//             headers: {
+//             'Authorization': 'Bearer jina_244ca6436ced4fbba4fc6761a933abc77H_rA5y7mcR6jlg1d9Dv07Qvv1rY',
+//             'X-Timeout': '60',
+//             'X-Base': 'final'
+//             },
+//             proxy: {
+//                 protocol: 'http',
+//                 host: 'p.webshare.io',
+//                 port: 80,
+//                 auth: {
+//                     username: 'umwhniat-rotate',
+//                     password: 'eudczfs5mkzt'
+//                 }
+//             }
+//         });
+//         res.send({
+//             code: 0,
+//             msg: 'Success',
+//             data: response.data
+//         });
+//     } catch (error) {
+//         console.error(`Error: ${error.message}`);
+//         res.status(500).send(`Error: ${error.message}`);
+//     }
+// })
 
 
-app.post('/jina_reader_test', async (req, res) => {
+app.post('/jina_reader', async (req, res) => {
 
     let { url } = req.body;
 
@@ -573,12 +573,20 @@ app.post('/jina_reader_test', async (req, res) => {
         });
 
         _res.on('end', () => {
-            res.send(data);
+            return res.send({
+                code: 0,
+                msg: 'Success',
+                data: data
+            });
         });
     });
 
     _req.on('error', (e) => {
         console.error(`Problem with request: ${e.message}`);
+        return res.send({
+            code: -1,
+            msg: `Error: ${e.message}`
+        })
     });
 
     _req.end();
