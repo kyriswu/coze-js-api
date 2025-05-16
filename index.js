@@ -549,7 +549,7 @@ app.post('/jina_reader_test', async (req, res) => {
 
 const options = {
   hostname: 'r.jina.ai',
-  path: '/https://www.toutiao.com/article/7503097983110709798/?log_from=1a9eed0aa90f68_1747384154034',
+  path: '/'+url,
   method: 'GET',
   headers: {
     'Authorization': 'Bearer jina_244ca6436ced4fbba4fc6761a933abc77H_rA5y7mcR6jlg1d9Dv07Qvv1rY',
@@ -558,6 +558,8 @@ const options = {
   }
 };
 
+console.log(options);
+
 const _req = https.request(options, _res => {
   let data = '';
   _res.on('data', chunk => {
@@ -565,7 +567,6 @@ const _req = https.request(options, _res => {
   });
 
   _res.on('end', () => {
-    console.log(data);
     return res.send(data)
   });
 });
