@@ -1069,6 +1069,19 @@ const { timeout } = req.body;
     });
 })
 
+//zyte在元素中输入文本。
+app.post('/web/inputText', async (req, res) => {
+    const { type, value, text } = req.body;
+    if (!type || !value || !text) {
+        return res.status(400).send('Invalid input: "type" and "value" and "text" are required');
+    }
+    return res.send({
+        code: 0,
+        msg: 'Success',
+        data: zyte.gen_inputText_code(type, value, text)
+    });
+});
+
 app.post('/bilibili/subtitle', th_bilibili.fetch_one_video_v2);
 
 app.listen(port, () => {

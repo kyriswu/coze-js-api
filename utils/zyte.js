@@ -54,6 +54,16 @@ const zyte = {
             "timeout": timeout
         }
     },
+    gen_inputText_code: function (type, value, text) {
+        return {
+            "action": "type",
+            "selector": {
+                "type": type,
+                "value": value,
+            },
+            "text": text
+        }
+    }
 };
 
 module.exports = zyte;
