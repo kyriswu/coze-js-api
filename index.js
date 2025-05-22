@@ -679,13 +679,11 @@ app.post('/parse_html', async (req, res) => {
     }else{
         //免费版
         const canParse = await canUseHtmlParse(free_key);
-        if (req.headers['user-identity'] !== '9ae1b679c3c2c89fe4998ab523533d33'){//过滤掉我自己
-            if (!canParse) {
-                return res.send({
-                    code: -1,
-                    msg: '免费版每天限量5次，付费可以解锁更多次数，请联系作者！【B站:小吴爱折腾】'
-                }); 
-            }
+        if (!canParse) {
+            return res.send({
+                code: -1,
+                msg: '免费版每天限量5次，付费可以解锁更多次数，请联系作者！【B站:小吴爱折腾】'
+            }); 
         }
     }
 
