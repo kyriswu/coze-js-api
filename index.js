@@ -658,6 +658,7 @@ app.post('/parse_html', async (req, res) => {
     }
     const api_id = "api_413Kmmitqy3qaDo4";
 
+    console.log(req.headers);
     //免费版的key
     const free_key = environment === 'online' ? "html_parser_" + req.headers['user-identity'] : 'test';
     if(api_key){
@@ -1083,7 +1084,30 @@ app.post('/web/inputText', async (req, res) => {
 });
 
 app.post('/bilibili/subtitle', th_bilibili.fetch_one_video_v2);
-
+app.post('/redis/get', async (req, res) => {
+    const { key } = req.body;
+    if (!key) {
+        return res.status(400).send('Invalid input: "key" is required');
+    }
+    const value = await redis.get(key);
+    return res.send({
+        code: 0,
+        msg: 'Success',
+        data: value
+    });
+})
+app.post('/redis/set', async (req, res) => {
+    const { key, value } = req.body;
+    if (!key || !value) {
+        return res.status(400).send('Invalid input: "key" and "value" is required');
+    }
+    await redis.set(key, value, 'EX', 60*60*24);
+    return res.send({
+        code: 0,
+        msg: 'Success',
+        data: value
+    });
+})
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
 })
