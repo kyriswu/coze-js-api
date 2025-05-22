@@ -259,29 +259,6 @@ app.post('/google_search', async (req, res) => {
     }
 })
 
-app.post('/google_search_image', async (req, res) => {
-    let { q, cx } = req.body;
-
-    if (!q) {
-        return res.status(400).send('Invalid input: "q" and "cx" are required');
-    }
-
-    if (!cx) {
-        cx = "93d449f1c4ff047bc"    // 默认使用我的自定义搜索引擎
-    }
-
-    const apiKey = 'AIzaSyAw5rOQ8yF5Hkd8oTzd0-jQSTMMTGgC51E';
-    const searchUrl = `https://customsearch.googleapis.com/customsearch/v1?q=${encodeURIComponent(q)}&cx=${cx}&key=${apiKey}&safe=active&searchType=image`;
-
-    try {
-        const response = await axios.get(searchUrl);
-        res.send(response.data);
-    } catch (error) {
-        console.error(`Error performing Google search: ${error.message}`);
-        res.status(500).send(`Error performing Google search: ${error.message}`);
-    }
-})
-
 // 从维基百科搜索条目
 app.post('/zh_wikipedia/search_item', async (req, res) => {
     const { item } = req.body;
@@ -831,7 +808,7 @@ app.post('/google/search/web', async (req, res) => {
     }
 
     //免费版的key
-    const free_key = environment === 'online' ? req.headers['user-identity'] : 'test';
+    const free_key = environment === 'online' ? 'google_'+req.headers['user-identity'] : 'test';
     if (api_key) {
         const { keyId, valid, remaining, code } = await unkey.verifyKey(api_id, api_key, 0);
         if (!valid) {
@@ -1082,7 +1059,8 @@ app.post('/web/inputText', async (req, res) => {
 });
 
 app.post('/bilibili/subtitle', th_bilibili.fetch_one_video_v2);
-app.post('/redis/get', async (req, res) => {
+
+app.post('/redis/get_string', async (req, res) => {
     const { key } = req.body;
     if (!key) {
         return res.status(400).send('Invalid input: "key" is required');
@@ -1094,7 +1072,7 @@ app.post('/redis/get', async (req, res) => {
         data: value
     });
 })
-app.post('/redis/set', async (req, res) => {
+app.post('/redis/set_string', async (req, res) => {
     const { key, value } = req.body;
     if (!key || !value) {
         return res.status(400).send('Invalid input: "key" and "value" is required');
@@ -1104,6 +1082,18 @@ app.post('/redis/set', async (req, res) => {
         code: 0,
         msg: 'Success',
         data: value
+    });
+})
+app.post('/redis/keys', async (req, res) => {
+    const { pattern } = req.body;
+    if (!pattern) {
+        return res.status(400).send('Invalid input: "pattern" is required');
+    }
+    const keys = await redis.keys(pattern);
+    return res.send({
+        code: 0,
+        msg: 'Success',
+        data: keys
     });
 })
 app.listen(port, () => {
