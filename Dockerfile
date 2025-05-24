@@ -1,16 +1,17 @@
-# 基础镜像
 FROM node:22.10.0
 
-# 安装 Python、pip 和 pdf2image 所需的依赖（基于 Debian）
 RUN apt-get update && \
-    apt-get install -y \
-        python3 \
-        python3-pip \
-        poppler-utils \
-        && apt-get clean && rm -rf /var/lib/apt/lists/*
+    apt-get install -y python3 python3-venv poppler-utils && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# 安装 Python 包
-RUN pip3 install pdf2image
+# 创建虚拟环境
+RUN python3 -m venv /opt/venv
 
-# 设置默认工作目录
+# 激活虚拟环境并用它的 pip 安装 pdf2image
+RUN /opt/venv/bin/pip install --upgrade pip && \
+    /opt/venv/bin/pip install pdf2image
+
 WORKDIR /app
+
+# 将虚拟环境路径加入环境变量，方便后续使用
+ENV PATH="/opt/venv/bin:$PATH"
