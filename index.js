@@ -1,5 +1,7 @@
 const express = require('express')
 const axios = require('axios')
+const fs = require('fs');
+const { execFile } = require('child_process');
 const cheerio = require('cheerio')
 const { JSDOM } = require('jsdom');
 const TurndownService = require('@joplin/turndown');
@@ -1053,6 +1055,68 @@ app.post('/redis/keys', async (req, res) => {
         data: keys
     });
 })
+
+
+async function downloadPdf(url, path) {
+  const res = await axios({ url, responseType: 'stream' });
+
+  const contentType = res.headers['content-type'];
+  if (!contentType || !contentType.includes('application/pdf')) {
+    throw new Error(`❌ 不是 PDF 文件，Content-Type 是: ${contentType}`);
+  }
+
+  // 确认是 PDF，再保存
+  const writer = fs.createWriteStream(path);
+  res.data.pipe(writer);
+
+  return new Promise((resolve, reject) => {
+    writer.on('finish', () => resolve('✅ 下载成功: ' + path));
+    writer.on('error', reject);
+  });
+}
+
+app.post('/pdf2img', async (req, res) => {
+    const { url } = req.body;
+    if (!url) {
+        return res.status(400).send('Invalid input: "url" is required');
+    }
+    const randomString = [...Array(16)].map(() => Math.random().toString(36)[2]).join('');
+    await downloadPdf(url, `./images/${randomString}.pdf`).then(() => {
+        console.log('PDF downloaded successfully');
+
+        const python = 'python';
+        const script = path.join(__dirname, 'pdf2images.py');
+
+        execFile(python, [script, `./images/${randomString}.pdf`, randomString], (error, stdout, stderr) => {
+            if (error) {
+                console.error(stderr);
+                return res.send({
+                    code: -1,
+                    msg: 'PDF文件转换失败'+stderr,
+                })
+            }
+
+            const outputFiles = stdout.trim().split('\n');
+
+            return res.send({
+                code: 0,
+                data: outputFiles.map(path => req.protocol + '://' + req.get('host') + '/' + path)
+            });
+        });
+
+    }).catch((error) => {   
+        console.error('Error downloading PDF:', error);
+        return res.send({
+            code: -1,
+            msg: 'PDF文件转换失败，请检查url是否正确！',
+        });
+    })
+})
+
+const path = require('path');
+// 静态资源服务，访问 images 目录下的文件
+app.use('/images', express.static(path.join(__dirname, 'images')));
+
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
 })

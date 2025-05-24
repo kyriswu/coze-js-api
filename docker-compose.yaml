@@ -2,7 +2,8 @@ version: '3.8'
 
 services:
   app:
-    image: node:22.10.0
+    build: .
+    image: my-custom-node-python-app
     working_dir: /app
     volumes:
       - .:/app
