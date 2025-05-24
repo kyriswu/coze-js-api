@@ -212,53 +212,6 @@ app.post('/parseUrlContent', async (req, res) => {
     }
 })
 
-app.post('/google_search', async (req, res) => {
-    let { q, cx } = req.body;
-    console.log(req.body);
-    if (!q) {
-        return res.status(400).send('Invalid input: "q" and "cx" are required');
-    }
-
-    if (!cx) {
-        cx = "93d449f1c4ff047bc"    // 默认使用我的自定义搜索引擎
-    }
-
-    const key = environment === 'online' ? req.headers['user-identity'] : 'test';
-    const canSearch = await canSearchGoogle(key);
-    if (!canSearch) {
-        return res.send({
-            code: 0,
-            msg: '维护成本大，为避免滥用，每天只能使用5次，谢谢理解'
-        }); 
-    }
-
-    const apiKey = 'AIzaSyAw5rOQ8yF5Hkd8oTzd0-jQSTMMTGgC51E';
-    const searchUrl = `https://customsearch.googleapis.com/customsearch/v1?q=${encodeURIComponent(q)}&cx=${cx}&key=${apiKey}&safe=active`;
-
-    try {
-        const response = await axios.get(searchUrl);
-        const items = response.data.items;
-        const result_list = items.map(item => ({
-            title: item.title,
-            snippet: item.snippet,
-            link: item.link
-        }));
-        await redis.incr(key);//每次调用增加一次
-        return res.send({
-            code: 0,
-            msg: 'Success',
-            data: result_list
-        });
-    } catch (error) {
-        console.error(`Error performing Google search: ${error.message}`);
-        return res.send({
-            code: -1,
-            msg: `Error: ${error.message}`,
-            data: []
-        });
-    }
-})
-
 // 从维基百科搜索条目
 app.post('/zh_wikipedia/search_item', async (req, res) => {
     const { item } = req.body;
@@ -339,13 +292,18 @@ app.post('/en_wikipedia/get_item_content', async (req, res) => {
 
 // 判断是否可使用 Google 搜索
 async function canSearchGoogle(key) {
-    if(environment === "online"){
-        const usage = await getUsage(key);
-        if (usage > 5) {
-            return false
-        }
+    const value = await redis.get(key);
+    if (value === null) {
+        // 不存在，创建 key 并设置初始值
+        const now = new Date();
+        const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const secondsSinceMidnight = Math.floor((now - midnight) / 1000);
+        console.log("创建key:", key, "初始值为0，过期时间为", secondsSinceMidnight);
+        await redis.set(key, 0, 'EX', secondsSinceMidnight);
+        return true
+    }else{
+        return false;
     }
-    return true;
 }
 
 // 判断是否可使用 HTML解析 功能
@@ -828,7 +786,7 @@ app.post('/google/search/web', async (req, res) => {
         if (!canSearch) {
             return res.send({
                 code: 0,
-                msg: '维护成本大，为避免滥用，每天只能使用5次，请联系作者！【B站:小吴爱折腾】'
+                msg: '维护成本大，每天免费使用1次，付费购买API KEY可解锁更多次数，请联系作者！【B站:小吴爱折腾】'
             }); 
         }
     }
@@ -840,8 +798,7 @@ app.post('/google/search/web', async (req, res) => {
             const { remaining } = await unkey.verifyKey(api_id, api_key, 1);
             msg = `API Key 剩余调用次数：${remaining}`;
         }else{
-            await redis.incr(free_key);//每次调用增加一次
-            msg = `今日免费使用次数：${5 - await getUsage(free_key)}`;
+            msg = `今日免费使用次数用完，付费购买API KEY可解锁更多次数，请联系作者！【B站:小吴爱折腾】`;
         }
         return res.send({
             code: 0,
