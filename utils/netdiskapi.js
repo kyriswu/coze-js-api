@@ -39,7 +39,13 @@ const netdiskapi = {
             // 从原始数据中截取当前页的数据
             let resultList = JSON.parse(data.list);
             resultList = resultList.slice(startIndex, endIndex);
-            return res.send(resultList);
+            return res.send({
+                code: 0,
+                msg: 'Success',
+                data: {
+                    list: resultList
+                }
+            });
         } catch (error) {
             console.error('xpan/search error:', error.message);
             return res.send({
