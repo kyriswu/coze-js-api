@@ -37,9 +37,9 @@ const netdiskapi = {
             const endIndex = page * 10; // 不包含此索引
 
             // 从原始数据中截取当前页的数据
-            data = JSON.parse(data);
-            const currentPageData = data.slice(startIndex, endIndex);
-            return res.send(currentPageData);
+            let resultList = JSON.parse(data.list);
+            resultList = resultList.slice(startIndex, endIndex);
+            return res.send(resultList);
         } catch (error) {
             console.error('xpan/search error:', error.message);
             return res.send({
