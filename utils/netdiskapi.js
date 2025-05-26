@@ -1,7 +1,7 @@
 const axios = require('axios');
 const redis = require('./redisClient');
 
-const API_BASE_URL = process.env.NODE_ENV === 'online' ? 'netdisk-api' : 'http://localhost:8080';
+const API_BASE_URL = process.env.NODE_ENV === 'online' ? 'http://netdisk-api' : 'http://localhost:8080';
 
 const netdiskapi = {
     search: async function (req, res) {
