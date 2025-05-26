@@ -86,6 +86,7 @@ const netdiskapi = {
             return res.send(data);
         } catch (error) {
             console.error('xpan/get_access_token error:', error.message);
+            console.error('xpan/get_access_token URL:', API_BASE_URL + "/xpan/access_token?code=" + code);
             return res.send({
                 code: 500,
                 msg: '出现错误，请稍后再试'
