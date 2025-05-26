@@ -22,7 +22,9 @@ const netdiskapi = {
             if (!page || isNaN(page) || page < 1) {
                 page = 1;
             }
-            const response = await axios.get(API_BASE_URL + "/xpan/search" + '?access_token=' + access_token + '&dir=' + encodeURIComponent(dir) + '&key=' + encodeURIComponent(key || '') + '&page=' + page);
+            // 百度网盘API的分页是每500个结果一页，所以需要将page转换为百度网盘API的页码
+            new_page = Math.floor(((page-1)*10) / 500) + 1
+            const response = await axios.get(API_BASE_URL + "/xpan/search" + '?access_token=' + access_token + '&dir=' + encodeURIComponent(dir) + '&key=' + encodeURIComponent(key || '') + '&page=' + new_page);
             const data = response.data;
             if (data.message && data.message.includes('身份验证失败')) {
                 return res.send({
@@ -30,7 +32,13 @@ const netdiskapi = {
                     msg: '身份验证失败，打开链接获取授权码：https://openapi.baidu.com/oauth/2.0/authorize?response_type=code&client_id=W3oykF2rUQgQa62s79DS2xUxKbp2SFFL&redirect_uri=oob&scope=basic,netdisk&device_id=26145626',
                 });
             }
-            return res.send(data);
+            // 计算当前页的起始和结束索引（基于0开始）
+            const startIndex = (page - 1) * 10;
+            const endIndex = page * 10; // 不包含此索引
+
+            // 从原始数据中截取当前页的数据
+            const currentPageData = data.slice(startIndex, endIndex);
+            return res.send(currentPageData);
         } catch (error) {
             console.error('xpan/search error:', error.message);
             return res.send({
