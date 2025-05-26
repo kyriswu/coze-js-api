@@ -196,7 +196,7 @@ const netdiskapi = {
         
     },
     download: async function (req, res) {
-        let {dlink} = req.params
+        let dlink = req.params.dlink
         if (!dlink) {
             return res.send({
                 code: -1,
