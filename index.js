@@ -1114,8 +1114,13 @@ app.post('/pdf2img', async (req, res) => {
 })
 
 const path = require('path');
+const netdiskapi = require('./utils/netdiskapi');
 // 静态资源服务，访问 images 目录下的文件
 app.use('/images', express.static(path.join(__dirname, 'images')));
+
+app.post('/xpan/search', netdiskapi.search)
+app.post('/xpan/get_access_token', netdiskapi.get_access_token)
+app.post('/xpan/get_dlink', netdiskapi.get_dlink)
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
