@@ -27,7 +27,7 @@ const netdiskapi = {
             if (data.message && data.message.includes('身份验证失败')) {
                 return res.send({
                     code: -1,
-                    msg: '身份验证失败，打开链接获取授权码：http://openapi.baidu.com/oauth/2.0/authorize?response_type=code&client_id=W3oykF2rUQgQa62s79DS2xUxKbp2SFFL&redirect_uri=oob&scope=basic,netdisk&device_id=26145626',
+                    msg: '身份验证失败，打开链接获取授权码：https://openapi.baidu.com/oauth/2.0/authorize?response_type=code&client_id=W3oykF2rUQgQa62s79DS2xUxKbp2SFFL&redirect_uri=oob&scope=basic,netdisk&device_id=26145626',
                 });
             }
             return res.send(data);
@@ -80,7 +80,7 @@ const netdiskapi = {
             }else{
                 return res.send({
                     code: -1,
-                    msg: '获取access_token失败，请检查code是否正确，重新打开链接获取授权码：http://openapi.baidu.com/oauth/2.0/authorize?response_type=code&client_id=W3oykF2rUQgQa62s79DS2xUxKbp2SFFL&redirect_uri=oob&scope=basic,netdisk&device_id=26145626',
+                    msg: '获取access_token失败，请检查code是否正确，重新打开链接获取授权码：https://openapi.baidu.com/oauth/2.0/authorize?response_type=code&client_id=W3oykF2rUQgQa62s79DS2xUxKbp2SFFL&redirect_uri=oob&scope=basic,netdisk&device_id=26145626',
                 });
             }
             return res.send(data);
