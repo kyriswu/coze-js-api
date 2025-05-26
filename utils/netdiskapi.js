@@ -120,7 +120,63 @@ const netdiskapi = {
             });
         }
         
+    },
+    refresh_token: async function (req, res) {
+        try {
+            let {refresh_token} = req.body
+            if (!refresh_token) {
+                return res.send({
+                    code: -1,
+                    msg: 'refresh_token不能为空,',
+                })
+            }
+
+            const response = await axios.get(API_BASE_URL + "/xpan/refresh_token?refresh_token=" + refresh_token);
+            const data = response.data;
+            
+            return res.send({
+                code: 0,
+                msg: 'Success',
+                data: data
+            });
+        } catch (error) {
+            console.error('xpan/refresh_token error:', error.message);
+            return res.send({
+                code: 500,
+                msg: '出现错误，请稍后再试'
+            });
+        }
+        
+    },
+    filemetainfo: async function (req, res) {
+        try {
+            let {fsid,access_token} = req.body
+            if(!fsid || !access_token) {
+                return res.send({
+                    code: -1,
+                    msg: 'fsid和access_token不能为空,',
+                })
+            }
+
+            const response = await axios.get(API_BASE_URL + "/xpan/filemetainfo?fsid=" + fsid + '&access_token=' + access_token);
+            const data = response.data.data;
+            
+            return res.send({
+                code: 0,
+                msg: 'Success',
+                data: data
+            });
+        } catch (error) {
+            console.error('xpan/filemetainfo error:', error.message);
+            return res.send({
+                code: 500,
+                msg: '出现错误，请稍后再试'
+            });
+        }
+        
     }
+
+    
 };
 
 module.exports = netdiskapi;

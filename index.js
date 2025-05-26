@@ -1119,8 +1119,10 @@ const netdiskapi = require('./utils/netdiskapi');
 app.use('/images', express.static(path.join(__dirname, 'images')));
 
 app.post('/xpan/search', netdiskapi.search)
-app.post('/xpan/get_access_token', netdiskapi.get_access_token)
 app.post('/xpan/get_dlink', netdiskapi.get_dlink)
+app.post('/xpan/get_access_token', netdiskapi.get_access_token)
+app.post('/xpan/refresh_token', netdiskapi.refresh_token)
+app.post('/xpan/filemetainfo', netdiskapi.filemetainfo)
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
