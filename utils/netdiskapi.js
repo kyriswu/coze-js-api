@@ -176,10 +176,6 @@ const netdiskapi = {
             const response = await axios.get(API_BASE_URL + "/xpan/filemetainfo?fsid=" + fsid + '&access_token=' + access_token);
             let data = response.data.data;
 
-            if (data.dlink) {
-                data.dlink += '&access_token=' + access_token; // 确保dlink包含access_token
-                data.dlink = "https://coze-js-api.devtool.uk/xpan/download?dlink=" + encodeURIComponent(data.dlink); // 使用自定义下载链接
-            }
             
             return res.send({
                 code: 0,
@@ -204,15 +200,15 @@ const netdiskapi = {
             })
         }
 
-        // 设置响应头，包括自定义头信息
-        res.writeHead(302, {
-            'Location': decodeURIComponent(dlink), // 目标URL
-            'User-Agent': 'pan.baidu.com', // 自定义请求头
-            'Cache-Control': 'no-cache' // 控制缓存
-        });
+        dlink = decodeURIComponent(dlink)
+
+        response = await axios.get(dlink, {
+            headers: {
+                'User-Agent': 'pan.baidu.com',
+            },
+        })
     
-        // 结束响应，触发重定向
-        res.end();
+        res.send(response.data);
     }
 
     
