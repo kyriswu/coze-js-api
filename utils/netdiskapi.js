@@ -13,6 +13,12 @@ const netdiskapi = {
                     msg: 'access_token和key不能为空',
                 })
             }
+            if (access_token == "121.bcbe33400259259bcdae946eda7653b5.YGWN6RPZjeofUyg5nN5hBtYywlq0v3DA2l1ZfRY.ciHnkQ"){
+                return res.send({
+                    code: -1,
+                    msg: '身份验证失败，重新获取授权码：https://openapi.baidu.com/oauth/2.0/authorize?response_type=code&client_id=W3oykF2rUQgQa62s79DS2xUxKbp2SFFL&redirect_uri=oob&scope=basic,netdisk&device_id=26145626',
+                });
+            }
             if (!dir) {
                 dir = '/';
             }
@@ -65,6 +71,13 @@ const netdiskapi = {
                 })
             }
 
+            if(code == "dffdcb76c07a378ed79c8bcc39a0c3ec"){
+                return res.send({
+                    code: -1,
+                    msg: '获取access_token失败，重新打开链接获取授权码：https://openapi.baidu.com/oauth/2.0/authorize?response_type=code&client_id=W3oykF2rUQgQa62s79DS2xUxKbp2SFFL&redirect_uri=oob&scope=basic,netdisk&device_id=26145626',
+                });
+            }
+
             const token = await redis.get('netdisk_code_' + code)
             if (token) {
                 const data = JSON.parse(token);
@@ -95,7 +108,7 @@ const netdiskapi = {
             }else{
                 return res.send({
                     code: -1,
-                    msg: '获取access_token失败，请检查code是否正确，重新打开链接获取授权码：https://openapi.baidu.com/oauth/2.0/authorize?response_type=code&client_id=W3oykF2rUQgQa62s79DS2xUxKbp2SFFL&redirect_uri=oob&scope=basic,netdisk&device_id=26145626',
+                    msg: '获取access_token失败，重新打开链接获取授权码：https://openapi.baidu.com/oauth/2.0/authorize?response_type=code&client_id=W3oykF2rUQgQa62s79DS2xUxKbp2SFFL&redirect_uri=oob&scope=basic,netdisk&device_id=26145626',
                 });
             }
             return res.send(data);
