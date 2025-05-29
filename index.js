@@ -1115,6 +1115,7 @@ app.post('/pdf2img', async (req, res) => {
 
 const path = require('path');
 const netdiskapi = require('./utils/netdiskapi');
+const faceplusplus = require('./utils/kuangshi');
 // 静态资源服务，访问 images 目录下的文件
 app.use('/images', express.static(path.join(__dirname, 'images')));
 
@@ -1124,6 +1125,8 @@ app.post('/xpan/get_access_token', netdiskapi.get_access_token)
 app.post('/xpan/refresh_token', netdiskapi.refresh_token)
 app.post('/xpan/filemetainfo', netdiskapi.filemetainfo)
 app.get('/xpan/download', netdiskapi.download)
+
+app.post('/faceplusplus/face_detect', faceplusplus.face_detect)
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
