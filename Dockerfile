@@ -1,7 +1,7 @@
 FROM node:22.10.0
 
 RUN apt-get update && \
-    apt-get install -y python3 python3-venv poppler-utils && \
+    apt-get install -y python3 python3-venv poppler-utils ffmpeg && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # 创建虚拟环境
