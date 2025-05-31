@@ -1116,6 +1116,8 @@ app.post('/pdf2img', async (req, res) => {
 const path = require('path');
 const netdiskapi = require('./utils/netdiskapi');
 const faceplusplus = require('./utils/kuangshi');
+const whisperapi = require('./utils/whisperapi');
+const tool = require('./utils/tool');
 // 静态资源服务，访问 images 目录下的文件
 app.use('/images', express.static(path.join(__dirname, 'images')));
 
@@ -1128,6 +1130,49 @@ app.get('/xpan/download', netdiskapi.download)
 
 app.post('/faceplusplus/face_detect', faceplusplus.face_detect)
 
+
+app.post('/extract-video-subtitle', async (req, res) => {
+    const { url } = req.body;
+    if (!url) {
+        return res.status(400).send('Invalid input: "url" is required');
+    }
+    
+
+    try{
+        const download = await tool.download_video(url)
+        if (!download.success) throw new Error(download.error);
+        const convert = await tool.video_to_audio(download.filepath)
+        if (!convert.success) throw new Error(convert.error);
+        // const {is_video,video_size} = await tool.is_video(url)
+        // const { is_audio, audio_size } = await tool.is_audio(url)
+        // if ((is_video && video_size < 1024) || (is_audio && audio_size < 1024)) {
+        //     const stt = await whisperapi.speech_to_text({
+        //         file_url: url,
+        //     })
+        //     if (!stt.success) throw new Error(stt.error);
+
+        //     return res.send({
+        //         code: 0,
+        //         msg: 'Success',
+        //         data: stt
+        //     });
+        // }
+        const stt = await whisperapi.openaiSTT({"file_path":convert.outputFile})
+        if (!stt.success) throw new Error(stt.error);
+        return res.send({
+            code: 0,
+            msg: 'Success',
+            data: stt
+        });
+        
+    }catch(error){
+        console.error(error)
+        return res.send({
+            code: -1,
+            msg: error.message
+        })
+    }
+})
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
 })
