@@ -51,7 +51,8 @@ const tool = {
         return result;
     },
     getMediaDuration: async function(file){
-        const command = `ffmpeg.ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 ${file}`;
+        // const command = `ffmpeg.ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 ${file}`;
+        const command = `ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 ${file}`;
         
         try {
             // Execute ffmpeg command
