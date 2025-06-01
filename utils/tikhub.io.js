@@ -22,6 +22,34 @@ const th_youtube = {
 };
 
 const th_bilibili = {
+    get_aid_cid: async function(url) {
+        return new Promise(async (resolve, reject) => {
+            // 1. 从链接中提取出 BV 号
+            const matched = url.match(/\/video\/(BV[0-9A-Za-z]+)/i);
+            if (!matched) {
+                reject({success: false,aid:null,cid:null,error:"不是B站链接"})
+            }
+            const bvid = matched[1];
+
+            // 2. 调用 B 站接口获取信息
+            const apiUrl = `https://api.bilibili.com/x/web-interface/view?bvid=${bvid}`;
+            const response = await fetch(apiUrl, { 
+                headers: { 'Accept': 'application/json' }
+            });
+            // if (!response.ok) {
+            //     throw new Error(`接口请求失败：${response.status}`);
+            // }
+            const json = await response.json();
+            console.log(json.data)
+            if (json.code != 0) {
+                reject({success: false,aid:null,cid:null,error:"获取aid,cid失败"})
+            }
+            // 3. 解析 aid 和 cid
+            const aid = json.data.aid;
+            const cid = json.data.pages[0].cid;
+            resolve({success:true,aid:aid,cid:cid,error:null})
+        })
+    },
     fetch_one_video_v2: async function (req, res) {
         var api_key = req.body.api_key
         var url = req.body.url
@@ -120,6 +148,27 @@ const th_bilibili = {
             return res.send({msg: "服务器错误，请重试"})
         }
     },
+
+    get_video_link: async function (url) {
+        const {success,aid,cid,error} = await this.get_aid_cid(url)
+        console.log(success,aid,cid,error)
+        if (!success) throw new Error(error.error)
+         var config = {
+            method: 'get',
+            url: `https://api.tikhub.io/api/v1/bilibili/web/fetch_one_video_v2?a_id=${aid}&c_id=${cid}`,
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + tikhub_api_token
+            }
+        };
+        try {
+            const response = await axios(config)
+            console.log(response.data)
+        }catch (error) {
+            console.log(error)
+            return res.send({msg: "服务器错误，请重试"})
+        }
+    }
 }
 
 module.exports = {

@@ -17,7 +17,9 @@ const whisperapi = {
             file_url = null,
             language = 'chinese',
             max_speakers = null,
-            min_speakers = null
+            min_speakers = null,
+            speaker_labels = false,
+            response_format = 'text'
         } = options;
 
         return new Promise(async (resolve, reject) => {
@@ -28,8 +30,8 @@ const whisperapi = {
                     }),
                     model: "whisper-1",
                     language: language,
-                    speaker_labels: true,
-                    response_format: 'verbose_json',
+                    speaker_labels: speaker_labels,
+                    response_format: response_format,
                     ...(min_speakers && { min_speakers }),
                     ...(max_speakers && { max_speakers })
                 });

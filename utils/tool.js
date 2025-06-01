@@ -3,11 +3,72 @@ const fs = require('fs');
 const path = require('path');
 const { exec } = require('child_process');
 const util = require('util');
+const { response } = require('express');
+const redis = require('./redisClient');
+const crypto = require('crypto');
+const whisperapi = require('./whisperapi');
 
 // Convert exec to Promise-based function
 const execPromise = util.promisify(exec);
 
 const tool = {
+      /**
+     * 用于将字符串转换为数字位索引
+     * @param {string} str - 需要转换的秒数
+     * @returns {string} 格式化后的时间字符串
+     */
+    hashCode: function(str) {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+            const chr = str.charCodeAt(i);
+            hash = ((hash << 5) - hash) + chr;
+            hash |= 0; // 转为32位整数
+        }
+        return Math.abs(hash);
+    },
+    /**
+     * 将秒数转换为时分秒格式
+     * @param {number} seconds - 需要转换的秒数
+     * @returns {string} 格式化后的时间字符串
+     */
+    formatDuration: function(seconds) {
+        const hours = Math.floor(seconds / 3600);
+        const minutes = Math.floor((seconds % 3600) / 60);
+        const secs = Math.floor(seconds % 60);
+        
+        let result = '';
+        
+        if (hours > 0) {
+            result += `${hours}时`;
+        }
+        if (minutes > 0) {
+            result += `${minutes}分`;
+        }
+        if (secs > 0 || result === '') {
+            result += `${secs}秒`;
+        }
+        
+        return result;
+    },
+    getMediaDuration: async function(file){
+        const command = `ffmpeg.ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 ${file}`;
+        
+        try {
+            // Execute ffmpeg command
+            const { stdout, stderr } = await execPromise(command);
+            console.log("stdout",stdout)
+            console.log("stderr",stderr)
+            return {success:true,duration:parseFloat(stdout.trim())};
+        } catch (error) {
+            return {success:false, error: error.message};
+        }
+    },
+    /**
+     * @param {string} text - 需要计算 MD5 的文本
+     */
+    md5: function(text) {
+        return crypto.createHash('md5').update(text).digest('hex');
+    },
     // Add helper function to convert bytes to MB
     bytesToMB: function(bytes) {
         return (bytes / (1024 * 1024)).toFixed(2);
@@ -65,7 +126,7 @@ const tool = {
                         success: true,
                         filepath: filepath,
                         filename: filename,
-                        size: totalSize
+                        size: this.bytesToMB(totalSize)
                     });
                 });
 
@@ -198,6 +259,166 @@ const tool = {
                 extension: null,
                 error: error.message
             };
+        }
+    },
+    // deal_douyin_url: async function (url) {
+    //     const urlObj = new URL(url);
+    //     if (urlObj.hostname === 'v.douyin.com') {
+    //         const response = await axios({
+    //             method: 'get',
+    //             url: url,
+    //             headers: {
+    //                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36 Edg/136.0.0.0'
+    //             }
+    //         });
+            
+    //     }
+    // },
+    remove_query_param: function (url) {
+        const urlObj = new URL(url);
+        return urlObj.origin + urlObj.pathname;
+    },
+    extract_url: function (text) {
+        const urlRegex = /(https?:\/\/[^\s]+)/g;
+        const matches = text.match(urlRegex);
+        return matches ? matches[0] : null;
+    },
+    get_video_url: async function (input_text) {
+        try{
+            var data = ""
+            const key = this.md5(input_text)
+            const value = await redis.get(key)
+
+            if (value === null){
+                const response = await axios.post(
+                    'https://api.xiazaitool.com/api/parseVideoUrl',
+                    {
+                        url:input_text,
+                        token:'ca30558557e04da5ad5157f67bf1e10d'
+                    }
+                );
+                data = response.data
+                console.log("查询：", data)
+                await redis.set(key, JSON.stringify(data), 'NX', 'EX', 3600 * 3);
+            }else{
+                data = JSON.parse(value)
+                console.log("缓存：", data)
+            }
+            
+            return {
+                success:true,
+                data: data
+            }
+        }catch(error){
+            console.log(error)
+            return {
+                success:false,
+                data: response.data
+            }
+        }
+    },
+    /**
+     * 
+     * @param string video_url 视频链接
+     * @param string download_link 下载直链
+     * @param string task_id 任务ID
+     * @param number left_time 剩余时间，单位(秒)
+     * @param string api_key 付费版用户密钥
+     * @param string free_key 免费版用户密钥
+     */
+    video_to_subtitle: async function(video_url, download_link, task_id, left_time, api_key, free_key,language){
+
+        var download //视频下载信息
+        var convert //音频转换信息
+        var stt //asr
+        var duration //时长
+        try{
+            var value = await redis.get(video_url)
+
+            if (value === null) {
+                console.log("开始处理任务",{
+                    video_url:video_url,
+                    download_link:download_link
+                })
+                 download = await this.download_video(download_link)
+                if (!download.success) throw new Error(download.error);
+                 duration = await this.getMediaDuration(download.filepath)
+                if (!duration.success) throw new Error(duration.error)
+                if (duration.duration > left_time) throw new Error("任务失败！本视频时长"+ this.formatDuration(duration.duration) +"，账户剩余时长"+this.formatDuration(left_time)+"，需要充值额度！请联系作者购买包月套餐（15元180分钟，30元450分钟，50元1000分钟）【vx：xiaowu_azt】")
+                 convert = await this.video_to_audio(download.filepath)
+                if (!convert.success) throw new Error(convert.error);
+
+                 stt = await whisperapi.openaiSTT({"file_path":convert.outputFile,speaker_labels:true,language:language})
+                if (!stt.success) throw new Error(stt.error);
+
+                value = {
+                    transcription: stt.transcription,
+                    duration: duration.duration
+                }
+
+                //字幕信息保存90天
+                await redis.set(video_url, JSON.stringify(value), 'EX', 3600 * 24 * 90);
+                
+                //日志
+                console.log("任务处理成功",{
+                    video:download,
+                    audio:convert,
+                    stt:stt,
+                    duration:this.formatDuration(duration.duration)
+                })
+                
+            }else{
+                value = JSON.parse(value)
+            }
+
+            const reDownloadKey = free_key+api_key+video_url
+            const exist = await redis.exists(reDownloadKey);
+            if (!exist){
+                //更新套餐额度:剩余时间-当前视频时间
+                left_time = Math.floor(left_time-value.duration)
+                this.update_asr_key(api_key, free_key, left_time)
+                redis.set(reDownloadKey,1,'EX', 3600*24)//一天之内重复下载不用扣费
+            }
+
+            const result = {
+                success: true,
+                transcription: value.transcription,
+                duration: value.duration,
+                message: "账户剩余时间：" + this.formatDuration(left_time)
+            }
+            //异步任务返回
+            await redis.set("task_"+task_id, JSON.stringify(result), 'EX', 3600 * 72);
+            //同步任务返回
+            return result
+
+        }catch(err){
+            console.log("获取字幕失败：",err.message,{
+                video:download,
+                audio:convert,
+                stt:stt,
+                duration:this.formatDuration(duration.duration)
+            })
+            if (download && download.filepath) fs.promises.unlink(download.filepath).catch(()=>{})
+            if (convert && convert.outputFile) fs.promises.unlink(convert.outputFile).catch(()=>{})
+            
+            //更新任务状态信息
+            await redis.set("task_"+task_id, err.message, 'EX', 3600 * 72);
+            return {
+                success: false,
+                error: err.message //json格式
+            }
+        }
+        
+    },
+    /**
+     * 更新语音转录的使用限制
+     * @param string api_key 付费用户密钥
+     * @param string free_key 免费用户密钥
+     * @param number left_time 剩余解析时长
+     */
+    update_asr_key: async function (api_key, free_key, left_time) {
+        if (free_key) {
+            await redis.set(free_key, left_time);
         }
     }
 };

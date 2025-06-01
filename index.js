@@ -12,6 +12,7 @@ const unkey = require('./utils/unkey');
 const app = express()
 const port = 3000
 const environment = process.env.NODE_ENV || 'development';
+const crypto = require('crypto');
 
 app.use(express.json())
 
@@ -312,168 +313,12 @@ async function canSearchGoogle(key) {
 async function canUseHtmlParse(key) {
     if(environment === "online"){
         const usage = await getUsage(key);
-        if (usage > 5) {
+        if (usage > 3) {
             return false
         }
     }
     return true;
 }
-
-// app.post('/google/search/web', async (req, res) => {
-//     console.log(req.headers);
-//     let { q, api_key} = req.body;
-//     const api_id = "api_41vHKzNmXf5xx23f";
-
-//     if (!q) {
-//         return res.status(400).send('Invalid input: "q" is required');
-//     }
-
-//     //免费版的key
-//     const free_key = environment === 'online' ? req.headers['user-identity'] : 'test';
-//     if (api_key) {
-//         const { keyId, valid, remaining, code } = await unkey.verifyKey(api_id, api_key, 0);
-//         if (!valid) {
-//             return res.send({
-//                 code: -1,
-//                 msg: 'API Key 无效或已过期，请检查后重试！'
-//             }); 
-//         }
-//         if (remaining == 0) {
-//             return res.send({
-//                 code: -1,
-//                 msg: 'API Key 使用次数已用完，请联系作者续费！'
-//             }); 
-//         }
-//     }else{
-//         const canSearch = await canSearchGoogle(free_key);
-//         if (!canSearch) {
-//             return res.send({
-//                 code: 0,
-//                 msg: '维护成本大，为避免滥用，每天只能使用5次，请联系作者！【B站:小吴爱折腾】'
-//             }); 
-//         }
-//     }
-    
-
-//     const searchUrl = `https://cse.google.com/cse?cx=93d449f1c4ff047bc#gsc.tab=0&gsc.q=${encodeURIComponent(q)}&gsc.sort=`;
-
-//     try {
-//         const x_api_key = "f528f374df3f44c1b62d005f81f63fab"
-//         const encodedUrl = encodeURIComponent(searchUrl);
-//         const scrapingAntUrl = `https://api.scrapingant.com/v2/general?url=${encodedUrl}&x-api-key=${x_api_key}`;
-//         const response = await axios.get(scrapingAntUrl);
-//         let HtmlContent = response.data;
-//         const dom = new JSDOM(HtmlContent);
-//         const { document } = dom.window;
-//         const result_list = Array.from(document.querySelectorAll('div.gsc-webResult.gsc-result')).map(div => {
-//             const _title = div.querySelector('a.gs-title');
-//             const title = _title ? _title.textContent.trim() : '';
-//             const _image = div.querySelector('img.gs-image');
-//             const image = _image ? _image.src : '';
-//             const _snippet = div.querySelector('div.gs-snippet');
-//             const snippet = _snippet ? _snippet.textContent.trim() : '';
-//             const _url = div.querySelector('a.gs-title');
-//             const url = _url ? _url.href : '';
-//             return { title, image, snippet, url };
-//         }).filter(item => item.title); // 过滤掉 title 为空的;
-
-//         let msg = "";
-//         if (api_key) {
-//             //付费版
-//             const { remaining } = await unkey.verifyKey(api_id, api_key, 1);
-//             msg = `API Key 剩余调用次数：${remaining}`;
-//         }else{
-//             await redis.incr(free_key);//每次调用增加一次
-//             msg = `今日免费使用次数：${5 - await getUsage(free_key)}`;
-//         }
-
-//         return res.send({
-//             code: 0,
-//             msg: msg,
-//             data: result_list
-//         });
-//     } catch (error) {
-//         console.error(`Error performing Google search: ${error.message}`);
-//         res.status(500).send(`Error performing Google search: ${error.message}`);
-//     }
-// })
-
-// app.post('/google/search/image', async (req, res) => {
-//     let { q } = req.body;
-
-//     if (!q) {
-//         return res.status(400).send('Invalid input: "q" is required');
-//     }
-
-//     const searchUrl = `https://cse.google.com/cse?cx=93d449f1c4ff047bc#gsc.tab=1&gsc.q=${q}&gsc.sort=`;
-//     //在页面中执行js代码，获取图片搜索结果（base64encode）
-//     const js_snippet = `ZG9jdW1lbnQucXVlcnlTZWxlY3RvckFsbCgnZGl2LmdzYy1pbWFnZVJlc3VsdC5nc2MtaW1hZ2VSZXN1bHQtcG9wdXAuZ3NjLXJlc3VsdCcpLmZvckVhY2goZWwgPT4gewogICAgY29uc3QgdGFyZ2V0ID0gZWwucXVlcnlTZWxlY3RvcignYSwgaW1nLCBidXR0b24nKSB8fCBlbDsKICAgIGNvbnN0IGV2ZW50ID0gbmV3IE1vdXNlRXZlbnQoJ2NsaWNrJywgeyBidWJibGVzOiB0cnVlLCBjYW5jZWxhYmxlOiB0cnVlIH0pOwogICAgdGFyZ2V0LmRpc3BhdGNoRXZlbnQoZXZlbnQpOwp9KTsK`
-
-//     try {
-//         const x_api_key = "f528f374df3f44c1b62d005f81f63fab"
-//         const encodedUrl = encodeURIComponent(searchUrl);
-//         const scrapingAntUrl = `https://api.scrapingant.com/v2/general?url=${encodedUrl}&x-api-key=${x_api_key}&js_snippet=${js_snippet}`;
-//         const response = await axios.get(scrapingAntUrl);
-//         let HtmlContent = response.data;
-//         const dom = new JSDOM(HtmlContent);
-//         const { document } = dom.window;
-//         const result_list = Array.from(document.querySelectorAll('div.gsc-imageResult.gsc-imageResult-popup.gsc-result')).map(div => {
-//             const _title = div.querySelector('div.gs-image-box a.gs-image img');
-//             const title = _title ? _title.title : '';
-//             const _image = div.querySelector('a.gs-previewLink img');
-//             const image_url = _image ? _image.src : '';
-//             const width = _image.width;
-//             const height = _image.height;
-//             const size = `${width}x${height}`;
-//             const _source = div.querySelector('div.gs-visibleUrl');
-//             const source = _source ? _source.textContent.trim() : '';
-//             return { title, image_url, size, source };
-//         }).filter(item => item.image_url); // 过滤掉 title 为空的;
-//         res.send({
-//             code: 0,
-//             msg: 'Success',
-//             data: result_list
-//         });
-//     } catch (error) {
-//         console.error(`Error performing Google search: ${error.message}`);
-//         res.status(500).send(`Error performing Google search: ${error.message}`);
-//     }
-// })
-
-// app.post('/jina_reader', async (req, res) => {
-    
-//     let { url } = req.body;
-
-//     if (!url) {
-//         return res.status(400).send('Invalid input: "url" is required');
-//     }
-//     try {
-//         const response = await axios.get(`https://r.jina.ai/${url}`, {
-//             headers: {
-//             'Authorization': 'Bearer jina_244ca6436ced4fbba4fc6761a933abc77H_rA5y7mcR6jlg1d9Dv07Qvv1rY',
-//             'X-Timeout': '60',
-//             'X-Base': 'final'
-//             },
-//             proxy: {
-//                 protocol: 'http',
-//                 host: 'p.webshare.io',
-//                 port: 80,
-//                 auth: {
-//                     username: 'umwhniat-rotate',
-//                     password: 'eudczfs5mkzt'
-//                 }
-//             }
-//         });
-//         res.send({
-//             code: 0,
-//             msg: 'Success',
-//             data: response.data
-//         });
-//     } catch (error) {
-//         console.error(`Error: ${error.message}`);
-//         res.status(500).send(`Error: ${error.message}`);
-//     }
-// })
 
 
 app.post('/jina_reader', async (req, res) => {
@@ -619,7 +464,7 @@ app.post('/parse_html', async (req, res) => {
         if (!canParse) {
             return res.send({
                 code: -1,
-                msg: '免费版每天限量5次，付费可以解锁更多次数，请联系作者！【B站:小吴爱折腾】'
+                msg: '免费版每天限量3次，付费可以解锁更多次数，请联系作者！【B站:小吴爱折腾】'
             }); 
         }
     }
@@ -668,7 +513,7 @@ app.post('/parse_html', async (req, res) => {
             msg = `API Key 剩余调用次数：${remaining}`;
         }else{
             await redis.incr(free_key);//每次调用增加一次
-            msg = `今日免费使用次数：${5 - await getUsage(free_key)}`;
+            msg = `今日免费使用次数：${3 - await getUsage(free_key)}`;
         }
 
         return res.send({
@@ -848,7 +693,7 @@ async function zyteExtract(req, res) {
         if (!canParse) {
             return res.send({
                 code: -1,
-                msg: '免费版每天限量5次，付费可以解锁更多次数，请联系作者！【B站:小吴爱折腾】'
+                msg: '免费版每天限量3次，付费可以解锁更多次数，请联系作者！【B站:小吴爱折腾】'
             }); 
         }
     }
@@ -902,7 +747,7 @@ async function zyteExtract(req, res) {
             msg += ` API Key 剩余调用次数：${remaining}`;
         }else{
             await redis.incr(free_key);//每次调用增加一次
-            msg = `今日免费使用次数：${5 - await getUsage(free_key)}`;
+            msg = `今日免费使用次数：${3 - await getUsage(free_key)}`;
         }
 
         return res.send({
@@ -1057,6 +902,16 @@ app.post('/redis/keys', async (req, res) => {
 })
 
 
+app.post('/redis/del', async (req, res) => {
+    const { key } = req.body;
+    await redis.del(key)
+    return res.send({
+        code: 0,
+        msg: 'Success'
+    });
+})
+
+
 async function downloadPdf(url, path) {
   const res = await axios({ url, responseType: 'stream' });
 
@@ -1130,40 +985,73 @@ app.get('/xpan/download', netdiskapi.download)
 
 app.post('/faceplusplus/face_detect', faceplusplus.face_detect)
 
+app.post('/extract-video-subtitle/task-info', async (req, res) => {
+    const { task_id } = req.body;
+    if (!task_id) {
+        return res.status(400).send('Invalid input: "task_id" is required');
+    }
+    try{
+        const task_info = await redis.get("task_"+task_id)
+        return res.send({
+            code:0,
+            data: JSON.parse(task_info)
+        })
+    }catch(error){
+        return res.send({
+            code:-1,
+            msg: error.message
+        })
+    }
+})
 
 app.post('/extract-video-subtitle', async (req, res) => {
-    const { url } = req.body;
-    if (!url) {
-        return res.status(400).send('Invalid input: "url" is required');
+    const { link,language,api_key,is_sync } = req.body;
+    if (!link) {
+        return res.status(400).send('Invalid input: "link" is required');
     }
-    
 
     try{
-        const download = await tool.download_video(url)
-        if (!download.success) throw new Error(download.error);
-        const convert = await tool.video_to_audio(download.filepath)
-        if (!convert.success) throw new Error(convert.error);
-        // const {is_video,video_size} = await tool.is_video(url)
-        // const { is_audio, audio_size } = await tool.is_audio(url)
-        // if ((is_video && video_size < 1024) || (is_audio && audio_size < 1024)) {
-        //     const stt = await whisperapi.speech_to_text({
-        //         file_url: url,
-        //     })
-        //     if (!stt.success) throw new Error(stt.error);
 
-        //     return res.send({
-        //         code: 0,
-        //         msg: 'Success',
-        //         data: stt
-        //     });
-        // }
-        const stt = await whisperapi.openaiSTT({"file_path":convert.outputFile})
-        if (!stt.success) throw new Error(stt.error);
-        return res.send({
-            code: 0,
-            msg: 'Success',
-            data: stt
-        });
+        const free_key = "asr_" + req.headers['user-identity']
+        var left_time = await redis.get(free_key)
+        if (left_time === null) left_time = 600
+        if (left_time <= 0) throw new Error("体验结束~您累计解析视频时长超过10分钟，请联系作者购买包月套餐（15元180分钟，30元450分钟，50元1000分钟）【vx：xiaowu_azt】")
+
+        const task_id = tool.md5(new Date().getTime().toString() + crypto.randomBytes(4).toString('hex'))
+
+        var videoLink = tool.extract_url(link)
+        if (!videoLink) throw new Error("无法解析无效链接")
+        videoLink = tool.remove_query_param(videoLink)
+
+        //查询直链
+        const XiaZaiTool = await tool.get_video_url(videoLink)
+        if (!XiaZaiTool.success) throw new Error(XiaZaiTool.message);
+        const downloadUrl = XiaZaiTool.data.data.videoUrls
+
+        if (is_sync){
+            //同步处理
+            const subtitle = await  tool.video_to_subtitle(videoLink, downloadUrl, task_id, left_time, api_key, free_key, language)
+            if (!subtitle.success) throw new Error(subtitle.error);
+
+            return res.send({
+                code: 0,
+                msg: 'Success',
+                data: subtitle
+            });
+        }else{
+            //异步处理
+            tool.video_to_subtitle(videoLink, downloadUrl, task_id, left_time, api_key, free_key, language)
+            await redis.set("task_"+task_id, JSON.stringify({success:false,msg:"任务正在处理中...",data:link}), 'EX', 3600 * 72);
+            
+            return res.send({
+                code: 0,
+                msg: '请求发送成功，正在后台处理...稍后通过task_id查询任务状态，请妥善保存',
+                data: {
+                    task_id: task_id,
+                    link: link
+                }
+            });
+        }
         
     }catch(error){
         console.error(error)
@@ -1173,6 +1061,7 @@ app.post('/extract-video-subtitle', async (req, res) => {
         })
     }
 })
+
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
 })
