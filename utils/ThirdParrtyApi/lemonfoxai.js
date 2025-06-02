@@ -59,17 +59,20 @@ const lemonfoxai = {
     speech_to_text: async function ({
         file_url,
         response_format = 'text',
-        language = 'chinese',
+        language,
         speaker_labels,
         max_speakers,
         min_speakers,
-        callback_url
+        callback_url,
+        prompt
     } = {}) {
 
         const body = new FormData();
         body.append('file', file_url);
-        body.append('language', language);
         body.append('response_format', response_format);
+        if (language) {
+            body.append('language', language);
+        }
         if (speaker_labels) {
             body.append('speaker_labels', speaker_labels)
         }
@@ -81,6 +84,9 @@ const lemonfoxai = {
         }
         if (callback_url) {
             body.append('callback_url', callback_url)
+        }
+        if (prompt) {
+            body.append('prompt', prompt)
         }
         try {
             const response = await axios.post('https://api.lemonfox.ai/v1/audio/transcriptions', body, {
