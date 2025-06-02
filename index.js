@@ -1122,6 +1122,7 @@ app.post('/whisper/speech-to-text/result', async (req, res) => {
 app.post('/whisper/speech-to-text/callback', async (req, res) => {
     const mediaFile = req.query.mediaFile;//资源文件链接（标识唯一性）
     const response_data = req.body
+    console.log(response_data)
     await redis.set("whisper_callback_"+mediaFile, response_data, "EX", 3600*24*30)
     return res.send({
         "code": 1,
