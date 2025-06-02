@@ -1065,9 +1065,15 @@ app.post('/extract-video-subtitle', async (req, res) => {
 })
 
 app.post('/whisper/speech-to-text', async (req, res) => {
+    const {url,language} = req.body
+    if (!url) {
+         return res.status(400).send('Invalid input: "url" is required');
+    }
+    console.log(req.protocol + '://' + req.get('host') + '/whisper/speech-to-text/callback')
     return res.send(await lemonfoxai.speech_to_text({
-        "file_url":"https://pub-9e75ac5ca5fe440486627acf1f65370c.r2.dev/output.mp3",
-        "callback_url":req.protocol + '://' + req.get('host') + '/whisper/speech-to-text/callback'
+        "file_url":url,
+        "language":language,
+        "callback_url":"https://coze-js-api.devtool.uk/whisper/speech-to-text/callback"
     }))
 })
 
@@ -1079,7 +1085,7 @@ app.post('/whisper/speech-to-text/result', async (req, res) => {
     return res.send(await aimlapi.speech_to_text_result(generation_id))
 })
 
-app.post('/whisper/speech-to-text/callback', async (req, res) => {
+app.all('/whisper/speech-to-text/callback', async (req, res) => {
     console.log(req.body)
     return res.send({
         "code":1
