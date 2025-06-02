@@ -973,6 +973,7 @@ const netdiskapi = require('./utils/netdiskapi');
 const faceplusplus = require('./utils/kuangshi');
 const whisperapi = require('./utils/whisperapi');
 const tool = require('./utils/tool');
+const aimlapi = require('./utils/ThirdParrtyApi/aimlapi');
 // 静态资源服务，访问 images 目录下的文件
 app.use('/images', express.static(path.join(__dirname, 'images')));
 
@@ -1015,7 +1016,7 @@ app.post('/extract-video-subtitle', async (req, res) => {
         const free_key = "asr_" + req.headers['user-identity']
         var left_time = await redis.get(free_key)
         if (left_time === null) left_time = 600
-        if (left_time <= 0) throw new Error("体验结束~您累计解析视频时长超过10分钟，请联系作者购买包月套餐（15元180分钟，30元450分钟，50元1000分钟）【vx：xiaowu_azt】")
+        if (left_time <= 0) throw new Error("免费体验结束~您累计解析视频时长超过10分钟，请联系作者购买包月套餐（15元180分钟，30元450分钟，50元1000分钟）【vx：xiaowu_azt】")
 
         const task_id = tool.md5(new Date().getTime().toString() + crypto.randomBytes(4).toString('hex'))
 
@@ -1036,7 +1037,7 @@ app.post('/extract-video-subtitle', async (req, res) => {
             return res.send({
                 code: 0,
                 msg: 'Success',
-                data: subtitle
+                data: subtitle.transcription
             });
         }else{
             //异步处理
@@ -1061,6 +1062,12 @@ app.post('/extract-video-subtitle', async (req, res) => {
         })
     }
 })
+
+app.post('/aiml/speech-to-text', async (req, res) => {
+    res.send(aimlapi.speech_to_text({"url":"https://pub-9e75ac5ca5fe440486627acf1f65370c.r2.dev/output.mp3"}))
+})
+
+
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)

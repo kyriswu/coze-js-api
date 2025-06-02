@@ -36,6 +36,8 @@ const whisperapi = {
                     ...(max_speakers && { max_speakers })
                 });
 
+                console.log(Object.keys(transcription))
+
                 // 成功后删除音频文件
                 fs.unlink(file_path, (err) => {
                     if (err) console.error('Error deleting audio file:', err);

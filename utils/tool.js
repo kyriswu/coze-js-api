@@ -51,8 +51,12 @@ const tool = {
         return result;
     },
     getMediaDuration: async function(file){
-        // const command = `ffmpeg.ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 ${file}`;
-        const command = `ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 ${file}`;
+        var command = ""
+        if (process.env.NODE_ENV === 'online'){
+             command = `ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 ${file}`;
+        }else{
+             command = `ffmpeg.ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 ${file}`;
+        }
         
         try {
             // Execute ffmpeg command
@@ -339,7 +343,7 @@ const tool = {
             if (value === null) {
                 console.log("开始处理任务",{
                     video_url:video_url,
-                    download_link:download_link
+                    52:download_link
                 })
                  download = await this.download_video(download_link)
                 if (!download.success) throw new Error(download.error);
@@ -352,10 +356,7 @@ const tool = {
                  stt = await whisperapi.openaiSTT({"file_path":convert.outputFile,speaker_labels:true,language:language})
                 if (!stt.success) throw new Error(stt.error);
 
-                value = {
-                    transcription: stt.transcription,
-                    duration: duration.duration
-                }
+                value = stt.transcription
 
                 //字幕信息保存90天
                 await redis.set(video_url, JSON.stringify(value), 'EX', 3600 * 24 * 90);
@@ -372,7 +373,7 @@ const tool = {
                 value = JSON.parse(value)
             }
 
-            const reDownloadKey = free_key+api_key+video_url
+            const reDownloadKey = free_key + api_key + video_url
             const exist = await redis.exists(reDownloadKey);
             if (!exist){
                 //更新套餐额度:剩余时间-当前视频时间
@@ -383,9 +384,7 @@ const tool = {
 
             const result = {
                 success: true,
-                transcription: value.transcription,
-                duration: value.duration,
-                message: "账户剩余时间：" + this.formatDuration(left_time)
+                transcription: value
             }
             //异步任务返回
             await redis.set("task_"+task_id, JSON.stringify(result), 'EX', 3600 * 72);
@@ -422,6 +421,7 @@ const tool = {
             await redis.set(free_key, left_time);
         }
     }
+    
 };
 
 module.exports = tool;
