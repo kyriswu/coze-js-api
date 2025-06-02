@@ -27,13 +27,13 @@
       Your browser does not support the video tag.
     </video>
   </div>
-  <duration></duration>
 
   <script>
     const video = document.getElementById('myVideo');
 
     video.addEventListener('loadedmetadata', () => {
     console.log('视频时长:', video.duration, '秒');
+    document.body.insertAdjacentHTML('beforeend', `<div class='duration'>${video.duration.toFixed(2)}</div>`);
     document.querySelector('duration').textContent = `${video.duration.toFixed(2)}`;
     });
 
