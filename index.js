@@ -13,12 +13,26 @@ const app = express()
 const port = 3000
 const environment = process.env.NODE_ENV || 'development';
 const crypto = require('crypto');
+const path = require('path');
 
 app.use(express.json())
 app.use(express.text())
 
+// 设置模板引擎配置 (必须在路由之前)
+app.set('view engine', 'ejs')
+app.set('views', path.join(__dirname, 'views'))
+
 app.get('/', (req, res) => {
     res.send('Hello World!')
+})
+app.get('/video', (req, res) => {
+
+    // Then in the /video route handler:
+    res.render('video', {
+        title: 'Video Page',
+        message: 'This is a simple video page template.',
+        videoUrl: "https://upos-sz-mirrorcos.bilivideo.com/upgcxcode/90/15/1545831590/1545831590-1-192.mp4?e=ig8euxZM2rNcNbNV7bdVhwdlhbdjhwdVhoNvNC8BqJIzNbfq9rVEuxTEnE8L5F6VnEsSTx0vkX8fqJeYTj_lta53NCM=&uipk=5&nbs=1&deadline=1748874972&gen=playurlv2&os=bcache&oi=1386006202&trid=000069a1534035b04b13af06979415c3b77dT&mid=1882208752&platform=html5&og=hw&upsig=e65d50888cf72f1ab187e72680744a69&uparams=e,uipk,nbs,deadline,gen,os,oi,trid,mid,platform,og&cdnid=63301&bvc=vod&nettype=0&bw=208298&orderid=0,1&buvid=&build=0&mobi_app=&f=T_0_0&logo=80000000"
+    })
 })
 
 // 假设你有成千上万个 URL 和相应的处理函数
@@ -443,7 +457,7 @@ app.post('/parse_html', async (req, res) => {
 
     console.log(req.headers);
     //免费版的key
-    const free_key = environment === 'online' ? "html_parser_" + req.headers['user-identity'] : 'test';
+    const free_key = "html_parser_" + req.headers['user-identity']
     if(api_key){
         //付费版
         const { keyId, valid, remaining, code } = await unkey.verifyKey(api_id, api_key, 0);
@@ -614,7 +628,7 @@ app.post('/google/search/web', async (req, res) => {
     }
 
     //免费版的key
-    const free_key = environment === 'online' ? 'google_'+req.headers['user-identity'] : 'test';
+    const free_key = 'google_'+req.headers['user-identity']
     if (api_key) {
         const { keyId, valid, remaining, code } = await unkey.verifyKey(api_id, api_key, 0);
         if (!valid) {
@@ -672,7 +686,7 @@ async function zyteExtract(req, res) {
     //unkey的api_id
     const unkey_api_id = "api_413Kmmitqy3qaDo4";
     //免费版的redis_key，用于限制用户的使用次数
-    const free_key = environment === 'online' ? "html_parser_" + req.headers['user-identity'] : 'test';
+    const free_key = "html_parser_" + req.headers['user-identity']
     if(api_key){
         //付费版
         const { keyId, valid, remaining, code } = await unkey.verifyKey(unkey_api_id, api_key, 0);
@@ -969,7 +983,6 @@ app.post('/pdf2img', async (req, res) => {
     })
 })
 
-const path = require('path');
 const netdiskapi = require('./utils/netdiskapi');
 const faceplusplus = require('./utils/kuangshi');
 const tool = require('./utils/tool');
@@ -1074,40 +1087,27 @@ app.post('/whisper/speech-to-text', async (req, res) => {
         language="chinese"
     }
 
+    let {error, HtmlContent} = await zyte.extract("https://coze-js-api.devtool.uk", null, null);
+    return res.send(HtmlContent)
+
     var videoLink = tool.extract_url(url)
     if (!videoLink) throw new Error("无法解析无效链接")
     videoLink = tool.remove_query_param(videoLink)
     
-    var whisper_data = await redis.get("whisper_callback_"+videoLink)
+    var whisper_data = await redis.get("whisper_data_"+videoLink)
     if (whisper_data){
         console.log("存在")
         
     }else{
 
-        console.log(req.protocol + '://' + req.get('host') + '/whisper/speech-to-text/callback')
-
-        await lemonfoxai.speech_to_text({
+        const response = await lemonfoxai.speech_to_text({
             "file_url":url,
             "response_format":"verbose_json",
             "speaker_labels": true,
-            "language":language,
-            "callback_url":"https://coze-js-api.devtool.uk/whisper/speech-to-text/callback?mediaFile="+videoLink
+            "language":language
         })
 
-        // Poll redis key every second for 10 minutes
-        const endTime = Date.now() + 600000; // 10 minutes in milliseconds
-        const interval = setInterval(async () => {
-            if (Date.now() > endTime) {
-                clearInterval(interval);
-                throw new Error("Timeout waiting for result")
-            }
-
-            const result = await redis.get("whisper_callback_" + videoLink);
-            if (result) {
-                clearInterval(interval);
-                whisper_data = result
-            }
-        }, 1000);
+        
 
         
     }
