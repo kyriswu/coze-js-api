@@ -974,6 +974,7 @@ const faceplusplus = require('./utils/kuangshi');
 const whisperapi = require('./utils/whisperapi');
 const tool = require('./utils/tool');
 const aimlapi = require('./utils/ThirdParrtyApi/aimlapi');
+const lemonfoxai = require('./utils/ThirdParrtyApi/lemonfoxai');
 // 静态资源服务，访问 images 目录下的文件
 app.use('/images', express.static(path.join(__dirname, 'images')));
 
@@ -1063,16 +1064,26 @@ app.post('/extract-video-subtitle', async (req, res) => {
     }
 })
 
-app.post('/aiml/speech-to-text', async (req, res) => {
-    res.send(await aimlapi.speech_to_text({"url":"https://pub-9e75ac5ca5fe440486627acf1f65370c.r2.dev/output.mp3"}))
+app.post('/whisper/speech-to-text', async (req, res) => {
+    return res.send(await lemonfoxai.speech_to_text({
+        "file_url":"https://pub-9e75ac5ca5fe440486627acf1f65370c.r2.dev/output.mp3",
+        "callback_url":req.protocol + '://' + req.get('host') + '/whisper/speech-to-text/callback'
+    }))
 })
 
-app.post('/aiml/speech-to-text/result', async (req, res) => {
+app.post('/whisper/speech-to-text/result', async (req, res) => {
     const {generation_id} = req.body
     if (!generation_id) {
          return res.status(400).send('Invalid input: "generation_id" is required');
     }
-    res.send(await aimlapi.speech_to_text_result(generation_id))
+    return res.send(await aimlapi.speech_to_text_result(generation_id))
+})
+
+app.post('/whisper/speech-to-text/callback', async (req, res) => {
+    console.log(req.body)
+    return res.send({
+        "code":1
+    })
 })
 
 
