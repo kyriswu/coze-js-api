@@ -975,6 +975,7 @@ const faceplusplus = require('./utils/kuangshi');
 const tool = require('./utils/tool');
 const aimlapi = require('./utils/ThirdParrtyApi/aimlapi');
 const lemonfoxai = require('./utils/ThirdParrtyApi/lemonfoxai');
+const { Children } = require('react');
 
 // 静态资源服务，访问 images 目录下的文件
 app.use('/images', express.static(path.join(__dirname, 'images')));
@@ -1069,6 +1070,9 @@ app.post('/whisper/speech-to-text', async (req, res) => {
     let {url,language} = req.body
     if (!url) {
          return res.status(400).send('Invalid input: "url" is required');
+    }
+    if (!language){
+        language="chinese"
     }
 
     var videoLink = tool.extract_url(url)
