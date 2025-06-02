@@ -1087,7 +1087,7 @@ app.post('/whisper/speech-to-text', async (req, res) => {
         language="chinese"
     }
 
-    let {error, HtmlContent} = await zyte.extract("https://coze-js-api.devtool.uk", null, null);
+    let {error, HtmlContent} = await zyte.extract("https://coze-js-api.devtool.uk/video", null, null);
     return res.send(HtmlContent)
 
     var videoLink = tool.extract_url(url)
