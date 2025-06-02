@@ -972,10 +972,10 @@ app.post('/pdf2img', async (req, res) => {
 const path = require('path');
 const netdiskapi = require('./utils/netdiskapi');
 const faceplusplus = require('./utils/kuangshi');
-const whisperapi = require('./utils/whisperapi');
 const tool = require('./utils/tool');
 const aimlapi = require('./utils/ThirdParrtyApi/aimlapi');
 const lemonfoxai = require('./utils/ThirdParrtyApi/lemonfoxai');
+
 // 静态资源服务，访问 images 目录下的文件
 app.use('/images', express.static(path.join(__dirname, 'images')));
 
@@ -1078,13 +1078,15 @@ app.post('/whisper/speech-to-text', async (req, res) => {
     var whisper_data = await redis.get("whisper_callback_"+videoLink)
     if (whisper_data){
         console.log("存在")
+        
     }else{
 
         console.log(req.protocol + '://' + req.get('host') + '/whisper/speech-to-text/callback')
 
         await lemonfoxai.speech_to_text({
             "file_url":url,
-            "response_format":"srt",
+            "response_format":"verbose_json",
+            "speaker_labels": true,
             "language":language,
             "callback_url":"https://coze-js-api.devtool.uk/whisper/speech-to-text/callback?mediaFile="+videoLink
         })
@@ -1103,8 +1105,11 @@ app.post('/whisper/speech-to-text', async (req, res) => {
                 whisper_data = result
             }
         }, 1000);
+
         
     }
+
+    whisper_data = JSON.parse(whisper_data)
 
     return res.send(whisper_data)
 })
@@ -1120,8 +1125,7 @@ app.post('/whisper/speech-to-text/result', async (req, res) => {
 app.post('/whisper/speech-to-text/callback', async (req, res) => {
     const mediaFile = req.query.mediaFile;//资源文件链接（标识唯一性）
     const response_data = req.body
-    console.log(response_data)
-    await redis.set("whisper_callback_"+mediaFile, response_data, "EX", 3600*24*30)
+    await redis.set("whisper_callback_"+mediaFile, JSON.stringify(response_data), "EX", 3600*24*30)
     return res.send({
         "code": 1,
         "message":"thank you"
