@@ -1075,9 +1075,7 @@ app.post('/whisper/speech-to-text', async (req, res) => {
     if (!videoLink) throw new Error("无法解析无效链接")
     videoLink = tool.remove_query_param(videoLink)
     
-    const whisper_data = await redis.get("whisper_callback_"+videoLink)
-    console.log("whisper_callback_"+videoLink)
-    console.log(whisper_data)
+    var whisper_data = await redis.get("whisper_callback_"+videoLink)
     if (whisper_data){
         console.log("存在")
     }else{
@@ -1086,7 +1084,7 @@ app.post('/whisper/speech-to-text', async (req, res) => {
 
         await lemonfoxai.speech_to_text({
             "file_url":url,
-            "response_format":"json",
+            "response_format":"srt",
             "language":language,
             "callback_url":"https://coze-js-api.devtool.uk/whisper/speech-to-text/callback?mediaFile="+videoLink
         })
