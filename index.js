@@ -1086,7 +1086,7 @@ app.post('/whisper/speech-to-text', async (req, res) => {
 
         await lemonfoxai.speech_to_text({
             "file_url":url,
-            "response_format":"verbose_json",
+            "response_format":"json",
             "language":language,
             "callback_url":"https://coze-js-api.devtool.uk/whisper/speech-to-text/callback?mediaFile="+videoLink
         })
