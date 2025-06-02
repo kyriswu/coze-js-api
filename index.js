@@ -15,6 +15,7 @@ const environment = process.env.NODE_ENV || 'development';
 const crypto = require('crypto');
 
 app.use(express.json())
+app.use(express.text())
 
 app.get('/', (req, res) => {
     res.send('Hello World!')
@@ -1085,7 +1086,7 @@ app.post('/whisper/speech-to-text/result', async (req, res) => {
     return res.send(await aimlapi.speech_to_text_result(generation_id))
 })
 
-app.all('/whisper/speech-to-text/callback', async (req, res) => {
+app.post('/whisper/speech-to-text/callback', async (req, res) => {
     console.log(req)
     return res.send({
         "code":1
