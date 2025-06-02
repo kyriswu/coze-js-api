@@ -1064,7 +1064,7 @@ app.post('/extract-video-subtitle', async (req, res) => {
 })
 
 app.post('/aiml/speech-to-text', async (req, res) => {
-    res.send(aimlapi.speech_to_text({"url":"https://pub-9e75ac5ca5fe440486627acf1f65370c.r2.dev/output.mp3"}))
+    res.send(await aimlapi.speech_to_text({"url":"https://pub-9e75ac5ca5fe440486627acf1f65370c.r2.dev/output.mp3"}))
 })
 
 
