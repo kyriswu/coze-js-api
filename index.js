@@ -1067,6 +1067,14 @@ app.post('/aiml/speech-to-text', async (req, res) => {
     res.send(await aimlapi.speech_to_text({"url":"https://pub-9e75ac5ca5fe440486627acf1f65370c.r2.dev/output.mp3"}))
 })
 
+app.post('/aiml/speech-to-text/result', async (req, res) => {
+    const {generation_id} = req.body
+    if (!generation_id) {
+         return res.status(400).send('Invalid input: "generation_id" is required');
+    }
+    res.send(await aimlapi.speech_to_text_result(generation_id))
+})
+
 
 
 app.listen(port, () => {

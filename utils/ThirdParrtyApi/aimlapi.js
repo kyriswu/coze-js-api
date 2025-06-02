@@ -62,8 +62,23 @@ const aimlapi = {
         console.log(response)
         return response.data
 
-
-
+    },
+    speech_to_text_result: async function (generation_id) {
+        try {
+            const response = await axios({
+                method: 'GET',
+                url: `https://api.aimlapi.com/v1/stt/${generation_id}`,
+                headers: {
+                    'Authorization': 'Bearer ' + APIKEY,
+                    'Accept': '*/*'
+                }
+            });
+            
+            return response.data;
+        } catch (error) {
+            console.error('Error getting task result:', error.message);
+            throw error;
+        }
     }
 };
 
