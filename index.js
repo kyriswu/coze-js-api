@@ -14,6 +14,7 @@ const port = 3000
 const environment = process.env.NODE_ENV || 'development';
 const crypto = require('crypto');
 const path = require('path');
+const ffmpeg = require('fluent-ffmpeg');
 
 app.use(express.json())
 app.use(express.text())
@@ -1087,57 +1088,49 @@ app.post('/whisper/speech-to-text', async (req, res) => {
         language="chinese"
     }
 
-    let {error, HtmlContent} = await zyte.extract("https://coze-js-api.devtool.uk/video", [{"action": "waitForSelector",
-            "selector": {
-                "type": 'css',
-                "value": 'duration'}}], null);
-    return res.send(HtmlContent)
-
     var videoLink = tool.extract_url(url)
     if (!videoLink) throw new Error("无法解析无效链接")
     videoLink = tool.remove_query_param(videoLink)
     
-    var whisper_data = await redis.get("whisper_data_"+videoLink)
-    if (whisper_data){
-        console.log("存在")
-        
-    }else{
+    try{
 
-        const response = await lemonfoxai.speech_to_text({
-            "file_url":url,
-            "response_format":"verbose_json",
-            "speaker_labels": true,
-            "language":language
+        var transcription = await redis.get("transcription_"+videoLink)
+        if (transcription){
+            
+            transcription = JSON.parse(transcription)
+        }else{
+
+             //查询直链
+            const XiaZaiTool = await tool.get_video_url(videoLink)
+            if (!XiaZaiTool.success) throw new Error(XiaZaiTool.message);
+            const downloadUrl = XiaZaiTool.data.data.videoUrls
+
+            const result = await lemonfoxai.speech_to_text({
+                "file_url":downloadUrl,
+                "response_format":"verbose_json",
+                "speaker_labels": true,
+                "language":language,
+                "prompt":"Please transcribe the following audio accurately, detect the language automatically"
+            })
+            if (!result.success) throw result.error
+            transcription = result.data
+            redis.set("transcription_"+videoLink, JSON.stringify(transcription), "EX", 3600 * 24 * 60)
+            
+        }
+
+        return res.send({
+            'code': 0,
+            'msg': 'success',
+            'data': transcription
         })
-
-        
-
-        
+    }catch(error){
+        console.error(error)
+        return res.send({
+            'code': -1,
+            'msg': error.message
+        })
     }
-
-    whisper_data = JSON.parse(whisper_data)
-
-    return res.send(whisper_data)
 })
-
-app.post('/whisper/speech-to-text/result', async (req, res) => {
-    const {generation_id} = req.body
-    if (!generation_id) {
-         return res.status(400).send('Invalid input: "generation_id" is required');
-    }
-    return res.send(await aimlapi.speech_to_text_result(generation_id))
-})
-
-app.post('/whisper/speech-to-text/callback', async (req, res) => {
-    const mediaFile = req.query.mediaFile;//资源文件链接（标识唯一性）
-    const response_data = req.body
-    await redis.set("whisper_callback_"+mediaFile, JSON.stringify(response_data), "EX", 3600*24*30)
-    return res.send({
-        "code": 1,
-        "message":"thank you"
-    })
-})
-
 
 
 app.listen(port, () => {

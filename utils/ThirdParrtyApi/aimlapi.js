@@ -5,6 +5,10 @@ const OpenAI = require('openai');
 
 const APIKEY = "3b626c757811448ca2fdeb307aa7076a"
 
+const api = new OpenAI({
+  baseURL: 'https://api.aimlapi.com/v1',
+  apiKey: 'Bearer ' + APIKEY,
+});
 const aimlapi = {
     /**
      * 语音转文字函数
@@ -12,7 +16,6 @@ const aimlapi = {
      * @returns {Promise<Object>} 返回转换结果
      */
     speech_to_text: async function ({url = null, language = 'zh'} = {}) {
-
 
         const body = JSON.stringify({
             "url": url,
@@ -51,6 +54,29 @@ const aimlapi = {
             console.error('Error getting task result:', error.message);
             throw error;
         }
+    },
+    chat: async function (params) {
+        const result = await api.chat.completions.create({
+            model: 'o1-mini',
+            messages: [
+            {
+                "role": "user",
+                "content": ""
+            },
+            {
+                "role": "user",
+                "content": ""
+            }
+            ],
+            temperature: 0.7,
+            top_p: 0.7,
+            frequency_penalty: 1,
+            max_output_tokens: undefined,
+            top_k: 50,
+        });
+
+        const message = result.choices[0].message.content;
+        console.log(`Assistant: ${message}`);
     }
 };
 

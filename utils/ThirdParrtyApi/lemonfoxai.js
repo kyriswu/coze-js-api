@@ -94,10 +94,10 @@ const lemonfoxai = {
                     'Authorization': `Bearer ${APIKEY}`
                 }
             });
-            return response.data
+            return {success:true, data:response.data}
         } catch (error) {
             console.error('Error:', error);
-            throw error
+            return {success:false, error:error}
         }
     }
 };
