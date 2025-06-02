@@ -1066,16 +1066,47 @@ app.post('/extract-video-subtitle', async (req, res) => {
 })
 
 app.post('/whisper/speech-to-text', async (req, res) => {
-    const {url,language} = req.body
+    let {url,language} = req.body
     if (!url) {
          return res.status(400).send('Invalid input: "url" is required');
     }
-    console.log(req.protocol + '://' + req.get('host') + '/whisper/speech-to-text/callback')
-    return res.send(await lemonfoxai.speech_to_text({
-        "file_url":url,
-        "language":language,
-        "callback_url":"https://coze-js-api.devtool.uk/whisper/speech-to-text/callback"
-    }))
+
+    var videoLink = tool.extract_url(url)
+    if (!videoLink) throw new Error("无法解析无效链接")
+    videoLink = tool.remove_query_param(videoLink)
+    
+    const whisper_data = await redis.get("whisper_callback_"+videoLink)
+    if (whisper_data){
+
+    }else{
+
+        console.log(req.protocol + '://' + req.get('host') + '/whisper/speech-to-text/callback')
+
+        await lemonfoxai.speech_to_text({
+            "file_url":url,
+            "response_format":"verbose_json",
+            "language":language,
+            "callback_url":"https://coze-js-api.devtool.uk/whisper/speech-to-text/callback?mediaFile="+videoLink
+        })
+
+        // Poll redis key every second for 10 minutes
+        const endTime = Date.now() + 600000; // 10 minutes in milliseconds
+        const interval = setInterval(async () => {
+            if (Date.now() > endTime) {
+                clearInterval(interval);
+                throw new Error("Timeout waiting for result")
+            }
+
+            const result = await redis.get("whisper_callback_" + videoLink);
+            if (result) {
+                clearInterval(interval);
+                whisper_data = result
+            }
+        }, 1000);
+        
+    }
+
+    return res.send(whisper_data)
 })
 
 app.post('/whisper/speech-to-text/result', async (req, res) => {
@@ -1087,9 +1118,12 @@ app.post('/whisper/speech-to-text/result', async (req, res) => {
 })
 
 app.post('/whisper/speech-to-text/callback', async (req, res) => {
-    console.log(req.body)
+    const mediaFile = req.query.mediaFile;//资源文件链接（标识唯一性）
+    const response_data = req.body
+    await redis.set("whisper_callback_"+mediaFile, response_data, "EX", 3600*24*30)
     return res.send({
-        "code":1
+        "code": 1,
+        "message":"thank you"
     })
 })
 
