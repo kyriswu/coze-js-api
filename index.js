@@ -31,7 +31,7 @@ app.get('/video', (req, res) => {
     res.render('video', {
         title: 'Video Page',
         message: 'This is a simple video page template.',
-        videoUrl: "https://upos-sz-mirrorcos.bilivideo.com/upgcxcode/90/15/1545831590/1545831590-1-192.mp4?e=ig8euxZM2rNcNbNV7bdVhwdlhbdjhwdVhoNvNC8BqJIzNbfq9rVEuxTEnE8L5F6VnEsSTx0vkX8fqJeYTj_lta53NCM=&uipk=5&nbs=1&deadline=1748874972&gen=playurlv2&os=bcache&oi=1386006202&trid=000069a1534035b04b13af06979415c3b77dT&mid=1882208752&platform=html5&og=hw&upsig=e65d50888cf72f1ab187e72680744a69&uparams=e,uipk,nbs,deadline,gen,os,oi,trid,mid,platform,og&cdnid=63301&bvc=vod&nettype=0&bw=208298&orderid=0,1&buvid=&build=0&mobi_app=&f=T_0_0&logo=80000000"
+        videoUrl: "https://upos-sz-mirrorcos.bilivideo.com/upgcxcode/28/77/29896147728/29896147728-1-192.mp4?e=ig8euxZM2rNcNbRVhwdVhwdlhWdVhwdVhoNvNC8BqJIzNbfq9rVEuxTEnE8L5F6VnEsSTx0vkX8fqJeYTj_lta53NCM=&uipk=5&nbs=1&deadline=1748882820&gen=playurlv2&os=bcache&oi=837301814&trid=00004de5809b13c34b18bd93489356989e66T&mid=3546662372903895&platform=html5&og=hw&upsig=769f8dff014015645d736c5862c512b3&uparams=e,uipk,nbs,deadline,gen,os,oi,trid,mid,platform,og&cdnid=88601&bvc=vod&nettype=0&bw=55668&orderid=0,1&buvid=&build=0&mobi_app=&f=T_0_0&logo=80000000"
     })
 })
 
