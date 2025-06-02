@@ -1086,7 +1086,7 @@ app.post('/whisper/speech-to-text/result', async (req, res) => {
 })
 
 app.all('/whisper/speech-to-text/callback', async (req, res) => {
-    console.log(req.body)
+    console.log(req)
     return res.send({
         "code":1
     })
