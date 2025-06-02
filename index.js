@@ -1076,8 +1076,10 @@ app.post('/whisper/speech-to-text', async (req, res) => {
     videoLink = tool.remove_query_param(videoLink)
     
     const whisper_data = await redis.get("whisper_callback_"+videoLink)
+    console.log("whisper_callback_"+videoLink)
+    console.log(whisper_data)
     if (whisper_data){
-
+        console.log("存在")
     }else{
 
         console.log(req.protocol + '://' + req.get('host') + '/whisper/speech-to-text/callback')
