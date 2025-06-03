@@ -451,9 +451,9 @@ app.post('/parse_html', async (req, res) => {
         });
     }
 
-    if (action) {
+    // if (action) {
         return await zyteExtract(req, res);
-    }
+    // }
     const api_id = "api_413Kmmitqy3qaDo4";
 
     console.log(req.headers);
@@ -1080,7 +1080,7 @@ app.post('/extract-video-subtitle', async (req, res) => {
 })
 
 app.post('/whisper/speech-to-text', async (req, res) => {
-    let {url,language} = req.body
+    let {url,language,api_key} = req.body
     if (!url) {
          return res.status(400).send('Invalid input: "url" is required');
     }
@@ -1096,7 +1096,6 @@ app.post('/whisper/speech-to-text', async (req, res) => {
     var left_time = await redis.get(free_key)
     if (!left_time) left_time = 10
     if (left_time <= 0) throw new Error("免费体验结束~您累计解析时长超过10分钟，请联系作者购买包月套餐（15元180分钟，30元450分钟，50元1000分钟）【vx：xiaowu_azt】")
-    console.log(free_key, left_time)
     
     try{
         
@@ -1109,6 +1108,7 @@ app.post('/whisper/speech-to-text', async (req, res) => {
             //查询直链
             const XiaZaiTool = await tool.get_video_url(videoLink)
             if (!XiaZaiTool.success) throw new Error(XiaZaiTool.message);
+            if (!XiaZaiTool.data.success) throw new Error(XiaZaiTool.data.message)
             const downloadUrl = XiaZaiTool.data.data.videoUrls
 
             //语音转文字
@@ -1117,8 +1117,7 @@ app.post('/whisper/speech-to-text', async (req, res) => {
                 "file_url":downloadUrl,
                 "response_format":"verbose_json",
                 "speaker_labels": true,
-                "language":language,
-                "prompt":"Please transcribe the following audio accurately, detect the language automatically"
+                "language":language
             })
             if (!result.success) throw result.error
             transcription = result.data
