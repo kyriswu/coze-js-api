@@ -1087,17 +1087,17 @@ app.post('/whisper/speech-to-text', async (req, res) => {
     if (!language){
         language="chinese"
     }
-
-    var videoLink = tool.extract_url(url)
-    if (!videoLink) throw new Error("无法解析此链接，仅支持快手/抖音/小红书/B站/Youtube/tiktok，有问题联系作者【vx：xiaowu_azt】")
-    videoLink = tool.remove_query_param(videoLink)
-
-    const free_key = "FreeASR_" + req.headers['user-identity']
-    var left_time = await redis.get(free_key)
-    if (!left_time) left_time = 10
-    if (left_time <= 0) throw new Error("免费体验结束~您累计解析时长超过10分钟，请联系作者购买包月套餐（15元180分钟，30元450分钟，50元1000分钟）【vx：xiaowu_azt】")
     
     try{
+
+        var videoLink = tool.extract_url(url)
+        if (!videoLink) throw new Error("无法解析此链接，仅支持快手/抖音/小红书/B站/Youtube/tiktok，有问题联系作者【vx：xiaowu_azt】")
+        videoLink = tool.remove_query_param(videoLink)
+
+        const free_key = "FreeASR_" + req.headers['user-identity']
+        var left_time = await redis.get(free_key)
+        if (!left_time) left_time = 10
+        if (left_time <= 0) throw new Error("免费体验结束~您累计解析时长超过10分钟，请联系作者购买包月套餐（15元180分钟，30元450分钟，50元1000分钟）【vx：xiaowu_azt】")
         
         var transcription = await redis.get("transcription_"+videoLink)
         if (transcription){
