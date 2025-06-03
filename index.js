@@ -1089,22 +1089,30 @@ app.post('/whisper/speech-to-text', async (req, res) => {
     }
 
     var videoLink = tool.extract_url(url)
-    if (!videoLink) throw new Error("无法解析无效链接")
+    if (!videoLink) throw new Error("无法解析此链接，仅支持快手/抖音/小红书/B站/Youtube/tiktok，有问题联系作者【vx：xiaowu_azt】")
     videoLink = tool.remove_query_param(videoLink)
+
+    const free_key = "FreeASR_" + req.headers['user-identity']
+    var left_time = await redis.get(free_key)
+    if (!left_time) left_time = 10
+    if (left_time <= 0) throw new Error("免费体验结束~您累计解析时长超过10分钟，请联系作者购买包月套餐（15元180分钟，30元450分钟，50元1000分钟）【vx：xiaowu_azt】")
+    console.log(free_key, left_time)
     
     try{
-
+        
         var transcription = await redis.get("transcription_"+videoLink)
         if (transcription){
             
             transcription = JSON.parse(transcription)
         }else{
-
-             //查询直链
+            
+            //查询直链
             const XiaZaiTool = await tool.get_video_url(videoLink)
             if (!XiaZaiTool.success) throw new Error(XiaZaiTool.message);
             const downloadUrl = XiaZaiTool.data.data.videoUrls
 
+            //语音转文字
+            console.log("开始生成字幕")
             const result = await lemonfoxai.speech_to_text({
                 "file_url":downloadUrl,
                 "response_format":"verbose_json",
@@ -1114,8 +1122,10 @@ app.post('/whisper/speech-to-text', async (req, res) => {
             })
             if (!result.success) throw result.error
             transcription = result.data
-            redis.set("transcription_"+videoLink, JSON.stringify(transcription), "EX", 3600 * 24 * 60)
-            
+            left_time = Math.floor(left_time - Math.ceil(transcription.duration/60))
+            await redis.set("transcription_"+videoLink, JSON.stringify(transcription), "EX", 3600 * 24 * 60)
+            await redis.set(free_key, left_time)
+            console.log("字幕生成结束")
         }
 
         return res.send({
