@@ -752,9 +752,9 @@ async function zyteExtract(req, res) {
                 result_list.push({ htmlContent: element.outerHTML });
             }
         } else if (selector) {
-            // const domSelector = selector;
-            // const parserSelector = htmlToQuerySelector(domSelector);
-            result_list = Array.from(document.querySelectorAll(selector)).map(element => {
+            const domSelector = selector;
+            const parserSelector = htmlToQuerySelector(domSelector);
+            result_list = Array.from(document.querySelectorAll(parserSelector)).map(element => {
                 return { htmlContent: element.outerHTML };
             }); 
         }
