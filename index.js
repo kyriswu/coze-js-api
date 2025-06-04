@@ -451,9 +451,9 @@ app.post('/parse_html', async (req, res) => {
         });
     }
 
-    // if (action) {
+    if (action && Date.now()%2==0) {
         return await zyteExtract(req, res);
-    // }
+    }
     const api_id = "api_413Kmmitqy3qaDo4";
 
     console.log(req.headers);
@@ -778,9 +778,6 @@ async function zyteExtract(req, res) {
         res.status(500).send(`Error: ${error.message}`);
     }
 }
-app.post('/web/extract', async (req, res) => {
-    await zyteExtract(req, res);
-})
 
 app.post('/get_sitemap', async (req, res) => {
     const { url, api_key } = req.body;
