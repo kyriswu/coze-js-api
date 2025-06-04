@@ -1124,7 +1124,7 @@ app.post('/whisper/speech-to-text', async (req, res) => {
             await redis.set(free_key, left_time)
             console.log("字幕生成结束")
         }
-
+        console.log(free_key)
         return res.send({
             'code': 0,
             'msg': 'success',
