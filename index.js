@@ -456,7 +456,6 @@ app.post('/parse_html', async (req, res) => {
     }
     const api_id = "api_413Kmmitqy3qaDo4";
 
-    console.log(req.headers);
     //免费版的key
     const free_key = "html_parser_" + req.headers['user-identity']
     if(api_key){
