@@ -1093,6 +1093,7 @@ app.post('/whisper/speech-to-text', async (req, res) => {
         videoLink = tool.remove_query_param(videoLink)
 
         const free_key = "FreeASR_" + req.headers['user-identity']
+        console.log(free_key)
         var left_time = await redis.get(free_key)
         if (!left_time) left_time = 10
         if (left_time <= 0) throw new Error("免费体验结束~您累计解析时长超过10分钟，请联系作者购买包月套餐（15元180分钟，30元450分钟，50元1000分钟）【vx：xiaowu_azt】")
@@ -1124,7 +1125,7 @@ app.post('/whisper/speech-to-text', async (req, res) => {
             await redis.set(free_key, left_time)
             console.log("字幕生成结束")
         }
-        console.log(free_key)
+        
         return res.send({
             'code': 0,
             'msg': 'success',
