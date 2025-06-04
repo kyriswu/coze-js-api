@@ -451,9 +451,9 @@ app.post('/parse_html', async (req, res) => {
         });
     }
 
-    if (action && Date.now()%2==0) {
+    // if (action) {
         return await zyteExtract(req, res);
-    }
+    // }
     const api_id = "api_413Kmmitqy3qaDo4";
 
     //免费版的key
