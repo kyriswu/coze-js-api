@@ -1113,8 +1113,8 @@ app.post('/whisper/speech-to-text', async (req, res) => {
             console.log("开始生成字幕")
             const result = await lemonfoxai.speech_to_text({
                 "file_url":downloadUrl,
-                "response_format":"verbose_json",
-                "speaker_labels": true,
+                "response_format":"srt",
+                "speaker_labels": false,
                 "language":language
             })
             if (!result.success) throw result.error
