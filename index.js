@@ -1135,7 +1135,8 @@ app.post('/whisper/speech-to-text', async (req, res) => {
         console.error(error)
         return res.send({
             'code': -1,
-            'msg': error.message
+            'msg': error.message,
+            'data': error.message
         })
     }
 })
