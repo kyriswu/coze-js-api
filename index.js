@@ -1019,64 +1019,6 @@ app.post('/extract-video-subtitle/task-info', async (req, res) => {
     }
 })
 
-app.post('/extract-video-subtitle', async (req, res) => {
-    const { link,language,api_key,is_sync } = req.body;
-    if (!link) {
-        return res.status(400).send('Invalid input: "link" is required');
-    }
-
-    try{
-
-        const free_key = "asr_" + req.headers['user-identity']
-        var left_time = await redis.get(free_key)
-        if (left_time === null) left_time = 600
-        if (left_time <= 0) throw new Error("免费体验结束~您累计解析视频时长超过10分钟，请联系作者购买包月套餐（15元180分钟，30元450分钟，50元1000分钟）【vx：xiaowu_azt】")
-
-        const task_id = tool.md5(new Date().getTime().toString() + crypto.randomBytes(4).toString('hex'))
-
-        var videoLink = tool.extract_url(link)
-        if (!videoLink) throw new Error("无法解析无效链接")
-        videoLink = tool.remove_query_param(videoLink)
-
-        //查询直链
-        const XiaZaiTool = await tool.get_video_url(videoLink)
-        if (!XiaZaiTool.success) throw new Error(XiaZaiTool.message);
-        const downloadUrl = XiaZaiTool.data.data.videoUrls
-
-        if (is_sync){
-            //同步处理
-            const subtitle = await  tool.video_to_subtitle(videoLink, downloadUrl, task_id, left_time, api_key, free_key, language)
-            if (!subtitle.success) throw new Error(subtitle.error);
-
-            return res.send({
-                code: 0,
-                msg: 'Success',
-                data: subtitle.transcription
-            });
-        }else{
-            //异步处理
-            tool.video_to_subtitle(videoLink, downloadUrl, task_id, left_time, api_key, free_key, language)
-            await redis.set("task_"+task_id, JSON.stringify({success:false,msg:"任务正在处理中...",data:link}), 'EX', 3600 * 72);
-            
-            return res.send({
-                code: 0,
-                msg: '请求发送成功，正在后台处理...稍后通过task_id查询任务状态，请妥善保存',
-                data: {
-                    task_id: task_id,
-                    link: link
-                }
-            });
-        }
-        
-    }catch(error){
-        console.error(error)
-        return res.send({
-            code: -1,
-            msg: error.message
-        })
-    }
-})
-
 app.post('/whisper/speech-to-text', async (req, res) => {
     let {url,language,api_key} = req.body
     if (!url) {
@@ -1095,8 +1037,8 @@ app.post('/whisper/speech-to-text', async (req, res) => {
         const free_key = "FreeASR_" + req.headers['user-identity']
         console.log(free_key)
         var left_time = await redis.get(free_key)
-        if (!left_time) left_time = 10
-        if (left_time <= 0) throw new Error("免费体验结束~您累计解析时长超过10分钟，请联系作者购买包月套餐（15元180分钟，30元450分钟，50元1000分钟）【vx：xiaowu_azt】")
+        if (!left_time || isNaN(left_time)) left_time = 10
+        if (left_time <= 0) throw new Error("抱歉~该服务后台依赖大量算力，维护成本大。体验阶段，累计解析时长不得超过10分钟，请联系作者购买时长（15元180分钟，30元450分钟，50元1000分钟）【vx：xiaowu_azt】")
         
         var transcription = await redis.get("transcription_"+videoLink)
         if (transcription){
@@ -1114,29 +1056,39 @@ app.post('/whisper/speech-to-text', async (req, res) => {
             console.log("开始生成字幕")
             const result = await lemonfoxai.speech_to_text({
                 "file_url":downloadUrl,
-                "response_format":"srt",
+                "response_format":"verbose_json",
                 "speaker_labels": false,
                 "language":language
             })
             if (!result.success) throw result.error
             transcription = result.data
-            left_time = Math.floor(left_time - Math.ceil(transcription.duration/60))
+            left_time = Math.floor(left_time - Math.ceil(Math.floor(transcription.duration)/60))
             await redis.set("transcription_"+videoLink, JSON.stringify(transcription), "EX", 3600 * 24 * 60)
             await redis.set(free_key, left_time)
             console.log("字幕生成结束")
+        }
+
+        // 生成SRT内容
+        const srt = transcription.segments.map((item, index) => {
+            const start = tool.format_SRT_timestamp(item.start);
+            const end = tool.format_SRT_timestamp(item.end);
+            return `${index + 1}\n${start} --> ${end}\n${item.text}\n`;
+        }).join('\n');
+        const data = {
+            text:transcription.text,
+            srt:srt
         }
         
         return res.send({
             'code': 0,
             'msg': 'success',
-            'data': transcription
+            'data': data
         })
     }catch(error){
         console.error(error)
         return res.send({
             'code': -1,
-            'msg': error.message,
-            'data': error.message
+            'msg': error.message
         })
     }
 })

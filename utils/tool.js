@@ -12,6 +12,14 @@ const whisperapi = require('./whisperapi');
 const execPromise = util.promisify(exec);
 
 const tool = {
+    format_SRT_timestamp: function(seconds){
+        const date = new Date(seconds * 1000);
+        const hours = String(date.getUTCHours()).padStart(2, '0');
+        const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+        const secs = String(date.getUTCSeconds()).padStart(2, '0');
+        const millis = String(date.getUTCMilliseconds()).padStart(3, '0');
+        return `${hours}:${minutes}:${secs},${millis}`;
+    },
       /**
      * 用于将字符串转换为数字位索引
      * @param {string} str - 需要转换的秒数
