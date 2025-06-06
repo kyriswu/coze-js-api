@@ -995,6 +995,7 @@ const faceplusplus = require('./utils/kuangshi');
 const tool = require('./utils/tool');
 const aimlapi = require('./utils/ThirdParrtyApi/aimlapi');
 const lemonfoxai = require('./utils/ThirdParrtyApi/lemonfoxai');
+const { QuotaExceededError } = require('./utils/CustomError');
 
 // 静态资源服务，访问 images 目录下的文件
 app.use('/images', express.static(path.join(__dirname, 'images')));
@@ -1058,14 +1059,14 @@ app.post('/whisper/speech-to-text', async (req, res) => {
     try{
 
         var videoLink = tool.extract_url(url)
-        if (!videoLink) throw new Error("无法解析此链接，仅支持快手/抖音/小红书/B站/Youtube/tiktok，有问题联系作者【vx：xiaowu_azt】")
+        if (!videoLink) throw new Error("无法解析此链接，本插件支持快手/抖音/小红书/B站/Youtube/tiktok，有问题联系作者【vx：xiaowu_azt】")
         videoLink = tool.remove_query_param(videoLink)
 
         const free_key = "FreeASR_" + req.headers['user-identity']
         console.log(free_key)
         var left_time = await redis.get(free_key)
         if (!left_time || isNaN(left_time)) left_time = 10
-        if (left_time <= 0) throw new Error("抱歉~该服务后台依赖大量算力，维护成本大。体验阶段，累计解析时长不得超过10分钟，请联系作者购买时长（15元180分钟，30元450分钟，50元1000分钟）【vx：xiaowu_azt】")
+        if (left_time <= 0) throw new QuotaExceededError("试用体验结束，该服务需要大量算力资源，维护不易，如果您喜欢此工具，请联系作者购买时长（15元180分钟，30元450分钟，50元1000分钟）【vx：xiaowu_azt】")
         
         var transcription = await redis.get("transcription_"+videoLink)
         if (transcription){
@@ -1114,10 +1115,21 @@ app.post('/whisper/speech-to-text', async (req, res) => {
         })
     }catch(error){
         console.error(error)
-        return res.send({
-            'code': -1,
-            'msg': error.message
-        })
+        if (error instanceof QuotaExceededError) {
+            return res.send({
+                'code': 0,
+                'msg': '抱歉，达到用量限制',
+                'data': {
+                    "text": error.message,
+                    "srt": error.message
+                }
+            });
+        } else {
+            return res.send({
+                'code': -1,
+                'msg': error.message
+            });
+        }
     }
 })
 
