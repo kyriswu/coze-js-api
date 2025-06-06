@@ -428,6 +428,10 @@ const tool = {
         if (free_key) {
             await redis.set(free_key, left_time);
         }
+    },
+    //音频格式转换
+    audio_format_convert: async function (audio) {
+        
     }
     
 };

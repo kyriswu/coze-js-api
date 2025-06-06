@@ -1008,24 +1008,43 @@ app.get('/xpan/download', netdiskapi.download)
 
 app.post('/faceplusplus/face_detect', faceplusplus.face_detect)
 
-app.post('/extract-video-subtitle/task-info', async (req, res) => {
-    const { task_id } = req.body;
-    if (!task_id) {
-        return res.status(400).send('Invalid input: "task_id" is required');
+//生成重定向链接
+app.post('/tts_to_mp3', async (req, res) => {
+    let { url } = req.body;
+    if (!url) {
+        return res.status(400).send('Invalid input: "url" is required');
     }
-    try{
-        const task_info = await redis.get("task_"+task_id)
-        return res.send({
-            code:0,
-            data: JSON.parse(task_info)
-        })
-    }catch(error){
-        return res.send({
-            code:-1,
-            msg: error.message
-        })
-    }
+    const key = "mp3_" + tool.md5(Date.now().toString() + crypto.randomBytes(8).toString('hex'))
+    await redis.set(key, url, "EX", 3600*24*30)
+    return res.send({
+        "code": 0,
+        "msg": "success", 
+        "data": req.protocol + '://' + req.get('host') + '/mp3/' + key + '.mp3'
+    })
 })
+//执行重定向
+app.get('/mp3/:id', async (req, res) => {
+    // 获取动态参数值
+    const id = req.params.id;
+    
+    // 去掉 .mp3 后缀（如果需要）
+    const fileId = id.replace('.mp3', '');
+    
+    try {
+        // 从 Redis 获取真实 URL
+        const realUrl = await redis.get(fileId);
+        if (!realUrl) {
+            return res.status(404).send('File not found');
+        }
+        
+        // 重定向到实际 URL
+        res.redirect(302, realUrl);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Server error');
+    }
+});
+
 
 app.post('/whisper/speech-to-text', async (req, res) => {
     let {url,language,api_key} = req.body
