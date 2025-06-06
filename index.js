@@ -1074,6 +1074,7 @@ app.post('/whisper/speech-to-text', async (req, res) => {
         }else{
             
             //查询直链
+            console.log("视频链接：" + videoLink)
             const XiaZaiTool = await tool.get_video_url(videoLink)
             if (!XiaZaiTool.success) throw new Error(XiaZaiTool.message);
             if (!XiaZaiTool.data.success) throw new Error(XiaZaiTool.data.message)

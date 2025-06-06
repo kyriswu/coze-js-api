@@ -312,7 +312,9 @@ const tool = {
                 );
                 data = response.data
                 console.log("查询：", data)
-                await redis.set(key, JSON.stringify(data), 'NX', 'EX', 3600 * 3);
+                if(data.success){
+                    await redis.set(key, JSON.stringify(data), 'NX', 'EX', 3600 * 3);
+                }
             }else{
                 data = JSON.parse(value)
                 console.log("缓存：", data)
