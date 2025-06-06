@@ -1019,7 +1019,7 @@ app.post('/tts_to_mp3', async (req, res) => {
     return res.send({
         "code": 0,
         "msg": "success", 
-        "data": req.protocol + '://' + req.get('host') + '/mp3/' + key + '.mp3'
+        "data": 'https://' + req.get('host') + '/mp3/' + key + '.mp3'
     })
 })
 //执行重定向
