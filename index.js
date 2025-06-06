@@ -774,7 +774,7 @@ async function zyteExtract(req, res) {
             await redis.incr(free_key);//每次调用增加一次
             msg = `今日免费使用次数：${3 - await getUsage(free_key)}`;
         }
-
+        console.log(result_list)
         return res.send({
             code: 0,
             msg: msg,
