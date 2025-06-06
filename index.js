@@ -1058,10 +1058,11 @@ app.post('/audio-format-convert', async (req, res) => {
         if(!download.success) throw new Error(download.error)
         const convert = await tool.audio_format_convert(download.filepath, format)
         if(!convert.success) throw new Error(convert.error)
+        const protocol = req.headers['x-forwarded-proto'] || req.protocol;
         return res.send({
             "code": 0,
             "msg":"格式转换成功，请尽快使用，本站将定期清除",
-            "data": `${req.protocol}://${req.get('host')}/audio/${path.basename(convert.filepath)}`
+            "data": `${protocol}://${req.get('host')}/audio/${path.basename(convert.filepath)}`
         })
     }catch(error){
         console.error(error)
