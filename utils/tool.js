@@ -154,6 +154,73 @@ const tool = {
             };
         }
     },
+    download_audio: async function (audio_url) {
+        try {
+            const audioCheck = await this.is_audio(audio_url);
+            if (!audioCheck.is_audio) {
+                throw new Error('音频链接无效');
+            }
+
+            // Create downloads directory if it doesn't exist
+            const downloadDir = path.join(__dirname, '..', 'downloads');
+            if (!fs.existsSync(downloadDir)) {
+                fs.mkdirSync(downloadDir);
+            }
+
+            // Generate filename with timestamp and extension
+            const timestamp = new Date().getTime();
+            const extension = audioCheck.extension
+            const filename = `audio_${timestamp}.${extension}`;
+            const filepath = path.join(downloadDir, filename);
+
+            // Download video with progress tracking
+            const response = await axios({
+                method: 'get',
+                url: audio_url,
+                responseType: 'stream',
+                headers: {
+                    'Accept': '*/*',
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36 Edg/136.0.0.0'
+                }
+            });
+
+            // Get total size
+            const totalSize = parseInt(response.headers['content-length'], 10);
+            let downloadedSize = 0;
+
+            // Create write stream
+            const writer = fs.createWriteStream(filepath);
+
+            // Pipe the response to the file while tracking progress
+            response.data.on('data', (chunk) => {
+                downloadedSize += chunk.length;
+                const progress = (downloadedSize / totalSize) * 100;
+                // console.log(`Download progress: ${progress.toFixed(2)}%`);
+            });
+
+            response.data.pipe(writer);
+
+            return new Promise((resolve, reject) => {
+                writer.on('finish', () => {
+                    resolve({
+                        success: true,
+                        filepath: filepath,
+                        filename: filename,
+                        size: this.bytesToMB(totalSize)
+                    });
+                });
+
+                writer.on('error', reject);
+            });
+
+        } catch (error) {
+            console.error('Error downloading audio:', error.message);
+            return {
+                success: false,
+                error: error.message
+            };
+        }
+    },
     is_video: async function (url) {
         try {
             const response = await axios.head(url);
@@ -431,9 +498,35 @@ const tool = {
             await redis.set(free_key, left_time);
         }
     },
-    //音频格式转换
-    audio_format_convert: async function (audio) {
-        
+    /**
+     * 
+     * @param {string} input_file 源文件
+     * @param {string} output_type 目标类型
+     * @returns 
+     */
+    audio_format_convert: async function (input_file, output_type) {
+        const output_file = `${input_file}.${output_type}`
+        const command = `ffmpeg -i ${input_file} ${output_file}`;
+        console.log(command)
+
+        try {
+            // Execute ffmpeg command
+            const { stdout, stderr } = await execPromise(command);
+            console.log("stdout",stdout)
+            console.log("stderr",stderr)
+            fs.unlink(input_file,(err) => {
+                if (err) throw err
+            });
+            return {success:true,filepath:output_file};
+        } catch (error) {
+             fs.unlink(input_file,(err) => {
+                if (err) throw err
+            });
+             fs.unlink(output_file,(err) => {
+                if (err) throw err
+            });
+            return {success:false, error: error.message};
+        }
     }
     
 };

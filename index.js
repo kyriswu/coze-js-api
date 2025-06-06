@@ -997,8 +997,9 @@ const aimlapi = require('./utils/ThirdParrtyApi/aimlapi');
 const lemonfoxai = require('./utils/ThirdParrtyApi/lemonfoxai');
 const { QuotaExceededError } = require('./utils/CustomError');
 
-// 静态资源服务，访问 images 目录下的文件
+// 静态资源服务
 app.use('/images', express.static(path.join(__dirname, 'images')));
+app.use('/audio', express.static(path.join(__dirname, 'downloads')));
 
 app.post('/xpan/search', netdiskapi.search)
 app.post('/xpan/get_dlink', netdiskapi.get_dlink)
@@ -1046,6 +1047,30 @@ app.get('/mp3/:id', async (req, res) => {
     }
 });
 
+app.post('/audio-format-convert', async (req, res) => {
+    let { url, format} = req.body;
+    if (!url || !format) {
+        return res.status(400).send('Invalid input: "url" or "format" is required');
+    }
+    
+    try {
+        const download = await tool.download_audio(url)
+        if(!download.success) throw new Error(download.error)
+        const convert = await tool.audio_format_convert(download.filepath, format)
+        if(!convert.success) throw new Error(convert.error)
+        return res.send({
+            "code": 0,
+            "msg":"格式转换成功，请尽快使用，本站将定期清除",
+            "data": `${req.protocol}://${req.get('host')}/audio/${path.basename(convert.filepath)}`
+        })
+    }catch(error){
+        console.error(error)
+        return res.send({
+            "code": -1,
+            "msg":"格式转换失败："+error.message
+        })
+    }
+})
 
 app.post('/whisper/speech-to-text', async (req, res) => {
     let {url,language,api_key} = req.body
@@ -1121,7 +1146,7 @@ app.post('/whisper/speech-to-text', async (req, res) => {
                 'msg': '抱歉，达到用量限制',
                 'data': {
                     "text": error.message,
-                    "srt": error.message
+                    "srt": "1\n00:00:00,000 --> 00:00:03,480\n" + error.message
                 }
             });
         } else {
