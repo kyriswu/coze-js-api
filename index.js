@@ -354,7 +354,7 @@ app.post('/jina_reader', async (req, res) => {
 
     const options = {
         hostname: 'r.jina.ai',
-        path: '/' + url,
+        path: '/' + encodeURI(url),
         method: 'GET',
         headers: {
             'Authorization': 'Bearer jina_244ca6436ced4fbba4fc6761a933abc77H_rA5y7mcR6jlg1d9Dv07Qvv1rY',
@@ -365,30 +365,38 @@ app.post('/jina_reader', async (req, res) => {
         agent: agent
     };
 
-    const _req = https.request(options, _res => {
-        let data = '';
-        _res.on('data', chunk => {
-            data += chunk;
-        });
+    try {
+        const _req = https.request(options, _res => {
+            let data = '';
+            _res.on('data', chunk => {
+                data += chunk;
+            });
 
-        _res.on('end', () => {
-            return res.send({
-                code: 0,
-                msg: 'Success',
-                data: data
+            _res.on('end', () => {
+                return res.send({
+                    code: 0,
+                    msg: 'Success',
+                    data: data
+                });
             });
         });
-    });
 
-    _req.on('error', (e) => {
-        console.error(`Problem with request: ${e.message}`);
+        _req.on('error', (e) => {
+            console.error(`Problem with request: ${e.message}`);
+            return res.send({
+                code: -1,
+                msg: `Error: ${e.message}`
+            })
+        });
+
+        _req.end();
+    }catch(error){
+        console.log(error)
         return res.send({
             code: -1,
-            msg: `Error: ${e.message}`
-        })
-    });
-
-    _req.end();
+            msg: "出现错误，请联系作者【B站：小吴爱折腾】"
+        });
+    }
 
 })
 
