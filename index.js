@@ -329,7 +329,7 @@ async function canSearchGoogle(key) {
 async function canUseHtmlParse(key) {
     if(environment === "online"){
         const usage = await getUsage(key);
-        if (usage > 3) {
+        if (usage >= 3) {
             return false
         }
     }
