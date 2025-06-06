@@ -1052,6 +1052,13 @@ app.post('/audio-format-convert', async (req, res) => {
     if (!url || !format) {
         return res.status(400).send('Invalid input: "url" or "format" is required');
     }
+    const supported_format = ['mp3', 'm4a', 'wav', 'ogg', 'aac', 'flac'];
+    if (!supported_format.includes(format)) {
+        return res.send({
+            "code": -1,
+            "msg":"format参数仅支持mp3/m4a/wav/ogg/aac/flac"
+        })
+    }
     
     try {
         const download = await tool.download_audio(url)
