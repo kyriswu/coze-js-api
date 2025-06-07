@@ -1096,11 +1096,16 @@ app.post('/whisper/speech-to-text', async (req, res) => {
         videoLink = tool.remove_query_param(videoLink)
 
         const free_key = "FreeASR_" + req.headers['user-identity']
+        const lock_key = "asr:lock:" + req.headers['user-identity']//并发锁
         console.log(free_key)
         var left_time = await redis.get(free_key)
         if (!left_time || isNaN(left_time)) left_time = 10
         if (left_time <= 0) throw new QuotaExceededError("试用体验结束，该服务需要大量算力资源，维护不易，如果您喜欢此工具，请联系作者购买时长（15元180分钟，30元450分钟，50元1000分钟）【vx：xiaowu_azt】")
-        
+        const lock_ttl = await redis.ttl(lock_key)
+        if(lock_ttl > 0) {
+            throw new Error(`上一个任务还在处理中，剩余${lock_ttl}秒`)
+        }
+
         var transcription = await redis.get("transcription_"+videoLink)
         if (transcription){
             
@@ -1109,13 +1114,23 @@ app.post('/whisper/speech-to-text', async (req, res) => {
             
             //查询直链
             console.log("视频链接：" + videoLink)
-            const XiaZaiTool = await tool.get_video_url(videoLink)
+            let retries = 5;
+            let XiaZaiTool;
+            while (retries > 0) {
+                XiaZaiTool = await tool.get_video_url(videoLink);
+                if (XiaZaiTool.success) break;
+                retries--;
+                if (retries > 0) {
+                    await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 1 second
+                }
+            }
             if (!XiaZaiTool.success) throw new Error(XiaZaiTool.message);
             if (!XiaZaiTool.data.success) throw new Error(XiaZaiTool.data.message)
             const downloadUrl = XiaZaiTool.data.data.videoUrls
 
             //语音转文字
             console.log("开始生成字幕")
+            await redis.set(lock_key, 1, "NX", "EX", 180)
             const result = await lemonfoxai.speech_to_text({
                 "file_url":downloadUrl,
                 "response_format":"verbose_json",
@@ -1127,6 +1142,7 @@ app.post('/whisper/speech-to-text', async (req, res) => {
             left_time = Math.floor(left_time - Math.ceil(Math.floor(transcription.duration)/60))
             await redis.set("transcription_"+videoLink, JSON.stringify(transcription), "EX", 3600 * 24 * 60)
             await redis.set(free_key, left_time)
+            await redis.del(lock_key)
             console.log("字幕生成结束")
         }
 
