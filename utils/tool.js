@@ -132,7 +132,7 @@ const tool = {
             response.data.on('data', (chunk) => {
                 downloadedSize += chunk.length;
                 const progress = (downloadedSize / totalSize) * 100;
-                // console.log(`Download progress: ${progress.toFixed(2)}%`);
+                console.log(`Download progress: ${progress.toFixed(2)}%`);
             });
 
             response.data.pipe(writer);

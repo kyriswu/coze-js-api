@@ -1,3 +1,15 @@
+### 服务器环境准备
+```bash
+yum install epel-release
+yum install certbot python3-certbot-nginx
+# 为域名申请证书，Certbot 会自动检测你的网站配置，自动生成证书并配置好 HTTPS。
+certbot --nginx
+# Let's Encrypt 的证书有效期是 90天，推荐使用自动续期：
+crontab -e
+0 3 * * * /usr/bin/certbot renew --quiet
+
+```
+
 依赖：安装好docker环境
 ### 本地部署流程
 1. docker run -d --name my-redis --restart=always -p 6379:6379 redis:latest
