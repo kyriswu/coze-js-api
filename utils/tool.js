@@ -376,11 +376,24 @@ const tool = {
             // 检查是否匹配 /video/av{数字} 格式
             const avPattern = /^\/video\/av\d+\/?$/;
             if(avPattern.test(urlObj.pathname)){
-                const response = await fetch(url)
-                if (!response.ok) {
+                const response = await axios.get(url, {
+                    headers: {
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36 Edg/136.0.0.0'
+                    },
+                    proxy: {
+                        host: 'p.webshare.io',
+                        port: 80,
+                        auth: {
+                            username: 'umwhniat-rotate',
+                            password: 'eudczfs5mkzt'
+                        },
+                        protocol: 'http'
+                    }
+                });
+                if (response.status !== 200) {
                     throw new Error(`查询BV链接失败，HTTP error! status: ${response.status}`);
                 }
-                const htmlContent = await response.text();
+                const htmlContent = response.data;
                 const dom = new JSDOM(htmlContent);
                 const { document, window } = dom.window;
                 // Find meta tag with property="og:url"
