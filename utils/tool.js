@@ -7,6 +7,7 @@ const { response } = require('express');
 const redis = require('./redisClient');
 const crypto = require('crypto');
 const whisperapi = require('./whisperapi');
+const { JSDOM } = require('jsdom');
 
 // Convert exec to Promise-based function
 const execPromise = util.promisify(exec);
@@ -363,6 +364,41 @@ const tool = {
         const matches = text.match(urlRegex);
         return matches ? matches[0] : null;
     },
+    url_preprocess: async function (url) {
+        try {
+            const urlObj = new URL(url);
+            
+            // 检查域名是否为 bilibili.com
+            if (!urlObj.hostname.endsWith('bilibili.com')) {
+                return url;
+            }
+
+            // 检查是否匹配 /video/av{数字} 格式
+            const avPattern = /^\/video\/av\d+\/?$/;
+            if(avPattern.test(urlObj.pathname)){
+                const response = await fetch(url)
+                if (!response.ok) {
+                    throw new Error(`查询BV链接失败，HTTP error! status: ${response.status}`);
+                }
+                const htmlContent = await response.text();
+                const dom = new JSDOM(htmlContent);
+                const { document, window } = dom.window;
+                // Find meta tag with property="og:url"
+                const metaTag = document.querySelector('meta[property="og:url"]');
+                if (metaTag) {
+                    const realUrl = metaTag.getAttribute('content');
+                    console.log("真实BV链接：", realUrl)
+                    return realUrl;
+                }else{
+                    console.log("没有找到meta标签：", htmlContent)
+                    return url;
+                }
+            }
+        } catch (error) {
+            // URL 解析失败
+            return url;
+        }       
+    },
     get_video_url: async function (input_text) {
         try{
             var data = ""
@@ -381,6 +417,8 @@ const tool = {
                 console.log("查询：", data)
                 if(data.success){
                     await redis.set(key, JSON.stringify(data), 'NX', 'EX', 3600 * 3);
+                }else{
+                    throw new Error(data.message)
                 }
             }else{
                 data = JSON.parse(value)
@@ -392,7 +430,7 @@ const tool = {
                 data: data
             }
         }catch(error){
-            console.log(error)
+            console.log("出现错误：", error)
             return {
                 success:false,
                 data: response.data

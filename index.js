@@ -1114,14 +1114,16 @@ app.post('/whisper/speech-to-text', async (req, res) => {
             
             //查询直链
             console.log("视频链接：" + videoLink)
-            let retries = 5;
+            //链接预处理（av转bv）
+            videoLink = await tool.url_preprocess(videoLink)
+            let retries = 3;
             let XiaZaiTool;
             while (retries > 0) {
                 XiaZaiTool = await tool.get_video_url(videoLink);
                 if (XiaZaiTool.success) break;
                 retries--;
                 if (retries > 0) {
-                    await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 1 second
+                    await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second
                 }
             }
             if (!XiaZaiTool.success) throw new Error(XiaZaiTool.message);
