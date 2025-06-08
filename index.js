@@ -1097,7 +1097,7 @@ app.post('/video2audio', async (req, res) => {
         return res.send({
             "code": 0,
             "msg": "success",
-            "data": `${protocol}://${req.get('host')}/audio/${path.basename(convert.outputFile)}`
+            "data": `https://coze-js-api.devtool.uk/audio/${path.basename(convert.outputFile)}`
         })
     }catch(error){
         console.error(error)
