@@ -115,7 +115,10 @@ const tool = {
                 headers: {
                     'Accept': '*/*',
                     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36 Edg/136.0.0.0'
-                }
+                },
+                timeout: 30000, // 30 seconds timeout for the request
+                maxContentLength: Infinity, // Allow large files
+                maxBodyLength: Infinity
             });
 
             // Get total size
@@ -148,7 +151,7 @@ const tool = {
             });
 
         } catch (error) {
-            console.error('Error downloading video:', error.message);
+            console.error('Error downloading video:', error);
             return {
                 success: false,
                 error: error.message
