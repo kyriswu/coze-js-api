@@ -716,7 +716,8 @@ async function zyteExtract(req, res) {
         if (!canParse) {
             return res.send({
                 code: -1,
-                msg: '免费版每天限量3次，付费可以解锁更多次数，请联系作者！【B站:小吴爱折腾】'
+                msg: '免费版每天限量3次，付费可以解锁更多次数，请联系作者！【B站:小吴爱折腾】',
+                data: [{ htmlContent: "免费版每天限量3次，付费可以解锁更多次数，请联系作者！【B站:小吴爱折腾】" }]
             }); 
         }
     }
