@@ -1118,7 +1118,7 @@ app.post('/whisper/speech-to-text', async (req, res) => {
     }
     
     try{
-
+throw new Error("由于本插件太火爆，上线几天就被大家耗光羊毛了，该服务需要大量算力资源，维护不易，如果您喜欢此工具，请联系作者购买使用权限【vx：xiaowu_azt】")
         var videoLink = tool.extract_url(url)
         if (!videoLink) throw new Error("无法解析此链接，本插件支持快手/抖音/小红书/B站/Youtube/tiktok，有问题联系作者【vx：xiaowu_azt】")
         videoLink = tool.remove_query_param(videoLink)
