@@ -1081,6 +1081,33 @@ app.post('/audio-format-convert', async (req, res) => {
     }
 })
 
+app.post('/video2audio', async (req, res) => {
+    const {videoUrl} = req.body
+    if (!videoUrl){
+        return res.status(400).send('Invalid input: "videoUrl" is required');
+    }
+
+    try {
+        download = await tool.download_video(videoUrl)
+        if (!download.success) throw new Error(download.error);
+        convert = await tool.video_to_audio(download.filepath)
+        if (!convert.success) throw new Error(convert.error);
+
+        const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+        return res.send({
+            "code": 0,
+            "msg": "success",
+            "data": `${protocol}://${req.get('host')}/audio/${path.basename(convert.outputFile)}`
+        })
+    }catch(error){
+        console.error(error)
+        return res.send({
+            "code": -1,
+            "msg": error.message
+        })
+    }
+})
+
 app.post('/whisper/speech-to-text', async (req, res) => {
     let {url,language,api_key} = req.body
     if (!url) {
@@ -1184,6 +1211,8 @@ app.post('/whisper/speech-to-text', async (req, res) => {
         }
     }
 })
+
+
 
 
 app.listen(port, () => {

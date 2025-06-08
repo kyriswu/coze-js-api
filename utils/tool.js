@@ -263,16 +263,16 @@ const tool = {
     },
     video_to_audio: async function (video) {
         try {
-            // Get the directory and original filename
+            // Get the directory and original filen ame
             const dir = path.dirname(video);
             const originalFilename = path.basename(video);
+            const extension = path.extname(video);
             
             // Replace 'video' with 'audio' in filename and change extension to .wav
-            const outputFile = path.join(dir, originalFilename.replace('video', 'audio').replace('.mp4', '.wav'));
-
+            const outputFile = path.join(dir, originalFilename.replace('video', 'audio').replace(extension, '.mp3'));
 
             // Construct ffmpeg command
-            const command = `ffmpeg -i "${video}" -vn -acodec pcm_s16le -ar 16000 -ac 1 "${outputFile}"`;
+            const command = `ffmpeg -i ${video} -vn -ac 1 -ar 16000 -q:a 2 -y ${outputFile}`
             
             // Execute ffmpeg command
             const { stdout, stderr } = await execPromise(command);
