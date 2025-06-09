@@ -796,7 +796,9 @@ app.post('/download_video', async (req, res) => {
     try {
         var videoLink = tool.extract_url(url)
         if (!videoLink) throw new Error("无法解析此链接，本插件支持快手/抖音/小红书/B站/Youtube/tiktok，有问题联系作者【vx：xiaowu_azt】")
-        videoLink = tool.remove_query_param(videoLink)
+        if (!(videoLink.includes('www.youtube.com') || videoLink.includes('youtu.be'))) {
+            videoLink = tool.remove_query_param(videoLink)
+        }
 
         const free_key = "FreeVideoDownload_" + req.headers['user-identity']
         console.log(free_key)
