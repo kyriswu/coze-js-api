@@ -114,7 +114,7 @@ const coze = {
     },
     generate_video_caption: async function (url) {
         try {
-            var access_token = await redis.get("coze_api_access_token")
+            var access_token = await this.refresh_token()
             if (!access_token) {
                 access_token = await this.refresh_token()
             }
