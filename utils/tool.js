@@ -94,6 +94,7 @@ const tool = {
     },
     download_video: async function (url) {
         try {
+            console.log("下载视频直链：", url)
             // First check if it's a video
             const videoCheck = await this.is_video(url);
             if (!videoCheck.is_video) {
