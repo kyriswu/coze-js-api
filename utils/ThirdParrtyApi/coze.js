@@ -114,7 +114,7 @@ const coze = {
     },
     generate_video_caption: async function (url) {
         try {
-            var access_token = await this.refresh_token()
+            var access_token = await redis.get("coze_api_access_token")
             if (!access_token) {
                 access_token = await this.refresh_token()
             }
@@ -135,7 +135,20 @@ const coze = {
                 }
             });
 
-            return response.data;
+            const match = response.data.match(/id: 0[\s\S]*?data: (.*)/);
+            if (match) {
+                const rawJsonStr = match[1];
+                try {
+                    const data = JSON.parse(rawJsonStr);
+                    console.log(data); // 这是你要的 data 内容
+                    return data
+                } catch (e) {
+                    console.error("JSON 解析失败:", e);
+                }
+            } else {
+                console.error("未找到 id: 0 的 data 内容");
+            }
+
         } catch (error) {
             console.error("Failed to generate video caption:", error);
             throw error;
