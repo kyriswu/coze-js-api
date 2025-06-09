@@ -802,7 +802,7 @@ app.post('/download_video', async (req, res) => {
         console.log(free_key)
         var left_time = await redis.get(free_key)
         if (!left_time || isNaN(left_time)) left_time = 5
-        if (left_time <= 0) throw new QuotaExceededError("当前额度为0，如果您想继续使用，请联系作者购买额度【vx：xiaowu_azt】【B站：小吴爱折腾】")
+        if (left_time <= 0) throw new QuotaExceededError("当前使用额度为0，如果您想继续使用，请联系作者购买额度【vx：xiaowu_azt】【B站：小吴爱折腾】")
 
         //查询直链
         console.log("视频链接：" + videoLink)

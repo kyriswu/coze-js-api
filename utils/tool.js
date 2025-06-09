@@ -425,7 +425,12 @@ const tool = {
                     return url;
                 }
             }
+
+            // 如果不是 av 号或处理失败，直接返回原始 URL
+            return url;
+
         } catch (error) {
+            console.error('Error in url_preprocess:', error);
             // URL 解析失败
             return url;
         }       
