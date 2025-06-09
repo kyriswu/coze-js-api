@@ -1250,7 +1250,7 @@ app.post('/whisper/speech-to-text', async (req, res) => {
             const audio_url = `${protocol}://${req.get('host')}/audio/${path.basename(convert.outputFile)}`
             console.log("音频文件链接:",audio_url)
             const result = await coze.generate_video_caption(audio_url)
-            return res.send(JSON.parse(result.data))
+            return res.send(result.data)
             if (!result.success) throw result.error
             transcription = result.data
             left_time = Math.floor(left_time - Math.ceil(Math.floor(transcription.duration)/60))
