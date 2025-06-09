@@ -801,10 +801,26 @@ app.post('/download_video', async (req, res) => {
         }
 
         const free_key = "FreeVideoDownload_" + req.headers['user-identity']
-        console.log(free_key)
-        var left_time = await redis.get(free_key)
-        if (!left_time || isNaN(left_time)) left_time = 5
-        if (left_time <= 0) throw new QuotaExceededError("当前使用额度为0，如果您想继续使用，请联系作者购买额度【vx：xiaowu_azt】【B站：小吴爱折腾】")
+        var left_time = 0
+
+        const unkey_api_id = "api_413Kmmitqy3qaDo4";
+        if (api_key) {
+            const { keyId, valid, remaining, code } = await unkey.verifyKey(unkey_api_id, api_key, 0);
+            if (!valid) {
+                return res.send({
+                    msg: 'API Key 无效或已过期，请检查后重试！'
+                }); 
+            }
+            if (remaining == 0) {
+                return res.send({
+                    msg: 'API Key 使用次数已用完，请联系作者续费！'
+                }); 
+            }
+        }else{
+            left_time = await redis.get(free_key)
+            if (!left_time || isNaN(left_time)) left_time = 5
+            if (left_time <= 0) throw new QuotaExceededError("当前使用额度为0，如果您想继续使用，请联系作者购买额度【vx：xiaowu_azt】【B站：小吴爱折腾】")
+        }
 
         //查询直链
         console.log("视频链接：" + videoLink)
@@ -817,17 +833,27 @@ app.post('/download_video', async (req, res) => {
             if (XiaZaiTool.success) break;
             retries--;
             if (retries > 0) {
-                await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second
+                await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 1 second
             }
         }
         if (!XiaZaiTool.success) throw new Error(XiaZaiTool.message);
         if (!XiaZaiTool.data.success) throw new Error(XiaZaiTool.data.message)
         const downloadUrl = XiaZaiTool.data.data.videoUrls
-        await redis.set(free_key, left_time-1)
+        
+        var msg = ""
+        if (api_key) {
+            //付费版
+            const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
+            msg = `解析成功，API Key 剩余调用次数：${remaining}`;
+        }else{
+            await redis.set(free_key, Number(left_time)-1)
+            msg = `解析成功`;
+        }
+        
         return res.send({
-            "code":0,
-            "msg":"解析成功",
-            "data":downloadUrl
+            "code": 0,
+            "msg": msg,
+            "data": downloadUrl
         })
 
     } catch (error) {

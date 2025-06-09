@@ -450,7 +450,7 @@ const tool = {
                     }
                 );
                 data = response.data
-                // console.log("查询：", data)
+                console.log("查询：", JSON.stringify(data))
                 if(data.success){
                     await redis.set(key, JSON.stringify(data), 'NX', 'EX', 3600 * 3);
                 }else{
