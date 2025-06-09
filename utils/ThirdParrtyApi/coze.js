@@ -118,7 +118,7 @@ const coze = {
             if (!access_token) {
                 access_token = await this.refresh_token()
             }
-
+            console.log("access_token", access_token)
             const response = await axios({
                 method: 'post',
                 url: 'https://api.coze.cn/v1/workflow/stream_run',
