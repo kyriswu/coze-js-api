@@ -775,7 +775,7 @@ async function zyteExtract(req, res) {
             await redis.incr(free_key);//每次调用增加一次
             msg = `今日免费使用次数：${3 - await getUsage(free_key)}`;
         }
-        console.log(result_list)
+        
         return res.send({
             code: 0,
             msg: msg,
@@ -786,6 +786,56 @@ async function zyteExtract(req, res) {
         res.status(500).send(`Error: ${error.message}`);
     }
 }
+
+//全网视频下载(B站/抖音/头条/油管)
+app.post('/download_video', async (req, res) => {
+    let {url,api_key} = req.body
+    if (!url) {
+         return res.status(400).send('Invalid input: "url" is required');
+    }
+    try {
+        var videoLink = tool.extract_url(url)
+        if (!videoLink) throw new Error("无法解析此链接，本插件支持快手/抖音/小红书/B站/Youtube/tiktok，有问题联系作者【vx：xiaowu_azt】")
+        videoLink = tool.remove_query_param(videoLink)
+
+        const free_key = "FreeVideoDownload_" + req.headers['user-identity']
+        console.log(free_key)
+        var left_time = await redis.get(free_key)
+        if (!left_time || isNaN(left_time)) left_time = 5
+        if (left_time <= 0) throw new QuotaExceededError("当前额度为0，如果您想继续使用，请联系作者购买额度【vx：xiaowu_azt】【B站：小吴爱折腾】")
+
+        //查询直链
+        console.log("视频链接：" + videoLink)
+        //链接预处理（av转bv）
+        videoLink = await tool.url_preprocess(videoLink)
+        let retries = 3;
+        let XiaZaiTool;
+        while (retries > 0) {
+            XiaZaiTool = await tool.get_video_url(videoLink);
+            if (XiaZaiTool.success) break;
+            retries--;
+            if (retries > 0) {
+                await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second
+            }
+        }
+        if (!XiaZaiTool.success) throw new Error(XiaZaiTool.message);
+        if (!XiaZaiTool.data.success) throw new Error(XiaZaiTool.data.message)
+        const downloadUrl = XiaZaiTool.data.data.videoUrls
+        await redis.set(free_key, left_time-1)
+        return res.send({
+            "code":0,
+            "msg":"解析成功",
+            "data":downloadUrl
+        })
+
+    } catch (error) {
+        console.error(error)
+        return res.send({
+            "code":-1,
+            "msg":error.message
+        })
+    }
+})
 
 app.post('/get_sitemap', async (req, res) => {
     const { url, api_key } = req.body;

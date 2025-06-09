@@ -29,7 +29,7 @@ const unkey = {
                 res.on('end', () => {
                     try {
                         const parsedData = JSON.parse(responseData);
-                        console.log('Parsed data:', parsedData);
+                        console.log('Parsed data:', JSON.stringify(parsedData));
                         resolve(parsedData);
                     } catch (error) {
                         reject(error);

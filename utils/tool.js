@@ -8,6 +8,7 @@ const redis = require('./redisClient');
 const crypto = require('crypto');
 const whisperapi = require('./whisperapi');
 const { JSDOM } = require('jsdom');
+const { Throttle } = require('stream-throttle');
 
 // Convert exec to Promise-based function
 const execPromise = util.promisify(exec);
@@ -103,11 +104,12 @@ const tool = {
 
             // Generate filename with timestamp and extension
             const timestamp = new Date().getTime();
-            const extension = videoCheck.extension
+            const extension = videoCheck.extension;
             const filename = `video_${timestamp}.${extension}`;
             const filepath = path.join(downloadDir, filename);
 
             // Download video with progress tracking
+            const rateLimit = 100 * (1024 * 1024); // 0.5MB/s limit
             const response = await axios({
                 method: 'get',
                 url: url,
@@ -116,29 +118,43 @@ const tool = {
                     'Accept': '*/*',
                     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36 Edg/136.0.0.0'
                 },
-                timeout: 30000, // 30 seconds timeout for the request
-                maxContentLength: Infinity, // Allow large files
+                timeout: 30000,
+                maxContentLength: Infinity,
                 maxBodyLength: Infinity
             });
 
-            // Get total size
             const totalSize = parseInt(response.headers['content-length'], 10);
             let downloadedSize = 0;
+            let lastTime = Date.now();
+            let bytesThisSecond = 0;
 
-            // Create write stream
             const writer = fs.createWriteStream(filepath);
+            const throttle = new Throttle({ rate: rateLimit });
 
-            // Pipe the response to the file while tracking progress
-            response.data.on('data', (chunk) => {
-                downloadedSize += chunk.length;
-                const progress = (downloadedSize / totalSize) * 100;
-                console.log(`Download progress: ${progress.toFixed(2)}%`);
-            });
+            // 监听 throttled 数据流
+            // throttle.on('data', (chunk) => {
+            //     downloadedSize += chunk.length;
+            //     bytesThisSecond += chunk.length;
 
-            response.data.pipe(writer);
+            //     const now = Date.now();
+            //     const timeDiff = now - lastTime;
+
+            //     if (timeDiff >= 1000) {
+            //         const speed = bytesThisSecond / (timeDiff / 1000);
+            //         const progress = (downloadedSize / totalSize) * 100;
+            //         console.log(`Download progress: ${progress.toFixed(2)}%, Speed: ${(speed / 1024 / 1024).toFixed(2)} MB/s`);
+
+            //         bytesThisSecond = 0;
+            //         lastTime = now;
+            //     }
+            // });
+
+            // 替换 pipe 流为带节流的流
+            response.data.pipe(throttle).pipe(writer);
 
             return new Promise((resolve, reject) => {
                 writer.on('finish', () => {
+                    console.log(`视频下载成功，视频大小：${this.bytesToMB(totalSize)}MB`)
                     resolve({
                         success: true,
                         filepath: filepath,
@@ -370,7 +386,6 @@ const tool = {
     url_preprocess: async function (url) {
         try {
             const urlObj = new URL(url);
-            
             // 检查域名是否为 bilibili.com
             if (!urlObj.hostname.endsWith('bilibili.com')) {
                 return url;
@@ -430,7 +445,7 @@ const tool = {
                     }
                 );
                 data = response.data
-                console.log("查询：", data)
+                // console.log("查询：", data)
                 if(data.success){
                     await redis.set(key, JSON.stringify(data), 'NX', 'EX', 3600 * 3);
                 }else{
@@ -438,7 +453,7 @@ const tool = {
                 }
             }else{
                 data = JSON.parse(value)
-                console.log("缓存：", data)
+                // console.log("缓存：", data)
             }
             
             return {
