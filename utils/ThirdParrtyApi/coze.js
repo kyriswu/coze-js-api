@@ -103,7 +103,7 @@ const coze = {
                 refresh_token: oauthToken.refresh_token,
                 expires_in: `${oauthToken.expires_in} (${expiresStr})`,
             })
-            await redis.set("coze_api_access_token", oauthToken.access_token, "EX", oauthToken.expires_in)
+            await redis.set("coze_api_access_token", oauthToken.access_token, "EX", 60 * 14)
             await redis.set("coze_api_refresh_token", oauthToken.refresh_token, "EX", 3600 * 24 * 30)
             return oauthToken.access_token
         }catch(error){
