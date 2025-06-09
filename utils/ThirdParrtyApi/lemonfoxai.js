@@ -1,7 +1,7 @@
-const axios = require('axios');
-const fs = require('fs');
-const path = require('path');
-const OpenAI = require('openai');
+import axios from 'axios';
+import fs from 'fs';
+import path from 'path';
+import OpenAI from 'openai';
 
 const APIKEY = "IiVQKvhX0It8AZZikI2uD7CQr2ow4hAM"
 
@@ -102,4 +102,4 @@ const lemonfoxai = {
     }
 };
 
-module.exports = lemonfoxai;
+export default lemonfoxai;

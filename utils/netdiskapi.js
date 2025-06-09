@@ -1,5 +1,5 @@
-const axios = require('axios');
-const redis = require('./redisClient');
+import axios from 'axios';
+import redis from './redisClient.js';
 
 const API_BASE_URL = process.env.NODE_ENV === 'online' ? 'http://netdisk-api' : 'http://localhost:8080';
 
@@ -227,4 +227,4 @@ const netdiskapi = {
     
 };
 
-module.exports = netdiskapi;
+export default netdiskapi;

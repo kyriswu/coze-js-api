@@ -1,20 +1,22 @@
-const express = require('express')
-const axios = require('axios')
-const fs = require('fs');
-const { execFile } = require('child_process');
-const cheerio = require('cheerio')
-const { JSDOM } = require('jsdom');
-const TurndownService = require('@joplin/turndown');
-const turndownPluginGfm = require('@joplin/turndown-plugin-gfm');
-const { Readability, isProbablyReaderable } = require('@mozilla/readability');
-const { URL } = require('url');
-const unkey = require('./utils/unkey');
-const app = express()
-const port = 3000
+import express from 'express';
+import axios from 'axios';
+import fs from 'fs';
+import { execFile } from 'child_process';
+import { JSDOM } from 'jsdom';
+import TurndownService from '@joplin/turndown';
+import turndownPluginGfm from '@joplin/turndown-plugin-gfm';
+import { Readability, isProbablyReaderable } from '@mozilla/readability';
+import { URL,fileURLToPath } from 'url';
+import unkey from './utils/unkey.js'
+import { dirname } from 'path';
+import path from 'path'
+import crypto from 'crypto';
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
+
+const app = express();
+const port = 3000;
 const environment = process.env.NODE_ENV || 'development';
-const crypto = require('crypto');
-const path = require('path');
-const ffmpeg = require('fluent-ffmpeg');
 
 app.use(express.json())
 app.use(express.text())
@@ -68,11 +70,10 @@ const urlHandlers = {
     // 其它 URL 处理函数……
 };
 
-const redis = require('./utils/redisClient');
-const { parse } = require('path');
-const search1api = require('./utils/search1api');
-const zyte = require('./utils/zyte');
-const { th_bilibili, th_youtube } = require('./utils/tikhub.io');
+import redis from './utils/redisClient.js';
+import search1api from './utils/search1api.js';
+import zyte from './utils/zyte.js';
+import { th_bilibili, th_youtube } from './utils/tikhub.io.js';
 // 从 Redis 中获取用户使用量
 async function getUsage(key) {
     let value = await redis.get(key);
@@ -336,7 +337,8 @@ async function canUseHtmlParse(key) {
     return true;
 }
 
-
+import https from 'https';
+import { HttpsProxyAgent } from 'https-proxy-agent';
 app.post('/jina_reader', async (req, res) => {
 
     let { url } = req.body;
@@ -344,8 +346,7 @@ app.post('/jina_reader', async (req, res) => {
     if (!url) {
         return res.status(400).send('Invalid input: "url" is required');
     }
-    const https = require('https');
-    const { HttpsProxyAgent } = require('https-proxy-agent');
+   
 
     // 设置您的代理服务器地址
     const proxyUrl = 'http://umwhniat-rotate:eudczfs5mkzt@p.webshare.io:80';
@@ -1069,12 +1070,12 @@ app.post('/pdf2img', async (req, res) => {
     })
 })
 
-const netdiskapi = require('./utils/netdiskapi');
-const faceplusplus = require('./utils/kuangshi');
-const tool = require('./utils/tool');
-const aimlapi = require('./utils/ThirdParrtyApi/aimlapi');
-const lemonfoxai = require('./utils/ThirdParrtyApi/lemonfoxai');
-const { QuotaExceededError } = require('./utils/CustomError');
+import netdiskapi from './utils/netdiskapi.js';
+import  tool from './utils/tool.js';
+import * as aimlapi from './utils/ThirdParrtyApi/aimlapi.js';
+import * as lemonfoxai from './utils/ThirdParrtyApi/lemonfoxai.js';
+import { QuotaExceededError } from './utils/CustomError.js';
+import coze from './utils/ThirdParrtyApi/coze.js';
 
 // 静态资源服务
 app.use('/images', express.static(path.join(__dirname, 'images')));
@@ -1086,8 +1087,6 @@ app.post('/xpan/get_access_token', netdiskapi.get_access_token)
 app.post('/xpan/refresh_token', netdiskapi.refresh_token)
 app.post('/xpan/filemetainfo', netdiskapi.filemetainfo)
 app.get('/xpan/download', netdiskapi.download)
-
-app.post('/faceplusplus/face_detect', faceplusplus.face_detect)
 
 //生成重定向链接
 app.post('/tts_to_mp3', async (req, res) => {
@@ -1194,9 +1193,11 @@ app.post('/whisper/speech-to-text', async (req, res) => {
     if (!language){
         language="chinese"
     }
-    
+    if(api_key!==123) return res.send({
+        "code":-1,
+        "msg":"服务升级中"
+    })
     try{
-throw new Error("由于本插件太火爆，上线几天就被大家耗光羊毛了，该服务需要大量算力资源，维护不易，如果您喜欢此工具，请联系作者购买使用权限【vx：xiaowu_azt】")
         var videoLink = tool.extract_url(url)
         if (!videoLink) throw new Error("无法解析此链接，本插件支持快手/抖音/小红书/B站/Youtube/tiktok，有问题联系作者【vx：xiaowu_azt】")
         videoLink = tool.remove_query_param(videoLink)
@@ -1229,22 +1230,27 @@ throw new Error("由于本插件太火爆，上线几天就被大家耗光羊毛
                 if (XiaZaiTool.success) break;
                 retries--;
                 if (retries > 0) {
-                    await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second
+                    await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 1 second
                 }
             }
             if (!XiaZaiTool.success) throw new Error(XiaZaiTool.message);
             if (!XiaZaiTool.data.success) throw new Error(XiaZaiTool.data.message)
             const downloadUrl = XiaZaiTool.data.data.videoUrls
 
+            await redis.set(lock_key, 1, "NX", "EX", 180)
+            //下载mp4文件
+            console.log("开始下载mp4文件")
+            const download = await tool.download_video(downloadUrl)
+            if (!download.success) throw new Error(download.error);
+            const convert = await tool.video_to_audio(download.filepath)
+            if (!convert.success) throw new Error(convert.error);
             //语音转文字
             console.log("开始生成字幕")
-            await redis.set(lock_key, 1, "NX", "EX", 180)
-            const result = await lemonfoxai.speech_to_text({
-                "file_url":downloadUrl,
-                "response_format":"verbose_json",
-                "speaker_labels": false,
-                "language":language
-            })
+            const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+            const audio_url = `${protocol}://${req.get('host')}/audio/${path.basename(convert.outputFile)}`
+            console.log("音频文件链接:",audio_url)
+            const result = await coze.generate_video_caption(audio_url)
+            return res.send({"data":result})
             if (!result.success) throw result.error
             transcription = result.data
             left_time = Math.floor(left_time - Math.ceil(Math.floor(transcription.duration)/60))
@@ -1290,8 +1296,7 @@ throw new Error("由于本插件太火爆，上线几天就被大家耗光羊毛
     }
 })
 
-
-
+app.get('/coze-auth-callback', coze.callback)
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)

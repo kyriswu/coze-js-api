@@ -1,4 +1,4 @@
-const Redis = require('ioredis');
+import Redis from 'ioredis';
 
 
 // 根据环境变量设置 Redis 主机
@@ -20,4 +20,4 @@ redis.on('error', (err) => {
 });
 
 // 导出 Redis 客户端
-module.exports = redis;
+export default redis 

@@ -1,4 +1,4 @@
-const https = require('https');
+import https from 'node:https';
 
 const unkey = {
     verifyKey: async function (apiId, key, cost) {
@@ -64,4 +64,4 @@ const unkey = {
     }
 };
 
-module.exports = unkey;
+export default unkey;

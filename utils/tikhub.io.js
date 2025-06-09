@@ -1,11 +1,11 @@
-const axios = require('axios');
-const unkey = require('./unkey');
-const redis = require('./redisClient');
+import axios from 'axios';
+import unkey from './unkey.js';
+import redis from './redisClient.js';
 
 const tikhub_api_token = "k500F2ou70UEuXsHzWKAolU82AYOsIfGsK5N5ivGrXNC+VY2TN8qyjynJg=="
 const unkey_api_id = "api_413Kmmitqy3qaDo4"
 
-const th_youtube = {
+export const th_youtube = {
     get_video_info: async function (url, actions) {
         var config = {
             method: 'get',
@@ -21,7 +21,7 @@ const th_youtube = {
     
 };
 
-const th_bilibili = {
+export const th_bilibili = {
     get_aid_cid: async function(url) {
         return new Promise(async (resolve, reject) => {
             // 1. 从链接中提取出 BV 号
@@ -171,7 +171,7 @@ const th_bilibili = {
     }
 }
 
-module.exports = {
-    th_youtube: th_youtube,
-    th_bilibili: th_bilibili
+export default {
+    th_youtube,
+    th_bilibili
 }

@@ -1,14 +1,18 @@
-const axios = require('axios');
-const fs = require('fs');
-const path = require('path');
-const { exec } = require('child_process');
-const util = require('util');
-const { response } = require('express');
-const redis = require('./redisClient');
-const crypto = require('crypto');
-const whisperapi = require('./whisperapi');
-const { JSDOM } = require('jsdom');
-const { Throttle } = require('stream-throttle');
+import axios from 'axios';
+import fs from 'fs';
+import { URL,fileURLToPath } from 'url';
+import { dirname } from 'path';
+import path from 'path'
+import { exec } from 'child_process';
+import util from 'util';
+import { response } from 'express';
+import redis from './redisClient.js';
+import crypto from 'crypto';
+import whisperapi from './whisperapi.js';
+import { JSDOM } from 'jsdom';
+import { Throttle } from 'stream-throttle';
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
 
 // Convert exec to Promise-based function
 const execPromise = util.promisify(exec);
@@ -398,15 +402,15 @@ const tool = {
                     headers: {
                         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36 Edg/136.0.0.0'
                     },
-                    proxy: {
-                        host: 'p.webshare.io',
-                        port: 80,
-                        auth: {
-                            username: 'umwhniat-rotate',
-                            password: 'eudczfs5mkzt'
-                        },
-                        protocol: 'http'
-                    }
+                    // proxy: {
+                    //     host: 'p.webshare.io',
+                    //     port: 80,
+                    //     auth: {
+                    //         username: 'umwhniat-rotate',
+                    //         password: 'eudczfs5mkzt'
+                    //     },
+                    //     protocol: 'http'
+                    // }
                 });
                 if (response.status !== 200) {
                     throw new Error(`查询BV链接失败，HTTP error! status: ${response.status}`);
@@ -437,6 +441,7 @@ const tool = {
     },
     get_video_url: async function (input_text) {
         try{
+            console.log("视频链接：", input_text)
             var data = ""
             const key = this.md5(input_text)
             const value = await redis.get(key)
@@ -605,4 +610,4 @@ const tool = {
     
 };
 
-module.exports = tool;
+export default tool;

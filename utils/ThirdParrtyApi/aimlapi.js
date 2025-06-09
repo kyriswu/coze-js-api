@@ -1,7 +1,7 @@
-const axios = require('axios');
-const fs = require('fs');
-const path = require('path');
-const OpenAI = require('openai');
+import axios from 'axios';
+import fs from 'fs';
+import path from 'path';
+import OpenAI from 'openai';
 
 const APIKEY = "3b626c757811448ca2fdeb307aa7076a"
 
@@ -80,4 +80,4 @@ const aimlapi = {
     }
 };
 
-module.exports = aimlapi;
+export default aimlapi;

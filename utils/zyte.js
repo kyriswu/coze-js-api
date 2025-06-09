@@ -1,4 +1,4 @@
-const axios = require('axios')
+import axios from 'axios';
 
 const zyte = {
     extract: async function (url, actions, screenshot) {
@@ -66,4 +66,4 @@ const zyte = {
     }
 };
 
-module.exports = zyte;
+export default zyte;

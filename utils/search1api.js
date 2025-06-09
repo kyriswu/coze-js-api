@@ -39,4 +39,4 @@ const search1api = {
     }
 };
 
-module.exports = search1api;
+export default search1api;
