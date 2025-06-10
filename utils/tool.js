@@ -176,10 +176,10 @@ const tool = {
         try {
             console.log("下载视频直链：", url)
             // First check if it's a video
-            const videoCheck = await this.is_video(url);
-            if (!videoCheck.is_video) {
-                throw new Error('视频链接无效');
-            }
+            // const videoCheck = await this.is_video(url);
+            // if (!videoCheck.is_video) {
+            //     throw new Error('视频链接无效');
+            // }
 
             // Create downloads directory if it doesn't exist
             const downloadDir = path.join(__dirname, '..', 'downloads');
@@ -189,9 +189,9 @@ const tool = {
 
             // Generate filename with timestamp and extension
             const timestamp = new Date().getTime();
-            const extension = videoCheck.extension;
-            const filename = `video_${timestamp}.${extension}`;
-            const filepath = path.join(downloadDir, filename);
+            const extension = 'mp4';
+            var filename = `video_${timestamp}.${extension}`;
+            var filepath = path.join(downloadDir, filename);
 
             // Download video with progress tracking
             const rateLimit = 100 * (1024 * 1024); // 0.5MB/s limit
@@ -240,13 +240,31 @@ const tool = {
             return new Promise((resolve, reject) => {
                 writer.on('finish', () => {
                     console.log(`视频下载成功，视频大小：${this.bytesToMB(totalSize)}MB`)
-                    resolve({
-                        success: true,
-                        filepath: filepath,
-                        filename: filename,
-                        size: this.bytesToMB(totalSize)
+                     this.get_media_info(filepath)
+                        .then(info => {
+                            console.log(info)
+
+
+                            if (!info.success) {
+                                return reject(new Error(info.error));
+                            }
+                            if (info.success) {
+                                const newPath = filepath.replace(/\.[^.]+$/, `.${info.extension}`);
+                                fs.renameSync(filepath, newPath);
+                                filepath = newPath;
+                                filename = path.basename(filepath);
+                                console.log(`视频转换成功，新的文件名：${filename}`);
+                            }
+
+                            resolve({
+                                success: true,
+                                filepath: filepath,
+                                filename: filename,
+                                size: this.bytesToMB(totalSize)
+                            });
+                        })
+                        .catch(error => reject(error));
                     });
-                });
 
                 writer.on('error', reject);
             });
@@ -275,8 +293,8 @@ const tool = {
             // Generate filename with timestamp and extension
             const timestamp = new Date().getTime();
             const extension = 'mp3'
-            const filename = `audio_${timestamp}.${extension}`;
-            const filepath = path.join(downloadDir, filename);
+            var filename = `audio_${timestamp}.${extension}`;
+            var filepath = path.join(downloadDir, filename);
 
             // Download video with progress tracking
             const response = await axios({
@@ -320,7 +338,15 @@ const tool = {
                 writer.on('finish', () => {
 
                     const info = this.get_media_info(filepath)
-                    console.log("音频信息：", info)
+                    if (!info.success) {
+                        return reject(new Error(info.error));
+                    }
+                    if (info.success) {
+                        const newPath = filepath.replace(/\.[^.]+$/, `.${info.extension}`);
+                        fs.renameSync(filepath, newPath);
+                        filepath = newPath;
+                        filename = path.basename(filepath);
+                    }
                     resolve({
                         success: true,
                         filepath: filepath,

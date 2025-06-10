@@ -136,19 +136,16 @@ const coze = {
                 }
             });
 
-            const match = response.data.match(/id: 0[\s\S]*?data: (.*)/);
-            if (match) {
-                const rawJsonStr = match[1];
-                try {
-                    const data = JSON.parse(rawJsonStr);
-                    console.log(data); // 这是你要的 data 内容
-                    return data.content;
-                } catch (e) {
-                    console.error("JSON 解析失败:", e);
-                }
+            console.log("插件原始字幕结果：", response.data);
+
+            const messageDataMatch = response.data.match(/event:\s*message\s*data:\s*(\{[\s\S]*?)(?=\n(?:id:|event:|$))/i);
+
+            if (messageDataMatch) {
+                const messageData = messageDataMatch[1].trim();
+                console.log("提取到的 message data 内容：", messageData);
+                return JSON.parse(messageData);
             } else {
-                console.error("未找到 id: 0 的 data 内容");
-                throw new Error("未找到 id: 0 的 data 内容");
+                throw new Error("未找到有效的 message data 内容");
             }
 
         } catch (error) {

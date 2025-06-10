@@ -1245,12 +1245,12 @@ app.post('/whisper/speech-to-text', async (req, res) => {
             if (!convert.success) throw new Error(convert.error);
 
             const protocol = req.headers['x-forwarded-proto'] || req.protocol;
-            const audio_url = `${protocol}://${req.get('host')}/audio/${path.basename(convert.outputFile)}`
-            
+            var audio_url = `${protocol}://${req.get('host')}/audio/${path.basename(convert.outputFile)}`
+            // audio_url = "https://coze-js-api.devtool.uk/audio/audio_1749559334235.mp3"
             //语音转文字
             console.log("开始生成字幕")
             const result = await coze.generate_video_caption(audio_url)
-            transcription = JSON.parse(result).output
+            transcription = JSON.parse(result.content).output
             left_time = left_time - 1
             await redis.set("transcription_"+videoLink, JSON.stringify(transcription), "EX", 3600 * 24 * 60)
             await redis.set(free_key, left_time)//更新免费余量
