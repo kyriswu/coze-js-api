@@ -345,7 +345,8 @@ const tool = {
                 'audio/x-wav': 'wav',
                 'audio/ogg': 'ogg',
                 'audio/aac': 'aac',
-                'audio/flac': 'flac'
+                'audio/flac': 'flac',
+                'audio/webm': 'webm',
             };
             
             // 查找匹配的音频类型
