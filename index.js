@@ -1233,20 +1233,25 @@ app.post('/whisper/speech-to-text', async (req, res) => {
                 }
             }
             if (!XiaZaiTool.success) throw new Error(XiaZaiTool.data.message);
-            const downloadUrl = XiaZaiTool.data.data.videoUrls
-
+            //设置并发锁
             await redis.set(lock_key, 1, "NX", "EX", 180)
-            //下载mp4文件
-            console.log("开始下载mp4文件")
-            const download = await tool.download_video(downloadUrl)
-            if (!download.success) throw new Error(download.error);
-            const convert = await tool.video_to_audio(download.filepath)
-            if (!convert.success) throw new Error(convert.error);
+
+            var audio_url = XiaZaiTool.data.audio_url
+
+            if (!XiaZaiTool.data.audio_url){
+                const downloadUrl = XiaZaiTool.data.data.videoUrls
+                //下载mp4文件
+                const download = await tool.download_video(downloadUrl)
+                if (!download.success) throw new Error(download.error);
+                const convert = await tool.video_to_audio(download.filepath)
+                if (!convert.success) throw new Error(convert.error);
+
+                const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+                audio_url = `${protocol}://${req.get('host')}/audio/${path.basename(convert.outputFile)}`
+            }
+            
             //语音转文字
             console.log("开始生成字幕")
-            const protocol = req.headers['x-forwarded-proto'] || req.protocol;
-            const audio_url = `${protocol}://${req.get('host')}/audio/${path.basename(convert.outputFile)}`
-            console.log("音频文件链接:",audio_url)
             const result = await coze.generate_video_caption(audio_url)
             transcription = JSON.parse(result).output
             left_time = left_time - 1

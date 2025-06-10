@@ -6,18 +6,32 @@ const tikhub_api_token = "k500F2ou70UEuXsHzWKAolU82AYOsIfGsK5N5ivGrXNC+VY2TN8qyj
 const unkey_api_id = "api_413Kmmitqy3qaDo4"
 
 export const th_youtube = {
-    get_video_info: async function (url, actions) {
-        var config = {
+    get_video_info: async function (url) {
+        // 1. 从链接中提取出视频ID
+        const matched = url.match(/(?:v=|\/)([a-zA-Z0-9_-]{11})/);
+        if (!matched) {
+            throw new Error("无法从链接中提取视频ID");
+        }
+        const videoId = matched[1];
+        // 2. 调用 TikHub API 获取视频信息
+        try{
+            var config = {
             method: 'get',
-            url: 'https://api.tikhub.io/api/v1/youtube/web/get_video_info?video_id=LuIL5JATZsc',
+            url: 'https://api.tikhub.io/api/v1/youtube/web/get_video_info?video_id='+videoId,
             headers: {
                 "Authorization": "Bearer k500F2ou70UEuXsHzWKAolU82AYOsIfGsK5N5ivGrXNC+VY2TN8qyjynJg=="
             }
         };
 
         const response = await axios(config)
-        if (response.data.code == 200) {}
-    },
+        if (response.data.code == 200) {
+            return response.data.data
+        }
+        }catch (error) {
+            console.error("获取Youtube视频信息失败:", error.message);
+            throw new Error("获取Youtube视频信息失败，请稍后再试");
+        }
+    }
     
 };
 

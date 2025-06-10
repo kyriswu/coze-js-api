@@ -11,6 +11,7 @@ import crypto from 'crypto';
 import whisperapi from './whisperapi.js';
 import { JSDOM } from 'jsdom';
 import { Throttle } from 'stream-throttle';
+import { th_youtube } from './tikhub.io.js';
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 
@@ -453,28 +454,69 @@ const tool = {
             const value = await redis.get(key)
 
             if (value === null){
-                const response = await axios.post(
-                    'https://api.xiazaitool.com/api/parseVideoUrl',
-                    {
-                        url:input_text,
-                        token:'ca30558557e04da5ad5157f67bf1e10d'
+
+                if (input_text.includes('youtube.com') || input_text.includes('youtu.be')) {
+                    // 如果是 YouTube 链接，使用 th_youtube 模块获取视频信息
+                    const response = await th_youtube.get_video_info(input_text)
+
+                    var videoUrl = ""
+                    if (response.videos && response.videos.items && response.videos.items.length > 0) {
+                        // Sort items by size and get the smallest one
+                        const smallestVideo = response.videos.items.reduce((min, item) => {
+                            return (!min || item.size < min.size) ? item : min;
+                        });
+                        
+                        videoUrl = smallestVideo.url;
                     }
-                );
-                data = response.data
-                console.log("查询：", JSON.stringify(data))
-                if(data.success){
+
+                    var audioUrl = ""
+                    if (response.audios && response.audios.items && response.audios.items.length > 0) {
+                        // Sort items by size and get the smallest one
+                        const smallestAudio = response.audios.items.reduce((min, item) => {
+                            return (!min || item.size < min.size) ? item : min;
+                        });
+                        
+                        audioUrl = smallestAudio.url;
+                    }
+
+                    data = {
+                        title: response.title,
+                        audio_url: audioUrl,
+                        video_url: videoUrl,
+                    };
+                        
                     await redis.set(key, JSON.stringify(data), 'NX', 'EX', 3600 * 1);
+                   
                 }else{
-                    return {
-                        success:false,
-                        data: data
+                    
+                    // 如果是其他视频链接，使用下载工具 API 获取视频信息
+                    const response = await axios.post(
+                        'https://api.xiazaitool.com/api/parseVideoUrl',
+                        {
+                            url:input_text,
+                            token:'ca30558557e04da5ad5157f67bf1e10d'
+                        }
+                    );
+                    console.log("下载狗查询：", JSON.stringify(response.data))
+                    if(response.data.success){
+                        data = {
+                            title: response.data.data.title,
+                            video_url: response.data.data.videoUrls,
+                        };
+                        await redis.set(key, JSON.stringify(data), 'NX', 'EX', 3600 * 1);
+                    }else{
+                        return {
+                            success:false,
+                            data: response.data.message
+                        }
                     }
                 }
+
             }else{
                 data = JSON.parse(value)
                 // console.log("缓存：", data)
             }
-            
+
             return {
                 success:true,
                 data: data
@@ -483,7 +525,7 @@ const tool = {
             console.log("出现错误：", error)
             return {
                 success:false,
-                data: response.data
+                data: error.message
             }
         }
     },
