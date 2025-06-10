@@ -19,6 +19,49 @@ const __dirname = dirname(__filename)
 const execPromise = util.promisify(exec);
 
 const tool = {
+    getExtensionFromCodec: function(codec) {
+        const codecToExt = {
+            'mp3': 'mp3',
+            'aac': 'm4a',
+            'wav': 'wav',
+            'vorbis': 'ogg',
+            'opus': 'opus',
+            'flac': 'flac',
+            'mp4': 'mp4',
+            'h264': 'mp4',
+            'vp8': 'webm',
+            'vp9': 'webm'
+        };
+        return codecToExt[codec] || 'mp4';
+    },
+    get_media_info: async function (file) {
+        var command = ""
+        if (process.env.NODE_ENV === 'online'){
+             command = `ffprobe -v quiet -print_format json -show_format -show_streams "${file}"`;
+        }else{
+             command = `ffmpeg.ffprobe -v quiet -print_format json -show_format -show_streams "${file}"`;
+        }
+        
+        try {
+            // Execute ffmpeg command
+            const { stdout, stderr } = await execPromise(command);
+            console.log("stdout",stdout)
+            console.log("stderr",stderr)
+            const info = JSON.parse(stdout);
+            // Get file type info
+            const stream = info.streams[0];
+            const format = info.format;
+            return {
+                success: true,
+                type: stream.codec_type, // 'audio' or 'video'
+                codec: stream.codec_name,
+                format: format.format_name,
+                extension: this.getExtensionFromCodec(stream.codec_name)
+            };
+        } catch (error) {
+            return {success:false, error: error.message};
+        }
+    },
     format_SRT_timestamp: function(seconds){
         const date = new Date(seconds * 1000);
         const hours = String(date.getUTCHours()).padStart(2, '0');
@@ -182,10 +225,10 @@ const tool = {
     },
     download_audio: async function (audio_url) {
         try {
-            const audioCheck = await this.is_audio(audio_url);
-            if (!audioCheck.is_audio) {
-                throw new Error('音频链接无效');
-            }
+            // const audioCheck = await this.is_audio(audio_url);
+            // if (!audioCheck.is_audio) {
+            //     throw new Error('音频链接无效');
+            // }
 
             // Create downloads directory if it doesn't exist
             const downloadDir = path.join(__dirname, '..', 'downloads');
@@ -195,7 +238,7 @@ const tool = {
 
             // Generate filename with timestamp and extension
             const timestamp = new Date().getTime();
-            const extension = audioCheck.extension
+            const extension = 'mp3'
             const filename = `audio_${timestamp}.${extension}`;
             const filepath = path.join(downloadDir, filename);
 
@@ -228,6 +271,9 @@ const tool = {
 
             return new Promise((resolve, reject) => {
                 writer.on('finish', () => {
+
+                    const info = this.get_media_info(filepath)
+                    console.log("音频信息：", info)
                     resolve({
                         success: true,
                         filepath: filepath,
@@ -240,7 +286,7 @@ const tool = {
             });
 
         } catch (error) {
-            console.error('Error downloading audio:', error.message);
+            console.error('Error downloading audio:', error);
             return {
                 success: false,
                 error: error.message
@@ -333,7 +379,12 @@ const tool = {
     },
     is_audio: async function (url) {
         try {
-            const response = await axios.head(url);
+            const response = await axios.head(url, {
+                headers: {
+                    'Accept': '*/*',
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36 Edg/136.0.0.0'
+                }
+            });
             const contentType = response.headers['content-type'];
             console.log(contentType);
             const contentLength = parseInt(response.headers['content-length'], 10)
