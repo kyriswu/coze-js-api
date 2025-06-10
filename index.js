@@ -1165,9 +1165,9 @@ app.post('/video2audio', async (req, res) => {
     }
 
     try {
-        download = await tool.download_video(videoUrl)
+        const download = await tool.download_video(videoUrl)
         if (!download.success) throw new Error(download.error);
-        convert = await tool.video_to_audio(download.filepath)
+        const convert = await tool.video_to_audio(download.filepath)
         if (!convert.success) throw new Error(convert.error);
 
         const protocol = req.headers['x-forwarded-proto'] || req.protocol;
@@ -1193,21 +1193,20 @@ app.post('/whisper/speech-to-text', async (req, res) => {
     if (!language){
         language="chinese"
     }
-    if(api_key!==123) return res.send({
-        "code":-1,
-        "msg":"服务升级中"
-    })
+
     try{
         var videoLink = tool.extract_url(url)
         if (!videoLink) throw new Error("无法解析此链接，本插件支持快手/抖音/小红书/B站/Youtube/tiktok，有问题联系作者【vx：xiaowu_azt】")
-        videoLink = tool.remove_query_param(videoLink)
+        if (!(videoLink.includes('www.youtube.com') || videoLink.includes('youtu.be'))) {
+            videoLink = tool.remove_query_param(videoLink)
+        }
 
         const free_key = "FreeASR_" + req.headers['user-identity']
         const lock_key = "asr:lock:" + req.headers['user-identity']//并发锁
         console.log(free_key)
         var left_time = await redis.get(free_key)
         if (!left_time || isNaN(left_time)) left_time = 3
-        if (left_time <= 0) throw new QuotaExceededError("试用体验结束，该服务需要大量算力资源，维护不易，如果您喜欢此工具，请联系作者购买时长（15元180分钟，30元450分钟，50元1000分钟）【vx：xiaowu_azt】")
+        if (left_time <= 0) throw new QuotaExceededError("试用体验结束，该服务需要大量算力资源，维护不易，如果您喜欢此工具，请联系作者购买时长【vx：xiaowu_azt】")
         const lock_ttl = await redis.ttl(lock_key)
         if(lock_ttl > 0) {
             throw new Error(`上一个任务还在处理中，剩余${lock_ttl}秒`)
@@ -1250,10 +1249,8 @@ app.post('/whisper/speech-to-text', async (req, res) => {
             const audio_url = `${protocol}://${req.get('host')}/audio/${path.basename(convert.outputFile)}`
             console.log("音频文件链接:",audio_url)
             const result = await coze.generate_video_caption(audio_url)
-            return res.send(result)
-            if (!result.success) throw result.error
-            transcription = result.data
-            left_time = Math.floor(left_time - Math.ceil(Math.floor(transcription.duration)/60))
+            transcription = JSON.parse(result).output
+            left_time = left_time - 1
             await redis.set("transcription_"+videoLink, JSON.stringify(transcription), "EX", 3600 * 24 * 60)
             await redis.set(free_key, left_time)
             await redis.del(lock_key)
@@ -1261,13 +1258,13 @@ app.post('/whisper/speech-to-text', async (req, res) => {
         }
 
         // 生成SRT内容
-        const srt = transcription.segments.map((item, index) => {
-            const start = tool.format_SRT_timestamp(item.start);
-            const end = tool.format_SRT_timestamp(item.end);
+        const srt = transcription.content_chunks.map((item, index) => {
+            const start = tool.format_SRT_timestamp(item.start_time);
+            const end = tool.format_SRT_timestamp(item.start_time);
             return `${index + 1}\n${start} --> ${end}\n${item.text}\n`;
         }).join('\n');
         const data = {
-            text:transcription.text,
+            text:transcription.content,
             srt:srt
         }
         

@@ -141,7 +141,7 @@ const coze = {
                 try {
                     const data = JSON.parse(rawJsonStr);
                     console.log(data); // 这是你要的 data 内容
-                    return data
+                    return data.content;
                 } catch (e) {
                     console.error("JSON 解析失败:", e);
                 }

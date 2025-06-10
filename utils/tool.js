@@ -248,7 +248,12 @@ const tool = {
     },
     is_video: async function (url) {
         try {
-            const response = await axios.head(url);
+            const response = await axios.head(url, {
+                headers: {
+                    'Accept': '*/*',
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36 Edg/136.0.0.0'
+                }
+            });
             const contentType = response.headers['content-type'];
 
             const contentLength = parseInt(response.headers['content-length'], 10)
