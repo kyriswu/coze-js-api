@@ -1248,6 +1248,10 @@ app.post('/whisper/speech-to-text', async (req, res) => {
 
                 const protocol = req.headers['x-forwarded-proto'] || req.protocol;
                 audio_url = `${protocol}://${req.get('host')}/audio/${path.basename(convert.outputFile)}`
+            }else{
+                const downloadAudio = await tool.download_audio(XiaZaiTool.data.audio_url)
+                if(!downloadAudio.success) throw new Error(downloadAudio.error)
+                audio_url = `${protocol}://${req.get('host')}/audio/${path.basename(downloadAudio.filepath)}`
             }
             
             //语音转文字
