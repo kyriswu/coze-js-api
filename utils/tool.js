@@ -465,7 +465,10 @@ const tool = {
                 if(data.success){
                     await redis.set(key, JSON.stringify(data), 'NX', 'EX', 3600 * 1);
                 }else{
-                    throw new Error(data.message)
+                    return {
+                        success:false,
+                        data: data
+                    }
                 }
             }else{
                 data = JSON.parse(value)

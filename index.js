@@ -1194,6 +1194,9 @@ app.post('/whisper/speech-to-text', async (req, res) => {
         language="chinese"
     }
 
+    const free_key = "FreeASR_" + req.headers['user-identity']//免费版的key
+    const lock_key = "asr:lock:" + req.headers['user-identity']//并发锁
+
     try{
         var videoLink = tool.extract_url(url)
         if (!videoLink) throw new Error("无法解析此链接，本插件支持快手/抖音/小红书/B站/Youtube/tiktok，有问题联系作者【vx：xiaowu_azt】")
@@ -1201,8 +1204,6 @@ app.post('/whisper/speech-to-text', async (req, res) => {
             videoLink = tool.remove_query_param(videoLink)
         }
 
-        const free_key = "FreeASR_" + req.headers['user-identity']
-        const lock_key = "asr:lock:" + req.headers['user-identity']//并发锁
         console.log(free_key)
         var left_time = await redis.get(free_key)
         if (!left_time || isNaN(left_time)) left_time = 3
@@ -1232,8 +1233,7 @@ app.post('/whisper/speech-to-text', async (req, res) => {
                     await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 1 second
                 }
             }
-            if (!XiaZaiTool.success) throw new Error(XiaZaiTool.message);
-            if (!XiaZaiTool.data.success) throw new Error(XiaZaiTool.data.message)
+            if (!XiaZaiTool.success) throw new Error(XiaZaiTool.data.message);
             const downloadUrl = XiaZaiTool.data.data.videoUrls
 
             await redis.set(lock_key, 1, "NX", "EX", 180)
@@ -1275,6 +1275,7 @@ app.post('/whisper/speech-to-text', async (req, res) => {
         })
     }catch(error){
         console.error(error)
+        await redis.del(lock_key)
         if (error instanceof QuotaExceededError) {
             return res.send({
                 'code': 0,
