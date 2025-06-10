@@ -19,6 +19,42 @@ const __dirname = dirname(__filename)
 const execPromise = util.promisify(exec);
 
 const tool = {
+    yt_dlp_audio: async function (url) {
+        // Create downloads directory if it doesn't exist
+        const downloadDir = path.join(__dirname, '..', 'downloads');
+        if (!fs.existsSync(downloadDir)) {
+            fs.mkdirSync(downloadDir);
+        }
+
+        const timestamp = new Date().getTime();
+        const filename = `audio_${timestamp}.mp3`;
+        const filepath = path.join(downloadDir, filename);
+
+        var command = ""
+        if (process.env.NODE_ENV === 'online'){
+            command = `yt-dlp -f bestaudio --extract-audio --audio-format mp3 -o ${filepath} "${url}"`
+        }else{
+             command = `yt-dlp -f bestaudio --extract-audio --proxy --proxy http://192.168.1.6:10808 --audio-format mp3 -o ${filepath} "${url}"`
+        }
+        console.log(command)
+    
+        try {
+            // Execute command
+            const { stdout, stderr } = await execPromise(command);
+            console.log("stdout", stdout);
+            console.log("stderr", stderr);
+            return {
+                success: true,
+                stdout: stdout,
+                stderr: stderr
+            };
+        } catch (error) {
+            return {
+                success: false, 
+                error: error.message
+            };
+        }
+    },
     getExtensionFromCodec: function(codec) {
         const codecToExt = {
             'mp3': 'mp3',
@@ -242,23 +278,29 @@ const tool = {
             const filename = `audio_${timestamp}.${extension}`;
             const filepath = path.join(downloadDir, filename);
 
+            const youtubeAudio = await this.yt_dlp_audio(audio_url)
+            console.log("youtubeAudio:", youtubeAudio)
+
             // Download video with progress tracking
             const response = await axios({
                 method: 'get',
                 url: audio_url,
-                // responseType: 'stream',
+                // responseType: 'stream', 
                 headers: {
                     'Accept': '*/*',
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36 Edg/136.0.0.0'
+                    'sec-ch-ua': '"Chromium";v="137", "Not/A)Brand";v="24", "Google Chrome";v="137"',
+                    'sec-ch-ua-mobile': '?0',
+                    'sec-ch-ua-platform': '"Windows"',
+                    'sec-fetch-dest': 'document',
+                    'sec-fetch-mode': 'navigate', 
+                    'sec-fetch-site': 'none',
+                    'sec-fetch-user': '?1',
+                    'upgrade-insecure-requests': '1',
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36',
                 },
                 timeout: 30000,
                 maxContentLength: Infinity,
                 maxBodyLength: Infinity,
-                proxy: {
-                    protocol: 'http',
-                    host: '192.168.1.6',
-                    port: 10808
-                }
             });
 
             // Get total size
