@@ -1079,6 +1079,7 @@ import coze from './utils/ThirdParrtyApi/coze.js';
 // 静态资源服务
 app.use('/images', express.static(path.join(__dirname, 'images')));
 app.use('/audio', express.static(path.join(__dirname, 'downloads')));
+app.use('/downloads', express.static(path.join(__dirname, 'downloads')));
 
 app.post('/xpan/search', netdiskapi.search)
 app.post('/xpan/get_dlink', netdiskapi.get_dlink)
