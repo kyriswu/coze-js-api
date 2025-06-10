@@ -837,8 +837,7 @@ app.post('/download_video', async (req, res) => {
                 await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 1 second
             }
         }
-        if (!XiaZaiTool.success) throw new Error(XiaZaiTool.message);
-        if (!XiaZaiTool.data.success) throw new Error(XiaZaiTool.data.message)
+        if (!XiaZaiTool.success) throw new Error(XiaZaiTool.data.message);
         const downloadUrl = XiaZaiTool.data.data.videoUrls
         
         var msg = ""
