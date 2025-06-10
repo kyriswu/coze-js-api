@@ -1232,14 +1232,14 @@ app.post('/whisper/speech-to-text', async (req, res) => {
                     await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 1 second
                 }
             }
-            if (!XiaZaiTool.success) throw new Error(XiaZaiTool.data.message);
+            if (!XiaZaiTool.success) throw new Error(XiaZaiTool.data);
             //设置并发锁
             await redis.set(lock_key, 1, "NX", "EX", 180)
 
             var audio_url = XiaZaiTool.data.audio_url
 
             if (!XiaZaiTool.data.audio_url){
-                const downloadUrl = XiaZaiTool.data.data.videoUrls
+                const downloadUrl = XiaZaiTool.data.video_url
                 //下载mp4文件
                 const download = await tool.download_video(downloadUrl)
                 if (!download.success) throw new Error(download.error);
