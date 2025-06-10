@@ -1260,8 +1260,8 @@ app.post('/whisper/speech-to-text', async (req, res) => {
             transcription = JSON.parse(result).output
             left_time = left_time - 1
             await redis.set("transcription_"+videoLink, JSON.stringify(transcription), "EX", 3600 * 24 * 60)
-            await redis.set(free_key, left_time)
-            await redis.del(lock_key)
+            await redis.set(free_key, left_time)//更新免费余量
+            await redis.del(lock_key)//关闭并发锁
             console.log("字幕生成结束")
         }
 

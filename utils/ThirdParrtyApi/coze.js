@@ -147,6 +147,7 @@ const coze = {
                 }
             } else {
                 console.error("未找到 id: 0 的 data 内容");
+                throw new Error("未找到 id: 0 的 data 内容");
             }
 
         } catch (error) {
