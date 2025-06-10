@@ -246,10 +246,18 @@ const tool = {
             const response = await axios({
                 method: 'get',
                 url: audio_url,
-                responseType: 'stream',
+                // responseType: 'stream',
                 headers: {
                     'Accept': '*/*',
                     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36 Edg/136.0.0.0'
+                },
+                timeout: 30000,
+                maxContentLength: Infinity,
+                maxBodyLength: Infinity,
+                proxy: {
+                    protocol: 'http',
+                    host: '192.168.1.6',
+                    port: 10808
                 }
             });
 
