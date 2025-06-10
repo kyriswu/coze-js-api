@@ -9,8 +9,7 @@ RUN python3 -m venv /opt/venv
 
 # 激活虚拟环境并用它的 pip 安装 pdf2image
 RUN /opt/venv/bin/pip install --upgrade pip && \
-    /opt/venv/bin/pip install pdf2image && \
-    /opt/venv/bin/pip install -U yt-dlp
+    /opt/venv/bin/pip install pdf2image
 
 WORKDIR /app
 

@@ -278,14 +278,11 @@ const tool = {
             const filename = `audio_${timestamp}.${extension}`;
             const filepath = path.join(downloadDir, filename);
 
-            const youtubeAudio = await this.yt_dlp_audio(audio_url)
-            console.log("youtubeAudio:", youtubeAudio)
-
             // Download video with progress tracking
             const response = await axios({
                 method: 'get',
                 url: audio_url,
-                // responseType: 'stream', 
+                responseType: 'stream', 
                 headers: {
                     'Accept': '*/*',
                     'sec-ch-ua': '"Chromium";v="137", "Not/A)Brand";v="24", "Google Chrome";v="137"',

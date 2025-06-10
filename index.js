@@ -1236,23 +1236,16 @@ app.post('/whisper/speech-to-text', async (req, res) => {
             //设置并发锁
             await redis.set(lock_key, 1, "NX", "EX", 180)
 
-            var audio_url = XiaZaiTool.data.audio_url
+            var downloadUrl = XiaZaiTool.data.video_url
+            //下载mp4文件
+            const download = await tool.download_video(downloadUrl)
+            if (!download.success) throw new Error(download.error);
+            //mp4转mp3
+            const convert = await tool.video_to_audio(download.filepath)
+            if (!convert.success) throw new Error(convert.error);
 
-            if (!XiaZaiTool.data.audio_url){
-                const downloadUrl = XiaZaiTool.data.video_url
-                //下载mp4文件
-                const download = await tool.download_video(downloadUrl)
-                if (!download.success) throw new Error(download.error);
-                const convert = await tool.video_to_audio(download.filepath)
-                if (!convert.success) throw new Error(convert.error);
-
-                const protocol = req.headers['x-forwarded-proto'] || req.protocol;
-                audio_url = `${protocol}://${req.get('host')}/audio/${path.basename(convert.outputFile)}`
-            }else{
-                const downloadAudio = await tool.download_audio(videoLink)
-                if(!downloadAudio.success) throw new Error(downloadAudio.error)
-                audio_url = `${protocol}://${req.get('host')}/audio/${path.basename(downloadAudio.filepath)}`
-            }
+            const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+            const audio_url = `${protocol}://${req.get('host')}/audio/${path.basename(convert.outputFile)}`
             
             //语音转文字
             console.log("开始生成字幕")

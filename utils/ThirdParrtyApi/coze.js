@@ -113,6 +113,7 @@ const coze = {
         
     },
     generate_video_caption: async function (url) {
+        console.log("audio地址：", url)
         try {
             var access_token = await redis.get("coze_api_access_token")
             if (!access_token) {
