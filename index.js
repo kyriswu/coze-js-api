@@ -1069,6 +1069,30 @@ app.post('/pdf2img', async (req, res) => {
     })
 })
 
+app.post('/download_pdf', async (req, res) => {
+    const { url } = req.body;
+    if (!url) {
+        return res.status(400).send('Invalid input: "url" is required');
+    }
+
+    const randomString = [...Array(16)].map(() => Math.random().toString(36)[2]).join('');
+    await downloadPdf(url, `./downloads/${randomString}.pdf`).then(() => {
+        console.log('PDF downloaded successfully');
+        return res.send({
+            code: 0,
+            data: req.protocol + '://' + req.get('host') + `/downloads/${randomString}.pdf`,
+        });
+
+    }).catch((error) => {   
+        console.error('Error downloading PDF:', error);
+        return res.send({
+            code: -1,
+            msg: 'PDF文件下载失败，请检查url是否正确！',
+        });
+    })
+
+})
+
 import netdiskapi from './utils/netdiskapi.js';
 import  tool from './utils/tool.js';
 import * as aimlapi from './utils/ThirdParrtyApi/aimlapi.js';
