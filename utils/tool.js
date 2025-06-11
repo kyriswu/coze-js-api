@@ -19,6 +19,60 @@ const __dirname = dirname(__filename)
 const execPromise = util.promisify(exec);
 
 const tool = {
+    download_image: async function (url) {
+        try {
+            // Create downloads directory if it doesn't exist
+            const downloadDir = path.join(__dirname, '..', 'downloads');
+            if (!fs.existsSync(downloadDir)) {
+                fs.mkdirSync(downloadDir);
+            }
+
+            // Generate filename with timestamp
+            const timestamp = new Date().getTime();
+            const tempFile = path.join(downloadDir, `image_${timestamp}.tmp`);
+            const finalFile = path.join(downloadDir, `image_${timestamp}.jpg`);
+
+            // Download image 
+            const response = await axios({
+                method: 'get',
+                url: url,
+                responseType: 'stream',
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                }
+            });
+
+            // Save to temp file
+            const writer = fs.createWriteStream(tempFile);
+            response.data.pipe(writer);
+
+            return new Promise((resolve, reject) => {
+                writer.on('finish', async () => {
+                    try {
+                        // Convert to jpg using ffmpeg
+                        await execPromise(`ffmpeg -i ${tempFile} ${finalFile}`);
+                        // Delete temp file
+                        fs.unlinkSync(tempFile);
+                        resolve({
+                            success: true,
+                            filepath: finalFile,
+                            filename: path.basename(finalFile)
+                        });
+                    } catch (err) {
+                        reject(err);
+                    }
+                });
+                writer.on('error', reject);
+            });
+
+        } catch (error) {
+            console.error('Error downloading image:', error);
+            return {
+                success: false,
+                error: error.message
+            };
+        }
+    },
     yt_dlp_audio: async function (url) {
         // Create downloads directory if it doesn't exist
         const downloadDir = path.join(__dirname, '..', 'downloads');

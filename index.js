@@ -1345,6 +1345,26 @@ app.post('/whisper/speech-to-text', async (req, res) => {
 })
 
 app.get('/coze-auth-callback', coze.callback)
+app.post('/download_image', async (req, res) => {
+    const { url } = req.body;
+    if (!url) {
+        return res.status(400).send('Invalid input: "url" is required');
+    }
+    try {
+        const download = await tool.download_image(url)
+        if (!download.success) throw new Error(download.error);
+        return res.send({
+            code: 0,
+            data: req.protocol + '://' + req.get('host') + '/downloads/' + path.basename(download.filepath)
+        })
+    } catch (error) {
+        console.error(error);
+        return res.send({
+            code: -1,
+            msg: error.message
+        });
+    }
+})
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
