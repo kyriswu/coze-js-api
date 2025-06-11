@@ -327,6 +327,7 @@ const tool = {
     },
     download_audio: async function (audio_url) {
 
+        console.log(`开始下载音频：${audio_url}`)
         const downloadDir = path.join(__dirname, '..', 'downloads');
         if (!fs.existsSync(downloadDir)) {
             fs.mkdirSync(downloadDir);
