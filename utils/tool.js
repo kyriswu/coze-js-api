@@ -228,25 +228,19 @@ const tool = {
         return (bytes / (1024 * 1024)).toFixed(2);
     },
     download_video: async function (url) {
+        
+        const downloadDir = path.join(__dirname, '..', 'downloads');
+        if (!fs.existsSync(downloadDir)) {
+            fs.mkdirSync(downloadDir);
+        }
+
+        // Generate filename with timestamp and extension
+        const timestamp = new Date().getTime();
+        const extension = 'mp4';
+        var filename = `video_${timestamp}.${extension}`;
+        var filepath = path.join(downloadDir, filename);
+        
         try {
-            // First check if it's a video
-            // const videoCheck = await this.is_video(url);
-            // if (!videoCheck.is_video) {
-            //     throw new Error('视频链接无效');
-            // }
-
-            // Create downloads directory if it doesn't exist
-            const downloadDir = path.join(__dirname, '..', 'downloads');
-            if (!fs.existsSync(downloadDir)) {
-                fs.mkdirSync(downloadDir);
-            }
-
-            // Generate filename with timestamp and extension
-            const timestamp = new Date().getTime();
-            const extension = 'mp4';
-            var filename = `video_${timestamp}.${extension}`;
-            var filepath = path.join(downloadDir, filename);
-
             // Download video with progress tracking
             const rateLimit = 100 * (1024 * 1024); // 0.5MB/s limit
             const response = await axios({
@@ -261,8 +255,10 @@ const tool = {
                 maxContentLength: Infinity,
                 maxBodyLength: Infinity
             });
-
-            console.log(`下载视频：${url}，response headers：`, response.headers)
+            if (!this.is_video(response.headers['content-type'])) {
+                throw new Error('视频链接无效！请查看视频教程：【https://www.bilibili.com/video/BV169TizqE58】');
+            }
+            console.log(`成功下载视频：${url} `)
             const totalSize = parseInt(response.headers['content-length'], 10);
             let downloadedSize = 0;
             let lastTime = Date.now();
@@ -330,24 +326,19 @@ const tool = {
         }
     },
     download_audio: async function (audio_url) {
+
+        const downloadDir = path.join(__dirname, '..', 'downloads');
+        if (!fs.existsSync(downloadDir)) {
+            fs.mkdirSync(downloadDir);
+        }
+
+        // Generate filename with timestamp and extension
+        const timestamp = new Date().getTime();
+        const extension = 'mp3'
+        var filename = `audio_${timestamp}.${extension}`;
+        var filepath = path.join(downloadDir, filename);
+
         try {
-            // const audioCheck = await this.is_audio(audio_url);
-            // if (!audioCheck.is_audio) {
-            //     throw new Error('音频链接无效');
-            // }
-
-            // Create downloads directory if it doesn't exist
-            const downloadDir = path.join(__dirname, '..', 'downloads');
-            if (!fs.existsSync(downloadDir)) {
-                fs.mkdirSync(downloadDir);
-            }
-
-            // Generate filename with timestamp and extension
-            const timestamp = new Date().getTime();
-            const extension = 'mp3'
-            var filename = `audio_${timestamp}.${extension}`;
-            var filepath = path.join(downloadDir, filename);
-
             // Download video with progress tracking
             const response = await axios({
                 method: 'get',
@@ -370,6 +361,9 @@ const tool = {
                 maxBodyLength: Infinity,
             });
 
+            if (!this.is_audio(response.headers['content-type'])) {
+                throw new Error('音频链接无效！');
+            }
             // Get total size
             const totalSize = parseInt(response.headers['content-length'], 10);
             let downloadedSize = 0;
@@ -412,24 +406,19 @@ const tool = {
 
         } catch (error) {
             console.error('Error downloading audio:', error);
+            // 如果下载失败，删除临时文件
+            fs.unlink(filepath, (err) => {
+                if (err) console.error('Error deleting audio file:', err);
+            });
             return {
                 success: false,
                 error: error.message
             };
         }
     },
-    is_video: async function (url) {
+    is_video: function (contentType) {
         try {
-            const response = await axios.head(url, {
-                headers: {
-                    'Accept': '*/*',
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36 Edg/136.0.0.0'
-                }
-            });
-            const contentType = response.headers['content-type'];
 
-            const contentLength = parseInt(response.headers['content-length'], 10)
-            console.log(contentType)
             // MIME类型到文件扩展名的映射
             const mimeToExtension = {
                 'video/mp4': 'mp4',
@@ -441,25 +430,12 @@ const tool = {
             // 查找匹配的视频类型
             const matchedType = Object.keys(mimeToExtension).find(type => 
                 contentType.toLowerCase().includes(type)
-            );
-            console.log("matchedType:",!!matchedType)
+            )
             
-            return {
-                is_video: !!matchedType,
-                mime_type: matchedType || null,
-                content_type: contentType,
-                extension: matchedType ? mimeToExtension[matchedType] : null,
-                size: this.bytesToMB(contentLength)
-            };
+            return !!matchedType
         } catch (error) {
             console.error('Error getting video type:', error.message);
-            return {
-                is_video: false,
-                mime_type: null,
-                content_type: null,
-                extension: null,
-                error: error.message
-            };
+            return false
         }
     },
     video_to_audio: async function (video) {
@@ -496,23 +472,18 @@ const tool = {
 
         } catch (error) {
             console.error('Error converting video to audio:', error.message);
+            // 如果转换失败，删除视频文件
+            fs.unlink(video, (err) => {
+                if (err) console.error('Error deleting video file:', err);
+            });
             return {
                 success: false,
                 error: error.message
             };
         }
     },
-    is_audio: async function (url) {
+    is_audio: async function (contentType) {
         try {
-            const response = await axios.head(url, {
-                headers: {
-                    'Accept': '*/*',
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36 Edg/136.0.0.0'
-                }
-            });
-            const contentType = response.headers['content-type'];
-            console.log(contentType);
-            const contentLength = parseInt(response.headers['content-length'], 10)
             // MIME类型到文件扩展名的映射
             const mimeToExtension = {
                 'audio/mpeg': 'mp3',
@@ -529,24 +500,14 @@ const tool = {
             const matchedType = Object.keys(mimeToExtension).find(type => 
                 contentType.toLowerCase().includes(type)
             );
-            console.log("matchedType:", !!matchedType);
             
-            return {
-                is_audio: !!matchedType,
-                mime_type: matchedType || null,
-                content_type: contentType,
-                extension: matchedType ? mimeToExtension[matchedType] : null,
-                size: this.bytesToMB(contentLength)
-            };
+            return !!matchedType
+
         } catch (error) {
+
             console.error('Error getting audio type:', error.message);
-            return {
-                is_audio: false,
-                mime_type: null,
-                content_type: null,
-                extension: null,
-                error: error.message
-            };
+            return false
+
         }
     },
     // deal_douyin_url: async function (url) {
