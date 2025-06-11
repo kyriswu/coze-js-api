@@ -1012,8 +1012,32 @@ app.post('/redis/del', async (req, res) => {
     });
 })
 
+function extract_pdf_url(url) {
+    try {
+            const urlObj = new URL(url);
+            // 从 file 参数中获取真实的 PDF URL
+            const pdfUrl = urlObj.searchParams.get('file');
+            if (!pdfUrl) {
+                throw new Error('No PDF URL found in parameters');
+            }
+            // 解码URL
+            return decodeURIComponent(pdfUrl);
+        } catch (error) {
+            console.error('Error extracting PDF URL:', error);
+            return null;
+        }
+}
 
 async function downloadPdf(url, path) {
+    // 检查是否是viewer URL
+    if (url.includes('viewer.html')) {
+        const pdfUrl = extract_pdf_url(url);
+        if (!pdfUrl) {
+            throw new Error('无法从viewer URL中提取PDF地址');
+        }
+        url = pdfUrl; // 使用提取出的真实PDF URL
+    }
+
   const res = await axios({ url, responseType: 'stream' });
 
   const contentType = res.headers['content-type'];
