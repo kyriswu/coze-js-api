@@ -797,7 +797,7 @@ app.post('/download_video', async (req, res) => {
     try {
         var videoLink = tool.extract_url(url)
         if (!videoLink) throw new Error("无法解析此链接，本插件支持快手/抖音/小红书/B站/Youtube/tiktok，有问题联系作者【vx：xiaowu_azt】")
-        if (!(videoLink.includes('www.youtube.com') || videoLink.includes('youtu.be'))) {
+        if (!(videoLink.includes('www.youtube.com') || videoLink.includes('youtu.be') || videoLink.includes('xiaohongshu.com'))) {
             videoLink = tool.remove_query_param(videoLink)
         }
 
