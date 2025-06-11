@@ -1254,7 +1254,7 @@ app.post('/whisper/speech-to-text', async (req, res) => {
 
         console.log(free_key)
         var left_time = await redis.get(free_key)
-        if (!left_time || isNaN(left_time)) left_time = 3
+        if (!left_time || isNaN(left_time)) left_time = 5
         if (left_time <= 0) throw new QuotaExceededError("试用体验结束，该服务需要大量算力资源，维护不易，如果您喜欢此工具，请联系作者购买api_key【vx：xiaowu_azt】")
         const lock_ttl = await redis.ttl(lock_key)
         if(lock_ttl > 0) {
