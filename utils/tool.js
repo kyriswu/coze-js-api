@@ -53,10 +53,12 @@ const tool = {
                         await execPromise(`ffmpeg -i ${tempFile} ${finalFile}`);
                         // Delete temp file
                         fs.unlinkSync(tempFile);
+                        const stats = fs.statSync(finalFile);
                         resolve({
                             success: true,
                             filepath: finalFile,
-                            filename: path.basename(finalFile)
+                            filename: path.basename(finalFile),
+                            size: stats.size
                         });
                     } catch (err) {
                         reject(err);

@@ -1355,7 +1355,8 @@ app.post('/download_image', async (req, res) => {
         if (!download.success) throw new Error(download.error);
         return res.send({
             code: 0,
-            data: req.protocol + '://' + req.get('host') + '/downloads/' + path.basename(download.filepath)
+            data: req.protocol + '://' + req.get('host') + '/downloads/' + path.basename(download.filepath),
+            size: download.size
         })
     } catch (error) {
         console.error(error);
