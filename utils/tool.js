@@ -81,7 +81,6 @@ const tool = {
         try {
             // Execute ffmpeg command
             const { stdout, stderr } = await execPromise(command);
-            console.log("stdout",stdout)
             console.log("stderr",stderr)
             const info = JSON.parse(stdout);
             // Get file type info
@@ -174,7 +173,6 @@ const tool = {
     },
     download_video: async function (url) {
         try {
-            console.log("下载视频直链：", url)
             // First check if it's a video
             // const videoCheck = await this.is_video(url);
             // if (!videoCheck.is_video) {
@@ -242,9 +240,6 @@ const tool = {
                     console.log(`视频下载成功，视频大小：${this.bytesToMB(totalSize)}MB`)
                      this.get_media_info(filepath)
                         .then(info => {
-                            console.log(info)
-
-
                             if (!info.success) {
                                 return reject(new Error(info.error));
                             }

@@ -136,13 +136,12 @@ const coze = {
                 }
             });
 
-            console.log("插件原始字幕结果：", response.data);
+            // console.log("插件原始字幕结果：", response.data);
 
             const messageDataMatch = response.data.match(/event:\s*message\s*data:\s*(\{[\s\S]*?)(?=\n(?:id:|event:|$))/i);
 
             if (messageDataMatch) {
                 const messageData = messageDataMatch[1].trim();
-                console.log("提取到的 message data 内容：", messageData);
                 return JSON.parse(messageData);
             } else {
                 throw new Error("未找到有效的 message data 内容");
