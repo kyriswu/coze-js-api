@@ -136,7 +136,7 @@ const coze = {
                 }
             });
 
-            // console.log("插件原始字幕结果：", response.data);
+            console.log("插件原始字幕结果：", response.data);
 
             const messageDataMatch = response.data.match(/event:\s*message\s*data:\s*(\{[\s\S]*?)(?=\n(?:id:|event:|$))/i);
 

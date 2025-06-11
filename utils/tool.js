@@ -137,7 +137,7 @@ const tool = {
         try {
             // Execute ffmpeg command
             const { stdout, stderr } = await execPromise(command);
-            console.log("stderr",stderr)
+            console.log("get_media_info stderr",stderr)
             const info = JSON.parse(stdout);
             // Get file type info
             const stream = info.streams[0];
@@ -262,6 +262,7 @@ const tool = {
                 maxBodyLength: Infinity
             });
 
+            console.log(`下载视频：${url}，response headers：`, response.headers)
             const totalSize = parseInt(response.headers['content-length'], 10);
             let downloadedSize = 0;
             let lastTime = Date.now();
@@ -624,7 +625,6 @@ const tool = {
     },
     get_video_url: async function (input_text) {
         try{
-            console.log("视频链接：", input_text)
             var data = ""
             const key = this.md5(input_text)
             const value = await redis.get(key)

@@ -1255,7 +1255,7 @@ app.post('/whisper/speech-to-text', async (req, res) => {
         console.log(free_key)
         var left_time = await redis.get(free_key)
         if (!left_time || isNaN(left_time)) left_time = 3
-        if (left_time <= 0) throw new QuotaExceededError("试用体验结束，该服务需要大量算力资源，维护不易，如果您喜欢此工具，请联系作者购买时长【vx：xiaowu_azt】")
+        if (left_time <= 0) throw new QuotaExceededError("试用体验结束，该服务需要大量算力资源，维护不易，如果您喜欢此工具，请联系作者购买api_key【vx：xiaowu_azt】")
         const lock_ttl = await redis.ttl(lock_key)
         if(lock_ttl > 0) {
             throw new Error(`上一个任务还在处理中，剩余${lock_ttl}秒`)
@@ -1267,8 +1267,6 @@ app.post('/whisper/speech-to-text', async (req, res) => {
             transcription = JSON.parse(transcription)
         }else{
             
-            //查询直链
-            console.log("视频链接：" + videoLink)
             //链接预处理（av转bv）
             videoLink = await tool.url_preprocess(videoLink)
             let retries = 3;
@@ -1318,6 +1316,7 @@ app.post('/whisper/speech-to-text', async (req, res) => {
             srt:srt
         }
         
+
         return res.send({
             'code': 0,
             'msg': 'success',
