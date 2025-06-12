@@ -1256,13 +1256,25 @@ app.post('/whisper/speech-to-text', async (req, res) => {
         
         if (!api_key) {
             if (!left_time || isNaN(left_time)) left_time = 5
-            if (left_time <= 0) throw new QuotaExceededError("试用体验结束，该服务需要大量算力资源，维护不易，如果您喜欢此工具，请联系作者购买api_key【vx：xiaowu_azt】")
+            if (left_time <= 0) throw new QuotaExceededError("试用体验结束，该服务需要大量算力资源，维护不易，如果您喜欢此工具，请联系作者购买api_key【vx：xiaowu_azt】更多扣子教程，可以关注【B站：小吴爱折腾】")
             const lock_ttl = await redis.ttl(lock_key)
             if(lock_ttl > 0) {
                 throw new Error(`上一个任务还在处理中，剩余${lock_ttl}秒`)
             }
         }else{
-
+            const { keyId, valid, remaining, code } = await unkey.verifyKey("api_413Kmmitqy3qaDo4", api_key, 0);
+            if (!valid) {
+                return res.send({
+                    code: -1,
+                    msg: 'API Key 无效或已过期，请检查后重试！'
+                }); 
+            }
+            if (remaining == 0) {
+                return res.send({
+                    code: -1,
+                    msg: 'API Key 使用次数已用完，请联系作者续费！'
+                }); 
+            }
         }
         
 
@@ -1286,7 +1298,7 @@ app.post('/whisper/speech-to-text', async (req, res) => {
             }
             if (!XiaZaiTool.success) throw new Error(XiaZaiTool.data);
             //设置并发锁
-            await redis.set(lock_key, 1, "NX", "EX", 180)
+            await redis.set(lock_key, 1, "NX", "EX", 60 * 5) //设置5分钟的锁
 
             var downloadUrl = XiaZaiTool.data.video_url
             //下载mp4文件
@@ -1306,12 +1318,6 @@ app.post('/whisper/speech-to-text', async (req, res) => {
             await redis.set("transcription_"+videoLink, JSON.stringify(transcription), "EX", 3600 * 24 * 60)
             await redis.del(lock_key)//关闭并发锁
             console.log("字幕生成结束")
-            if(!api_key){
-                left_time = left_time - 1
-                await redis.set(free_key, left_time)//更新免费余量
-            }else{
-
-            }
         }
 
         // 生成SRT内容
@@ -1331,6 +1337,9 @@ app.post('/whisper/speech-to-text', async (req, res) => {
             const { remaining } = await unkey.verifyKey("api_413Kmmitqy3qaDo4", api_key, 1);
             msg = `API Key 剩余调用次数：${remaining}`;
         }else{
+            //免费版
+            left_time = left_time - 1
+            await redis.set(free_key, left_time)
             msg = `今日免费使用次数：${left_time}`;
         }
 
