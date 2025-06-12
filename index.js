@@ -1241,11 +1241,17 @@ app.post('/cozecom/linkreader', async (req, res) => {
     }
 
     try {
-        const result = await cozecom.linkReader(url)
+        const response = await cozecom.linkReader(url)
+        const content = JSON.parse(response.content)
+        const output = JSON.parse(content.output)
+        const data = {
+            "title": output.data.title,
+            "content": output.data.content,
+        }
         return res.send({
             code: 0,
             msg: 'Success',
-            data: result
+            data: data
         });
     } catch (error) {
         console.error(`Error calling CozeCom API: ${error.message}`);
