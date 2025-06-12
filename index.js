@@ -1390,7 +1390,7 @@ app.post('/whisper/speech-to-text', async (req, res) => {
 })
 
 app.get('/coze-auth-callback', coze.callback)
-app.get('/cozecom-auth-callback', coze.callback)
+app.get('/cozecom-auth-callback', cozecom.callback)
 app.post('/download_image', async (req, res) => {
     const { url } = req.body;
     if (!url) {
