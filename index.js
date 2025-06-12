@@ -1123,6 +1123,7 @@ import * as aimlapi from './utils/ThirdParrtyApi/aimlapi.js';
 import * as lemonfoxai from './utils/ThirdParrtyApi/lemonfoxai.js';
 import { QuotaExceededError } from './utils/CustomError.js';
 import coze from './utils/ThirdParrtyApi/coze.js';
+import cozecom from './utils/ThirdParrtyApi/cozecom.js';
 
 // 静态资源服务
 app.use('/images', express.static(path.join(__dirname, 'images')));
@@ -1230,6 +1231,25 @@ app.post('/video2audio', async (req, res) => {
             "code": -1,
             "msg": error.message
         })
+    }
+})
+
+app.post('/cozecom/linkreader', async (req, res) => {
+    const { url, api_key } = req.body;
+    if (!url) {
+        return res.status(400).send('Invalid input: "url" is required');
+    }
+
+    try {
+        const result = await cozecom.linkReader(url)
+        return res.send({
+            code: 0,
+            msg: 'Success',
+            data: result
+        });
+    } catch (error) {
+        console.error(`Error calling CozeCom API: ${error.message}`);
+        res.status(500).send(`链接读取失败: ${error.message}`);
     }
 })
 
@@ -1370,6 +1390,7 @@ app.post('/whisper/speech-to-text', async (req, res) => {
 })
 
 app.get('/coze-auth-callback', coze.callback)
+app.get('/cozecom-auth-callback', coze.callback)
 app.post('/download_image', async (req, res) => {
     const { url } = req.body;
     if (!url) {
