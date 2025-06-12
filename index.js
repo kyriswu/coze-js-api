@@ -1244,22 +1244,27 @@ app.post('/whisper/speech-to-text', async (req, res) => {
 
     const free_key = "FreeASR_" + req.headers['user-identity']//免费版的key
     const lock_key = "asr:lock:" + req.headers['user-identity']//并发锁
+    var left_time = await redis.get(free_key)//免费版剩余次数
 
     try{
+
         var videoLink = tool.extract_url(url)
         if (!videoLink) throw new Error("无法解析此链接，本插件支持快手/抖音/小红书/B站/Youtube/tiktok，有问题联系作者【vx：xiaowu_azt】")
         if (!(videoLink.includes('www.youtube.com') || videoLink.includes('youtu.be') || videoLink.includes('xiaohongshu.com'))) {
             videoLink = tool.remove_query_param(videoLink)
         }
+        
+        if (!api_key) {
+            if (!left_time || isNaN(left_time)) left_time = 5
+            if (left_time <= 0) throw new QuotaExceededError("试用体验结束，该服务需要大量算力资源，维护不易，如果您喜欢此工具，请联系作者购买api_key【vx：xiaowu_azt】")
+            const lock_ttl = await redis.ttl(lock_key)
+            if(lock_ttl > 0) {
+                throw new Error(`上一个任务还在处理中，剩余${lock_ttl}秒`)
+            }
+        }else{
 
-        console.log(free_key)
-        var left_time = await redis.get(free_key)
-        if (!left_time || isNaN(left_time)) left_time = 5
-        if (left_time <= 0) throw new QuotaExceededError("试用体验结束，该服务需要大量算力资源，维护不易，如果您喜欢此工具，请联系作者购买api_key【vx：xiaowu_azt】")
-        const lock_ttl = await redis.ttl(lock_key)
-        if(lock_ttl > 0) {
-            throw new Error(`上一个任务还在处理中，剩余${lock_ttl}秒`)
         }
+        
 
         var transcription = await redis.get("transcription_"+videoLink)
         if (transcription){
@@ -1298,11 +1303,15 @@ app.post('/whisper/speech-to-text', async (req, res) => {
             console.log("开始生成字幕")
             const result = await coze.generate_video_caption(audio_url)
             transcription = JSON.parse(result.content).output
-            left_time = left_time - 1
             await redis.set("transcription_"+videoLink, JSON.stringify(transcription), "EX", 3600 * 24 * 60)
-            await redis.set(free_key, left_time)//更新免费余量
             await redis.del(lock_key)//关闭并发锁
             console.log("字幕生成结束")
+            if(!api_key){
+                left_time = left_time - 1
+                await redis.set(free_key, left_time)//更新免费余量
+            }else{
+
+            }
         }
 
         // 生成SRT内容
@@ -1316,10 +1325,18 @@ app.post('/whisper/speech-to-text', async (req, res) => {
             srt:srt
         }
         
+        var msg = ""
+        if (api_key) {
+            //付费版
+            const { remaining } = await unkey.verifyKey("api_413Kmmitqy3qaDo4", api_key, 1);
+            msg = `API Key 剩余调用次数：${remaining}`;
+        }else{
+            msg = `今日免费使用次数：${left_time}`;
+        }
 
         return res.send({
             'code': 0,
-            'msg': 'success',
+            'msg': msg,
             'data': data
         })
     }catch(error){
