@@ -28,7 +28,7 @@ function timestampToDatetime(timestamp) {
 }
 
 
-const AuthUrl = `https://www.coze.com/api/permission/oauth2/authorize?response_type=code&client_id=00564282338763591222922205285168.app.coze&redirect_uri=http://localhost:3000/cozecom-auth-callback&state=1294848`
+const AuthUrl = `https://www.coze.com/api/permission/oauth2/authorize?response_type=code&client_id=00564282338763591222922205285168.app.coze&redirect_uri=https://coze-js-api.devtool.uk/cozecom-auth-callback&state=1294848`
 
 const cozecom = {
     getApiClient: async function () {
@@ -56,6 +56,13 @@ const cozecom = {
             })
         }
 
+        console.log("授权信息：", {
+                baseURL: config.coze_api_base,
+                clientId: config.client_id,
+                clientSecret: config.client_secret,
+                code: code,
+                redirectUrl: REDIRECT_URI,
+            })
         try {
             // Get access token
             const oauthToken = await getWebOAuthToken({
