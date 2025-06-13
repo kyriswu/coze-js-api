@@ -120,13 +120,13 @@ const cozecom = {
         
     },
     linkReader: async function (url) {
-        console.log("audio地址：", url)
         try {
-            var access_token = await redis.get("cozecom_api_access_token")
-            if (!access_token) {
-                access_token = await this.refresh_token()
-            }
-            console.log("access_token", access_token)
+            // var access_token = await redis.get("cozecom_api_access_token")
+            // if (!access_token) {
+            //     access_token = await this.refresh_token()
+            // }
+            // console.log("access_token", access_token)
+            const access_token = "pat_uszZ7Pw5DecJNewpWovZvhjqBGigY8xVhWSAuJ3eZDS0NYtTFDFpTybGHZMhfm8t"
             const response = await axios({
                 method: 'post',
                 url: 'https://api.coze.com/v1/workflow/stream_run',

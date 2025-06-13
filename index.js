@@ -337,8 +337,6 @@ async function canUseHtmlParse(key) {
     return true;
 }
 
-import https from 'https';
-import { HttpsProxyAgent } from 'https-proxy-agent';
 app.post('/jina_reader', async (req, res) => {
 
     let { url } = req.body;
@@ -347,56 +345,24 @@ app.post('/jina_reader', async (req, res) => {
         return res.status(400).send('Invalid input: "url" is required');
     }
    
-
-    // 设置您的代理服务器地址
-    const proxyUrl = 'http://umwhniat-rotate:eudczfs5mkzt@p.webshare.io:80';
-    const agent = new HttpsProxyAgent(proxyUrl);
-
-
-    const options = {
-        hostname: 'r.jina.ai',
-        path: '/' + encodeURI(url),
-        method: 'GET',
-        headers: {
-            'Authorization': 'Bearer jina_244ca6436ced4fbba4fc6761a933abc77H_rA5y7mcR6jlg1d9Dv07Qvv1rY',
-            'X-Engine': 'browser',
-            'X-Timeout': '60',
-            // 'X-Proxy-Url': 'http://umwhniat-rotate:eudczfs5mkzt@p.webshare.io:80'
-        },
-        agent: agent
-    };
-
     try {
-        const _req = https.request(options, _res => {
-            let data = '';
-            _res.on('data', chunk => {
-                data += chunk;
-            });
-
-            _res.on('end', () => {
-                return res.send({
-                    code: 0,
-                    msg: 'Success',
-                    data: data
-                });
-            });
-        });
-
-        _req.on('error', (e) => {
-            console.error(`Problem with request: ${e.message}`);
-            return res.send({
-                code: -1,
-                msg: `Error: ${e.message}`
-            })
-        });
-
-        _req.end();
-    }catch(error){
-        console.log(error)
+        const response = await cozecom.linkReader(url)
+        const content = JSON.parse(response.content)
+        const output = JSON.parse(content.output)
+        var data = ""
+        if (output.content) {
+            data = output.content
+        } else if (output.pdf_content) {
+            data = output.pdf_content
+        }
         return res.send({
-            code: -1,
-            msg: "出现错误，请联系作者【B站：小吴爱折腾】"
+            code: 0,
+            msg: 'Success',
+            data: data
         });
+    } catch (error) {
+        console.error(`Error calling CozeCom API: ${error.message}`);
+        res.status(500).send(`链接读取失败: ${error.message}`);
     }
 
 })
