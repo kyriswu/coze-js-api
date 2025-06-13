@@ -350,8 +350,8 @@ app.post('/jina_reader', async (req, res) => {
         const content = JSON.parse(response.content)
         const output = JSON.parse(content.output)
         var data = ""
-        if (output.content) {
-            data = output.content
+        if (output.data && output.data.content) {
+            data = output.data.content
         } else if (output.pdf_content) {
             data = output.pdf_content
         }
