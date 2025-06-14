@@ -318,7 +318,7 @@ const tool = {
             });
 
         } catch (error) {
-            console.error('Error downloading video:', error);
+            console.error('Error downloading video:', error, " video url:", url);
             return {
                 success: false,
                 error: error.message
