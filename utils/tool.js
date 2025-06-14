@@ -472,7 +472,7 @@ const tool = {
             };
 
         } catch (error) {
-            console.error('Error converting video to audio:', error.message);
+            console.error('Error converting video to audio:', error.message, "\n 视频URL：", video);
             // 如果转换失败，删除视频文件
             fs.unlink(video, (err) => {
                 if (err) console.error('Error deleting video file:', err);
