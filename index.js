@@ -344,7 +344,10 @@ app.post('/jina_reader', async (req, res) => {
     if (!url) {
         return res.status(400).send('Invalid input: "url" is required');
     }
-   
+    if(!tool.isValidUrl(url)){
+        return res.status(400).send("链接无效，请输入正确的链接");
+    }
+
     try {
         const response = await cozecom.linkReader(url)
         const content = JSON.parse(response.content)
@@ -1204,6 +1207,10 @@ app.post('/cozecom/linkreader', async (req, res) => {
     const { url, api_key } = req.body;
     if (!url) {
         return res.status(400).send('Invalid input: "url" is required');
+    }
+
+    if(!tool.isValidUrl(url)){
+        return res.status(400).send("链接无效，请输入正确的链接");
     }
 
     try {

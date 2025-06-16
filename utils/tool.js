@@ -19,6 +19,14 @@ const __dirname = dirname(__filename)
 const execPromise = util.promisify(exec);
 
 const tool = {
+    isValidUrl: function (url) {
+        try {
+            new URL(url);
+            return true;
+        } catch (e) {
+            return false;
+        }
+    },
     download_image: async function (url) {
         try {
             // Create downloads directory if it doesn't exist
