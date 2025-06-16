@@ -622,13 +622,13 @@ app.post('/google/search/web', async (req, res) => {
             }); 
         }
     }else{
-        // const canSearch = await canSearchGoogle(free_key);
-        // if (!canSearch) {
-        //     return res.send({
-        //         code: 0,
-        //         msg: '维护成本大，每天免费使用1次，付费购买API KEY可解锁更多次数，请联系作者！【B站:小吴爱折腾】'
-        //     }); 
-        // }
+        const canSearch = await canSearchGoogle(free_key);
+        if (!canSearch) {
+            return res.send({
+                code: 0,
+                msg: '维护成本大，每天免费使用1次，付费购买API KEY可解锁更多次数，请联系作者！【B站:小吴爱折腾】'
+            }); 
+        }
     }
 
     search1api.search(q).then(async (data) => {
