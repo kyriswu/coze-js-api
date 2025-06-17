@@ -796,7 +796,7 @@ app.post('/download_video', async (req, res) => {
         }
 
         //查询直链
-        console.log("视频链接：" + videoLink)
+        console.log("下载视频链接：" + videoLink)
         //链接预处理（av转bv）
         videoLink = await tool.url_preprocess(videoLink)
         let retries = 3;
