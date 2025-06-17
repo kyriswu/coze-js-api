@@ -1217,7 +1217,6 @@ app.post('/cozecom/linkreader', async (req, res) => {
         const content = JSON.parse(response.content)
         
         const data = {
-            "title": content.output.title,
             "content": content.output.content,
         }
         return res.send({
