@@ -429,9 +429,9 @@ app.post('/parse_html', async (req, res) => {
         });
     }
 
-    // if (action) {
+    if (action) {
         return await zyteExtract(req, res);
-    // }
+    }
     const api_id = "api_413Kmmitqy3qaDo4";
 
     //免费版的key
@@ -465,11 +465,7 @@ app.post('/parse_html', async (req, res) => {
     try {
 
         let HtmlContent = "";
-
-        const x_api_key = "f528f374df3f44c1b62d005f81f63fab"
-        const encodedUrl = encodeURIComponent(url);
-        let scrapingAntUrl = `https://api.scrapingant.com/v2/general?url=${encodedUrl}&x-api-key=${x_api_key}`;
-        const response = await axios.get(scrapingAntUrl);
+        const response = await browserless.chromium_content(url)
         HtmlContent = response.data;
 
         const dom = new JSDOM(HtmlContent);
@@ -1096,6 +1092,7 @@ import * as lemonfoxai from './utils/ThirdParrtyApi/lemonfoxai.js';
 import { QuotaExceededError } from './utils/CustomError.js';
 import coze from './utils/ThirdParrtyApi/coze.js';
 import cozecom from './utils/ThirdParrtyApi/cozecom.js';
+import browserless from './utils/ThirdParrtyApi/browserless.js';
 
 // 静态资源服务
 app.use('/images', express.static(path.join(__dirname, 'images')));
