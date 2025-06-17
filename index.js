@@ -692,21 +692,24 @@ async function zyteExtract(req, res) {
         }
     }
 
-    //处理action
-    let actions = [];//完整的动作列表
-    if (action){
-        action = JSON.parse(action);//本次动作
-        action.forEach((item) => {
-            if (item.action === "click") {
-                actions.push(zyte.gen_waitForSelector_code(item.selector.type, item.selector.value));
-                actions.push(item)
-            }else{
-                actions.push(item)
-            }
-        })
-    }
-
     try {
+
+
+        //处理action
+        let actions = [];//完整的动作列表
+        if (action){
+            action = JSON.parse(action);//本次动作
+            action.forEach((item) => {
+                if (item.action === "click") {
+                    actions.push(zyte.gen_waitForSelector_code(item.selector.type, item.selector.value));
+                    actions.push(item)
+                }else{
+                    actions.push(item)
+                }
+            })
+        }
+
+
         let msg = "";
         let result_list = [];
         let {error, HtmlContent} = await zyte.extract(url, actions, screenshot);
