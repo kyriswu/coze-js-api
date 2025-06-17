@@ -351,10 +351,9 @@ app.post('/jina_reader', async (req, res) => {
     try {
         const response = await cozecom.linkReader(url)
         const content = JSON.parse(response.content)
-        const output = JSON.parse(content.output)
         var data = ""
-        if (output.data && output.data.content) {
-            data = output.data.content
+        if (content.output && content.output.content) {
+            data = content.output.content
         } else if (output.pdf_content) {
             data = output.pdf_content
         }
@@ -1216,10 +1215,10 @@ app.post('/cozecom/linkreader', async (req, res) => {
     try {
         const response = await cozecom.linkReader(url)
         const content = JSON.parse(response.content)
-        const output = JSON.parse(content.output)
+        
         const data = {
-            "title": output.data.title,
-            "content": output.data.content,
+            "title": content.output.title,
+            "content": content.output.content,
         }
         return res.send({
             code: 0,

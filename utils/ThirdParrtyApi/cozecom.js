@@ -127,6 +127,12 @@ const cozecom = {
             // }
             // console.log("access_token", access_token)
             const access_token = "pat_uszZ7Pw5DecJNewpWovZvhjqBGigY8xVhWSAuJ3eZDS0NYtTFDFpTybGHZMhfm8t"
+            console.log({
+                workflow_id: "7515067322877739016",
+                parameters: {
+                    input: url
+                }
+            })
             const response = await axios({
                 method: 'post',
                 url: 'https://api.coze.com/v1/workflow/stream_run',
@@ -149,6 +155,7 @@ const cozecom = {
 
             if (messageDataMatch) {
                 const messageData = messageDataMatch[1].trim();
+                console.log(JSON.parse(messageData));
                 return JSON.parse(messageData);
             } else {
                 throw new Error("未找到有效的 message data 内容");
