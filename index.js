@@ -1238,7 +1238,7 @@ app.post('/whisper/speech-to-text', async (req, res) => {
     if (!language){
         language="chinese"
     }
-    if (!cache){
+    if (cache===null){
         cache = true; // 默认读取缓存
     }
 
