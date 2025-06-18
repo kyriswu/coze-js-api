@@ -1313,7 +1313,8 @@ app.post('/whisper/speech-to-text', async (req, res) => {
             }
 
             const protocol = req.headers['x-forwarded-proto'] || req.protocol;
-            var audio_url = `${protocol}://${req.get('host')}/audio/${path.basename(convert.outputFile)}`
+            var audio_url = `${protocol}://coze-js-api-noproxy.devtool.uk/audio/${path.basename(convert.outputFile)}`
+            // var audio_url = `${protocol}://${req.get('host')}/audio/${path.basename(convert.outputFile)}`
             // audio_url = "https://coze-js-api.devtool.uk/audio/audio_1749559334235.mp3"
             //语音转文字
             console.log("开始生成字幕")
