@@ -465,7 +465,8 @@ app.post('/parse_html', async (req, res) => {
     try {
 
         let HtmlContent = "";
-        const response = await browserless.chromium_content(url)
+        const sanitizedUrl = url.trim(); // Remove any whitespace including newlines
+        const response = await browserless.chromium_content(sanitizedUrl)
         HtmlContent = response.data;
 
         const dom = new JSDOM(HtmlContent);
