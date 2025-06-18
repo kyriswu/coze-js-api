@@ -257,17 +257,20 @@ const tool = {
             const rateLimit = 100 * (1024 * 1024); // 0.5MB/s limit
             let response
             if (sourceUrl.includes('youtube.com') || sourceUrl.includes('youtu.be')) {
-                let xxx = await tool.yt_dlp_audio(sourceUrl)
-                console.log("yt-dlp 返回：", xxx)
-                if (!xxx.success) {
-                    console.error("yt-dlp 错误：", xxx.error, "下载youtube失败，重试 第1次 。。。")
-                    xxx = await tool.yt_dlp_audio(sourceUrl)
-                    if (!xxx.success) {
-                        console.error("yt-dlp 错误：", xxx.error, "下载youtube失败，重试 第2次 。。。")
-                        xxx = await tool.yt_dlp_audio(sourceUrl)
-                        if (!xxx.success) {
-                            throw new Error(xxx.error);
-                        }
+                let xxx;
+                const maxRetries = 4;
+
+                for (let attempt = 1; attempt <= maxRetries; attempt++) {
+                    xxx = await tool.yt_dlp_audio(sourceUrl);
+                    if (xxx.success) {
+                        console.log("yt-dlp 返回：", xxx);
+                        break;
+                    }
+                    
+                    if (attempt < maxRetries) {
+                        console.error(`yt-dlp 错误：${xxx.error}，下载youtube失败，重试第${attempt}次...`);
+                    } else {
+                        throw new Error(xxx.error);
                     }
                 }
                 
