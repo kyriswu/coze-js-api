@@ -285,7 +285,7 @@ const tool = {
                         'Accept': '*/*',
                         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36 Edg/136.0.0.0'
                     },
-                    timeout: 300000,
+                    timeout: 600000,
                     maxContentLength: Infinity,
                     maxBodyLength: Infinity,
                 });
@@ -392,7 +392,7 @@ const tool = {
                     'upgrade-insecure-requests': '1',
                     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36',
                 },
-                timeout: 30000,
+                timeout: 600000,
                 maxContentLength: Infinity,
                 maxBodyLength: Infinity,
             });

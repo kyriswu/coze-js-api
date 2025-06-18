@@ -2,7 +2,7 @@ import axios from 'axios';
 import fs from 'fs';
 import path from 'path';
 
-const CHROME_URL= "http://172.245.84.92:8123"
+var CHROME_URL= "http://172.245.84.92:8123"
   
 const browserless = {
     /**

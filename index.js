@@ -351,11 +351,12 @@ app.post('/jina_reader', async (req, res) => {
     try {
         const response = await cozecom.linkReader(url)
         const content = JSON.parse(response.content)
+        console.log(content)
         var data = ""
-        if (content.output && content.output.content) {
+        if (content.output !== null) {
             data = content.output.content
-        } else if (output.pdf_content) {
-            data = output.pdf_content
+        } else if (content.pdf_content) {
+            data = content.pdf_content
         }
         return res.send({
             code: 0,
