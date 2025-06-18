@@ -351,7 +351,7 @@ app.post('/jina_reader', async (req, res) => {
     try {
         const response = await cozecom.linkReader(url)
         const content = JSON.parse(response.content)
-        console.log(content)
+
         var data = ""
         if (content.output !== null) {
             data = content.output.content
@@ -1210,7 +1210,7 @@ app.post('/cozecom/linkreader', async (req, res) => {
     }
 
     if(!tool.isValidUrl(url)){
-        return res.status(400).send("链接无效，请输入正确的链接");
+        return res.status(400).send("链接无效，请输入正确的url链接");
     }
 
     try {
