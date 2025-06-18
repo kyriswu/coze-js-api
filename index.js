@@ -1332,7 +1332,12 @@ app.post('/whisper/speech-to-text', async (req, res) => {
                 result = await coze.generate_video_caption(audio_url)
                 transcription = JSON.parse(result.content).output
                 if(!transcription) {
-                    throw new Error("字幕生成失败，可能是视频时长太长，或者服务器压力太大，请稍后再试！")
+                    console.log("No content_chunks found, retrying...第二次重试")
+                    result = await coze.generate_video_caption(audio_url)
+                    transcription = JSON.parse(result.content).output
+                    if(!transcription) {
+                        throw new Error("字幕生成失败，可能是视频时长太长，或者服务器压力太大，请稍后再试！")
+                    }
                 }
             }
     
