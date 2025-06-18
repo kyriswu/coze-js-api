@@ -1322,11 +1322,11 @@ app.post('/whisper/speech-to-text', async (req, res) => {
             transcription = JSON.parse(result.content).output
             
             // Check if content_chunks exists, if not retry once
-            if (!transcription.content_chunks) {
+            if (transcription.content_chunks === undefined) {
                 console.log("No content_chunks found, retrying...")
                 result = await coze.generate_video_caption(audio_url)
                 transcription = JSON.parse(result.content).output
-                if(!transcription.content_chunks) {
+                if(transcription.content_chunks === undefined) {
                     throw new Error("字幕生成失败，可能是视频时长太长，或者服务器压力太大，请稍后再试！")
                 }
             }
