@@ -110,7 +110,10 @@ const tool = {
             return {
                 success: true,
                 stdout: stdout,
-                stderr: stderr
+                stderr: stderr,
+                filepath: filepath,
+                filename: filename,
+                is_audio: true,
             };
         } catch (error) {
             return {
@@ -256,27 +259,10 @@ const tool = {
             if (sourceUrl.includes('youtube.com') || sourceUrl.includes('youtu.be')) {
                 const xxx = await tool.yt_dlp_audio(sourceUrl)
                 console.log("yt-dlp 返回：", xxx)
-                response = await axios({
-                    method: 'get',
-                    url: url,
-                    responseType: 'stream',
-                    headers: {
-                        'Accept': '*/*',
-                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36 Edg/136.0.0.0'
-                    },
-                    timeout: 300000,
-                    maxContentLength: Infinity,
-                    maxBodyLength: Infinity,
-                    proxy: {
-                        host: 'p.webshare.io',
-                        port: 80,
-                        auth: {
-                            username: 'liyylnev-rotate',
-                            password: 'n8yufdsr2u5q'
-                        },
-                        protocol: 'http'
-                    }
-                });
+                if (!xxx.success) {
+                    throw new Error(xxx.error);
+                }
+                return xxx
             } else {
                 response = await axios({
                     method: 'get',

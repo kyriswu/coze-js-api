@@ -1301,9 +1301,15 @@ app.post('/whisper/speech-to-text', async (req, res) => {
             //下载mp4文件
             const download = await tool.download_video(downloadUrl,url)
             if (!download.success) throw new Error(download.error);
-            //mp4转mp3
-            const convert = await tool.video_to_audio(download.filepath)
-            if (!convert.success) throw new Error(convert.error);
+            if (!download.is_audio){
+                //mp4转mp3
+                const convert = await tool.video_to_audio(download.filepath)
+                if (!convert.success) throw new Error(convert.error);
+            }else{
+                convert = {
+                    outputFile: download.filepath
+                }
+            }
 
             const protocol = req.headers['x-forwarded-proto'] || req.protocol;
             var audio_url = `${protocol}://${req.get('host')}/audio/${path.basename(convert.outputFile)}`
