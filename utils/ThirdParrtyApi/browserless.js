@@ -3,6 +3,9 @@ import fs from 'fs';
 import path from 'path';
 
 var CHROME_URL= "http://172.245.84.92:8123"
+if (process.env.NODE_ENV === 'online') {
+     CHROME_URL= "http://172.17.0.1:8123"
+}
   
 const browserless = {
     /**
