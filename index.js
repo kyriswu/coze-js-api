@@ -1231,12 +1231,15 @@ app.post('/cozecom/linkreader', async (req, res) => {
 })
 
 app.post('/whisper/speech-to-text', async (req, res) => {
-    let {url,language,api_key} = req.body
+    let {url,language,api_key,cache} = req.body
     if (!url) {
          return res.status(400).send('Invalid input: "url" is required');
     }
     if (!language){
         language="chinese"
+    }
+    if (!cache){
+        cache = true; // 默认读取缓存
     }
 
     const free_key = "FreeASR_" + req.headers['user-identity']//免费版的key
@@ -1276,7 +1279,7 @@ app.post('/whisper/speech-to-text', async (req, res) => {
         
 
         var transcription = await redis.get("transcription_"+videoLink)
-        if (transcription){
+        if (transcription && cache){
             
             transcription = JSON.parse(transcription)
         }else{
