@@ -260,10 +260,14 @@ const tool = {
                 let xxx = await tool.yt_dlp_audio(sourceUrl)
                 console.log("yt-dlp 返回：", xxx)
                 if (!xxx.success) {
-                    console.error("yt-dlp 错误：", xxx.error, "重试 重试 重试 。。。")
+                    console.error("yt-dlp 错误：", xxx.error, "下载youtube失败，重试 第1次 。。。")
                     xxx = await tool.yt_dlp_audio(sourceUrl)
                     if (!xxx.success) {
-                        throw new Error(xxx.error);
+                        console.error("yt-dlp 错误：", xxx.error, "下载youtube失败，重试 第2次 。。。")
+                        xxx = await tool.yt_dlp_audio(sourceUrl)
+                        if (!xxx.success) {
+                            throw new Error(xxx.error);
+                        }
                     }
                 }
                 
