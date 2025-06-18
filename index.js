@@ -1299,7 +1299,7 @@ app.post('/whisper/speech-to-text', async (req, res) => {
 
             var downloadUrl = XiaZaiTool.data.video_url
             //下载mp4文件
-            const download = await tool.download_video(downloadUrl)
+            const download = await tool.download_video(downloadUrl,url)
             if (!download.success) throw new Error(download.error);
             //mp4转mp3
             const convert = await tool.video_to_audio(download.filepath)

@@ -235,8 +235,9 @@ const tool = {
     bytesToMB: function(bytes) {
         return (bytes / (1024 * 1024)).toFixed(2);
     },
-    download_video: async function (url) {
-        
+    download_video: async function (url,sourceUrl) {
+        console.log(`Video Direct Link：${url} `)
+        console.log(`Video Source Url：${sourceUrl} `)
         const downloadDir = path.join(__dirname, '..', 'downloads');
         if (!fs.existsSync(downloadDir)) {
             fs.mkdirSync(downloadDir);
@@ -251,22 +252,47 @@ const tool = {
         try {
             // Download video with progress tracking
             const rateLimit = 100 * (1024 * 1024); // 0.5MB/s limit
-            const response = await axios({
-                method: 'get',
-                url: url,
-                responseType: 'stream',
-                headers: {
-                    'Accept': '*/*',
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36 Edg/136.0.0.0'
-                },
-                timeout: 30000,
-                maxContentLength: Infinity,
-                maxBodyLength: Infinity
-            });
+            let response
+            if (sourceUrl.includes('youtube.com') || sourceUrl.includes('youtu.be')) {
+                response = await axios({
+                    method: 'get',
+                    url: url,
+                    responseType: 'stream',
+                    headers: {
+                        'Accept': '*/*',
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36 Edg/136.0.0.0'
+                    },
+                    timeout: 300000,
+                    maxContentLength: Infinity,
+                    maxBodyLength: Infinity,
+                    proxy: {
+                        host: 'p.webshare.io',
+                        port: 80,
+                        auth: {
+                            username: 'liyylnev-rotate',
+                            password: 'n8yufdsr2u5q'
+                        },
+                        protocol: 'http'
+                    }
+                });
+            } else {
+                response = await axios({
+                    method: 'get',
+                    url: url,
+                    responseType: 'stream',
+                    headers: {
+                        'Accept': '*/*',
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36 Edg/136.0.0.0'
+                    },
+                    timeout: 300000,
+                    maxContentLength: Infinity,
+                    maxBodyLength: Infinity,
+                });
+            }
             if (!this.is_video(response.headers['content-type'])) {
                 throw new Error('视频链接无效！请查看视频教程：【https://www.bilibili.com/video/BV169TizqE58】');
             }
-            console.log(`成功下载视频：${url} `)
+            
             const totalSize = parseInt(response.headers['content-length'], 10);
             let downloadedSize = 0;
             let lastTime = Date.now();
@@ -674,94 +700,6 @@ const tool = {
                 data: error.message
             }
         }
-    },
-    /**
-     * 
-     * @param string video_url 视频链接
-     * @param string download_link 下载直链
-     * @param string task_id 任务ID
-     * @param number left_time 剩余时间，单位(秒)
-     * @param string api_key 付费版用户密钥
-     * @param string free_key 免费版用户密钥
-     */
-    video_to_subtitle: async function(video_url, download_link, task_id, left_time, api_key, free_key,language){
-
-        var download //视频下载信息
-        var convert //音频转换信息
-        var stt //asr
-        var duration //时长
-        try{
-            var value = await redis.get(video_url)
-
-            if (value === null) {
-                console.log("开始处理任务",{
-                    video_url:video_url,
-                    52:download_link
-                })
-                 download = await this.download_video(download_link)
-                if (!download.success) throw new Error(download.error);
-                 duration = await this.getMediaDuration(download.filepath)
-                if (!duration.success) throw new Error(duration.error)
-                if (duration.duration > left_time) throw new Error("任务失败！本视频时长"+ this.formatDuration(duration.duration) +"，账户剩余时长"+this.formatDuration(left_time)+"，需要充值额度！请联系作者购买包月套餐（15元180分钟，30元450分钟，50元1000分钟）【vx：xiaowu_azt】")
-                 convert = await this.video_to_audio(download.filepath)
-                if (!convert.success) throw new Error(convert.error);
-
-                 stt = await whisperapi.openaiSTT({"file_path":convert.outputFile,speaker_labels:true,language:language})
-                if (!stt.success) throw new Error(stt.error);
-
-                value = stt.transcription
-
-                //字幕信息保存90天
-                await redis.set(video_url, JSON.stringify(value), 'EX', 3600 * 24 * 90);
-                
-                //日志
-                console.log("任务处理成功",{
-                    video:download,
-                    audio:convert,
-                    stt:stt,
-                    duration:this.formatDuration(duration.duration)
-                })
-                
-            }else{
-                value = JSON.parse(value)
-            }
-
-            const reDownloadKey = free_key + api_key + video_url
-            const exist = await redis.exists(reDownloadKey);
-            if (!exist){
-                //更新套餐额度:剩余时间-当前视频时间
-                left_time = Math.floor(left_time-value.duration)
-                this.update_asr_key(api_key, free_key, left_time)
-                redis.set(reDownloadKey,1,'EX', 3600*24)//一天之内重复下载不用扣费
-            }
-
-            const result = {
-                success: true,
-                transcription: value
-            }
-            //异步任务返回
-            await redis.set("task_"+task_id, JSON.stringify(result), 'EX', 3600 * 72);
-            //同步任务返回
-            return result
-
-        }catch(err){
-            console.log("获取字幕失败：",err.message,{
-                video:download,
-                audio:convert,
-                stt:stt,
-                duration:this.formatDuration(duration.duration)
-            })
-            if (download && download.filepath) fs.promises.unlink(download.filepath).catch(()=>{})
-            if (convert && convert.outputFile) fs.promises.unlink(convert.outputFile).catch(()=>{})
-            
-            //更新任务状态信息
-            await redis.set("task_"+task_id, err.message, 'EX', 3600 * 72);
-            return {
-                success: false,
-                error: err.message //json格式
-            }
-        }
-        
     },
     /**
      * 更新语音转录的使用限制
