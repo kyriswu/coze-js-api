@@ -257,11 +257,16 @@ const tool = {
             const rateLimit = 100 * (1024 * 1024); // 0.5MB/s limit
             let response
             if (sourceUrl.includes('youtube.com') || sourceUrl.includes('youtu.be')) {
-                const xxx = await tool.yt_dlp_audio(sourceUrl)
+                xxx = await tool.yt_dlp_audio(sourceUrl)
                 console.log("yt-dlp 返回：", xxx)
                 if (!xxx.success) {
-                    throw new Error(xxx.error);
+                    console.error("yt-dlp 错误：", xxx.error, "重试 重试 重试 。。。")
+                    xxx = await tool.yt_dlp_audio(sourceUrl)
+                    if (!xxx.success) {
+                        throw new Error(xxx.error);
+                    }
                 }
+                
                 return xxx
             } else {
                 response = await axios({
