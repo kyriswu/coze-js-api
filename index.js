@@ -1317,8 +1317,18 @@ app.post('/whisper/speech-to-text', async (req, res) => {
             // audio_url = "https://coze-js-api.devtool.uk/audio/audio_1749559334235.mp3"
             //语音转文字
             console.log("开始生成字幕")
-            const result = await coze.generate_video_caption(audio_url)
+            let result = await coze.generate_video_caption(audio_url)
             transcription = JSON.parse(result.content).output
+            
+            // Check if content_chunks exists, if not retry once
+            if (!transcription.content_chunks) {
+                console.log("No content_chunks found, retrying...")
+                result = await coze.generate_video_caption(audio_url)
+                transcription = JSON.parse(result.content).output
+            }
+            if(!transcription.content_chunks) {
+                throw new Error("字幕生成失败，可能是时长太长，或者服务器压力太大，请稍后再试！")
+            }
             await redis.set("transcription_"+videoLink, JSON.stringify(transcription), "EX", 3600 * 24 * 60)
             await redis.del(lock_key)//关闭并发锁
             console.log("字幕生成结束")
