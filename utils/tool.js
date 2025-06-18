@@ -96,9 +96,9 @@ const tool = {
 
         var command = ""
         if (process.env.NODE_ENV === 'online'){
-            command = `yt-dlp -f bestaudio --extract-audio --audio-format mp3 -o ${filepath} "${url}"`
+            command = `yt-dlp -f bestaudio --extract-audio --proxy "http://liyylnev-rotate:n8yufdsr2u5q@p.webshare.io:80" --audio-format mp3 -o ${filepath} "${url}"`
         }else{
-             command = `yt-dlp -f bestaudio --extract-audio --proxy --proxy http://192.168.1.6:10808 --audio-format mp3 -o ${filepath} "${url}"`
+             command = `yt-dlp -f bestaudio --extract-audio --proxy "http://192.168.1.6:10808" --audio-format mp3 -o ${filepath} "${url}"`
         }
         console.log(command)
     
@@ -254,6 +254,8 @@ const tool = {
             const rateLimit = 100 * (1024 * 1024); // 0.5MB/s limit
             let response
             if (sourceUrl.includes('youtube.com') || sourceUrl.includes('youtu.be')) {
+                const xxx = await tool.yt_dlp_audio(sourceUrl)
+                console.log("yt-dlp 返回：", xxx)
                 response = await axios({
                     method: 'get',
                     url: url,
