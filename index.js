@@ -467,6 +467,10 @@ app.post('/parse_html', async (req, res) => {
         let HtmlContent = "";
         const sanitizedUrl = url.trim(); // Remove any whitespace including newlines
         const response = await browserless.chromium_content(sanitizedUrl)
+        if (!response){
+            console.log("请求失败，使用备用方法解析网页内容");
+            return await zyteExtract(req, res);
+        }
         HtmlContent = response.data;
 
         const dom = new JSDOM(HtmlContent);

@@ -29,25 +29,31 @@ const browserless = {
         + `?timeout=180000`
         + `&launch=${encodeURIComponent(JSON.stringify(launch))}`;
 
-        const response = await axios({
-            method: 'POST',
-            url: endpoint,  // Session 总超时设为 3 分钟
-            headers: { 'Content-Type': 'application/json' },
-            timeout: 180000,  // axios 客户端超时
-            data: {
-                url,
-                gotoOptions: {
-                // waitUntil: 'networkidle0',
-                timeout: 180000  // page.goto 等待超时设为 3 分钟
-                },
-                 authenticate: {
-                    username: 'umwhniat-rotate',
-                    password: 'eudczfs5mkzt'
+        try {
+            const response = await axios({
+                method: 'POST',
+                url: endpoint,  // Session 总超时设为 3 分钟
+                headers: { 'Content-Type': 'application/json' },
+                timeout: 180000,  // axios 客户端超时
+                data: {
+                    url,
+                    gotoOptions: {
+                    // waitUntil: 'networkidle0',
+                    timeout: 180000  // page.goto 等待超时设为 3 分钟
+                    },
+                    authenticate: {
+                        username: 'umwhniat-rotate',
+                        password: 'eudczfs5mkzt'
+                    },
+                    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36'
                 }
-            }
-        });
-        // console.log(response)
-        return response
+            });
+            console.log("返回值：", response)
+            return response
+        } catch (error) {
+            console.error('Error in chromium_content:', error.response.status, error.response.statusText);
+            return null
+        }
 
     }
 };
