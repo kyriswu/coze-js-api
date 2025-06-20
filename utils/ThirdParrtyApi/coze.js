@@ -112,7 +112,7 @@ const coze = {
         }
         
     },
-    generate_video_caption: async function (url) {
+    generate_video_caption: async function (url, retried = false) {
         console.log("audio地址：", url)
         try {
             var access_token = await redis.get("coze_api_access_token")
@@ -145,6 +145,11 @@ const coze = {
                 const messageData = messageDataMatch[1].trim();
                 return JSON.parse(messageData);
             } else {
+                // 只重试一次，防止死循环
+                if (!retried) {
+                    console.warn("未找到有效的 message data 内容，尝试重新生成字幕");
+                    return await this.generate_video_caption(url, true);
+                }
                 throw new Error("未找到有效的 message data 内容");
             }
 
@@ -152,7 +157,7 @@ const coze = {
             console.error("Failed to generate video caption:", error);
             throw error;
         }
-    }
+}
 }
 
 export default coze
