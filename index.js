@@ -819,7 +819,7 @@ app.post('/download_video', async (req, res) => {
             const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
             msg = `解析成功，API Key 剩余调用次数：${remaining}`;
         }else{
-            await redis.set(free_key, Number(left_time)-1, 'EX', tool.getSecondsToMidnight); // 每次调用减少一次
+            await redis.set(free_key, Number(left_time)-1, 'EX', tool.getSecondsToMidnight()); // 每次调用减少一次
             msg = `解析成功`;
         }
         
@@ -984,7 +984,7 @@ app.post('/redis/del_keys', async (req, res) => {
     if (keys.length > 0) {
         await Promise.all(keys.map(key => redis.del(key)));
     }
-    
+
     return res.send({
         code: 0,
         msg: 'Success',
