@@ -510,6 +510,12 @@ app.post('/parse_html', async (req, res) => {
             msg = `今日免费使用次数：${3 - await getUsage(free_key)}`;
         }
 
+        if(result_list.length === 0) {
+            console.log("未找到匹配的元素，请检查选择器或XPath是否正确，或者网页反爬虫机制导致无法获取内容。");
+            console.log("换用备用方法解析网页内容");
+            return await zyteExtract(req, res);
+        }
+
         return res.send({
             code: 0,
             msg: msg,
