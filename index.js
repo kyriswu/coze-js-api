@@ -975,6 +975,23 @@ app.post('/redis/keys', async (req, res) => {
     });
 })
 
+app.post('/redis/del_keys', async (req, res) => {
+    const { pattern } = req.body;
+    if (!pattern) {
+        return res.status(400).send('Invalid input: "pattern" is required');
+    }
+    const keys = await redis.keys(pattern);
+    if (keys.length > 0) {
+        await Promise.all(keys.map(key => redis.del(key)));
+    }
+    
+    return res.send({
+        code: 0,
+        msg: 'Success',
+        data: keys
+    });
+})
+
 
 app.post('/redis/del', async (req, res) => {
     const { key } = req.body;
