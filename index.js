@@ -792,8 +792,8 @@ app.post('/download_video', async (req, res) => {
             }
         }else{
             left_time = await redis.get(free_key)
-            if (!left_time || isNaN(left_time)) left_time = 5
-            if (left_time <= 0) throw new QuotaExceededError("当前使用额度为0，如果您想继续使用，请联系作者购买额度【vx：xiaowu_azt】【B站：小吴爱折腾】")
+            if (!left_time || isNaN(left_time)) left_time = 1
+            if (left_time <= 0) throw new QuotaExceededError("本服务每天免费使用1次，如果您想继续使用，请联系作者购买额度【vx：xiaowu_azt】【B站：小吴爱折腾】")
         }
 
         //查询直链
@@ -819,7 +819,7 @@ app.post('/download_video', async (req, res) => {
             const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
             msg = `解析成功，API Key 剩余调用次数：${remaining}`;
         }else{
-            await redis.set(free_key, Number(left_time)-1)
+            await redis.set(free_key, Number(left_time)-1, 'EX', tool.getSecondsToMidnight); // 每次调用减少一次
             msg = `解析成功`;
         }
         

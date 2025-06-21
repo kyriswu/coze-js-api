@@ -19,6 +19,20 @@ const __dirname = dirname(__filename)
 const execPromise = util.promisify(exec);
 
 const tool = {
+    // 计算距离今晚24点还有多少秒
+    getSecondsToMidnight: function() {
+        // 获取当前 UTC 时间，加 8 小时得到北京时间
+        const now = new Date();
+        const beijingNow = new Date(now.getTime() + 8 * 60 * 60 * 1000);
+
+        // 构造北京时间的明天零点
+        const midnight = new Date(beijingNow);
+        midnight.setHours(24, 0, 0, 0);
+
+        // 计算北京时间剩余秒数
+        const diffMs = midnight - beijingNow;
+        return Math.floor(diffMs / 1000);
+    },
     isValidUrl: function (url) {
         try {
             new URL(url);
