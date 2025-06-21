@@ -793,7 +793,7 @@ app.post('/download_video', async (req, res) => {
         }else{
             left_time = await redis.get(free_key)
             if (!left_time || isNaN(left_time)) left_time = 1
-            if (left_time <= 0) throw new QuotaExceededError("本服务每天免费使用1次，如果您想继续使用，请联系作者购买额度【vx：xiaowu_azt】【B站：小吴爱折腾】")
+            if (left_time <= 0) throw new QuotaExceededError("每天免费使用1次，如果您想继续使用，联系作者付费购买更多次数【vx：xiaowu_azt】【B站：小吴爱折腾】")
         }
 
         //查询直链
@@ -1268,6 +1268,7 @@ app.post('/whisper/speech-to-text', async (req, res) => {
     const free_key = "FreeASR_" + req.headers['user-identity']//免费版的key
     const lock_key = "asr:lock:" + req.headers['user-identity']//并发锁
     var left_time = await redis.get(free_key)//免费版剩余次数
+    if (!left_time || isNaN(left_time)) left_time = 1
 
     try{
 
@@ -1278,8 +1279,7 @@ app.post('/whisper/speech-to-text', async (req, res) => {
         }
         
         if (!api_key) {
-            if (!left_time || isNaN(left_time)) left_time = 5
-            if (left_time <= 0) throw new QuotaExceededError("试用体验结束，该服务需要大量算力资源，维护不易，如果您喜欢此工具，请联系作者购买api_key【vx：xiaowu_azt】更多扣子教程，可以关注【B站：小吴爱折腾】")
+            if (left_time <= 0) throw new QuotaExceededError("每天免费使用1次，如果您想继续使用，联系作者购买api_key【vx：xiaowu_azt】更多扣子教程，可以关注【B站：小吴爱折腾】")
             const lock_ttl = await redis.ttl(lock_key)
             if(lock_ttl > 0) {
                 throw new Error(`上一个任务还在处理中，剩余${lock_ttl}秒`)
@@ -1386,7 +1386,7 @@ app.post('/whisper/speech-to-text', async (req, res) => {
         }else{
             //免费版
             left_time = left_time - 1
-            await redis.set(free_key, left_time)
+            await redis.set(free_key, left_time, 'EX', tool.getSecondsToMidnight()); // 每次调用减少一次
             msg = `今日免费使用次数：${left_time}`;
         }
 
