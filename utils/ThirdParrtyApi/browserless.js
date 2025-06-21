@@ -22,7 +22,7 @@ const browserless = {
                 '--no-sandbox',
                 '--proxy-bypass-list=<-loopback>'  // 移除 localhost 的跳过规则
             ],
-            headless: true
+            headless: false,  // 设置为 false 以便调试
         };
 
         const endpoint = `${CHROME_URL}/chromium/content`
