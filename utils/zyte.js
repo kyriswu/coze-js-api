@@ -11,7 +11,7 @@ const zyte = {
                 "screenshot": screenshot,
             },
             {
-                auth: { username: 'c88d2bbf065a4fc5bd7d315497c66ec7' }
+                auth: { username: '5fa6a2702c7c46e9a10f5001d2d24aae' }
             }
         );
 
