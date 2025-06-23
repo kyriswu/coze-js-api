@@ -467,6 +467,8 @@ function extract_html_conent_standard(HtmlContent,xpath,selector){
         result_list = Array.from(document.querySelectorAll(selector)).map(element => {
             return { htmlContent: element.outerHTML };
         });
+    }else{
+        result_list.push({ htmlContent: HtmlContent });
     }
 
     console.log(`提取到的内容数量: ${result_list.length}`);
@@ -1478,9 +1480,6 @@ app.post('/explorer', async (req, res) => {
     let { url, selector, xpath, api_key, action } = req.body;
     if (!url) {
         return res.status(400).send('url is required');
-    }
-    if (!selector && !xpath) {
-        return res.status(400).send('selector or xpath is required');
     }
 
     const api_id = "api_413Kmmitqy3qaDo4";
