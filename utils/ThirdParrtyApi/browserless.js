@@ -20,7 +20,7 @@ const browserless = {
             let success = false;
             while (attempts < 3 && !success) {
                 try {
-                    const res = await axios.get('https://share.proxy.qg.net/get?key=E4B6457D');
+                    const res = await axios.get('https://share.proxy.qg.net/get?key=FC283878');
                     console.log("使用青果代理：", res.data)
                     if (res.data && res.data.code === 'SUCCESS' && res.data.data && res.data.data.length > 0) {
                         proxy = 'http://' + res.data.data[0].server;
@@ -46,7 +46,9 @@ const browserless = {
         args: [
                 `--proxy-server=${proxy}`,
                 '--no-sandbox',
+                `--proxy-auth=${PROXY_USER}:${PROXY_PASS}`, // 显式设置代理认证
                 '--proxy-bypass-list=<-loopback>'  // 移除 localhost 的跳过规则
+
             ],
             headless: false,  // 设置为 false 以便调试
         };
@@ -60,7 +62,6 @@ const browserless = {
                 method: 'POST',
                 url: endpoint,  // Session 总超时设为 3 分钟
                 headers: {
-                    'Content-Type': 'application/json',
                     'sec-ch-ua': '"Microsoft Edge";v="137", "Chromium";v="137", "Not/A)Brand";v="24"',
                     'sec-ch-ua-mobile': '?0',
                     'sec-ch-ua-platform': '"Windows"',

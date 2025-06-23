@@ -435,6 +435,8 @@ function extract_html_conent(HtmlContent,xpath,selector){
             return { htmlContent: element.outerHTML };
         }); 
     }
+
+    console.log(`提取到的内容数量: ${result_list.length}`);
     
     return result_list
 }
