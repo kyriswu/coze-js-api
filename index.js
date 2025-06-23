@@ -441,6 +441,39 @@ function extract_html_conent(HtmlContent,xpath,selector){
     return result_list
 }
 
+//标准版：根据selector和xpath选择元素
+function extract_html_conent_standard(HtmlContent,xpath,selector){
+
+    const dom = new JSDOM(HtmlContent);
+    const { document, window } = dom.window;
+
+    let result_list = [];
+
+    if (xpath) {
+        const result = document.evaluate(
+            xpath, 
+            document, 
+            null, 
+            window.XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, // 使用 window.XPathResult
+            null
+        );
+        // Iterate over the results
+        for (let i = 0; i < result.snapshotLength; i++) {
+            const element = result.snapshotItem(i);
+            result_list.push({ htmlContent: element.outerHTML });
+        }
+    } else if (selector) {
+        // 直接用 selector 作为 CSS 选择器，无需转换
+        result_list = Array.from(document.querySelectorAll(selector)).map(element => {
+            return { htmlContent: element.outerHTML };
+        });
+    }
+
+    console.log(`提取到的内容数量: ${result_list.length}`);
+    
+    return result_list
+}
+
 app.post('/parse_html', async (req, res) => {
     let { url, selector, xpath, api_key, action } = req.body;
     if (!url) {
@@ -499,7 +532,7 @@ app.post('/parse_html', async (req, res) => {
         let response = await browserless.chromium_content(sanitizedUrl)
         if (!response){
             console.log("webshare代理请求失败，使用青果代理访问目标地址");
-            response = await browserless.chromium_content(sanitizedUrl, 'china')
+            response = await browserless.chromium_content(sanitizedUrl, {proxy:'china'})
             if (!response){
                 console.log("青果代理请求失败，使用zyte解析网页内容");
                 return await zyteExtract(req, res);
@@ -511,7 +544,7 @@ app.post('/parse_html', async (req, res) => {
         let result_list = extract_html_conent(HtmlContent,xpath,selector)
         if(result_list.length === 0) {
             console.log("未找到匹配的元素，请检查选择器或XPath是否正确，或者网页反爬虫机制导致无法获取内容。");
-            response = await browserless.chromium_content(sanitizedUrl, 'china')
+            response = await browserless.chromium_content(sanitizedUrl, {proxy:'china'})
             if (!response){
                 console.log("切换成青果代理也请求失败，换成zyte");
                 return await zyteExtract(req, res);
@@ -1438,6 +1471,105 @@ app.post('/whisper/speech-to-text', async (req, res) => {
 
 app.get('/coze-auth-callback', coze.callback)
 app.get('/cozecom-auth-callback', cozecom.callback)
+
+//虚拟浏览器
+app.post('/explorer', async (req, res) => {
+
+    let { url, selector, xpath, api_key, action } = req.body;
+    if (!url) {
+        return res.status(400).send('url is required');
+    }
+    if (!selector && !xpath) {
+        return res.status(400).send('selector or xpath is required');
+    }
+
+    const api_id = "api_413Kmmitqy3qaDo4";
+
+    //免费版的key
+    const free_key = "html_parser_" + req.headers['user-identity']
+    if(api_key){
+        //付费版
+        const { keyId, valid, remaining, code } = await unkey.verifyKey(api_id, api_key, 0);
+        if (!valid) {
+            return res.send({
+                code: -1,
+                msg: 'API Key 无效或已过期，请检查后重试！'
+            }); 
+        }
+        if (remaining == 0) {
+            return res.send({
+                code: -1,
+                msg: 'API Key 使用次数已用完，请联系作者续费！'
+            }); 
+        }
+    }else{
+        //免费版
+        const canParse = await canUseHtmlParse(free_key);
+        if (!canParse) {
+            return res.send({
+                code: -1,
+                msg: '免费版每天限量3次，付费可以解锁更多次数，请联系作者！【B站:小吴爱折腾】'
+            }); 
+        }
+    }
+
+    try {
+
+        const sanitizedUrl = url.trim(); // Remove any whitespace including newlines
+        let response = await browserless.chromium_content(sanitizedUrl)
+        if (!response){
+            console.log("虚拟浏览器：webshare代理请求失败，使用青果代理访问目标地址");
+            response = await browserless.chromium_content(sanitizedUrl, {proxy:'china'})
+            if (!response){
+                console.log("虚拟浏览器：青果代理请求失败");
+                throw new Error("虚拟浏览器：青果代理请求失败")
+            }
+        }
+
+        let HtmlContent = response.data;
+
+        let result_list = extract_html_conent_standard(HtmlContent,xpath,selector)
+        if(result_list.length === 0) {
+            console.log("虚拟浏览器：未找到匹配的元素，请检查选择器或XPath是否正确，或者网页反爬虫机制导致无法获取内容。");
+            response = await browserless.chromium_content(sanitizedUrl, {proxy:'china'})
+            if (!response){
+                console.log("虚拟浏览器：切换成青果代理也请求失败");
+                throw new Error("虚拟浏览器：青果代理请求失败")
+            }
+            HtmlContent = response.data
+            result_list = extract_html_conent_standard(HtmlContent,xpath,selector)
+        }
+
+        let msg = "";
+        if (api_key) {
+            //付费版
+            const { remaining } = await unkey.verifyKey(api_id, api_key, 1);
+            msg = `API Key 剩余调用次数：${remaining}`;
+        }else{
+            await redis.incr(free_key);//每次调用增加一次
+            msg = `今日免费使用次数：${3 - await getUsage(free_key)}`;
+        }
+
+        return res.send({
+            code: 0,
+            msg: msg,
+            data: result_list
+        });
+    } catch (error) {
+        console.error(`Error: ${error}`);
+        console.error(`Stack trace: ${error.stack}`);
+        if (error.response) {
+            console.error(`Response status: ${error.response.status}`);
+            console.error(`Response data: ${JSON.stringify(error.response.data)}`);
+            return res.send({
+                code: -1,
+                msg: "请求失败，请检查url和参数是否正确！",
+            })
+        }
+        res.status(500).send(`Error: ${error.message}`);
+    }
+
+})
 
 app.post('/download_image', async (req, res) => {
     const { url } = req.body;

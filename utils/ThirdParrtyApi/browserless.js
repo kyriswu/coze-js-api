@@ -13,9 +13,9 @@ var PROXY_PASS = "eudczfs5mkzt"
   
 const browserless = {
 
-    chromium_content: async function (url,proxyType=null) {
+    chromium_content: async function (url,params = {}) {
 
-        if (proxyType === "china") {
+        if (params.proxy && params.proxy === "china") {
             let attempts = 0;
             let success = false;
             while (attempts < 3 && !success) {
