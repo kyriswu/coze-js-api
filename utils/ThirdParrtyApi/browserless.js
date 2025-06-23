@@ -21,6 +21,7 @@ const browserless = {
             while (attempts < 3 && !success) {
                 try {
                     const res = await axios.get('https://share.proxy.qg.net/get?key=E4B6457D');
+                    console.log("使用青果代理：", res.data)
                     if (res.data && res.data.code === 'SUCCESS' && res.data.data && res.data.data.length > 0) {
                         proxy = 'http://' + res.data.data[0].server;
                         CHROME_URL = "http://1.15.114.179:8123"
@@ -84,6 +85,7 @@ const browserless = {
                     userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36'
                 }
             });
+            // console.log(response.data)
             return response
         } catch (error) {
             console.error('Error in chromium_content:', error.response.status, error.response.statusText);
