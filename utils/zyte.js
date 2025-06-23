@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const zyte = {
-    extract: async function (url, actions, screenshot) {
+    extract: async function (url, actions = null, screenshot = false) {
         const response = await axios.post(
             "https://api.zyte.com/v1/extract",
             {

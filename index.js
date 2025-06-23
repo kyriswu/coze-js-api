@@ -407,8 +407,36 @@ function htmlToQuerySelector(htmlString) {
     return selectorParts.join(' ');
 }
 
-function toBase64(str) {
-    return Buffer.from(str, 'utf-8').toString('base64');
+function extract_html_conent(HtmlContent,xpath,selector){
+
+    const dom = new JSDOM(HtmlContent);
+    const { document, window } = dom.window;
+
+    let result_list = [];
+
+    if (xpath) {
+        const result = document.evaluate(
+            xpath, 
+            document, 
+            null, 
+            window.XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, // 使用 window.XPathResult
+            null
+        );
+        // Iterate over the results
+        for (let i = 0; i < result.snapshotLength; i++) {
+            const element = result.snapshotItem(i);
+            result_list.push({ htmlContent: element.outerHTML });
+        }
+    } else if (selector) {
+        const domSelector = selector;
+        const parserSelector = htmlToQuerySelector(domSelector);
+        console.log(parserSelector)
+        result_list = Array.from(document.querySelectorAll(parserSelector)).map(element => {
+            return { htmlContent: element.outerHTML };
+        }); 
+    }
+    
+    return result_list
 }
 
 app.post('/parse_html', async (req, res) => {
@@ -466,38 +494,28 @@ app.post('/parse_html', async (req, res) => {
 
         let HtmlContent = "";
         const sanitizedUrl = url.trim(); // Remove any whitespace including newlines
-        const response = await browserless.chromium_content(sanitizedUrl)
+        let response = await browserless.chromium_content(sanitizedUrl)
         if (!response){
-            console.log("请求失败，使用备用方法解析网页内容");
-            return await zyteExtract(req, res);
+            console.log("webshare代理请求失败，使用青果代理访问目标地址");
+            response = await browserless.chromium_content(sanitizedUrl, 'china')
+            if (!response){
+                console.log("青果代理请求失败，使用zyte解析网页内容");
+                return await zyteExtract(req, res);
+            }
         }
+
         HtmlContent = response.data;
 
-        const dom = new JSDOM(HtmlContent);
-        const { document, window } = dom.window;
-
-        let result_list = [];
-
-        if (xpath) {
-            const result = document.evaluate(
-                xpath, 
-                document, 
-                null, 
-                window.XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, // 使用 window.XPathResult
-                null
-            );
-            // Iterate over the results
-            for (let i = 0; i < result.snapshotLength; i++) {
-                const element = result.snapshotItem(i);
-                result_list.push({ htmlContent: element.outerHTML });
+        let result_list = extract_html_conent(HtmlContent,xpath,selector)
+        if(result_list.length === 0) {
+            console.log("未找到匹配的元素，请检查选择器或XPath是否正确，或者网页反爬虫机制导致无法获取内容。");
+            response = await browserless.chromium_content(sanitizedUrl, 'china')
+            if (!response){
+                console.log("切换成青果代理也请求失败，换成zyte");
+                return await zyteExtract(req, res);
             }
-        } else if (selector) {
-            const domSelector = selector;
-            const parserSelector = htmlToQuerySelector(domSelector);
-            console.log(parserSelector)
-            result_list = Array.from(document.querySelectorAll(parserSelector)).map(element => {
-                return { htmlContent: element.outerHTML };
-            }); 
+            HtmlContent = response.data
+            result_list = extract_html_conent(HtmlContent,xpath,selector)
         }
 
         let msg = "";
@@ -508,12 +526,6 @@ app.post('/parse_html', async (req, res) => {
         }else{
             await redis.incr(free_key);//每次调用增加一次
             msg = `今日免费使用次数：${3 - await getUsage(free_key)}`;
-        }
-
-        if(result_list.length === 0) {
-            console.log("未找到匹配的元素，请检查选择器或XPath是否正确，或者网页反爬虫机制导致无法获取内容。");
-            console.log("换用备用方法解析网页内容");
-            return await zyteExtract(req, res);
         }
 
         return res.send({
