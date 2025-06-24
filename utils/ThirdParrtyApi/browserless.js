@@ -35,15 +35,15 @@ function getCpuUsage() {
   
 const browserless = {
 
-    chromium_content: async function (url,params = {}) {
-        console.log("chromium_content参数",url, params)
+    chromium_content: async function (url,opt = {}) {
+        console.log("chromium_content参数",url, opt)
 
         // 轮询判断 CPU 使用率小于 80 才放行
         while (getCpuUsage() >= 80) {
             await new Promise(resolve => setTimeout(resolve, 1000));
         }
 
-        if (params && params.proxy && params.proxy === "china") {
+        if (opt && opt.proxy && opt.proxy === "china") {
             let attempts = 0;
             let success = false;
             while (attempts < 3 && !success) {
