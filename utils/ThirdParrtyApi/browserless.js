@@ -69,6 +69,15 @@ const browserless = {
                 return null
             }
 
+        }else{
+            if (process.env.NODE_ENV === 'online') {
+                CHROME_ENDPOINT = "172.17.0.1:8123"
+            }
+            PROXY_USER = "umwhniat-rotate"
+            PROXY_PASS = "eudczfs5mkzt"
+            PROXY_HOST = "p.webshare.io"
+            PROXY_PORT = "80"
+            proxy = 'http://' + `${PROXY_HOST}:${PROXY_PORT}`
         }
         
 
