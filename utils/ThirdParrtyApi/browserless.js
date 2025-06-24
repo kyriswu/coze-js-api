@@ -36,15 +36,16 @@ function getCpuUsage() {
 const browserless = {
 
     chromium_content: async function (url,opt = {}) {
-        console.log("chromium_content参数",url, opt)
+
+        
         let proxy_user,proxy_pass,chromium_endpoint,proxy
 
-        // 轮询判断 CPU 使用率小于 80 才放行
-        const randomDelay = Math.floor(Math.random() * 1000) + 1;
-        await new Promise(resolve => setTimeout(resolve, randomDelay));
-        while (getCpuUsage() >= 80) {
-            await new Promise(resolve => setTimeout(resolve, 1000));
-        }
+        // // 轮询判断 CPU 使用率小于 80 才放行
+        // const randomDelay = Math.floor(Math.random() * 1000) + 1;
+        // await new Promise(resolve => setTimeout(resolve, randomDelay));
+        // while (getCpuUsage() >= 80) {
+        //     await new Promise(resolve => setTimeout(resolve, 1000));
+        // }
 
         if (opt && opt.proxy && opt.proxy === "china") {
             let attempts = 0;
