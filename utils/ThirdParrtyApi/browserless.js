@@ -97,7 +97,9 @@ const browserless = {
             console.error('Error in chromium_content:', error);
             return null
         } finally {
+            const pid = browser.process().pid;
             await browser.close();
+            kill(pid, 'SIGKILL');
         }
         
         try {
