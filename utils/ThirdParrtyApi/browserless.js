@@ -7,14 +7,14 @@ import puppeteer from 'puppeteer-core';
 var CHROME_URL= "http://172.245.84.92:8123"
 var CHROME_ENDPOINT = "172.245.84.92:8123"
 if (process.env.NODE_ENV === 'online') {
-     CHROME_URL= "http://172.17.0.1:8123"
+    CHROME_URL= "http://172.17.0.1:8123"
+    CHROME_ENDPOINT = "172.17.0.1:8123"
 }
 var PROXY_USER = "umwhniat-rotate"
 var PROXY_PASS = "eudczfs5mkzt"
 var PROXY_HOST = "p.webshare.io"
 var PROXY_PORT = "80"
 var proxy = 'http://' + `${PROXY_HOST}:${PROXY_PORT}`
-
   
 const browserless = {
 
@@ -49,8 +49,17 @@ const browserless = {
         }
         
 
+        console.log({
+            browserWSEndpoint: `ws://${CHROME_ENDPOINT}/chromium/content?timeout=180000`,  // 替换为你的本地端口
+            args: [
+                `--proxy-server=${proxy}`,
+                '--no-sandbox',
+                '--proxy-bypass-list=<-loopback>;localhost;127.0.0.1;172.17.0.1'  // 移除 localhost 的跳过规则
+            ],
+            headless: true,  // 设置为 false 以便调试
+        })
         const browser = await puppeteer.connect({
-            browserWSEndpoint: `ws://${CHROME_ENDPOINT}?timeout=180000`,  // 替换为你的本地端口
+            browserWSEndpoint: `ws://${CHROME_ENDPOINT}/chromium?timeout=180000`,  // 替换为你的本地端口
             args: [
                 `--proxy-server=${proxy}`,
                 '--no-sandbox',
