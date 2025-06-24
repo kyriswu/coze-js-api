@@ -37,6 +37,7 @@ const browserless = {
 
     chromium_content: async function (url,opt = {}) {
         console.log("chromium_content参数",url, opt)
+        let proxy_user,proxy_pass,chromium_endpoint,proxy
 
         // 轮询判断 CPU 使用率小于 80 才放行
         while (getCpuUsage() >= 80) {
@@ -51,10 +52,9 @@ const browserless = {
                     const res = await axios.get('https://share.proxy.qg.net/get?key=FC283878');
                     console.log("使用青果代理：", res.data)
                     if (res.data && res.data.code === 'SUCCESS' && res.data.data && res.data.data.length > 0) {
-                        CHROME_ENDPOINT = "1.15.114.179:8123"
-                        CHROME_URL = "http://1.15.114.179:8123"
-                        PROXY_USER = "FC283878"
-                        PROXY_PASS = "6BDF595312DA"
+                        chromium_endpoint = "1.15.114.179:8123"
+                        proxy_user = "FC283878"
+                        proxy_pass = "6BDF595312DA"
                         proxy = 'http://' + res.data.data[0].server;
                         success = true;
                     }
@@ -71,27 +71,17 @@ const browserless = {
 
         }else{
             if (process.env.NODE_ENV === 'online') {
-                CHROME_ENDPOINT = "172.17.0.1:8123"
+                chromium_endpoint = "172.17.0.1:8123"
+            }else{
+                chromium_endpoint = "172.245.84.92:8123"
             }
-            PROXY_USER = "umwhniat-rotate"
-            PROXY_PASS = "eudczfs5mkzt"
-            PROXY_HOST = "p.webshare.io"
-            PROXY_PORT = "80"
-            proxy = 'http://' + `${PROXY_HOST}:${PROXY_PORT}`
+            proxy_user = "umwhniat-rotate"
+            proxy_pass = "eudczfs5mkzt"
+            proxy = 'http://p.webshare.io:80'
         }
         
-
-        console.log({
-            browserWSEndpoint: `ws://${CHROME_ENDPOINT}/chromium/content?timeout=180000`,  // 替换为你的本地端口
-            args: [
-                `--proxy-server=${proxy}`,
-                '--no-sandbox',
-                '--proxy-bypass-list=<-loopback>;localhost;127.0.0.1;172.17.0.1'  // 移除 localhost 的跳过规则
-            ],
-            headless: true,  // 设置为 false 以便调试
-        })
         const browser = await puppeteer.connect({
-            browserWSEndpoint: `ws://${CHROME_ENDPOINT}/chromium?timeout=180000`,  // 替换为你的本地端口
+            browserWSEndpoint: `ws://${chromium_endpoint}/chromium?timeout=180000`,  // 替换为你的本地端口
             args: [
                 `--proxy-server=${proxy}`,
                 '--no-sandbox',
@@ -112,8 +102,8 @@ const browserless = {
             ); 
 
             await page.authenticate({
-                username: PROXY_USER,
-                password: PROXY_PASS,
+                username: proxy_user,
+                password: proxy_pass,
             }); // 正式验证代理用户名密码 :contentReference[oaicite:1]{index=1}
 
             await page.goto(url, {
