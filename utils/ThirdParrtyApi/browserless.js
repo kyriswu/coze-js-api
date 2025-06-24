@@ -40,6 +40,8 @@ const browserless = {
         let proxy_user,proxy_pass,chromium_endpoint,proxy
 
         // 轮询判断 CPU 使用率小于 80 才放行
+        const randomDelay = Math.floor(Math.random() * 1000) + 1;
+        await new Promise(resolve => setTimeout(resolve, randomDelay));
         while (getCpuUsage() >= 80) {
             await new Promise(resolve => setTimeout(resolve, 1000));
         }
