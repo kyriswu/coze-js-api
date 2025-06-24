@@ -42,7 +42,7 @@ const browserless = {
             await new Promise(resolve => setTimeout(resolve, 1000));
         }
 
-        if (params.proxy && params.proxy === "china") {
+        if (params && params.proxy && params.proxy === "china") {
             let attempts = 0;
             let success = false;
             while (attempts < 3 && !success) {
