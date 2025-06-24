@@ -2,13 +2,16 @@ import axios from 'axios';
 import fs from 'fs';
 import path from 'path';
 
-var proxy = 'http://p.webshare.io:80';
+
 var CHROME_URL= "http://172.245.84.92:8123"
 if (process.env.NODE_ENV === 'online') {
      CHROME_URL= "http://172.17.0.1:8123"
 }
 var PROXY_USER = "umwhniat-rotate"
 var PROXY_PASS = "eudczfs5mkzt"
+var PROXY_HOST = "p.webshare.io"
+var PROXY_PORT = "80"
+var proxy = 'http://' + `${PROXY_USER}:${PROXY_PASS}@${PROXY_HOST}:${PROXY_PORT}`
 
   
 const browserless = {
@@ -23,10 +26,11 @@ const browserless = {
                     const res = await axios.get('https://share.proxy.qg.net/get?key=FC283878');
                     console.log("使用青果代理：", res.data)
                     if (res.data && res.data.code === 'SUCCESS' && res.data.data && res.data.data.length > 0) {
-                        proxy = 'http://' + res.data.data[0].server;
+                        
                         CHROME_URL = "http://1.15.114.179:8123"
                         PROXY_USER = "FC283878"
                         PROXY_PASS = "6BDF595312DA"
+                        proxy = 'http://' + `${PROXY_USER}:${PROXY_PASS}@` + res.data.data[0].server;
                         success = true;
                     }
                 } catch (err) {
