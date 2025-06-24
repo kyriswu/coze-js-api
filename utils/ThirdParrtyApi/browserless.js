@@ -2,6 +2,7 @@ import axios from 'axios';
 import fs from 'fs';
 import path from 'path';
 import puppeteer from 'puppeteer-core';
+import os from 'os';
 
 
 var CHROME_URL= "http://172.245.84.92:8123"
@@ -15,10 +16,31 @@ var PROXY_PASS = "eudczfs5mkzt"
 var PROXY_HOST = "p.webshare.io"
 var PROXY_PORT = "80"
 var proxy = 'http://' + `${PROXY_HOST}:${PROXY_PORT}`
+
+function getCpuUsage() {
+  const cpus = os.cpus();
+  let idle = 0;
+  let total = 0;
+
+  cpus.forEach(cpu => {
+    for (let type in cpu.times) {
+      total += cpu.times[type];
+    }
+    idle += cpu.times.idle;
+  });
+
+  const idlePercentage = (idle / total) * 100;
+  return Math.floor(100 - idlePercentage) // 返回 CPU 使用率
+}
   
 const browserless = {
 
     chromium_content: async function (url,params = {}) {
+
+        // 轮询判断 CPU 使用率小于 80 才放行
+        while (getCpuUsage() >= 80) {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+        }
 
         if (params.proxy && params.proxy === "china") {
             let attempts = 0;
