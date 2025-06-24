@@ -36,6 +36,7 @@ function getCpuUsage() {
 const browserless = {
 
     chromium_content: async function (url,params = {}) {
+        console.log("chromium_content参数",url, params)
 
         // 轮询判断 CPU 使用率小于 80 才放行
         while (getCpuUsage() >= 80) {
