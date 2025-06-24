@@ -116,7 +116,7 @@ const browserless = {
             // console.log(response.data)
             return response
         } catch (error) {
-            console.error('Error in chromium_content:', error.response.status, error.response.statusText);
+            console.error('Error in chromium_content:', error);
             return null
         }
 
