@@ -11,7 +11,7 @@ var PROXY_USER = "umwhniat-rotate"
 var PROXY_PASS = "eudczfs5mkzt"
 var PROXY_HOST = "p.webshare.io"
 var PROXY_PORT = "80"
-var proxy = 'http://' + `${PROXY_USER}:${PROXY_PASS}@${PROXY_HOST}:${PROXY_PORT}`
+var proxy = 'http://' + `${PROXY_HOST}:${PROXY_PORT}`
 
   
 const browserless = {
@@ -30,7 +30,7 @@ const browserless = {
                         CHROME_URL = "http://1.15.114.179:8123"
                         PROXY_USER = "FC283878"
                         PROXY_PASS = "6BDF595312DA"
-                        proxy = 'http://' + `${PROXY_USER}:${PROXY_PASS}@` + res.data.data[0].server;
+                        proxy = 'http://' + res.data.data[0].server;
                         success = true;
                     }
                 } catch (err) {
