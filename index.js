@@ -1592,6 +1592,12 @@ app.post('/download_image', async (req, res) => {
     }
 })
 
+app.post("/test", async (req, res) => {
+    let {url} = req.body
+    let data = await browserless.openWithPorxy(url)
+    res.send(data)
+})
+
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
 })
