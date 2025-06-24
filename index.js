@@ -1521,7 +1521,7 @@ app.post('/explorer', async (req, res) => {
             response = await browserless.chromium_content(sanitizedUrl, {proxy:'china'})
             if (!response){
                 console.log("虚拟浏览器：青果代理请求失败");
-                throw new Error("虚拟浏览器：青果代理请求失败")
+                throw new Error("出了点问题，再重试一遍或者联系作者反馈【B站：小吴爱折腾】")
             }
         }
 
@@ -1533,7 +1533,7 @@ app.post('/explorer', async (req, res) => {
             response = await browserless.chromium_content(sanitizedUrl, {proxy:'china'})
             if (!response){
                 console.log("虚拟浏览器：切换成青果代理也请求失败");
-                throw new Error("虚拟浏览器：青果代理请求失败")
+                throw new Error("出了点问题，再重试一遍或者联系作者反馈【B站：小吴爱折腾】")
             }
             HtmlContent = response.data
             result_list = extract_html_conent_standard(HtmlContent,xpath,selector)

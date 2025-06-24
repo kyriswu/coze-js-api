@@ -41,12 +41,11 @@ const browserless = {
             }
 
         }
-            
+        
         const launch = {
         args: [
                 `--proxy-server=${proxy}`,
                 '--no-sandbox',
-                `--proxy-auth=${PROXY_USER}:${PROXY_PASS}`, // 显式设置代理认证
                 '--proxy-bypass-list=<-loopback>'  // 移除 localhost 的跳过规则
 
             ],
@@ -57,6 +56,34 @@ const browserless = {
         + `?timeout=180000`
         + `&launch=${encodeURIComponent(JSON.stringify(launch))}`;
 
+        console.log({
+                method: 'POST',
+                url: endpoint,  // Session 总超时设为 3 分钟
+                headers: {
+                    'sec-ch-ua': '"Microsoft Edge";v="137", "Chromium";v="137", "Not/A)Brand";v="24"',
+                    'sec-ch-ua-mobile': '?0',
+                    'sec-ch-ua-platform': '"Windows"',
+                    'sec-fetch-dest': 'document',
+                    'sec-fetch-mode': 'navigate',
+                    'sec-fetch-site': 'same-origin',
+                    'sec-fetch-user': '?1',
+                    'upgrade-insecure-requests': '1',
+                    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36 Edg/137.0.0.0'
+                },
+                timeout: 180000,  // axios 客户端超时
+                data: {
+                    url,
+                    gotoOptions: {
+                    // waitUntil: 'networkidle0',
+                    timeout: 180000  // page.goto 等待超时设为 3 分钟
+                    },
+                    authenticate: {
+                        username: PROXY_USER,
+                        password: PROXY_PASS
+                    },
+                    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36'
+                }
+            })
         try {
             const response = await axios({
                 method: 'POST',
