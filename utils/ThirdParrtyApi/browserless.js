@@ -4,9 +4,9 @@ import path from 'path';
 
 var proxy = 'http://p.webshare.io:80';
 var CHROME_URL= "http://172.245.84.92:8123"
-if (process.env.NODE_ENV === 'online') {
-     CHROME_URL= "http://172.17.0.1:8123"
-}
+// if (process.env.NODE_ENV === 'online') {
+//      CHROME_URL= "http://172.17.0.1:8123"
+// }
 var PROXY_USER = "umwhniat-rotate"
 var PROXY_PASS = "eudczfs5mkzt"
 
