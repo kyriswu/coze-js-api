@@ -19,6 +19,19 @@ const __dirname = dirname(__filename)
 const execPromise = util.promisify(exec);
 
 const tool = {
+    /**
+ * 判断输入是 CSS Selector 还是 XPath，或者都不是
+ * @param {string} sel - 选择器字符串
+ * @returns {'css'|'xpath'}
+ * @throws {Error} - 输入无效时抛错
+ */
+ identifySelector: function (sel) {
+  const s = sel.trim();
+  if (s.startsWith('//') || s.startsWith('(') || s.startsWith('/html') || s.includes('@')) {
+    return 'xpath';
+  }
+  return 'css';
+},
     // 计算距离今晚24点还有多少秒
     getSecondsToMidnight: function() {
         // 获取当前 UTC 时间，加 8 小时得到北京时间

@@ -1592,10 +1592,35 @@ app.post('/download_image', async (req, res) => {
     }
 })
 
+app.post("/screenshot", async (req, res) => {
+    let {url,element} = req.body
+    try {
+        let screenshot = await browserless.screenshot(url,{element:element})
+        if (!screenshot) screenshot = await browserless.screenshot(url,{proxy:'china',element:element})
+        const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+        return res.send({
+            'code':0,
+            'msg':'success',
+            'data': `${protocol}://${req.get('host')}/downloads/${screenshot}`
+        })
+    }catch(err){
+        return res.send({
+            'code':-1,
+            'msg':err.message,
+        })
+    }
+})
+
 app.post("/test", async (req, res) => {
-    let {url} = req.body
-    let data = await browserless.openWithPorxy(url)
-    res.send(data)
+    let {url,element} = req.body
+    let screenshot = await browserless.screenshot(url,{element:element})
+    if (!screenshot) screenshot = await browserless.screenshot(url,{proxy:'china',element:element})
+    const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+    return res.send({
+        'code':0,
+        'msg':'success',
+        'data': `${protocol}://${req.get('host')}/downloads/${screenshot}`
+    })
 })
 
 app.listen(port, () => {

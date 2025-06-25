@@ -1,21 +1,24 @@
 import axios from 'axios';
 import fs from 'fs';
 import path from 'path';
+import { dirname } from 'path';
 import puppeteer from 'puppeteer-core';
 import os from 'os';
+import { URL,fileURLToPath } from 'url';
+import tool from '../tool.js';
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
 
 
-var CHROME_URL= "http://172.245.84.92:8123"
-var CHROME_ENDPOINT = "172.245.84.92:8123"
-if (process.env.NODE_ENV === 'online') {
-    CHROME_URL= "http://172.17.0.1:8123"
-    CHROME_ENDPOINT = "172.17.0.1:8123"
-}
-var PROXY_USER = "umwhniat-rotate"
-var PROXY_PASS = "eudczfs5mkzt"
-var PROXY_HOST = "p.webshare.io"
-var PROXY_PORT = "80"
-var proxy = 'http://' + `${PROXY_HOST}:${PROXY_PORT}`
+
+const Webshare_PROXY_USER = "umwhniat-rotate"
+const Webshare_PROXY_PASS = "eudczfs5mkzt"
+const Webshare_PROXY_HOST = "p.webshare.io"
+const Webshare_PROXY_PORT = "80"
+
+const qingguo_api_url = "https://share.proxy.qg.net/get?key=FC283878"
+const qingguo_proxy_user = "FC283878"
+const qingguo_proxy_pass = "6BDF595312DA"
 
 function getCpuUsage() {
   const cpus = os.cpus();
@@ -37,7 +40,7 @@ const browserless = {
 
     chromium_content: async function (url,opt = {}) {
 
-        
+
         let proxy_user,proxy_pass,chromium_endpoint,proxy
 
         // // 轮询判断 CPU 使用率小于 80 才放行
@@ -52,12 +55,12 @@ const browserless = {
             let success = false;
             while (attempts < 3 && !success) {
                 try {
-                    const res = await axios.get('https://share.proxy.qg.net/get?key=FC283878');
+                    const res = await axios.get(qingguo_api_url);
                     console.log("使用青果代理：", res.data)
                     if (res.data && res.data.code === 'SUCCESS' && res.data.data && res.data.data.length > 0) {
                         chromium_endpoint = "1.15.114.179:8123"
-                        proxy_user = "FC283878"
-                        proxy_pass = "6BDF595312DA"
+                        proxy_user = qingguo_proxy_user
+                        proxy_pass = qingguo_proxy_pass
                         proxy = 'http://' + res.data.data[0].server;
                         success = true;
                     }
@@ -78,9 +81,9 @@ const browserless = {
             }else{
                 chromium_endpoint = "172.245.84.92:8123"
             }
-            proxy_user = "umwhniat-rotate"
-            proxy_pass = "eudczfs5mkzt"
-            proxy = 'http://p.webshare.io:80'
+            proxy_user = Webshare_PROXY_USER
+            proxy_pass = Webshare_PROXY_PASS
+            proxy = `http://${Webshare_PROXY_HOST}:${Webshare_PROXY_PORT}`
         }
         
         const browser = await puppeteer.connect({
@@ -124,58 +127,60 @@ const browserless = {
         } finally {
             await browser.close();
         }
-        
-        try {
-            const response = await axios({
-                method: 'POST',
-                url: endpoint,  // Session 总超时设为 3 分钟
-                headers: {
-                    'sec-ch-ua': '"Microsoft Edge";v="137", "Chromium";v="137", "Not/A)Brand";v="24"',
-                    'sec-ch-ua-mobile': '?0',
-                    'sec-ch-ua-platform': '"Windows"',
-                    'sec-fetch-dest': 'document',
-                    'sec-fetch-mode': 'navigate',
-                    'sec-fetch-site': 'same-origin',
-                    'sec-fetch-user': '?1',
-                    'upgrade-insecure-requests': '1',
-                    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36 Edg/137.0.0.0'
-                },
-                timeout: 180000,  // axios 客户端超时
-                data: {
-                    url,
-                    gotoOptions: {
-                    // waitUntil: 'networkidle0',
-                    timeout: 180000  // page.goto 等待超时设为 3 分钟
-                    },
-                    authenticate: {
-                        username: PROXY_USER,
-                        password: PROXY_PASS
-                    },
-                    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36'
-                }
-            });
-            // console.log(response.data)
-            return response
-        } catch (error) {
-            console.error('Error in chromium_content:', error);
-            return null
-        }
 
     },
 
-    openWithPorxy: async function(url) {
-                    // Browserless 的 websocket endpoint
-            const browser = await puppeteer.connect({
-                browserWSEndpoint: `ws://${PROXY_HOST}:8123?timeout=120000`,  // 替换为你的本地端口
-                args: [
-                    `--proxy-server=${proxy}`,
-                    '--no-sandbox',
-                    '--proxy-bypass-list=<-loopback>;localhost;127.0.0.1;172.17.0.1'  // 移除 localhost 的跳过规则
-                ],
-                headless: false,  // 设置为 false 以便调试
-            });
+    screenshot: async function(url,opt={}) {
+        let proxy_user,proxy_pass,chromium_endpoint,proxy
 
-            try {
+        if (opt && opt.proxy && opt.proxy === "china") {
+            let attempts = 0;
+            let success = false;
+            while (attempts < 3 && !success) {
+                try {
+                    const res = await axios.get(qingguo_api_url);
+                    console.log("使用青果代理：", res.data)
+                    if (res.data && res.data.code === 'SUCCESS' && res.data.data && res.data.data.length > 0) {
+                        chromium_endpoint = "1.15.114.179:8123"
+                        proxy_user = qingguo_proxy_user
+                        proxy_pass = qingguo_proxy_pass
+                        proxy = 'http://' + res.data.data[0].server;
+                        success = true;
+                    }
+                } catch (err) {
+                    console.log("获取代理IP失效，重新获取", err)
+                    // 可选：打印错误日志
+                }
+                attempts++;
+            }
+            if (attempts === 3) {
+                console.log("获取3次代理IP失败，推出浏览器")
+                return null
+            }
+
+        }else{
+            if (process.env.NODE_ENV === 'online') {
+                chromium_endpoint = "172.17.0.1:8123"
+            }else{
+                chromium_endpoint = "172.245.84.92:8123"
+            }
+            proxy_user = Webshare_PROXY_USER
+            proxy_pass = Webshare_PROXY_PASS
+            proxy = `http://${Webshare_PROXY_HOST}:${Webshare_PROXY_PORT}`
+        }
+        
+        const browser = await puppeteer.connect({
+            browserWSEndpoint: `ws://${chromium_endpoint}/chromium?timeout=180000`,  // 替换为你的本地端口
+            args: [
+                `--proxy-server=${proxy}`,
+                '--no-sandbox',
+                '--proxy-bypass-list=<-loopback>;localhost;127.0.0.1;172.17.0.1'  // 移除 localhost 的跳过规则
+            ],
+            headless: false,  // 设置为 false 以便调试
+            defaultViewport: { width: 1280, height: 800 }
+        });
+
+        try {
 
             const page = await browser.newPage();
 
@@ -187,17 +192,49 @@ const browserless = {
             ); 
 
             await page.authenticate({
-                username: PROXY_USER,
-                password: PROXY_PASS,
+                username: proxy_user,
+                password: proxy_pass,
             }); // 正式验证代理用户名密码 :contentReference[oaicite:1]{index=1}
 
             await page.goto(url, {
                 timeout: 180000,
-                waitUntil: 'networkidle2',
+                // waitUntil: 'networkidle2',
             });
 
-            const html = await page.content();
-            return html
+            // Create downloads directory if it doesn't exist
+            const downloadDir = path.join(__dirname, '../..', 'downloads');
+            if (!fs.existsSync(downloadDir)) {
+                fs.mkdirSync(downloadDir);
+            }
+
+            // Generate filename with timestamp
+            const timestamp = new Date().getTime();
+            const filepath = path.join(downloadDir, `screenshot_${timestamp}.png`);
+            const filename = `screenshot_${timestamp}.png`
+
+
+              if (opt && opt.element && opt.element) {
+                const selector_type = tool.identifySelector(opt.element)
+                let selector = opt.element
+                if (selector_type === 'xpath') {
+                    selector = `::-p-xpath(${opt.element})`;
+                }
+        
+                const elHandle = await page.waitForSelector(selector);
+                await elHandle.scrollIntoViewIfNeeded();
+                await elHandle.screenshot({ path: filepath });
+                
+              }else{
+                    await page.screenshot({
+                                    path: filepath,           // 保存路径
+                                    fullPage: true,           // 是否截取整个滚动区域
+                                });
+              }
+
+            return filename
+        } catch (error) {
+            console.error('Error in chromium screen shot:', error);
+            return null
         } finally {
             await browser.close();
         }
