@@ -18,6 +18,7 @@
 </head>
 <body>
   <div class="video-container">
+    <button id="autoDownload">立即下载视频</button>
     <video id="myVideo" controls preload="metadata">
       <source src="<%= videoUrl %>" type="video/mp4">
       <source src="<%= videoUrl %>" type="video/webm">
@@ -26,6 +27,7 @@
       <source src="<%= videoUrl %>" type="video/ogg">
       Your browser does not support the video tag.
     </video>
+    <a id="download" referrerpolicy="no-referrer" download href="<%= videoUrl %>">下载链接</a>
   </div>
 
   <script>
@@ -41,6 +43,23 @@
     video.addEventListener('error', (e) => {
       console.error('加载视频出错:', e);
     });
+
+
+    const btn = document.getElementById('autoDownload');
+
+btn.addEventListener('click', () => {
+  const src = video.currentSrc || video.src;
+  const name = src.split('/').pop().split('?')[0];
+  const a = document.createElement('a');
+  a.href = src;
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+});
+
+    
   </script>
+  
 </body>
 </html>

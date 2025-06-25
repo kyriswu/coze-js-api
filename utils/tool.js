@@ -19,6 +19,20 @@ const __dirname = dirname(__filename)
 const execPromise = util.promisify(exec);
 
 const tool = {
+    gen_cookie: async function (cookieStr, domain, path) {
+        // 目标网站的域名和路径（需替换为实际值）
+        // const domain = 'example.com'; // 请替换为目标网站的实际域名
+        // const path = '/';
+
+        // 解析 Cookie 字符串为 Puppeteer 可用的对象数组
+        const cookies = cookieStr.split('; ').map(pair => {
+            const [name, ...valueParts] = pair.split('=');
+            const value = valueParts.join('='); // 处理值中包含等号的情况
+            return { name, value, domain, path };
+        });
+
+        return cookies
+    },
     /**
  * 判断输入是 CSS Selector 还是 XPath，或者都不是
  * @param {string} sel - 选择器字符串

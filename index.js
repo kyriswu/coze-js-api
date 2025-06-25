@@ -34,7 +34,7 @@ app.get('/video', (req, res) => {
     res.render('video', {
         title: 'Video Page',
         message: 'This is a simple video page template.',
-        videoUrl: "https://upos-sz-mirrorcos.bilivideo.com/upgcxcode/28/77/29896147728/29896147728-1-192.mp4?e=ig8euxZM2rNcNbRVhwdVhwdlhWdVhwdVhoNvNC8BqJIzNbfq9rVEuxTEnE8L5F6VnEsSTx0vkX8fqJeYTj_lta53NCM=&uipk=5&nbs=1&deadline=1748882820&gen=playurlv2&os=bcache&oi=837301814&trid=00004de5809b13c34b18bd93489356989e66T&mid=3546662372903895&platform=html5&og=hw&upsig=769f8dff014015645d736c5862c512b3&uparams=e,uipk,nbs,deadline,gen,os,oi,trid,mid,platform,og&cdnid=88601&bvc=vod&nettype=0&bw=55668&orderid=0,1&buvid=&build=0&mobi_app=&f=T_0_0&logo=80000000"
+        videoUrl: "https://rr5---sn-oguesn6s.googlevideo.com/videoplayback?expire=1750889534&ei=3h9caKX5JoWtvcAPron58Ak&ip=43.163.224.99&id=o-AOc5_gHFhTV_NSZeu1ESoiaRLV6eYToR0a0wrIoUvNk3&itag=18&source=youtube&requiressl=yes&xpc=EgVo2aDSNQ%3D%3D&met=1750867934%2C&mh=Gx&mm=31%2C26&mn=sn-oguesn6s%2Csn-npoldn76&ms=au%2Conr&mv=m&mvi=5&pl=19&rms=au%2Cau&initcwndbps=823750&siu=1&bui=AY1jyLNcjqSo0Di3dmWLP4LgTPCokoRh-S_p9H71i1KoocQixuWucU0l2fJlOS0AnHWf_-dfrg&spc=l3OVKdVizwBRFpykXVrN6s6ej09s7k1yQJXB_TfOCsJ8L72MjiMIFHnbEtf0d_rw3L08-qs0xuIFZkKDmg0LdQ&vprv=1&svpuc=1&mime=video%2Fmp4&ns=eArLBwbrvTSbhx3azAiLoHQQ&rqh=1&cnr=14&ratebypass=yes&dur=56.331&lmt=1728511369250850&mt=1750867532&fvip=1&fexp=51355912&c=WEB&sefc=1&txp=1218224&n=JFmffu_x5sZiuQ&sparams=expire%2Cei%2Cip%2Cid%2Citag%2Csource%2Crequiressl%2Cxpc%2Csiu%2Cbui%2Cspc%2Cvprv%2Csvpuc%2Cmime%2Cns%2Crqh%2Ccnr%2Cratebypass%2Cdur%2Clmt&lsparams=met%2Cmh%2Cmm%2Cmn%2Cms%2Cmv%2Cmvi%2Cpl%2Crms%2Cinitcwndbps&lsig=APaTxxMwRgIhAIvNhcLbuGZg7-8s_gMuNI_ubSywGqBU5DcF8rFCADwaAiEAo134M2uWJHtLvhwgefh4T77MX3xXty4SQPF24rfmFo8%3D&sig=AJfQdSswRAIgUdh9vNxNOgVK26lXWrolrgxKicL8hhcMaLPsVtEnfx4CIEQ7UqtA8Wt-84-0m9xaGJTewgKiX6uKQopAuYeVDOP0"
     })
 })
 
@@ -544,16 +544,6 @@ app.post('/parse_html', async (req, res) => {
         HtmlContent = response.data;
 
         let result_list = extract_html_conent(HtmlContent,xpath,selector)
-        if(result_list.length === 0) {
-            console.log("未找到匹配的元素，请检查选择器或XPath是否正确，或者网页反爬虫机制导致无法获取内容。");
-            response = await browserless.chromium_content(sanitizedUrl, {proxy:'china'})
-            if (!response){
-                console.log("切换成青果代理也请求失败，换成zyte");
-                return await zyteExtract(req, res);
-            }
-            HtmlContent = response.data
-            result_list = extract_html_conent(HtmlContent,xpath,selector)
-        }
 
         let msg = "";
         if (api_key) {
@@ -1593,10 +1583,21 @@ app.post('/download_image', async (req, res) => {
 })
 
 app.post("/screenshot", async (req, res) => {
-    let {url,element} = req.body
+    let {url,element,cookie} = req.body
+    if (cookie) {
+        const parsedUrl = new URL(url);
+
+        // 提取 domain 和 path
+        const domain = parsedUrl.hostname; // 'kns.cnki.net'
+        const path = '/'; // 推荐使用根路径
+
+        console.log('Domain:', domain);
+        console.log('Path:', path);
+        cookie = await tool.gen_cookie(cookie,domain,path)
+    }
     try {
-        let screenshot = await browserless.screenshot(url,{element:element})
-        if (!screenshot) screenshot = await browserless.screenshot(url,{proxy:'china',element:element})
+        let screenshot = await browserless.screenshot(url,{element:element,cookie:cookie})
+        if (!screenshot) screenshot = await browserless.screenshot(url,{proxy:'china',element:element,cookie:cookie})
         const protocol = req.headers['x-forwarded-proto'] || req.protocol;
         return res.send({
             'code':0,

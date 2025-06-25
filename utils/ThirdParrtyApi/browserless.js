@@ -4,51 +4,58 @@ import path from 'path';
 import { dirname } from 'path';
 import puppeteer from 'puppeteer-core';
 import os from 'os';
-import { URL,fileURLToPath } from 'url';
+import { URL, fileURLToPath } from 'url';
 import tool from '../tool.js';
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 
-
+const TIMEOUT = 600000
 
 const Webshare_PROXY_USER = "umwhniat-rotate"
 const Webshare_PROXY_PASS = "eudczfs5mkzt"
 const Webshare_PROXY_HOST = "p.webshare.io"
 const Webshare_PROXY_PORT = "80"
 
+// http://liyylnev-rotate:n8yufdsr2u5q@p.webshare.io:80
+
 const qingguo_api_url = "https://share.proxy.qg.net/get?key=FC283878"
 const qingguo_proxy_user = "FC283878"
 const qingguo_proxy_pass = "6BDF595312DA"
 
 function getCpuUsage() {
-  const cpus = os.cpus();
-  let idle = 0;
-  let total = 0;
+    const cpus = os.cpus();
+    let idle = 0;
+    let total = 0;
 
-  cpus.forEach(cpu => {
-    for (let type in cpu.times) {
-      total += cpu.times[type];
-    }
-    idle += cpu.times.idle;
-  });
+    cpus.forEach(cpu => {
+        for (let type in cpu.times) {
+            total += cpu.times[type];
+        }
+        idle += cpu.times.idle;
+    });
 
-  const idlePercentage = (idle / total) * 100;
-  return Math.floor(100 - idlePercentage) // 返回 CPU 使用率
+    const idlePercentage = (idle / total) * 100;
+    return Math.floor(100 - idlePercentage) // 返回 CPU 使用率
 }
-  
+
+async function waitUntilDownload(page, fileName = '') {
+      return new Promise((resolve, reject) => {
+          page._client().on('Page.downloadProgress', e => { // or 'Browser.downloadProgress'
+              if (e.state === 'completed') {
+                  resolve(fileName);
+              } else if (e.state === 'canceled') {
+                  reject();
+              }
+          });
+      });
+  }
+
 const browserless = {
 
-    chromium_content: async function (url,opt = {}) {
+    chromium_content: async function (url, opt = {}) {
 
 
-        let proxy_user,proxy_pass,chromium_endpoint,proxy
-
-        // // 轮询判断 CPU 使用率小于 80 才放行
-        // const randomDelay = Math.floor(Math.random() * 1000) + 1;
-        // await new Promise(resolve => setTimeout(resolve, randomDelay));
-        // while (getCpuUsage() >= 80) {
-        //     await new Promise(resolve => setTimeout(resolve, 1000));
-        // }
+        let proxy_user, proxy_pass, chromium_endpoint, proxy
 
         if (opt && opt.proxy && opt.proxy === "china") {
             let attempts = 0;
@@ -75,19 +82,19 @@ const browserless = {
                 return null
             }
 
-        }else{
+        } else {
             if (process.env.NODE_ENV === 'online') {
                 chromium_endpoint = "172.17.0.1:8123"
-            }else{
+            } else {
                 chromium_endpoint = "172.245.84.92:8123"
             }
             proxy_user = Webshare_PROXY_USER
             proxy_pass = Webshare_PROXY_PASS
             proxy = `http://${Webshare_PROXY_HOST}:${Webshare_PROXY_PORT}`
         }
-        
+
         const browser = await puppeteer.connect({
-            browserWSEndpoint: `ws://${chromium_endpoint}/chromium?timeout=180000`,  // 替换为你的本地端口
+            browserWSEndpoint: `ws://${chromium_endpoint}/chromium?timeout=${TIMEOUT}`,  // 替换为你的本地端口
             args: [
                 `--proxy-server=${proxy}`,
                 '--no-sandbox',
@@ -105,17 +112,23 @@ const browserless = {
                 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) ' +
                 'AppleWebKit/537.36 (KHTML, like Gecko) ' +
                 'Chrome/121.0.0.0 Safari/537.36'
-            ); 
+            );
 
             await page.authenticate({
                 username: proxy_user,
                 password: proxy_pass,
             }); // 正式验证代理用户名密码 :contentReference[oaicite:1]{index=1}
 
-            await page.goto(url, {
-                timeout: 180000,
+            const response = await page.goto(url, {
+                timeout: TIMEOUT,
                 // waitUntil: 'networkidle2',
             });
+
+            // 检查 HTTP 状态码
+            if (response.status() !== 200) {
+                console.error(`无头浏览器：Request failed with status code: ${response.status()}`);
+                throw new Error(`HTTP request failed with status ${response.status()}`);
+            }
 
             const html = await page.content();
             return {
@@ -130,8 +143,9 @@ const browserless = {
 
     },
 
-    screenshot: async function(url,opt={}) {
-        let proxy_user,proxy_pass,chromium_endpoint,proxy
+    screenshot: async function (url, opt = {}) {
+
+        let proxy_user, proxy_pass, chromium_endpoint, proxy
 
         if (opt && opt.proxy && opt.proxy === "china") {
             let attempts = 0;
@@ -158,19 +172,19 @@ const browserless = {
                 return null
             }
 
-        }else{
+        } else {
             if (process.env.NODE_ENV === 'online') {
                 chromium_endpoint = "172.17.0.1:8123"
-            }else{
+            } else {
                 chromium_endpoint = "172.245.84.92:8123"
             }
             proxy_user = Webshare_PROXY_USER
             proxy_pass = Webshare_PROXY_PASS
             proxy = `http://${Webshare_PROXY_HOST}:${Webshare_PROXY_PORT}`
         }
-        
+
         const browser = await puppeteer.connect({
-            browserWSEndpoint: `ws://${chromium_endpoint}/chromium?timeout=180000`,  // 替换为你的本地端口
+            browserWSEndpoint: `ws://${chromium_endpoint}/chromium?timeout=${TIMEOUT}`,  // 替换为你的本地端口
             args: [
                 `--proxy-server=${proxy}`,
                 '--no-sandbox',
@@ -184,27 +198,45 @@ const browserless = {
 
             const page = await browser.newPage();
 
+            // Create downloads directory if it doesn't exist
+            const downloadDir = path.join(__dirname, '../..', 'downloads');
+            if (!fs.existsSync(downloadDir)) {
+                fs.mkdirSync(downloadDir);
+            }
+
             // 在打开任何页面之前设置 UA
             await page.setUserAgent(
                 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) ' +
                 'AppleWebKit/537.36 (KHTML, like Gecko) ' +
                 'Chrome/121.0.0.0 Safari/537.36'
-            ); 
+            );
 
             await page.authenticate({
                 username: proxy_user,
                 password: proxy_pass,
             }); // 正式验证代理用户名密码 :contentReference[oaicite:1]{index=1}
 
-            await page.goto(url, {
-                timeout: 180000,
+            //设置cookie
+            if (opt && opt.cookie) {
+                await browser.setCookie(...opt.cookie)
+            }
+
+            // 设置下载目录
+            const client = await page.createCDPSession();
+            await client.send('Page.setDownloadBehavior', {
+                behavior: 'allow',
+                downloadPath: "/tmp/",
+            });
+
+            const response = await page.goto(url, {
+                timeout: TIMEOUT,
                 waitUntil: 'networkidle0',
             });
 
-            // Create downloads directory if it doesn't exist
-            const downloadDir = path.join(__dirname, '../..', 'downloads');
-            if (!fs.existsSync(downloadDir)) {
-                fs.mkdirSync(downloadDir);
+            // 检查 HTTP 状态码
+            if (response.status() !== 200) {
+                console.error(`Request failed with status code: ${response.status()}`);
+                throw new Error(`HTTP request failed with status ${response.status()}`);
             }
 
             // Generate filename with timestamp
@@ -212,24 +244,23 @@ const browserless = {
             const filepath = path.join(downloadDir, `screenshot_${timestamp}.png`);
             const filename = `screenshot_${timestamp}.png`
 
-
-              if (opt && opt.element && opt.element) {
+            if (opt && opt.element) {
                 const selector_type = tool.identifySelector(opt.element)
                 let selector = opt.element
                 if (selector_type === 'xpath') {
                     selector = `::-p-xpath(${opt.element})`;
                 }
-        
+
                 const elHandle = await page.waitForSelector(selector);
                 await elHandle.scrollIntoViewIfNeeded();
                 await elHandle.screenshot({ path: filepath });
-                
-              }else{
-                    await page.screenshot({
-                                    path: filepath,           // 保存路径
-                                    fullPage: true,           // 是否截取整个滚动区域
-                                });
-              }
+
+            } else {
+                await page.screenshot({
+                    path: filepath,           // 保存路径
+                    fullPage: true,           // 是否截取整个滚动区域
+                });
+            }
 
             return filename
         } catch (error) {
