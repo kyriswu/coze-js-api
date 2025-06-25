@@ -198,7 +198,7 @@ const browserless = {
 
             await page.goto(url, {
                 timeout: 180000,
-                // waitUntil: 'networkidle2',
+                waitUntil: 'networkidle0',
             });
 
             // Create downloads directory if it doesn't exist
