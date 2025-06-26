@@ -1614,13 +1614,12 @@ app.post("/screenshot", async (req, res) => {
 
 app.post("/test", async (req, res) => {
     let {url,element} = req.body
-    let screenshot = await browserless.screenshot(url,{element:element})
-    if (!screenshot) screenshot = await browserless.screenshot(url,{proxy:'china',element:element})
-    const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+    let audio_url = await browserless.extract_youtube_audio_url("https://tuberipper.com/","https://youtu.be/Zw5m1CNKSgA?si=Y_AhMn-4yV2Szv6J")
+    let audio = await tool.download_audio(audio_url)
     return res.send({
         'code':0,
         'msg':'success',
-        'data': `${protocol}://${req.get('host')}/downloads/${screenshot}`
+        'data': audio.filepath
     })
 })
 

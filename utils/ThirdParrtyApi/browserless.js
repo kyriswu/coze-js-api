@@ -143,6 +143,121 @@ const browserless = {
 
     },
 
+    extract_youtube_audio_url: async function (toolurl,videourl, opt = {}) {
+
+        let proxy_user, proxy_pass, chromium_endpoint, proxy
+
+        if (opt && opt.proxy && opt.proxy === "china") {
+            let attempts = 0;
+            let success = false;
+            while (attempts < 3 && !success) {
+                try {
+                    const res = await axios.get(qingguo_api_url);
+                    console.log("使用青果代理：", res.data)
+                    if (res.data && res.data.code === 'SUCCESS' && res.data.data && res.data.data.length > 0) {
+                        chromium_endpoint = "1.15.114.179:8123"
+                        proxy_user = qingguo_proxy_user
+                        proxy_pass = qingguo_proxy_pass
+                        proxy = 'http://' + res.data.data[0].server;
+                        success = true;
+                    }
+                } catch (err) {
+                    console.log("获取代理IP失效，重新获取", err)
+                    // 可选：打印错误日志
+                }
+                attempts++;
+            }
+            if (attempts === 3) {
+                console.log("获取3次代理IP失败，推出浏览器")
+                return null
+            }
+
+        } else {
+            if (process.env.NODE_ENV === 'online') {
+                chromium_endpoint = "172.17.0.1:8123"
+            } else {
+                chromium_endpoint = "172.245.84.92:8123"
+            }
+            proxy_user = Webshare_PROXY_USER
+            proxy_pass = Webshare_PROXY_PASS
+            proxy = `http://${Webshare_PROXY_HOST}:${Webshare_PROXY_PORT}`
+        }
+
+        const browser = await puppeteer.connect({
+            browserWSEndpoint: `ws://${chromium_endpoint}/chromium?timeout=${TIMEOUT}`,  // 替换为你的本地端口
+            args: [
+                `--proxy-server=${proxy}`,
+                '--no-sandbox',
+                '--proxy-bypass-list=<-loopback>;localhost;127.0.0.1;172.17.0.1'  // 移除 localhost 的跳过规则
+            ],
+            headless: false,  // 设置为 false 以便调试
+            defaultViewport: { width: 1280, height: 800 }
+        });
+
+        try {
+
+            const page = await browser.newPage();
+
+            // 在打开任何页面之前设置 UA
+            await page.setUserAgent(
+                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) ' +
+                'AppleWebKit/537.36 (KHTML, like Gecko) ' +
+                'Chrome/121.0.0.0 Safari/537.36'
+            );
+
+            await page.authenticate({
+                username: proxy_user,
+                password: proxy_pass,
+            }); // 正式验证代理用户名密码 :contentReference[oaicite:1]{index=1}
+
+            //设置cookie
+            if (opt && opt.cookie) {
+                await browser.setCookie(...opt.cookie)
+            }
+
+            const response = await page.goto(toolurl, {
+                timeout: TIMEOUT,
+                waitUntil: 'networkidle0',
+            });
+
+            // 检查 HTTP 状态码
+            if (response.status() !== 200) {
+                console.error(`Request failed with status code: ${response.status()}`);
+                throw new Error(`HTTP request failed with status ${response.status()}`);
+            }
+
+                        // 等待 input 和 button 出现
+  await page.waitForSelector('#videoUrl');
+  await page.waitForSelector('#videoBtn');
+
+  // 在 input 中输入链接
+  const videoLink = videourl;
+  await page.click('#videoUrl', { clickCount: 3 }); // 聚焦并选中文本（如果已有）
+  await page.type('#videoUrl', videoLink); // 输入链接 :contentReference[oaicite:1]{index=1}
+    // 点击按钮提交
+  await page.click('#videoBtn');
+  await page.waitForSelector('a.js-unmask.ko-btn.btn.btn-lg.btn-primary', {timeout:120000})
+
+
+  // 查找 Extract Audio 对应的 <a> 标签
+  const audio_url = await page.evaluate(() => {
+    const a = Array.from(document.querySelectorAll('a.js-download.btn-success'))
+      .find(el => el.textContent.trim().includes('Extract Audio'));
+
+    if (!a) return null;
+    return a.href
+  });
+            
+
+            return audio_url
+        } catch (error) {
+            console.error('Error in chromium screen shot:', error);
+            return null
+        } finally {
+            await browser.close();
+        }
+    },
+
     screenshot: async function (url, opt = {}) {
 
         let proxy_user, proxy_pass, chromium_endpoint, proxy
@@ -220,13 +335,6 @@ const browserless = {
             if (opt && opt.cookie) {
                 await browser.setCookie(...opt.cookie)
             }
-
-            // 设置下载目录
-            const client = await page.createCDPSession();
-            await client.send('Page.setDownloadBehavior', {
-                behavior: 'allow',
-                downloadPath: "/tmp/",
-            });
 
             const response = await page.goto(url, {
                 timeout: TIMEOUT,
