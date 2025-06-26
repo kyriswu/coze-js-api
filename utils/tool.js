@@ -185,7 +185,7 @@ const tool = {
         }else{
              command = `ffmpeg.ffprobe -v quiet -print_format json -show_format -show_streams "${file}"`;
         }
-        
+        console.log(command)
         try {
             // Execute ffmpeg command
             const { stdout, stderr } = await execPromise(command);
