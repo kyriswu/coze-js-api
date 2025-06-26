@@ -182,11 +182,11 @@ const tool = {
         }else{
              command = `ffmpeg.ffprobe -v quiet -print_format json -show_format -show_streams "${file}"`;
         }
-        console.log(command)
+
         try {
             // Execute ffmpeg command
             const { stdout, stderr } = await execPromise(command);
-            console.log("get_media_info stderr",stderr,stdout)
+
             const info = JSON.parse(stdout);
             // Get file type info
             const stream = info.streams[0];
@@ -199,6 +199,7 @@ const tool = {
                 extension: this.getExtensionFromCodec(stream.codec_name)
             };
         } catch (error) {
+            console.log(error)
             return {success:false, error: error.message};
         }
     },
