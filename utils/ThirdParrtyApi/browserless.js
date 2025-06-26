@@ -107,6 +107,11 @@ const browserless = {
 
             const page = await browser.newPage();
 
+            //设置cookie
+            if (opt && opt.cookie) {
+                await browser.setCookie(...opt.cookie)
+            }
+            
             // 在打开任何页面之前设置 UA
             await page.setUserAgent(
                 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) ' +

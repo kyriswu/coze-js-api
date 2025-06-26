@@ -531,10 +531,10 @@ app.post('/parse_html', async (req, res) => {
 
         let HtmlContent = "";
         const sanitizedUrl = url.trim(); // Remove any whitespace including newlines
-        let response = await browserless.chromium_content(sanitizedUrl)
+        let response = await browserless.chromium_content(sanitizedUrl,{cookie:cookie})
         if (!response){
             console.log("webshare代理请求失败，使用青果代理访问目标地址");
-            response = await browserless.chromium_content(sanitizedUrl, {proxy:'china'})
+            response = await browserless.chromium_content(sanitizedUrl, {proxy:'china',cooike:cookie})
             if (!response){
                 console.log("青果代理请求失败，使用zyte解析网页内容");
                 return await zyteExtract(req, res);
@@ -1467,9 +1467,18 @@ app.get('/cozecom-auth-callback', cozecom.callback)
 //虚拟浏览器
 app.post('/explorer', async (req, res) => {
 
-    let { url, selector, xpath, api_key, action } = req.body;
+    let { url, selector, xpath, api_key, action, cookie } = req.body;
     if (!url) {
         return res.status(400).send('url is required');
+    }
+    if (cookie) {
+        const parsedUrl = new URL(url);
+
+        // 提取 domain 和 path
+        const domain = parsedUrl.hostname; // 'kns.cnki.net'
+        const path = '/'; // 推荐使用根路径
+
+        cookie = await tool.gen_cookie(cookie,domain,path)
     }
 
     const api_id = "api_413Kmmitqy3qaDo4";
@@ -1505,10 +1514,10 @@ app.post('/explorer', async (req, res) => {
     try {
 
         const sanitizedUrl = url.trim(); // Remove any whitespace including newlines
-        let response = await browserless.chromium_content(sanitizedUrl)
+        let response = await browserless.chromium_content(sanitizedUrl, {cookie:cookie})
         if (!response){
             console.log("虚拟浏览器：webshare代理请求失败，使用青果代理访问目标地址");
-            response = await browserless.chromium_content(sanitizedUrl, {proxy:'china'})
+            response = await browserless.chromium_content(sanitizedUrl, {proxy:'china',cookie:cookie})
             if (!response){
                 console.log("虚拟浏览器：青果代理请求失败");
                 throw new Error("出了点问题，再重试一遍或者联系作者反馈【B站：小吴爱折腾】")
@@ -1518,16 +1527,6 @@ app.post('/explorer', async (req, res) => {
         let HtmlContent = response.data;
 
         let result_list = extract_html_conent_standard(HtmlContent,xpath,selector)
-        if(result_list.length === 0) {
-            console.log("虚拟浏览器：未找到匹配的元素，请检查选择器或XPath是否正确，或者网页反爬虫机制导致无法获取内容。");
-            response = await browserless.chromium_content(sanitizedUrl, {proxy:'china'})
-            if (!response){
-                console.log("虚拟浏览器：切换成青果代理也请求失败");
-                throw new Error("出了点问题，再重试一遍或者联系作者反馈【B站：小吴爱折腾】")
-            }
-            HtmlContent = response.data
-            result_list = extract_html_conent_standard(HtmlContent,xpath,selector)
-        }
 
         let msg = "";
         if (api_key) {
@@ -1591,8 +1590,6 @@ app.post("/screenshot", async (req, res) => {
         const domain = parsedUrl.hostname; // 'kns.cnki.net'
         const path = '/'; // 推荐使用根路径
 
-        console.log('Domain:', domain);
-        console.log('Path:', path);
         cookie = await tool.gen_cookie(cookie,domain,path)
     }
     try {
