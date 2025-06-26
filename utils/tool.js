@@ -124,33 +124,14 @@ const tool = {
             };
         }
     },
-    yt_dlp_audio: async function (url) {
-        // Create downloads directory if it doesn't exist
-        const downloadDir = path.join(__dirname, '..', 'downloads');
-        if (!fs.existsSync(downloadDir)) {
-            fs.mkdirSync(downloadDir);
-        }
-
-        const timestamp = new Date().getTime();
-        const filename = `audio_${timestamp}.mp3`;
-        const filepath = path.join(downloadDir, filename);
-
-        var command = ""
-        if (process.env.NODE_ENV === 'online'){
-            command = `yt-dlp -f bestaudio --extract-audio --proxy "http://liyylnev-rotate:n8yufdsr2u5q@p.webshare.io:80" --audio-format mp3 -o ${filepath} "${url}"`
-        }else{
-             command = `yt-dlp -f bestaudio --extract-audio --proxy "http://192.168.1.6:10808" --audio-format mp3 -o ${filepath} "${url}"`
-        }
-    
+    yt_dlp_audio: async function (url) {    
         try {
-            // Execute command
-            const { stdout, stderr } = await execPromise(command);
+            let audio_url = await browserless.extract_youtube_audio_url("https://tuberipper.com/",url)
+            let audio = await tool.download_audio(audio_url)
             return {
                 success: true,
-                stdout: stdout,
-                stderr: stderr,
-                filepath: filepath,
-                filename: filename,
+                filepath: audio.filepath,
+                filename: audio.filename,
                 is_audio: true,
             };
         } catch (error) {
@@ -457,7 +438,7 @@ const tool = {
 
             return new Promise((resolve, reject) => {
                 writer.on('finish', () => {
-                    
+
                  this.get_media_info(filepath)
                         .then(info => {
                             if (!info.success) {
