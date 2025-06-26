@@ -457,25 +457,29 @@ const tool = {
 
             return new Promise((resolve, reject) => {
                 writer.on('finish', () => {
+                    
+                 this.get_media_info(filepath)
+                        .then(info => {
+                            if (!info.success) {
+                                return reject(new Error(info.error));
+                            }
+                            if (info.success) {
+                                const newPath = filepath.replace(/\.[^.]+$/, `.${info.extension}`);
+                                fs.renameSync(filepath, newPath);
+                                filepath = newPath;
+                                filename = path.basename(filepath);
+                                console.log(`音频转换成功，新的文件名：${filename}`);
+                            }
 
-                    const info = this.get_media_info(filepath)
-                    console.log(info)
-                    if (!info.success) {
-                        return reject(new Error(info.error));
-                    }
-                    if (info.success) {
-                        const newPath = filepath.replace(/\.[^.]+$/, `.${info.extension}`);
-                        fs.renameSync(filepath, newPath);
-                        filepath = newPath;
-                        filename = path.basename(filepath);
-                    }
-                    resolve({
-                        success: true,
-                        filepath: filepath,
-                        filename: filename,
-                        size: this.bytesToMB(totalSize)
+                            resolve({
+                                success: true,
+                                filepath: filepath,
+                                filename: filename,
+                                size: this.bytesToMB(totalSize)
+                            });
+                        })
+                        .catch(error => reject(error));
                     });
-                });
 
                 writer.on('error', reject);
             });
