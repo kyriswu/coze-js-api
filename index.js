@@ -1625,7 +1625,7 @@ app.post("/test", async (req, res) => {
     }catch(err){
         return res.send({
         'code':0,
-        'msg':'success',
+        'msg':'failure',
         'data': err.message
     })
     }

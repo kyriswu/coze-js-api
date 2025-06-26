@@ -141,13 +141,10 @@ const tool = {
         }else{
              command = `yt-dlp -f bestaudio --extract-audio --proxy "http://192.168.1.6:10808" --audio-format mp3 -o ${filepath} "${url}"`
         }
-        console.log(command)
     
         try {
             // Execute command
             const { stdout, stderr } = await execPromise(command);
-            console.log("stdout", stdout);
-            console.log("stderr", stderr);
             return {
                 success: true,
                 stdout: stdout,
@@ -461,6 +458,7 @@ const tool = {
                 writer.on('finish', () => {
 
                     const info = this.get_media_info(filepath)
+                    console.log(info)
                     if (!info.success) {
                         return reject(new Error(info.error));
                     }
@@ -763,13 +761,10 @@ const tool = {
     audio_format_convert: async function (input_file, output_type) {
         const output_file = `${input_file}.${output_type}`
         const command = `ffmpeg -i ${input_file} ${output_file}`;
-        console.log(command)
 
         try {
             // Execute ffmpeg command
             const { stdout, stderr } = await execPromise(command);
-            console.log("stdout",stdout)
-            console.log("stderr",stderr)
             fs.unlink(input_file,(err) => {
                 if (err) throw err
             });
