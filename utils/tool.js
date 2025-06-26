@@ -189,7 +189,7 @@ const tool = {
         try {
             // Execute ffmpeg command
             const { stdout, stderr } = await execPromise(command);
-            console.log("get_media_info stderr",stderr)
+            console.log("get_media_info stderr",stderr,stdout)
             const info = JSON.parse(stdout);
             // Get file type info
             const stream = info.streams[0];
