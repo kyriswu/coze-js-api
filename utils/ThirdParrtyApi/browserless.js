@@ -91,6 +91,7 @@ const browserless = {
             }else{
                 browser = SESSION ? SESSION : await puppeteer_connect(chromium_endpoint, TIMEOUT, proxy)
                 SESSION = browser
+                public_browser = true
             }
 
         }
@@ -319,6 +320,7 @@ const browserless = {
                 browser = SESSION ? SESSION : await puppeteer_connect(chromium_endpoint, TIMEOUT, proxy)
                 SESSION = browser
                 console.log("使用公共浏览器")
+                public_browser = true
             }
 
         }
