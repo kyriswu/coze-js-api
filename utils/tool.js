@@ -41,10 +41,10 @@ const tool = {
  * @throws {Error} - 输入无效时抛错
  */
  identifySelector: function (sel) {
-  const s = sel.trim();
-  if (s.startsWith('//') || s.startsWith('(') || s.startsWith('/html') || s.includes('@')) {
-    return 'xpath';
-  }
+     const s = sel.trim();
+  const xpathStart = s.startsWith('//') || s.startsWith('(/') || s.startsWith('/html') || s.startsWith('/');
+  const xpathSyntax = s.includes('@') || s.includes('::') || s.includes('[');
+  if (xpathStart || xpathSyntax) return 'xpath';
   return 'css';
 },
     // 计算距离今晚24点还有多少秒
