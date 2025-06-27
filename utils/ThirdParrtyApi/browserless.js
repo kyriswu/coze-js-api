@@ -126,7 +126,7 @@ const browserless = {
 
             const response = await page.goto(url, {
                 timeout: TIMEOUT,
-                // waitUntil: 'networkidle2',
+                waitUntil: 'networkidle2',
             });
 
             // 检查 HTTP 状态码
