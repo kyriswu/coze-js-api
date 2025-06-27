@@ -22,40 +22,29 @@ const qingguo_api_url = "https://share.proxy.qg.net/get?key=FC283878"
 const qingguo_proxy_user = "FC283878"
 const qingguo_proxy_pass = "6BDF595312DA"
 
-function getCpuUsage() {
-    const cpus = os.cpus();
-    let idle = 0;
-    let total = 0;
+var SESSION //长会话浏览器
 
-    cpus.forEach(cpu => {
-        for (let type in cpu.times) {
-            total += cpu.times[type];
-        }
-        idle += cpu.times.idle;
-    });
-
-    const idlePercentage = (idle / total) * 100;
-    return Math.floor(100 - idlePercentage) // 返回 CPU 使用率
+async function puppeteer_connect(chromium_endpoint, timeout, proxy){
+    try {
+        let b = await puppeteer.connect({
+            browserWSEndpoint: `ws://${chromium_endpoint}/chromium?timeout=${TIMEOUT}&--proxy-server=${proxy}&--no-sandbox&--proxy-bypass-list=<-loopback>;localhost;127.0.0.1;172.17.0.1`,  // 替换为你的本地端口
+            headless: false,  // 设置为 false 以便调试
+            defaultViewport: { width: 1280, height: 800 }
+        });
+        return b
+    }catch(err){
+        console.log("连接browserless服务器失败，",err)
+        throw err
+    }
 }
-
-async function waitUntilDownload(page, fileName = '') {
-      return new Promise((resolve, reject) => {
-          page._client().on('Page.downloadProgress', e => { // or 'Browser.downloadProgress'
-              if (e.state === 'completed') {
-                  resolve(fileName);
-              } else if (e.state === 'canceled') {
-                  reject();
-              }
-          });
-      });
-  }
 
 const browserless = {
 
     chromium_content: async function (url, opt = {}) {
 
-
         let proxy_user, proxy_pass, chromium_endpoint, proxy
+        let browser, page
+        let public_browser//公共浏览器
 
         if (opt && opt.proxy && opt.proxy === "china") {
             let attempts = 0;
@@ -78,9 +67,13 @@ const browserless = {
                 attempts++;
             }
             if (attempts === 3) {
-                console.log("获取3次代理IP失败，推出浏览器")
+                console.log("获取3次代理IP失败，退出浏览器")
                 return null
             }
+
+            //国内代理，每次都用新的浏览器
+            browser = await puppeteer_connect(chromium_endpoint, TIMEOUT, proxy)
+
 
         } else {
             if (process.env.NODE_ENV === 'online') {
@@ -91,21 +84,25 @@ const browserless = {
             proxy_user = Webshare_PROXY_USER
             proxy_pass = Webshare_PROXY_PASS
             proxy = `http://${Webshare_PROXY_HOST}:${Webshare_PROXY_PORT}`
-        }
 
-        const browser = await puppeteer.connect({
-            browserWSEndpoint: `ws://${chromium_endpoint}/chromium?timeout=${TIMEOUT}&--proxy-server=${proxy}&--no-sandbox&--proxy-bypass-list=<-loopback>;localhost;127.0.0.1;172.17.0.1`,  // 替换为你的本地端口
-            args: [
-                `--proxy-server=${proxy}`,
-                '--no-sandbox',
-                '--proxy-bypass-list=<-loopback>;localhost;127.0.0.1;172.17.0.1'  // 移除 localhost 的跳过规则
-            ],
-            headless: false,  // 设置为 false 以便调试
-        });
+            if (opt && opt.cookie) {
+                //国外代理，传了cookie就用新浏览器，否则共享
+                browser = await puppeteer_connect(chromium_endpoint, TIMEOUT, proxy)
+            }else{
+                browser = SESSION ? SESSION : await puppeteer_connect(chromium_endpoint, TIMEOUT, proxy)
+                SESSION = browser
+            }
+
+        }
+    
+        //设置cookie
+        if (opt && opt.cookie) {
+            await browser.setCookie(...opt.cookie)
+        }
 
         try {
 
-            const page = await browser.newPage();
+            page = await browser.newPage();
 
             //设置cookie
             if (opt && opt.cookie) {
@@ -136,6 +133,9 @@ const browserless = {
             }
 
             const html = await page.content();
+
+            page.close()
+
             return {
                 data: html
             }
@@ -143,7 +143,11 @@ const browserless = {
             console.error('Error in chromium_content:', error);
             return null
         } finally {
-            await browser.close();
+            if(public_browser){
+                browser.close();
+            }else{
+                page.close()
+            }
         }
 
     },
@@ -266,6 +270,8 @@ const browserless = {
     screenshot: async function (url, opt = {}) {
 
         let proxy_user, proxy_pass, chromium_endpoint, proxy
+        let browser, page
+        let public_browser//公共浏览器
 
         if (opt && opt.proxy && opt.proxy === "china") {
             let attempts = 0;
@@ -292,6 +298,10 @@ const browserless = {
                 return null
             }
 
+            //国内代理，每次都用新的浏览器
+            browser = await puppeteer_connect(chromium_endpoint, TIMEOUT, proxy)
+
+
         } else {
             if (process.env.NODE_ENV === 'online') {
                 chromium_endpoint = "172.17.0.1:8123"
@@ -301,22 +311,25 @@ const browserless = {
             proxy_user = Webshare_PROXY_USER
             proxy_pass = Webshare_PROXY_PASS
             proxy = `http://${Webshare_PROXY_HOST}:${Webshare_PROXY_PORT}`
-        }
 
-        const browser = await puppeteer.connect({
-            browserWSEndpoint: `ws://${chromium_endpoint}/chromium?timeout=${TIMEOUT}&--proxy-server=${proxy}&--no-sandbox&--proxy-bypass-list=<-loopback>;localhost;127.0.0.1;172.17.0.1`,  // 替换为你的本地端口
-            args: [
-                `--proxy-server=${proxy}`,
-                '',
-                '--proxy-bypass-list=<-loopback>;localhost;127.0.0.1;172.17.0.1'  // 移除 localhost 的跳过规则
-            ],
-            headless: false,  // 设置为 false 以便调试
-            defaultViewport: { width: 1280, height: 800 }
-        });
+            if (opt && opt.cookie) {
+                //国外代理，传了cookie就用新浏览器，否则共享
+                browser = await puppeteer_connect(chromium_endpoint, TIMEOUT, proxy)
+            }else{
+                browser = SESSION ? SESSION : await puppeteer_connect(chromium_endpoint, TIMEOUT, proxy)
+                SESSION = browser
+            }
+
+        }
+    
+        //设置cookie
+        if (opt && opt.cookie) {
+            await browser.setCookie(...opt.cookie)
+        }
 
         try {
 
-            const page = await browser.newPage();
+            page = await browser.newPage();
 
             // Create downloads directory if it doesn't exist
             const downloadDir = path.join(__dirname, '../..', 'downloads');
@@ -335,11 +348,6 @@ const browserless = {
                 username: proxy_user,
                 password: proxy_pass,
             }); // 正式验证代理用户名密码 :contentReference[oaicite:1]{index=1}
-
-            //设置cookie
-            if (opt && opt.cookie) {
-                await browser.setCookie(...opt.cookie)
-            }
 
             const response = await page.goto(url, {
                 timeout: TIMEOUT,
@@ -375,12 +383,18 @@ const browserless = {
                 });
             }
 
+            page.close()
+
             return filename
         } catch (error) {
             console.error('Error in chromium screen shot:', error);
             return null
         } finally {
-            await browser.close();
+            if(public_browser){
+                browser.close();
+            }else{
+                page.close()
+            }
         }
     }
 };
