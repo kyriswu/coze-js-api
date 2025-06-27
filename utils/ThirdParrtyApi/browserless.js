@@ -222,7 +222,7 @@ const browserless = {
 
             const response = await page.goto(toolurl, {
                 timeout: TIMEOUT,
-                waitUntil: 'networkidle0',
+                // waitUntil: 'networkidle0',
             });
 
             // 检查 HTTP 状态码

@@ -531,10 +531,10 @@ app.post('/parse_html', async (req, res) => {
 
         let HtmlContent = "";
         const sanitizedUrl = url.trim(); // Remove any whitespace including newlines
-        let response = await browserless.chromium_content(sanitizedUrl,{cookie:cookie})
+        let response = await browserless.chromium_content(sanitizedUrl)
         if (!response){
             console.log("webshare代理请求失败，使用青果代理访问目标地址");
-            response = await browserless.chromium_content(sanitizedUrl, {proxy:'china',cooike:cookie})
+            response = await browserless.chromium_content(sanitizedUrl, {proxy:'china'})
             if (!response){
                 console.log("青果代理请求失败，使用zyte解析网页内容");
                 return await zyteExtract(req, res);
