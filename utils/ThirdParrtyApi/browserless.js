@@ -94,7 +94,7 @@ const browserless = {
         }
 
         const browser = await puppeteer.connect({
-            browserWSEndpoint: `ws://${chromium_endpoint}/chromium?timeout=${TIMEOUT}`,  // 替换为你的本地端口
+            browserWSEndpoint: `ws://${chromium_endpoint}/chromium?timeout=${TIMEOUT}&--proxy-server=${proxy}&--no-sandbox&--proxy-bypass-list=<-loopback>;localhost;127.0.0.1;172.17.0.1`,  // 替换为你的本地端口
             args: [
                 `--proxy-server=${proxy}`,
                 '--no-sandbox',
@@ -189,7 +189,7 @@ const browserless = {
         }
 
         const browser = await puppeteer.connect({
-            browserWSEndpoint: `ws://${chromium_endpoint}/chromium?timeout=${TIMEOUT}`,  // 替换为你的本地端口
+            browserWSEndpoint: `ws://${chromium_endpoint}/chromium?timeout=${TIMEOUT}&--proxy-server=${proxy}&--no-sandbox&--proxy-bypass-list=<-loopback>;localhost;127.0.0.1;172.17.0.1`,  // 替换为你的本地端口
             args: [
                 `--proxy-server=${proxy}`,
                 '--no-sandbox',
@@ -288,7 +288,7 @@ const browserless = {
                 attempts++;
             }
             if (attempts === 3) {
-                console.log("获取3次代理IP失败，推出浏览器")
+                console.log("获取3次代理IP失败，退出浏览器")
                 return null
             }
 
@@ -304,10 +304,10 @@ const browserless = {
         }
 
         const browser = await puppeteer.connect({
-            browserWSEndpoint: `ws://${chromium_endpoint}/chromium?timeout=${TIMEOUT}`,  // 替换为你的本地端口
+            browserWSEndpoint: `ws://${chromium_endpoint}/chromium?timeout=${TIMEOUT}&--proxy-server=${proxy}&--no-sandbox&--proxy-bypass-list=<-loopback>;localhost;127.0.0.1;172.17.0.1`,  // 替换为你的本地端口
             args: [
                 `--proxy-server=${proxy}`,
-                '--no-sandbox',
+                '',
                 '--proxy-bypass-list=<-loopback>;localhost;127.0.0.1;172.17.0.1'  // 移除 localhost 的跳过规则
             ],
             headless: false,  // 设置为 false 以便调试
