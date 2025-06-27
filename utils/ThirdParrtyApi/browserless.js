@@ -29,7 +29,12 @@ async function puppeteer_connect(chromium_endpoint, timeout, proxy){
         let b = await puppeteer.connect({
             browserWSEndpoint: `ws://${chromium_endpoint}/chromium?timeout=${TIMEOUT}&--proxy-server=${proxy}&--no-sandbox&--proxy-bypass-list=<-loopback>;localhost;127.0.0.1;172.17.0.1`,  // 替换为你的本地端口
             headless: false,  // 设置为 false 以便调试
-            defaultViewport: { width: 1280, height: 800 }
+            defaultViewport: { width: 1280, height: 800 },
+            args: [
+                `--proxy-server=${proxy}`,
+                '--no-sandbox',
+                '--proxy-bypass-list=<-loopback>;localhost;127.0.0.1;172.17.0.1'  // 移除 localhost 的跳过规则
+            ],
         });
         return b
     }catch(err){
