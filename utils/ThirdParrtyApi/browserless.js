@@ -43,6 +43,15 @@ async function puppeteer_connect(chromium_endpoint, timeout, proxy){
     }
 }
 
+async function is_connected(browser){
+    try {
+        await SESSION.pages();
+        return true
+    } catch (e) {
+        return false;
+    }
+}
+
 const browserless = {
 
     chromium_content: async function (url, opt = {}) {
@@ -94,7 +103,9 @@ const browserless = {
                 //国外代理，传了cookie就用新浏览器，否则共享
                 browser = await puppeteer_connect(chromium_endpoint, TIMEOUT, proxy)
             }else{
-                browser = SESSION ? SESSION : await puppeteer_connect(chromium_endpoint, TIMEOUT, proxy)
+                let connected = await is_connected(SESSION)
+                console.log("公共浏览器状态:",connected)
+                browser = (connected && SESSION) ? SESSION : await puppeteer_connect(chromium_endpoint, TIMEOUT, proxy)
                 SESSION = browser
                 public_browser = true
             }
@@ -323,9 +334,10 @@ const browserless = {
                 //国外代理，传了cookie就用新浏览器，否则共享
                 browser = await puppeteer_connect(chromium_endpoint, TIMEOUT, proxy)
             }else{
-                browser = SESSION ? SESSION : await puppeteer_connect(chromium_endpoint, TIMEOUT, proxy)
+                let connected = await is_connected(SESSION)
+                console.log("公共浏览器状态:",connected)
+                browser = (connected && SESSION) ? SESSION : await puppeteer_connect(chromium_endpoint, TIMEOUT, proxy)
                 SESSION = browser
-                console.log("使用公共浏览器")
                 public_browser = true
             }
 
