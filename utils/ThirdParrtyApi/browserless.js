@@ -150,9 +150,10 @@ const browserless = {
             return null
         } finally {
             if(public_browser){
-                await browser.close();
+                // 强制再执行一次 page.close，不考虑报错
+                try { await page.close(); } catch (e) {}
             }else{
-                await page.close()
+                await browser.close()
             }
         }
 
@@ -398,11 +399,13 @@ const browserless = {
             console.error('Error in chromium screen shot:', error);
             return null
         } finally {
-            if(public_browser){
+            if (public_browser) {
+                // 强制再执行一次 page.close，不考虑报错
+                 try { await page.close(); } catch (e) {}
+            } else {
                 await browser.close();
-            }else{
-                await page.close()
             }
+        }
         }
     }
 };
