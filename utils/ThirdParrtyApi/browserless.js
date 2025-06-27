@@ -134,7 +134,7 @@ const browserless = {
 
             const html = await page.content();
 
-            page.close()
+            await page.close()
 
             return {
                 data: html
@@ -144,9 +144,9 @@ const browserless = {
             return null
         } finally {
             if(public_browser){
-                browser.close();
+                await browser.close();
             }else{
-                page.close()
+                await page.close()
             }
         }
 
@@ -318,6 +318,7 @@ const browserless = {
             }else{
                 browser = SESSION ? SESSION : await puppeteer_connect(chromium_endpoint, TIMEOUT, proxy)
                 SESSION = browser
+                console.log("使用公共浏览器")
             }
 
         }
@@ -383,7 +384,7 @@ const browserless = {
                 });
             }
 
-            page.close()
+            await page.close()
 
             return filename
         } catch (error) {
@@ -391,9 +392,9 @@ const browserless = {
             return null
         } finally {
             if(public_browser){
-                browser.close();
+                await browser.close();
             }else{
-                page.close()
+                await page.close()
             }
         }
     }
