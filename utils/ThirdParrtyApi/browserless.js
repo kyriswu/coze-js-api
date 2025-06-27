@@ -406,7 +406,6 @@ const browserless = {
                 await browser.close();
             }
         }
-        }
     }
 };
 
