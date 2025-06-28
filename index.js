@@ -1612,12 +1612,12 @@ app.post("/screenshot", async (req, res) => {
 app.post("/test", async (req, res) => {
     let {url,element} = req.body
     try {
-        let audio_url = await browserless.extract_youtube_audio_url("https://tuberipper.com/","https://youtu.be/Zw5m1CNKSgA?si=Y_AhMn-4yV2Szv6J")
-    let audio = await tool.download_audio(audio_url)
+        let data = await browserless.chromium("https://google.com/",{"connection_id":"xxx"})
+
     return res.send({
         'code':0,
         'msg':'success',
-        'data': audio.filepath
+        'data': data
     })
     }catch(err){
         return res.send({
@@ -1625,6 +1625,24 @@ app.post("/test", async (req, res) => {
         'msg':'failure',
         'data': err.message
     })
+    }
+})
+app.post("/page", async (req, res) => {
+    let {url,browserId} = req.body
+    try {
+        let data = await browserless.page(url,{"browserId":browserId})
+
+        return res.send({
+            'code':0,
+            'msg':'success',
+            'data': data
+        })
+        }catch(err){
+            return res.send({
+            'code':0,
+            'msg':'failure',
+            'data': err.message
+        })
     }
 })
 

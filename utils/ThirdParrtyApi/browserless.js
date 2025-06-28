@@ -24,10 +24,12 @@ const qingguo_proxy_pass = "6BDF595312DA"
 
 var SESSION //长会话浏览器
 
+var browser_map = {} //浏览器map
+
 async function puppeteer_connect(chromium_endpoint, timeout, proxy){
     try {
         let b = await puppeteer.connect({
-            browserWSEndpoint: `ws://${chromium_endpoint}/chromium?timeout=${TIMEOUT}&--proxy-server=${proxy}&--no-sandbox&--proxy-bypass-list=<-loopback>;localhost;127.0.0.1;172.17.0.1`,  // 替换为你的本地端口
+            browserWSEndpoint: `ws://${chromium_endpoint}/chromium?timeout=${timeout}&--proxy-server=${proxy}&--no-sandbox&--proxy-bypass-list=<-loopback>;localhost;127.0.0.1;172.17.0.1`,  // 替换为你的本地端口
             headless: false,  // 设置为 false 以便调试
             defaultViewport: { width: 1280, height: 800 },
             args: [
@@ -43,13 +45,13 @@ async function puppeteer_connect(chromium_endpoint, timeout, proxy){
     }
 }
 
-async function is_connected(browser){
-    try {
-        await browser.pages();
-        return true
-    } catch (e) {
-        return false;
-    }
+function generateConnectionId() {
+    // 生成符合 UUID v4 标准的字符串
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        const r = Math.random() * 16 | 0;
+        const v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
 }
 
 const browserless = {
@@ -424,7 +426,140 @@ const browserless = {
                 await browser.close();
             }
         }
+    },
+    chromium: async function (url, opt = {}) {
+
+        let proxy_user, proxy_pass, chromium_endpoint, proxy
+        let browser
+
+        if (opt && opt.proxy && opt.proxy === "china") {
+            let attempts = 0;
+            let success = false;
+            while (attempts < 3 && !success) {
+                try {
+                    const res = await axios.get(qingguo_api_url);
+                    console.log("使用青果代理：", res.data)
+                    if (res.data && res.data.code === 'SUCCESS' && res.data.data && res.data.data.length > 0) {
+                        chromium_endpoint = "1.15.114.179:8123"
+                        proxy_user = qingguo_proxy_user
+                        proxy_pass = qingguo_proxy_pass
+                        proxy = 'http://' + res.data.data[0].server;
+                        success = true;
+                    }
+                } catch (err) {
+                    console.log("获取代理IP失效，重新获取", err)
+                    // 可选：打印错误日志
+                }
+                attempts++;
+            }
+            if (attempts === 3) {
+                console.log("获取3次代理IP失败，退出浏览器")
+                return null
+            }
+
+        } else {
+            if (process.env.NODE_ENV === 'online') {
+                chromium_endpoint = "172.17.0.1:8123"
+            } else {
+                chromium_endpoint = "172.245.84.92:8123"
+            }
+            proxy_user = Webshare_PROXY_USER
+            proxy_pass = Webshare_PROXY_PASS
+            proxy = `http://${Webshare_PROXY_HOST}:${Webshare_PROXY_PORT}`
+        }
+
+        browser = await puppeteer_connect(chromium_endpoint, 120000, proxy)
+
+        const browserId = generateConnectionId()
+        browser.on('disconnected', () => {
+            console.warn('⚠️ 长会话浏览器关闭 Browser disconnected');
+            // 清理状态
+            delete browser_map[browserId];
+            // 这里可以触发重连逻辑
+        });
+        browser_map[browserId] = {
+            browser:browser,
+            proxy_user:proxy_user,
+            proxy_pass:proxy_pass,
+            pages:{}
+        }
+        
+        return browserId
+
+    },
+
+    page: async function (url, opt = {}) {
+
+        let browser, page
+        let browserId = opt.browserId
+        console.log(browser_map)
+        if (!browser_map[browserId]) {
+            throw new Error(`browserId无效，请重新通过browser工具重新生成`);
+        }
+
+        browser  =  browser_map[browserId].browser
+
+
+        if (opt && opt.cookie) {
+            await browser.setCookie(...opt.cookie)
+        }
+
+        try {
+
+            page = await browser.newPage();
+
+            //设置cookie
+            if (opt && opt.cookie) {
+                await browser.setCookie(...opt.cookie)
+            }
+            
+            // 在打开任何页面之前设置 UA
+            await page.setUserAgent(
+                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) ' +
+                'AppleWebKit/537.36 (KHTML, like Gecko) ' +
+                'Chrome/121.0.0.0 Safari/537.36'
+            );
+
+            await page.authenticate({
+                username: browser_map[browserId].proxy_user,
+                password: browser_map[browserId].proxy_pass,
+            }); // 正式验证代理用户名密码 :contentReference[oaicite:1]{index=1}
+
+            const response = await page.goto(url, {
+                timeout: TIMEOUT,
+                waitUntil: 'networkidle2',
+            });
+
+            
+            // 检查 HTTP 状态码
+            if (response.status() !== 200) {
+                console.error(`无头浏览器：Request failed with status code: ${response.status()}`);
+                throw new Error(`HTTP request failed with status ${response.status()}`);
+            }
+
+            const html = await page.content();
+
+            const pageId = generateConnectionId()
+            browser_map[browserId].pages[pageId] = page
+
+            return {
+                data: html
+            }
+        } catch (error) {
+            console.error('Error in chromium_content:', error);
+            return null
+        } finally {
+            // if(public_browser){
+            //     // 强制再执行一次 page.close，不考虑报错
+            //     try { await page.close(); } catch (e) {}
+            // }else{
+            //     await browser.close()
+            // }
+        }
+
     }
+
+    
 };
 
 export default browserless;
