@@ -45,7 +45,7 @@ async function puppeteer_connect(chromium_endpoint, timeout, proxy){
 
 async function is_connected(browser){
     try {
-        await SESSION.pages();
+        await browser.pages();
         return true
     } catch (e) {
         return false;
