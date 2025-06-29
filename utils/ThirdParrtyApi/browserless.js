@@ -105,12 +105,14 @@ const browserless = {
                 browser = await puppeteer_connect(chromium_endpoint, TIMEOUT, proxy)
             }else{
                 browser = SESSION ? SESSION : await puppeteer_connect(chromium_endpoint, TIMEOUT, proxy)
-                browser.on('disconnected', () => {
-                    console.warn('⚠️ Browser disconnected');
-                    SESSION = null;  // 清理状态
-                    // 这里可以触发重连逻辑
-                });
-                SESSION = browser
+                if (!SESSION) {
+                    browser.on('disconnected', async () => {
+                        console.warn('⚠️ Browser disconnected');
+                        SESSION = null;  // 清理状态
+                        // 这里可以触发重连逻辑
+                    });
+                    SESSION = browser
+                }
                 public_browser = true
             }
 
@@ -189,11 +191,14 @@ const browserless = {
         proxy = `http://${Webshare_PROXY_HOST}:${Webshare_PROXY_PORT}`
 
         browser = SESSION ? SESSION : await puppeteer_connect(chromium_endpoint, TIMEOUT, proxy)
-        browser.on('disconnected', () => {
-            console.warn('⚠️ Browser disconnected');
-            SESSION = null;  // 清理状态
-            // 这里可以触发重连逻辑
-        });
+        if (!SESSION) {
+            browser.on('disconnected', async () => {
+                console.warn('⚠️ Browser disconnected');
+                SESSION = null;  // 清理状态
+                // 这里可以触发重连逻辑
+            });
+            SESSION = browser
+        }
         SESSION = browser
 
         try {
@@ -380,12 +385,14 @@ const browserless = {
                 browser = await puppeteer_connect(chromium_endpoint, TIMEOUT, proxy)
             }else{
                 browser = SESSION ? SESSION : await puppeteer_connect(chromium_endpoint, TIMEOUT, proxy)
-                browser.on('disconnected', async () => {
-                    console.warn('⚠️ Browser disconnected');
-                    SESSION = null;  // 清理状态
-                    // 这里可以触发重连逻辑
-                });
-                SESSION = browser
+                if (!SESSION) {
+                    browser.on('disconnected', async () => {
+                        console.warn('⚠️ Browser disconnected');
+                        SESSION = null;  // 清理状态
+                        // 这里可以触发重连逻辑
+                    });
+                    SESSION = browser
+                }
                 public_browser = true
             }
 
