@@ -693,7 +693,8 @@ app.post('/google/search/web', async (req, res) => {
     //     });
     // })
 
-    const html = await browserless.google_search(q)
+    try {
+        const html = await browserless.google_search(q)
     const dom = new JSDOM(html);
     const { document, window } = dom.window;
     const selector = "div.gsc-result"
@@ -712,6 +713,19 @@ app.post('/google/search/web', async (req, res) => {
         msg: 'success',
         data: result_list
     });
+    }catch(err){
+        return res.send({
+        code: -1,
+        msg: 'failure',
+        data: [{
+            'title':"搜索失败",
+            'snippet':"搜索失败",
+            'link':''
+        }]
+    });
+    }
+
+    
 })
 
 // zyte解析网页内容
