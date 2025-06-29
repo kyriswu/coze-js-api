@@ -57,7 +57,6 @@ function generateConnectionId() {
 const browserless = {
 
     chromium_content: async function (url, opt = {}) {
-
         let proxy_user, proxy_pass, chromium_endpoint, proxy
         let browser, page
         let public_browser//公共浏览器
@@ -175,60 +174,96 @@ const browserless = {
 
     },
 
-    extract_youtube_audio_url: async function (toolurl,videourl, opt = {}) {
+    google_search: async function (keyword) {
 
         let proxy_user, proxy_pass, chromium_endpoint, proxy
+        let browser, page
 
-        if (opt && opt.proxy && opt.proxy === "china") {
-            let attempts = 0;
-            let success = false;
-            while (attempts < 3 && !success) {
-                try {
-                    const res = await axios.get(qingguo_api_url);
-                    console.log("使用青果代理：", res.data)
-                    if (res.data && res.data.code === 'SUCCESS' && res.data.data && res.data.data.length > 0) {
-                        chromium_endpoint = "1.15.114.179:8123"
-                        proxy_user = qingguo_proxy_user
-                        proxy_pass = qingguo_proxy_pass
-                        proxy = 'http://' + res.data.data[0].server;
-                        success = true;
-                    }
-                } catch (err) {
-                    console.log("获取代理IP失效，重新获取", err)
-                    // 可选：打印错误日志
-                }
-                attempts++;
-            }
-            if (attempts === 3) {
-                console.log("获取3次代理IP失败，推出浏览器")
-                return null
-            }
-
+        if (process.env.NODE_ENV === 'online') {
+            chromium_endpoint = "172.17.0.1:8123"
         } else {
-            if (process.env.NODE_ENV === 'online') {
-                chromium_endpoint = "172.17.0.1:8123"
-            } else {
-                chromium_endpoint = "172.245.84.92:8123"
-            }
-            proxy_user = Webshare_PROXY_USER
-            proxy_pass = Webshare_PROXY_PASS
-            proxy = `http://${Webshare_PROXY_HOST}:${Webshare_PROXY_PORT}`
+            chromium_endpoint = "172.245.84.92:8123"
         }
+        proxy_user = Webshare_PROXY_USER
+        proxy_pass = Webshare_PROXY_PASS
+        proxy = `http://${Webshare_PROXY_HOST}:${Webshare_PROXY_PORT}`
 
-        const browser = await puppeteer.connect({
-            browserWSEndpoint: `ws://${chromium_endpoint}/chromium?timeout=${TIMEOUT}&--proxy-server=${proxy}&--no-sandbox&--proxy-bypass-list=<-loopback>;localhost;127.0.0.1;172.17.0.1`,  // 替换为你的本地端口
-            args: [
-                `--proxy-server=${proxy}`,
-                '--no-sandbox',
-                '--proxy-bypass-list=<-loopback>;localhost;127.0.0.1;172.17.0.1'  // 移除 localhost 的跳过规则
-            ],
-            headless: false,  // 设置为 false 以便调试
-            defaultViewport: { width: 1280, height: 800 }
+        browser = SESSION ? SESSION : await puppeteer_connect(chromium_endpoint, TIMEOUT, proxy)
+        browser.on('disconnected', () => {
+            console.warn('⚠️ Browser disconnected');
+            SESSION = null;  // 清理状态
+            // 这里可以触发重连逻辑
         });
+        SESSION = browser
 
         try {
 
-            const page = await browser.newPage();
+            page = await browser.newPage();
+
+            // 在打开任何页面之前设置 UA
+            await page.setUserAgent(
+                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) ' +
+                'AppleWebKit/537.36 (KHTML, like Gecko) ' +
+                'Chrome/121.0.0.0 Safari/537.36'
+            );
+
+            await page.authenticate({
+                username: proxy_user,
+                password: proxy_pass,
+            }); // 正式验证代理用户名密码 :contentReference[oaicite:1]{index=1}
+
+            const ces=`https://cse.google.com/cse?cx=93d449f1c4ff047bc#gsc.tab=0&gsc.q=${keyword}&gsc.sort=&gsc.page=1`
+            const response = await page.goto(ces, {
+                timeout: TIMEOUT,
+            });
+
+            // 检查 HTTP 状态码
+            if (response.status() !== 200) {
+                console.error(`Request failed with status code: ${response.status()}`);
+                throw new Error(`HTTP request failed with status ${response.status()}`);
+            }
+
+            const html = await page.content();
+
+            await page.close()
+
+            return html
+        } catch (error) {
+            console.error('Error in chromium screen shot:', error);
+            return null
+        } finally {
+            // 强制再执行一次 page.close，不考虑报错
+                try { await page.close(); } catch (e) {}
+        }
+    },
+
+    extract_youtube_audio_url: async function (toolurl,videourl, opt = {}) {
+
+        let proxy_user, proxy_pass, chromium_endpoint, proxy
+        let browser, page
+        let public_browser
+
+        if (process.env.NODE_ENV === 'online') {
+            chromium_endpoint = "172.17.0.1:8123"
+        } else {
+            chromium_endpoint = "172.245.84.92:8123"
+        }
+        proxy_user = Webshare_PROXY_USER
+        proxy_pass = Webshare_PROXY_PASS
+        proxy = `http://${Webshare_PROXY_HOST}:${Webshare_PROXY_PORT}`
+
+        browser = SESSION ? SESSION : await puppeteer_connect(chromium_endpoint, TIMEOUT, proxy)
+        browser.on('disconnected', () => {
+            console.warn('⚠️ Browser disconnected');
+            SESSION = null;  // 清理状态
+            // 这里可以触发重连逻辑
+        });
+        SESSION = browser
+        public_browser = true
+
+        try {
+
+            page = await browser.newPage();
 
             // 在打开任何页面之前设置 UA
             await page.setUserAgent(
@@ -279,14 +314,19 @@ const browserless = {
     if (!a) return null;
     return a.href
   });
-            
+            await page.close()
 
             return audio_url
         } catch (error) {
             console.error('Error in chromium screen shot:', error);
             return null
         } finally {
-            await browser.close();
+            if(public_browser){
+                // 强制再执行一次 page.close，不考虑报错
+                try { await page.close(); } catch (e) {}
+            }else{
+                await browser.close()
+            }
         }
     },
 
@@ -432,7 +472,7 @@ const browserless = {
         let proxy_user, proxy_pass, chromium_endpoint, proxy
         let browser
 
-        if (opt && opt.proxy && opt.proxy === "china") {
+        if (1) {
             let attempts = 0;
             let success = false;
             while (attempts < 3 && !success) {
@@ -530,12 +570,13 @@ const browserless = {
                 waitUntil: 'networkidle2',
             });
 
-            
             // 检查 HTTP 状态码
             if (response.status() !== 200) {
                 console.error(`无头浏览器：Request failed with status code: ${response.status()}`);
                 throw new Error(`HTTP request failed with status ${response.status()}`);
             }
+
+            // await page.click('::-p-xpath(//*[@id="main"]/div[3]/ul/li[0]/div[1]/h3/a)')
 
             const html = await page.content();
 

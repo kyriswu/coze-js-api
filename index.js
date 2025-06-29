@@ -645,53 +645,73 @@ app.post('/openai-hub/chat/completions', async (req, res) => {
 
 app.post('/google/search/web', async (req, res) => {
     const { q, api_key} = req.body;
-    const api_id = "api_41vHKzNmXf5xx23f";
+    // const api_id = "api_41vHKzNmXf5xx23f";
 
-    if (!q) {
-        return res.status(400).send('Invalid input: "q" is required');
-    }
+    // if (!q) {
+    //     return res.status(400).send('Invalid input: "q" is required');
+    // }
 
-    //免费版的key
-    const free_key = 'google_'+req.headers['user-identity']
-    if (api_key) {
-        const { keyId, valid, remaining, code } = await unkey.verifyKey(api_id, api_key, 0);
-        if (!valid) {
-            return res.send({
-                code: -1,
-                msg: 'API Key 无效或已过期，请检查后重试！'
-            }); 
-        }
-        if (remaining == 0) {
-            return res.send({
-                code: -1,
-                msg: 'API Key 使用次数已用完，请联系作者续费！'
-            }); 
-        }
-    }else{
-        const canSearch = await canSearchGoogle(free_key);
-        if (!canSearch) {
-            return res.send({
-                code: 0,
-                msg: '维护成本大，每天免费使用1次，付费购买API KEY可解锁更多次数，请联系作者！【B站:小吴爱折腾】'
-            }); 
-        }
-    }
+    // //免费版的key
+    // const free_key = 'google_'+req.headers['user-identity']
+    // if (api_key) {
+    //     const { keyId, valid, remaining, code } = await unkey.verifyKey(api_id, api_key, 0);
+    //     if (!valid) {
+    //         return res.send({
+    //             code: -1,
+    //             msg: 'API Key 无效或已过期，请检查后重试！'
+    //         }); 
+    //     }
+    //     if (remaining == 0) {
+    //         return res.send({
+    //             code: -1,
+    //             msg: 'API Key 使用次数已用完，请联系作者续费！'
+    //         }); 
+    //     }
+    // }else{
+    //     const canSearch = await canSearchGoogle(free_key);
+    //     if (!canSearch) {
+    //         return res.send({
+    //             code: 0,
+    //             msg: '维护成本大，每天免费使用1次，付费购买API KEY可解锁更多次数，请联系作者！【B站:小吴爱折腾】'
+    //         }); 
+    //     }
+    // }
 
-    search1api.search(q).then(async (data) => {
-        let msg = "";
-        if (api_key) {
-            //付费版
-            const { remaining } = await unkey.verifyKey(api_id, api_key, 1);
-            msg = `API Key 剩余调用次数：${remaining}`;
-        }else{
-            msg = `今日免费使用次数用完，付费购买API KEY可解锁更多次数，请联系作者！【B站:小吴爱折腾】`;
-        }
-        return res.send({
-            code: 0,
-            msg: msg,
-            data: data.results
-        });
-    })
+    // search1api.search(q).then(async (data) => {
+    //     let msg = "";
+    //     if (api_key) {
+    //         //付费版
+    //         const { remaining } = await unkey.verifyKey(api_id, api_key, 1);
+    //         msg = `API Key 剩余调用次数：${remaining}`;
+    //     }else{
+    //         msg = `今日免费使用次数用完，付费购买API KEY可解锁更多次数，请联系作者！【B站:小吴爱折腾】`;
+    //     }
+    //     return res.send({
+    //         code: 0,
+    //         msg: msg,
+    //         data: data.results
+    //     });
+    // })
+
+    const html = await browserless.google_search(q)
+    const dom = new JSDOM(html);
+    const { document, window } = dom.window;
+    const selector = "div.gsc-result"
+    const result_list = Array.from(document.querySelectorAll(selector)).map(element => {
+        const a = element.querySelector('a.gs-title');
+        const div = element.querySelector('div.gs-snippet');
+        return {
+            snippet: div ? div.textContent.trim() : null,
+            link: a ? a.href : null,
+            title: a ? a.textContent.trim() : null
+        };
+    }).filter(item => item.link !== null); // 过滤掉不符合要求的项
+
+    return res.send({
+        code: 0,
+        msg: 'success',
+        data: result_list
+    });
 })
 
 // zyte解析网页内容
@@ -1610,7 +1630,7 @@ app.post("/screenshot", async (req, res) => {
 })
 
 app.post("/test", async (req, res) => {
-    let {url,element} = req.body
+    let {keyword,element} = req.body
     try {
         let data = await browserless.chromium("https://google.com/",{"connection_id":"xxx"})
 
