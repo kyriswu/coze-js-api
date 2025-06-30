@@ -11,6 +11,7 @@ import unkey from './utils/unkey.js'
 import { dirname } from 'path';
 import path from 'path'
 import crypto from 'crypto';
+import qs from 'querystring'; // 用于将参数编码为 x-www-form-urlencoded 格式
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 
@@ -1615,6 +1616,25 @@ app.post('/download_image', async (req, res) => {
     }
 })
 
+async function get_doc_direct_link(id) {
+    const data = {
+        id: id  // 替换成你实际需要的 id
+    };
+    const headers = {
+        'Content-Length': Buffer.byteLength(qs.stringify(data)), // Content-Length 要根据请求体的长度来设置
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+        'Host': 'flk.npc.gov.cn',
+        'Origin': 'https://flk.npc.gov.cn',
+        'Referer': 'https://flk.npc.gov.cn/detail2.html?' + id,
+    };
+
+    // 发送 POST 请求
+    const response = await axios.post('https://flk.npc.gov.cn/api/detail', qs.stringify(data), { headers })
+    const result = response.data.result.body
+    // console.log(result[0])
+    return "https://wb.flk.npc.gov.cn" + result[0].path
+}
+
 app.post("/flfg", async (req, res) => {
     let { title, page } = req.body;
     if (!title) {
@@ -1673,14 +1693,17 @@ app.post("/flfg", async (req, res) => {
         const data = response.data;
         // 为每个对象的 url 字段加上域名前缀
         let law_list = []
+        let doc_urls = [] //需要解析的文件url
         if (Array.isArray(data.result.data)) {
-            law_list = data.result.data.map(item => {
-            if (item.url && !item.url.startsWith('http')) {
-                item.url = 'https://flk.npc.gov.cn/' + item.url.replace(/^(\.\/|\/)+/, '');
-            }
-            return item;
-            });
+            law_list = await Promise.all(data.result.data.map(async (item) => {
+                if (item.url) {
+                    const doc_url = 'https://flk.npc.gov.cn/' + item.url.replace(/^(\.\/|\/)+/, '');
+                    item.url = await get_doc_direct_link(item.id) // await redis.get(doc_url);
+                }
+                return item;
+            }));
         }
+
         return res.send({
             code: 0,
             msg: 'success',
