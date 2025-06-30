@@ -1193,7 +1193,7 @@ import * as lemonfoxai from './utils/ThirdParrtyApi/lemonfoxai.js';
 import { QuotaExceededError } from './utils/CustomError.js';
 import coze from './utils/ThirdParrtyApi/coze.js';
 import cozecom from './utils/ThirdParrtyApi/cozecom.js';
-import browserless from './utils/ThirdParrtyApi/browserless.js';
+import browserless, { getQingGuoProxy } from './utils/ThirdParrtyApi/browserless.js';
 
 // 静态资源服务
 app.use('/images', express.static(path.join(__dirname, 'images')));
@@ -1615,6 +1615,91 @@ app.post('/download_image', async (req, res) => {
     }
 })
 
+app.post("/flfg", async (req, res) => {
+    let { title, page } = req.body;
+    if (!title) {
+        return res.status(400).send('参数title不能为空');
+    }
+    if (!Number.isInteger(page) || isNaN(page) || page <= 0) {
+        page = 1
+    }
+
+
+    // 参数解构
+    let type = '',
+        fgbt = title,
+        searchType = 'title;accurate',
+        sortTr = 'f_bbrq_s;desc',
+        gbrqStart = '',
+        gbrqEnd = '',
+        sxrqStart = '',
+        sxrqEnd = '',
+        size = 10,
+        _ = Date.now()
+
+
+    // 构建 URLSearchParams
+    const params = new URLSearchParams({
+        page,
+        type,
+        fgbt,
+        searchType,
+        sortTr,
+        gbrqStart,
+        gbrqEnd,
+        sxrqStart,
+        sxrqEnd,
+        size,
+        _: _
+    });
+
+    try {
+        // const { proxy, proxy_user, proxy_pass } = await getQingGuoProxy();
+        // 发起 GET 请求
+        const apiUrl = `https://flk.npc.gov.cn/api/?${params.toString()}`;
+        const response = await axios.get(apiUrl, {
+            headers: {
+                'referer': 'https://flk.npc.gov.cn/index.html',
+                'host': 'flk.npc.gov.cn'
+            },
+            // proxy: {
+            //     proxy,
+            //     auth: {
+            //         username: proxy_user,
+            //         password: proxy_pass
+            //     }
+            // }
+        });
+        const data = response.data;
+        // 为每个对象的 url 字段加上域名前缀
+        let law_list = []
+        if (Array.isArray(data.result.data)) {
+            law_list = data.result.data.map(item => {
+            if (item.url && !item.url.startsWith('http')) {
+                item.url = 'https://flk.npc.gov.cn/' + item.url.replace(/^(\.\/|\/)+/, '');
+            }
+            return item;
+            });
+        }
+        return res.send({
+            code: 0,
+            msg: 'success',
+            data: {
+            'list': law_list,
+            'totalSizes': data.result.totalSizes,
+            'page': data.result.page,
+            'size': data.result.size
+            }
+        })
+    } catch (error) {
+        console.error(error);
+        return res.send({
+            code: -1,
+            msg: error.message
+        });
+    }
+})
+
 app.post("/screenshot", async (req, res) => {
     let {url,element,cookie} = req.body
     if (cookie) {
@@ -1646,12 +1731,23 @@ app.post("/screenshot", async (req, res) => {
 app.post("/test", async (req, res) => {
     let {keyword,element} = req.body
     try {
-        let data = await browserless.chromium("https://google.com/",{"connection_id":"xxx"})
+        let html = await browserless.cn_law("劳动法")
 
+const dom = new JSDOM(html);
+    const { document, window } = dom.window;
+    const selector = "tr.list-b"
+    const result_list = Array.from(document.querySelectorAll(selector)).map(element => {
+        const title = element.querySelector('li.l-wen');
+        const authority = element.querySelector('h2.l-wen1');
+        return {
+            title: title ? title.title : null,
+            authority: authority ? authority.textContent.trim() : null
+        };
+    }).filter(item => item.title !== null); // 过滤掉不符合要求的项
     return res.send({
         'code':0,
         'msg':'success',
-        'data': data
+        'data': result_list
     })
     }catch(err){
         return res.send({

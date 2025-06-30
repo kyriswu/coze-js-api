@@ -54,6 +54,34 @@ function generateConnectionId() {
     });
 }
 
+async function getQingGuoProxy(){
+    let attempts = 0;
+    let success = false;
+    while (attempts < 5 && !success) {
+        try {
+            const res = await axios.get(qingguo_api_url);
+            console.log("使用青果代理：", res.data)
+            if (res.data && res.data.code === 'SUCCESS' && res.data.data && res.data.data.length > 0) {
+                success = true;
+                return {
+                    proxy:'http://' + res.data.data[0].server,
+                    proxy_user:qingguo_proxy_user,
+                    proxy_pass:qingguo_proxy_pass,
+                    proxy_server:res.data.data[0].server
+                }
+            }
+        } catch (err) {
+            console.log("获取代理IP失效，重新获取", err)
+            // 可选：打印错误日志
+        }
+        attempts++;
+    }
+    if (attempts === 3) {
+        console.log("获取3次代理IP失败，退出浏览器")
+        return null
+    }
+}
+
 const browserless = {
 
     chromium_content: async function (url, opt = {}) {
@@ -62,30 +90,8 @@ const browserless = {
         let public_browser//公共浏览器
 
         if (opt && opt.proxy && opt.proxy === "china") {
-            let attempts = 0;
-            let success = false;
-            while (attempts < 3 && !success) {
-                try {
-                    const res = await axios.get(qingguo_api_url);
-                    console.log("使用青果代理：", res.data)
-                    if (res.data && res.data.code === 'SUCCESS' && res.data.data && res.data.data.length > 0) {
-                        chromium_endpoint = "1.15.114.179:8123"
-                        proxy_user = qingguo_proxy_user
-                        proxy_pass = qingguo_proxy_pass
-                        proxy = 'http://' + res.data.data[0].server;
-                        success = true;
-                    }
-                } catch (err) {
-                    console.log("获取代理IP失效，重新获取", err)
-                    // 可选：打印错误日志
-                }
-                attempts++;
-            }
-            if (attempts === 3) {
-                console.log("获取3次代理IP失败，退出浏览器")
-                return null
-            }
-
+            chromium_endpoint = "1.15.114.179:8123"
+            ({proxy,proxy_user,proxy_pass} = await getQingGuoProxy())
             //国内代理，每次都用新的浏览器
             browser = await puppeteer_connect(chromium_endpoint, TIMEOUT, proxy)
 
@@ -199,7 +205,6 @@ const browserless = {
             });
             SESSION = browser
         }
-        SESSION = browser
 
         try {
 
@@ -605,9 +610,81 @@ const browserless = {
             // }
         }
 
-    }
+    },
+    //flk.npc.gov.cn
+    cn_law: async function (keyword) {
+        let proxy_user, proxy_pass, chromium_endpoint, proxy
+        let browser, page
+
+        let attempts = 0;
+        let success = false;
+        while (attempts < 3 && !success) {
+            try {
+                const res = await axios.get(qingguo_api_url);
+                console.log("使用青果代理：", res.data)
+                if (res.data && res.data.code === 'SUCCESS' && res.data.data && res.data.data.length > 0) {
+                    chromium_endpoint = "1.15.114.179:8123"
+                    proxy_user = qingguo_proxy_user
+                    proxy_pass = qingguo_proxy_pass
+                    proxy = 'http://' + res.data.data[0].server;
+                    success = true;
+                }
+            } catch (err) {
+                console.log("获取代理IP失效，重新获取", err)
+                // 可选：打印错误日志
+            }
+            attempts++;
+        }
+        if (attempts === 3) {
+            console.log("获取3次代理IP失败，退出浏览器")
+            return null
+        }
+        browser = await puppeteer_connect(chromium_endpoint, TIMEOUT, proxy)
+
+        try {
+
+            page = await browser.newPage();
+            
+            // 在打开任何页面之前设置 UA
+            await page.setUserAgent(
+                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) ' +
+                'AppleWebKit/537.36 (KHTML, like Gecko) ' +
+                'Chrome/121.0.0.0 Safari/537.36'
+            );
+
+            await page.authenticate({
+                username: proxy_user,
+                password: proxy_pass,
+            }); // 正式验证代理用户名密码 :contentReference[oaicite:1]{index=1}
+
+            const url = "https://flk.npc.gov.cn/index.html"
+            const response = await page.goto(url, {
+                timeout: TIMEOUT,
+                waitUntil: 'networkidle2',
+            });
+
+            // 检查 HTTP 状态码
+            if (response.status() !== 200) {
+                console.error(`无头浏览器：Request failed with status code: ${response.status()}`);
+                throw new Error(`HTTP request failed with status ${response.status()}`);
+            }
+
+            await page.type('#flfgTitle', keyword)
+            await page.click('ul.f-but > li:nth-child(1)')
+
+            const html = await page.content();
+
+            return html
+        } catch (error) {
+            console.error('Error in chromium_content:', error);
+            return null
+        } finally {
+            await browser.close()
+        }
+
+    },
 
     
 };
-
+export { getQingGuoProxy }
 export default browserless;
