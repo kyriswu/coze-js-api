@@ -91,7 +91,7 @@ const browserless = {
         let public_browser//公共浏览器
 
         if (opt && opt.proxy && opt.proxy === "china") {
-            chromium_endpoint = "1.15.114.179:8123"
+            chromium_endpoint = "1.15.114.179:8123";
             ({proxy,proxy_user,proxy_pass} = await getQingGuoProxy())
             //国内代理，每次都用新的浏览器
             browser = await puppeteer_connect(chromium_endpoint, TIMEOUT, proxy)
