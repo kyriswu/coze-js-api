@@ -86,6 +86,10 @@ async function getQingGuoProxy(){
 const browserless = {
 
     chromium_content: async function (url, opt = {}) {
+
+        if(!tool.isValidUrl(url)){
+            throw new Error("url链接不正确，请使用完整的链接")
+        }
         let proxy_user, proxy_pass, chromium_endpoint, proxy
         let browser, page
         let public_browser//公共浏览器
