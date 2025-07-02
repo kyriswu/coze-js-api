@@ -1195,6 +1195,7 @@ import { QuotaExceededError } from './utils/CustomError.js';
 import coze from './utils/ThirdParrtyApi/coze.js';
 import cozecom from './utils/ThirdParrtyApi/cozecom.js';
 import browserless, { getQingGuoProxy } from './utils/ThirdParrtyApi/browserless.js';
+import feishu from './utils/ThirdParrtyApi/feishu.js';
 
 // 静态资源服务
 app.use('/images', express.static(path.join(__dirname, 'images')));
@@ -1751,34 +1752,30 @@ app.post("/screenshot", async (req, res) => {
     }
 })
 
-app.post("/test", async (req, res) => {
-    let {keyword,element} = req.body
-    try {
-        let html = await browserless.cn_law("劳动法")
+app.post("/mix_video_and_audio", async (req, res) => {
+    let {video_url,audio_url} = req.body
 
-const dom = new JSDOM(html);
-    const { document, window } = dom.window;
-    const selector = "tr.list-b"
-    const result_list = Array.from(document.querySelectorAll(selector)).map(element => {
-        const title = element.querySelector('li.l-wen');
-        const authority = element.querySelector('h2.l-wen1');
-        return {
-            title: title ? title.title : null,
-            authority: authority ? authority.textContent.trim() : null
-        };
-    }).filter(item => item.title !== null); // 过滤掉不符合要求的项
+    let new_video_url = await tool.mix_video_and_audio(video_url, audio_url)
+    
     return res.send({
-        'code':0,
-        'msg':'success',
-        'data': result_list
+        code: 0,
+        msg: 'success',
+        data: req.protocol + '://' + req.get('host') + '/downloads/' + new_video_url
     })
-    }catch(err){
-        return res.send({
-        'code':0,
-        'msg':'failure',
-        'data': err.message
+})
+
+app.post("/test", async (req, res) => {
+    let {video_url,audio_url} = req.body
+    // let access_token = await feishu.getAccessToken('cli_a8d7f566f1ba100b','iSf4dqsDevTRyyysgl7Llti8V1VIMBCS')
+    // let doc = await feishu.readDoc(access_token, 'X2etdSFX7oJ7YNxXEuUc6pdOnoe')
+    // return res.send({
+    //     doc: doc
+    // })
+    let new_video_url = await tool.mix_video_and_audio(video_url, audio_url)
+    
+    return res.send({
+        data: req.protocol + '://' + req.get('host') + '/downloads/' + new_video_url
     })
-    }
 })
 app.post("/page", async (req, res) => {
     let {url,browserId} = req.body

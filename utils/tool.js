@@ -20,6 +20,21 @@ const __dirname = dirname(__filename)
 const execPromise = util.promisify(exec);
 
 const tool = {
+    mix_video_and_audio: async function(video_url, audio_url) {
+        const downloadDir = path.join(__dirname, '..', 'downloads');
+        const video = await this.download_video(video_url)
+        const audio = await this.download_audio(audio_url)
+        const timestamp = new Date().getTime();
+        const output_video = `video_${timestamp}.mp4`;
+        const output_path = path.join(downloadDir, output_video);
+         // Construct ffmpeg command
+            const command = `ffmpeg -i ${video.filepath} -i ${audio.filepath} -c:v copy -c:a aac ${output_path}`
+            
+            // Execute ffmpeg command
+            const { stdout, stderr } = await execPromise(command);
+            
+        return output_video
+    },
     gen_cookie: async function (cookieStr, domain, path) {
         // 目标网站的域名和路径（需替换为实际值）
         // const domain = 'example.com'; // 请替换为目标网站的实际域名
