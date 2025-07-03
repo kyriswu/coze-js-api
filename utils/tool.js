@@ -20,6 +20,38 @@ const __dirname = dirname(__filename)
 const execPromise = util.promisify(exec);
 
 const tool = {
+    mix_videos: async function (videos) {
+        try {
+            const downloadDir = path.join(__dirname, '..', 'downloads');
+            const timestamp = new Date().getTime();
+            const txt_filename = `${timestamp}_filelist.txt`
+            const txt_filepath = path.join(downloadDir, txt_filename);
+            
+            let fileListContent = '';
+
+            for (let i = 0; i < videos.length; i++) {
+                const video_name = path.basename(videos[i]);
+                const video_path = path.join(downloadDir, video_name);
+
+                // 注意：ffmpeg concat 格式中的路径要使用绝对路径并包裹在单引号中
+                fileListContent += `file '${video_path}'\n`;
+            }
+
+            // 写入 txt 文件，设定编码为 utf8
+            fs.writeFileSync(txt_filepath, fileListContent, { encoding: 'utf8' });
+
+            console.log('生成的视频列表文件路径：', txt_filename);
+            const out_video_name = `video_${timestamp}.mp4`
+            const out_video_path = path.join(downloadDir, out_video_name);
+            const command = `ffmpeg -f concat -safe 0 -i ${txt_filepath} -c copy -y ${out_video_path}`;
+            const { stdout, stderr } = await execPromise(command)
+            return out_video_name
+        }catch(err){
+            console.err(err)
+            throw err
+        }
+        
+    },
     mix_video_and_audio: async function(video_url, audio_url) {
         const downloadDir = path.join(__dirname, '..', 'downloads');
         const video = await this.download_video(video_url)
@@ -28,7 +60,7 @@ const tool = {
         const output_video = `video_${timestamp}.mp4`;
         const output_path = path.join(downloadDir, output_video);
          // Construct ffmpeg command
-            const command = `ffmpeg -i ${video.filepath} -i ${audio.filepath} -c:v copy -c:a aac ${output_path}`
+            const command = `ffmpeg -i ${video.filepath} -i ${audio.filepath} -filter_complex "[1:a]apad=pad_dur=100000[aud]" -map 0:v:0 -map "[aud]" -c:v copy -c:a aac -shortest ${output_path}`
             
             // Execute ffmpeg command
             const { stdout, stderr } = await execPromise(command);

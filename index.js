@@ -1764,6 +1764,40 @@ app.post("/mix_video_and_audio", async (req, res) => {
     })
 })
 
+app.post("/mix_videos", async (req, res) => {
+    let {videos} = req.body
+
+    // 判断 videos 是否为合法的 JSON 数组且每项为字符串且为 http(s) 链接
+    if (typeof videos === 'string') {
+        try {
+            videos = JSON.parse(videos)
+        } catch (e) {
+            return res.send({
+                code: -1,
+                msg: 'videos 参数必须是 JSON 数组字符串'
+            })
+        }
+    }
+    if (
+        !Array.isArray(videos) ||
+        videos.length === 0 ||
+        !videos.every(v => typeof v === 'string' && /^https?:\/\/.+\.mp4$/i.test(v))
+    ) {
+        return res.send({
+            code: -1,
+            msg: 'videos 必须是形如 ["https://...mp4", "..."] 的非空数组'
+        })
+    }
+
+    let new_video_url = await tool.mix_videos(videos)
+    
+    return res.send({
+        code: 0,
+        msg: 'success',
+        data: req.protocol + '://' + req.get('host') + '/downloads/' + new_video_url
+    })
+})
+
 app.post("/test", async (req, res) => {
     let {video_url,audio_url} = req.body
     // let access_token = await feishu.getAccessToken('cli_a8d7f566f1ba100b','iSf4dqsDevTRyyysgl7Llti8V1VIMBCS')
