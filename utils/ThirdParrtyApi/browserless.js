@@ -525,7 +525,7 @@ const browserless = {
             proxy = `http://${Webshare_PROXY_HOST}:${Webshare_PROXY_PORT}`
         }
 
-        browser = await puppeteer_connect(chromium_endpoint, 120000, proxy)
+        browser = await puppeteer_connect(chromium_endpoint, TIMEOUT, proxy)
 
         const browserId = generateConnectionId()
         browser.on('disconnected', () => {
