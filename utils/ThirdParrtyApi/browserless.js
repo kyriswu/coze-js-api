@@ -197,8 +197,8 @@ const browserless = {
         } else {
             chromium_endpoint = "172.245.84.92:8123"
         }
-        proxy_user = Webshare_PROXY_USER
-        proxy_pass = Webshare_PROXY_PASS
+        proxy_user = 'liyylnev-rotate'
+        proxy_pass = 'n8yufdsr2u5q'
         proxy = `http://${Webshare_PROXY_HOST}:${Webshare_PROXY_PORT}`
 
         browser = SESSION ? SESSION : await puppeteer_connect(chromium_endpoint, TIMEOUT, proxy)
