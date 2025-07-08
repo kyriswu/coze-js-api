@@ -232,10 +232,15 @@ const browserless = {
 
             page.on('request', (request) => {
                 const resourceType = request.resourceType();
-                const url = request.url();
+                const url = request.url().toLowerCase();
 
-                // 拦截图片请求
-                if (resourceType === 'image' || url.match(/\.(png|jpg|jpeg|gif|webp|svg)$/i)) {
+                // 拦截图片、CSS、字体、媒体、favicon
+                if (
+                    ['image', 'stylesheet', 'font', 'media'].includes(resourceType) ||
+                    url.endsWith('.css') ||
+                    url.endsWith('.ico') ||              // favicon 文件
+                    url.includes('favicon')              // 例如 /favicon.png 或 favicon.ico?ver=2
+                ) {
                     request.abort();
                 } else {
                     request.continue();
