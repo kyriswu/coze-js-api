@@ -236,12 +236,8 @@ const browserless = {
                 const url = request.url().toLowerCase();
 
                 const blockedPatterns = [
-                    'cse.google.com/adsense',
-                    'syndicatedsearch.goog/afs/ads',
-                    '/ads/',
-                    'adservice.google.com',
+                    'syndicatedsearch.goog',
                     'doubleclick.net',
-                    '.js', // 可选：可按需限制部分外部脚本
                 ];
 
                 // 拦截图片、CSS、字体、媒体、favicon
