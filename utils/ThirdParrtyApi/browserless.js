@@ -235,8 +235,18 @@ const browserless = {
                 const resourceType = request.resourceType();
                 const url = request.url().toLowerCase();
 
+                const blockedPatterns = [
+                    'cse.google.com/adsense',
+                    'syndicatedsearch.goog/afs/ads',
+                    '/ads/',
+                    'adservice.google.com',
+                    'doubleclick.net',
+                    '.js', // 可选：可按需限制部分外部脚本
+                ];
+
                 // 拦截图片、CSS、字体、媒体、favicon
                 if (
+                    blockedPatterns.some(pattern => url.includes(pattern)) ||
                     ['image', 'stylesheet', 'font', 'media'].includes(resourceType) ||
                     url.endsWith('.css') ||
                     url.endsWith('.ico') ||              // favicon 文件
