@@ -652,7 +652,7 @@ app.post('/google/search/web', async (req, res) => {
     //     return res.status(400).send('Invalid input: "q" is required');
     // }
 
-    // //免费版的key
+    //免费版的key
     // const free_key = 'google_'+req.headers['user-identity']
     // if (api_key) {
     //     const { keyId, valid, remaining, code } = await unkey.verifyKey(api_id, api_key, 0);
@@ -669,13 +669,17 @@ app.post('/google/search/web', async (req, res) => {
     //         }); 
     //     }
     // }else{
-    //     const canSearch = await canSearchGoogle(free_key);
-    //     if (!canSearch) {
-    //         return res.send({
-    //             code: 0,
-    //             msg: '维护成本大，每天免费使用1次，付费购买API KEY可解锁更多次数，请联系作者！【B站:小吴爱折腾】'
-    //         }); 
-    //     }
+        // const canSearch = await canSearchGoogle(free_key);
+        // if (!canSearch) {
+        //     return res.send({
+        //         code: 0,
+        //         msg: '每天免费使用1次，付费购买api_key，可解锁更多次数，请联系作者！【B站:小吴爱折腾】',
+        //         data: [{
+        //             'title': '每天免费使用1次，付费购买api_key，可解锁更多次数，请联系作者！【B站:小吴爱折腾】',
+        //             'url': 'https://space.bilibili.com/396762480'
+        //         }]
+        //     }); 
+        // }
     // }
 
     // search1api.search(q).then(async (data) => {

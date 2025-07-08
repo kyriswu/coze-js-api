@@ -227,6 +227,21 @@ const browserless = {
                 password: proxy_pass,
             }); // 正式验证代理用户名密码 :contentReference[oaicite:1]{index=1}
 
+            // 开启请求拦截
+            await page.setRequestInterception(true);
+
+            page.on('request', (request) => {
+                const resourceType = request.resourceType();
+                const url = request.url();
+
+                // 拦截图片请求
+                if (resourceType === 'image' || url.match(/\.(png|jpg|jpeg|gif|webp|svg)$/i)) {
+                    request.abort();
+                } else {
+                    request.continue();
+                }
+            });
+
             const ces=`https://cse.google.com/cse?cx=93d449f1c4ff047bc#gsc.tab=0&gsc.q=${keyword}&gsc.sort=&gsc.page=1`
             const response = await page.goto(ces, {
                 timeout: TIMEOUT,
