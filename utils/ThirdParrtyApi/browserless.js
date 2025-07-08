@@ -206,7 +206,7 @@ const browserless = {
         if (!GOOGLE_SESSION) {
             browser.on('disconnected', async () => {
                 console.warn('⚠️ Browser disconnected');
-                SESSION = null;  // 清理状态
+                GOOGLE_SESSION = null;  // 清理状态
                 // 这里可以触发重连逻辑
             });
             GOOGLE_SESSION = browser
@@ -283,7 +283,7 @@ const browserless = {
 
             return html
         } catch (error) {
-            console.error('Error in chromium screen shot:', error);
+            console.error('Error in chromium Google Search API:', error);
             return null
         } finally {
             // 强制再执行一次 page.close，不考虑报错

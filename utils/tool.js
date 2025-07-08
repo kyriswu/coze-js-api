@@ -30,8 +30,11 @@ const tool = {
             let fileListContent = '';
 
             for (let i = 0; i < videos.length; i++) {
-                const video_name = path.basename(videos[i]);
-                const video_path = path.join(downloadDir, video_name);
+                let video_name = path.basename(videos[i]);
+                let video_path = path.join(downloadDir, video_name);
+                if (!fs.existsSync(video_path)) {
+                    throw new Error(`文件不存在: ${videos[i]}`);
+                }
 
                 // 注意：ffmpeg concat 格式中的路径要使用绝对路径并包裹在单引号中
                 fileListContent += `file '${video_path}'\n`;
