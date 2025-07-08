@@ -24,6 +24,7 @@ const qingguo_proxy_user = "FC283878"
 const qingguo_proxy_pass = "6BDF595312DA"
 
 var SESSION //长会话浏览器
+var GOOGLE_SESSION //谷歌搜索长会话浏览器
 
 var browser_map = {} //浏览器map
 
@@ -201,14 +202,14 @@ const browserless = {
         proxy_pass = 'n8yufdsr2u5q'
         proxy = `http://${Webshare_PROXY_HOST}:${Webshare_PROXY_PORT}`
 
-        browser = SESSION ? SESSION : await puppeteer_connect(chromium_endpoint, TIMEOUT, proxy)
-        if (!SESSION) {
+        browser = GOOGLE_SESSION ? GOOGLE_SESSION : await puppeteer_connect(chromium_endpoint, TIMEOUT, proxy)
+        if (!GOOGLE_SESSION) {
             browser.on('disconnected', async () => {
                 console.warn('⚠️ Browser disconnected');
                 SESSION = null;  // 清理状态
                 // 这里可以触发重连逻辑
             });
-            SESSION = browser
+            GOOGLE_SESSION = browser
         }
 
         try {
