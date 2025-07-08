@@ -254,6 +254,17 @@ const browserless = {
                 }
             });
 
+            let totalBytes = 0;
+
+            page.on('response', async (response) => {
+                try {
+                const buffer = await response.buffer();
+                totalBytes += buffer.length;
+                } catch (err) {
+                // 某些响应可能没有主体（如 204/304），跳过即可
+                }
+            });
+
             const ces=`https://cse.google.com/cse?cx=93d449f1c4ff047bc#gsc.tab=0&gsc.q=${keyword}&gsc.sort=&gsc.page=1`
             const response = await page.goto(ces, {
                 timeout: TIMEOUT,
@@ -266,7 +277,7 @@ const browserless = {
             }
 
             const html = await page.content();
-
+              console.log(`💾 Total bandwidth: ${(totalBytes / 1024).toFixed(2)} KB`);
             await page.close()
 
             return html
