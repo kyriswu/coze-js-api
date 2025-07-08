@@ -189,7 +189,7 @@ const browserless = {
     },
 
     google_search: async function (keyword) {
-
+        await redis.incr("google_search_count")
         let proxy_user, proxy_pass, chromium_endpoint, proxy
         let browser, page
 
