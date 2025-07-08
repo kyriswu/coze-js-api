@@ -238,6 +238,7 @@ const browserless = {
                 const blockedPatterns = [
                     'syndicatedsearch.goog',
                     'doubleclick.net',
+                    'https://cse.google.com/adsense/search/async-ads.js'
                 ];
 
                 // 拦截图片、CSS、字体、媒体、favicon
