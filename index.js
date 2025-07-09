@@ -1730,6 +1730,13 @@ app.post("/flfg", async (req, res) => {
 
 app.post("/screenshot", async (req, res) => {
     let {url,element,cookie} = req.body
+    if (!tool.isValidUrl(url)) {
+        return res.send({
+            'code':-1,
+            'msg':'failure',
+            'data': '链接不正确，请输入https或者http开头的链接'
+        })
+    }
     if (cookie) {
         const parsedUrl = new URL(url);
 
