@@ -1711,7 +1711,7 @@ app.post("/flfg", async (req, res) => {
 
         return res.send({
             code: 0,
-            msg: 'success',
+            msg: '本插件后期将收费，关注【B站：小吴爱折腾】，以防失联',
             data: {
             'list': law_list,
             'totalSizes': data.result.totalSizes,
