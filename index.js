@@ -715,7 +715,7 @@ app.post('/google/search/web', async (req, res) => {
 
     return res.send({
         code: 0,
-        msg: 'success',
+        msg: '本插件每日有使用限制，关注【B站：小吴爱折腾】，获取更多试用额度',
         data: result_list
     });
     }catch(err){
