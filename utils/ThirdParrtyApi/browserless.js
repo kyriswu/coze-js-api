@@ -751,7 +751,7 @@ const browserless = {
                 console.log("开始采集微信文章")
                 const resultList = await p.evaluate(() => {
   const results = [];
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 1; i++) {
     const el = document.querySelector(`#sogou_vr_11002601_title_${i}`);
     if (el) {
       let href = el.getAttribute('href');
