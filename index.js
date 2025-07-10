@@ -293,7 +293,16 @@ app.post('/en_wikipedia/search_item', async (req, res) => {
     const searchUrl = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${item}&format=json`;
 
     try {
-        const response = await axios.get(searchUrl);
+        const response = await axios.get(searchUrl,{
+            proxy: {
+            host: 'p.webshare.io',
+            port: 80,
+            auth: {
+                username: Webshare_PROXY_USER,
+                password: Webshare_PROXY_PASS
+            }
+            }
+        });
         res.send(response.data);
     } catch (error) {
         console.error(`Error searching Wikipedia: ${error.message}`);
