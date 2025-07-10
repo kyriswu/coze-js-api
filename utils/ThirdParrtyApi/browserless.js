@@ -786,7 +786,7 @@ const pagesData = await Promise.all(resultList.map(async (item, index) => {
   try {
 
     // 禁用 JS 执行，页面不会跳转
-    await subpage.setJavaScriptEnabled(false);  
+    // await subpage.setJavaScriptEnabled(false);  
 
     await subpage.goto(item.href);
 
