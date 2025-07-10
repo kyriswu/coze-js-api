@@ -273,7 +273,16 @@ app.post('/zh_wikipedia/get_item_content', async (req, res) => {
     const wikipediaUrl = `https://zh.wikipedia.org/w/api.php?action=query&prop=extracts&titles=${item}&explaintext&format=json&redirects`;
 
     try {
-        let response = await axios.get(wikipediaUrl);
+        let response = await axios.get(wikipediaUrl,{
+            proxy: {
+            host: 'p.webshare.io',
+            port: 80,
+            auth: {
+                username: Webshare_PROXY_USER,
+                password: Webshare_PROXY_PASS
+            }
+            }
+        });
         response.data.query.pages = Object.values(response.data.query.pages);
         res.send(response.data);
     } catch (error) {
@@ -321,7 +330,16 @@ app.post('/en_wikipedia/get_item_content', async (req, res) => {
     const wikipediaUrl = `https://en.wikipedia.org/w/api.php?action=query&prop=extracts&titles=${item}&explaintext&format=json`;
 
     try {
-        let response = await axios.get(wikipediaUrl);
+        let response = await axios.get(wikipediaUrl,{
+            proxy: {
+            host: 'p.webshare.io',
+            port: 80,
+            auth: {
+                username: Webshare_PROXY_USER,
+                password: Webshare_PROXY_PASS
+            }
+            }
+        });
         response.data.query.pages = Object.values(response.data.query.pages);
         res.send(response.data);
     } catch (error) {
