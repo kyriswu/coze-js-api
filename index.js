@@ -1,5 +1,6 @@
 import express from 'express';
 import axios from 'axios';
+import { HttpsProxyAgent } from 'https-proxy-agent';
 import fs from 'fs';
 import { execFile } from 'child_process';
 import { JSDOM } from 'jsdom';
@@ -25,6 +26,9 @@ app.use(express.text())
 // 设置模板引擎配置 (必须在路由之前)
 app.set('view engine', 'ejs')
 app.set('views', path.join(__dirname, 'views'))
+
+const proxyUrl = `http://${Webshare_PROXY_USER}:${Webshare_PROXY_PASS}@p.webshare.io:80`;
+const agent = new HttpsProxyAgent(proxyUrl);
 
 app.get('/', (req, res) => {
     res.send('Hello World!')
@@ -245,16 +249,7 @@ app.post('/zh_wikipedia/search_item', async (req, res) => {
 
     try {
         // 通过代理访问 Wikipedia
-        const response = await axios.get(searchUrl, {
-            proxy: {
-            host: 'p.webshare.io',
-            port: 80,
-            auth: {
-                username: Webshare_PROXY_USER,
-                password: Webshare_PROXY_PASS
-            }
-            }
-        });
+        const response = await axios.get(searchUrl, { httpsAgent: agent });
         res.send(response.data);
     } catch (error) {
         console.error(`Error searching Wikipedia: ${error.message}`);
@@ -273,16 +268,7 @@ app.post('/zh_wikipedia/get_item_content', async (req, res) => {
     const wikipediaUrl = `https://zh.wikipedia.org/w/api.php?action=query&prop=extracts&titles=${item}&explaintext&format=json&redirects`;
 
     try {
-        let response = await axios.get(wikipediaUrl,{
-            proxy: {
-            host: 'p.webshare.io',
-            port: 80,
-            auth: {
-                username: Webshare_PROXY_USER,
-                password: Webshare_PROXY_PASS
-            }
-            }
-        });
+        let response = await axios.get(wikipediaUrl,{ httpsAgent: agent });
         response.data.query.pages = Object.values(response.data.query.pages);
         res.send(response.data);
     } catch (error) {
