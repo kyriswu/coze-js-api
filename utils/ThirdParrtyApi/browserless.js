@@ -786,7 +786,17 @@ const pagesData = await Promise.all(resultList.map(async (item, index) => {
   try {
 
     // 禁用 JS 执行，页面不会跳转
-    // await subpage.setJavaScriptEnabled(false);  
+    await subpage.setJavaScriptEnabled(false);
+    
+    await subpage.setUserAgent(
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) ' +
+        'AppleWebKit/537.36 (KHTML, like Gecko) ' +
+        'Chrome/121.0.0.0 Safari/537.36'
+    );
+    await subpage.authenticate({
+        username: proxy_user,
+        password: proxy_pass,
+    });
 
     await subpage.goto(item.href);
 
