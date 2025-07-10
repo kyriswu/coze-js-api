@@ -1,6 +1,6 @@
 ### 日志监控服务
 Dozzle
-启动虚拟浏览器：docker run -d -p 8123:3000 -e "CONCURRENT=30" -e "QUEUED=30" ghcr.io/browserless/chromium
+启动虚拟浏览器：docker run -d -p 8123:3000 -e "ALLOW_FILE_PROTOCOL=true" -e "CONCURRENT=30" -e "QUEUED=30" ghcr.io/browserless/chromium
 ### 服务器环境准备
 ```bash
 yum install epel-release

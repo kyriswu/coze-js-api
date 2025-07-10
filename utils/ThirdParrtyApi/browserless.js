@@ -780,6 +780,7 @@ const browserless = {
   }
   return results;
 });
+console.log(resultList)
 const pagesData = await Promise.all(resultList.map(async (item, index) => {
   const subpage = await browser.newPage();
   try {
