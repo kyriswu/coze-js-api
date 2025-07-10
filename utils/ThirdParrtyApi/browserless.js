@@ -740,7 +740,7 @@ const browserless = {
                 const url = "https://weixin.sogou.com/weixin?ie=utf8&s_from=input&_sug_=n&_sug_type_=1&type=2&query=" + keyword + "&page=" + page
                 const response = await p.goto(url, {
                     timeout: TIMEOUT,
-                    // waitUntil: 'networkidle2',
+                    waitUntil: 'networkidle2',
                 });
                 if (response.status() !== 200) {
                     console.error(`无头浏览器：Request failed with status code: ${response.status()}`);
@@ -748,6 +748,7 @@ const browserless = {
                     throw new Error(`HTTP request failed with status ${response.status()}`);
                 }
 
+                console.log("开始采集微信文章")
                 const resultList = await p.evaluate(() => {
   const results = [];
   for (let i = 0; i < 10; i++) {
