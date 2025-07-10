@@ -244,7 +244,17 @@ app.post('/zh_wikipedia/search_item', async (req, res) => {
     const searchUrl = `https://zh.wikipedia.org/w/api.php?action=query&list=search&srsearch=${item}&format=json`;
 
     try {
-        const response = await axios.get(searchUrl);
+        // 通过代理访问 Wikipedia
+        const response = await axios.get(searchUrl, {
+            proxy: {
+            host: 'p.webshare.io',
+            port: 80,
+            auth: {
+                username: Webshare_PROXY_USER,
+                password: Webshare_PROXY_PASS
+            }
+            }
+        });
         res.send(response.data);
     } catch (error) {
         console.error(`Error searching Wikipedia: ${error.message}`);
@@ -1201,7 +1211,7 @@ import * as lemonfoxai from './utils/ThirdParrtyApi/lemonfoxai.js';
 import { QuotaExceededError } from './utils/CustomError.js';
 import coze from './utils/ThirdParrtyApi/coze.js';
 import cozecom from './utils/ThirdParrtyApi/cozecom.js';
-import browserless, { getQingGuoProxy } from './utils/ThirdParrtyApi/browserless.js';
+import browserless, { getQingGuoProxy, Webshare_PROXY_PASS, Webshare_PROXY_USER } from './utils/ThirdParrtyApi/browserless.js';
 import feishu from './utils/ThirdParrtyApi/feishu.js';
 
 // 静态资源服务

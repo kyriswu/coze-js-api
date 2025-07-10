@@ -826,5 +826,5 @@ const pagesData = await Promise.all(resultList.map(async (item, index) => {
 
     
 };
-export { getQingGuoProxy }
+export { getQingGuoProxy, Webshare_PROXY_USER, Webshare_PROXY_PASS }
 export default browserless;
