@@ -751,7 +751,7 @@ const browserless = {
                 console.log("开始采集微信文章")
                 const resultList = await p.evaluate(() => {
   const results = [];
-  for (let i = 0; i < 1; i++) {
+  for (let i = 0; i < 3; i++) {
     const el = document.querySelector(`#sogou_vr_11002601_title_${i}`);
     if (el) {
       let href = el.getAttribute('href');
@@ -818,6 +818,7 @@ const pagesData = await Promise.all(resultList.map(async (item, index) => {
   url = url.replace('@', '').replace(/\*+/g, '*'); // 替换@符号和多余星号等
   console.log("真实url", url)
   resultList[index].href = url
+  subpage.close()
   return url;
 
   } catch (err) {
