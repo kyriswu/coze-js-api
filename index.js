@@ -1853,21 +1853,41 @@ app.post("/page", async (req, res) => {
 })
 
 //微信公众号文章搜索
-app.post("/weixin_search", async (req, res) => {
-    let {keyword, page, api_key} = req.body
+app.post("/zlcx", async (req, res) => {
+    let {keyword, api_key} = req.body
     if (!keyword) {
         return res.status(400).send('Invalid input: keyword不能为空');
     }
-    if (!Number.isInteger(page) || isNaN(page) || page <= 0) {
-        page = 1
-    }
+    // if (!Number.isInteger(page) || isNaN(page) || page <= 0) {
+    //     page = 1
+    // }
     try {
-        let data = await browserless.weixin_search(keyword,page)
+        let html = await browserless.zlcx(keyword)
+
+        const dom = new JSDOM(html);
+    const { document, window } = dom.window;
+    const selector = "table.result-table-list tbody tr"
+    const result_list = Array.from(document.querySelectorAll(selector)).map(element => {
+        const a = element.querySelector('td.name a');
+        const applicant = element.querySelector('td.applicant');
+        const inventor = element.querySelector('td.inventor')
+        const tds = element.querySelectorAll('td');
+        const apply_time = tds.length >= 6 ? tds[5].textContent.trim() : null;
+        const publish_time = tds.length >= 6 ? tds[6].textContent.trim() : null;
+        return {
+            inventor: inventor ? inventor.textContent.trim() : null,
+            applicant: applicant ? applicant.textContent.trim() : null,
+            link: a ? a.href : null,
+            title: a ? a.textContent.trim() : null,
+            apply_time: apply_time,
+            publish_time: publish_time
+        };
+    }).filter(item => item.link !== null); // 过滤掉不符合要求的项
 
         return res.send({
             'code':0,
             'msg':'success',
-            'data': data
+            'data': result_list
         })
         }catch(err){
             return res.send({
