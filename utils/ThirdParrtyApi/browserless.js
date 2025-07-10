@@ -751,7 +751,7 @@ const browserless = {
                 console.log("开始采集微信文章")
                 const resultList = await p.evaluate(() => {
   const results = [];
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 5; i++) {
     const el = document.querySelector(`#sogou_vr_11002601_title_${i}`);
     if (el) {
       let href = el.getAttribute('href');
@@ -763,6 +763,7 @@ const browserless = {
           href = 'https://weixin.sogou.com' + href
         }
       }
+
       const title = el.textContent.trim()
       const from = document.querySelector(`#sogou_vr_11002601_box_${i} .all-time-y2`).textContent.trim()
       const s2_el = document.querySelector(`#sogou_vr_11002601_box_${i} .s2`)
@@ -781,12 +782,13 @@ const browserless = {
   return results;
 });
 console.log(resultList)
+
 const pagesData = await Promise.all(resultList.map(async (item, index) => {
   const subpage = await browser.newPage();
   try {
 
     // 禁用 JS 执行，页面不会跳转
-    // await subpage.setJavaScriptEnabled(false);
+    await subpage.setJavaScriptEnabled(false);
     
     await subpage.setUserAgent(
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) ' +
@@ -798,7 +800,9 @@ const pagesData = await Promise.all(resultList.map(async (item, index) => {
         password: proxy_pass,
     });
 
-    await subpage.goto(item.href);
+    let r = await subpage.goto(item.href);
+
+  console.log('响应状态码:', r.status());
 
     const html = await subpage.content();
 
@@ -822,6 +826,8 @@ const pagesData = await Promise.all(resultList.map(async (item, index) => {
     return { error: err.message };
   }
 }));
+
+console.log(await browser.pages())
      
 
             return resultList
