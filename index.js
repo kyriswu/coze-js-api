@@ -1632,7 +1632,7 @@ app.post('/download_image', async (req, res) => {
     }
 })
 
-async function get_doc_direct_link(id, proxyAgent) {
+async function get_doc_direct_link(id) {
     const data = {
         id: id  // 替换成你实际需要的 id
     };
@@ -1645,7 +1645,7 @@ async function get_doc_direct_link(id, proxyAgent) {
     };
 
     // 发送 POST 请求
-    const response = await axios.post('https://flk.npc.gov.cn/api/detail', qs.stringify(data), { headers,httpsAgent: proxyAgent })
+    const response = await axios.post('https://flk.npc.gov.cn/api/detail', qs.stringify(data), { headers })
     const result = response.data.result.body
     // console.log(result[0])
     return "https://wb.flk.npc.gov.cn" + result[0].path
@@ -1690,17 +1690,16 @@ app.post("/flfg", async (req, res) => {
     });
 
     try {
-        const { proxy_user, proxy_pass, proxy_server } = await getQingGuoProxy();
-        const qgproxy = `http://${proxy_user}:${proxy_pass}@${proxy_server}`;
-        const qgagent = new HttpsProxyAgent(qgproxy);
+        // const { proxy_user, proxy_pass, proxy_server } = await getQingGuoProxy();
+        // const qgproxy = `http://${proxy_user}:${proxy_pass}@${proxy_server}`;
+        // const qgagent = new HttpsProxyAgent(qgproxy);
         // 发起 GET 请求
         const apiUrl = `https://flk.npc.gov.cn/api/?${params.toString()}`;
         const response = await axios.get(apiUrl, {
             headers: {
                 'referer': 'https://flk.npc.gov.cn/index.html',
                 'host': 'flk.npc.gov.cn'
-            },
-            httpsAgent: qgagent
+            }
         });
         const data = response.data;
         // 为每个对象的 url 字段加上域名前缀
@@ -1710,7 +1709,7 @@ app.post("/flfg", async (req, res) => {
             law_list = await Promise.all(data.result.data.map(async (item) => {
                 if (item.url) {
                     const doc_url = 'https://flk.npc.gov.cn/' + item.url.replace(/^(\.\/|\/)+/, '');
-                    item.url = await get_doc_direct_link(item.id, qgagent) // await redis.get(doc_url);
+                    item.url = await get_doc_direct_link(item.id) // await redis.get(doc_url);
                 }
                 return item;
             }));
