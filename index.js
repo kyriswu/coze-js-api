@@ -483,7 +483,10 @@ app.post('/parse_html', async (req, res) => {
         return res.status(400).send('url is required');
     }
     if (!selector && !xpath) {
-        return res.status(400).send('parser or xpath is required');
+        return res.status(400).send('selector or xpath 二选一，只需要填一个');
+    }
+    if (selector && xpath) {
+        return res.status(400).send('selector or xpath 不要两个都填，只需要填一个');
     }
     //判断是否是合法的url   
     try {
@@ -1508,6 +1511,9 @@ app.get('/cozecom-auth-callback', cozecom.callback)
 app.post('/explorer', async (req, res) => {
 
     let { url, selector, xpath, api_key, action, cookie } = req.body;
+    if (selector && xpath){
+        return res.status(400).send('selector or xpath，这两个参数二选一，不要都填');
+    }
     if (!url) {
         return res.status(400).send('url is required');
     }
@@ -1840,6 +1846,33 @@ app.post("/page", async (req, res) => {
         })
     }
 })
+
+//微信公众号文章搜索
+app.post("/weixin_search", async (req, res) => {
+    let {keyword, page, api_key} = req.body
+    if (!keyword) {
+        return res.status(400).send('Invalid input: keyword不能为空');
+    }
+    if (!Number.isInteger(page) || isNaN(page) || page <= 0) {
+        page = 1
+    }
+    try {
+        let data = await browserless.weixin_search(keyword,page)
+
+        return res.send({
+            'code':0,
+            'msg':'success',
+            'data': data
+        })
+        }catch(err){
+            return res.send({
+            'code':0,
+            'msg':'failure',
+            'data': err.message
+        })
+    }
+})
+
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
