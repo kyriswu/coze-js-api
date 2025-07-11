@@ -1905,7 +1905,7 @@ app.post("/youtube/download_audio", async (req, res) => {
     if (!url) {
         return res.status(400).send('Invalid input: "url" is required');
     }
-    if ( !sourceUrl.includes('youtube.com') && !sourceUrl.includes('youtu.be')) {
+    if ( !url.includes('youtube.com') && !url.includes('youtu.be')) {
         return res.status(400).send('Invalid input: "url" must be a valid YouTube link');
     }
     try {
