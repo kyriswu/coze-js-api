@@ -431,6 +431,129 @@ const tool = {
             };
         }
     },
+    isLocalFile: async function (url) {
+
+        const downloadDir = path.join(__dirname, '..', 'downloads');
+        if (!fs.existsSync(downloadDir)) {
+            fs.mkdirSync(downloadDir);
+        }
+        if (url.includes('devtool.uk')){
+            let filename = path.basename(url);
+            // 获取文件名后缀
+            let ext = path.extname(filename);
+            let filepath = path.join(downloadDir, filename);
+            if (fs.existsSync(filepath)) {
+
+                return {
+                    isLocalFile: true,
+                    filepath: filepath,
+                    filename: filename,
+                    is_video: ext === '.mp4' || ext === '.webm' || ext === '.mov' || ext === '.avi',
+                    is_audio: ext === '.mp3' || ext === '.wav' || ext === '.aac' || ext === '.ogg',
+                }
+            }
+        }
+
+        return {
+            isLocalFile: false,
+        }
+    },
+    //通用下载文件
+    download_file: async function (url) {
+        
+        const isf = this.isLocalFile(url)
+        if (isf.isLocalFile) return isf
+
+
+        // Generate filename with timestamp and extension
+        const timestamp = new Date().getTime();
+        var filename = `file_${timestamp}`;
+        var filepath = path.join(downloadDir, filename);
+        
+        try {
+            // Download video with progress tracking
+            const rateLimit = 100 * (1024 * 1024); // 0.5MB/s limit
+            let response = await axios({
+                method: 'get',
+                url: url,
+                responseType: 'stream',
+                headers: {
+                    'Accept': '*/*',
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36 Edg/136.0.0.0'
+                },
+                timeout: 600000,
+                maxContentLength: Infinity,
+                maxBodyLength: Infinity,
+            });
+            
+            const totalSize = parseInt(response.headers['content-length'], 10);
+            let downloadedSize = 0;
+            let lastTime = Date.now();
+            let bytesThisSecond = 0;
+
+            const writer = fs.createWriteStream(filepath);
+            const throttle = new Throttle({ rate: rateLimit });
+
+            // 监听 throttled 数据流
+            // throttle.on('data', (chunk) => {
+            //     downloadedSize += chunk.length;
+            //     bytesThisSecond += chunk.length;
+
+            //     const now = Date.now();
+            //     const timeDiff = now - lastTime;
+
+            //     if (timeDiff >= 1000) {
+            //         const speed = bytesThisSecond / (timeDiff / 1000);
+            //         const progress = (downloadedSize / totalSize) * 100;
+            //         console.log(`Download progress: ${progress.toFixed(2)}%, Speed: ${(speed / 1024 / 1024).toFixed(2)} MB/s`);
+
+            //         bytesThisSecond = 0;
+            //         lastTime = now;
+            //     }
+            // });
+
+            // 替换 pipe 流为带节流的流
+            response.data.pipe(throttle).pipe(writer);
+
+            return new Promise((resolve, reject) => {
+                writer.on('finish', () => {
+                    console.log(`文件下载成功，文件大小：${this.bytesToMB(totalSize)}MB`)
+                     this.get_media_info(filepath)
+                        .then(info => {
+                            if (!info.success) {
+                                return reject(new Error(info.error));
+                            }
+                            if (info.success) {
+                                const newPath = filepath + `.${info.extension}`;
+                                fs.renameSync(filepath, newPath);
+                                filepath = newPath;
+                                filename = path.basename(filepath);
+                                console.log(`文件保存成功，新的文件名：${filename}`);
+                            }
+
+                            resolve({
+                                success: true,
+                                filepath: filepath,
+                                filename: filename,
+                                size: this.bytesToMB(totalSize),
+                                is_video: info.type === 'video',
+                                is_audio: info.type === 'audio',
+                            });
+                        })
+                        .catch(error => reject(error));
+                    });
+
+                writer.on('error', reject);
+            });
+
+        } catch (error) {
+            console.error('Error downloading file:', error, " file url:", url);
+            return {
+                success: false,
+                error: error.message
+            };
+        }
+    },
     download_audio: async function (audio_url) {
 
         console.log(`开始下载音频：${audio_url}`)
