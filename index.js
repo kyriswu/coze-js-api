@@ -1854,7 +1854,7 @@ app.post("/page", async (req, res) => {
     }
 })
 
-//微信公众号文章搜索
+//专利查询
 app.post("/zlcx", async (req, res) => {
     let {keyword, api_key} = req.body
     if (!keyword) {
@@ -1896,6 +1896,27 @@ app.post("/zlcx", async (req, res) => {
             'code':0,
             'msg':'failure',
             'data': err.message
+        })
+    }
+})
+
+app.post("/youtube/download_audio", async (req, res) => {
+    let {url} = req.body
+    try {
+        let audio_url = await browserless.extract_youtube_audio_url("https://tuberipper.com/",url)
+        let audio = await tool.download_audio(audio_url)
+        const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+        return res.send({
+            "code": 0,
+            "msg":"success",
+            "data": `${protocol}://${req.get('host')}/downloads/${audio.filename}`
+        })
+    }catch(err){
+        console.error(err)
+        return res.send({
+            "code": 0,
+            "msg":"failure",
+            "data": `资源提取失败，请重试`
         })
     }
 })
