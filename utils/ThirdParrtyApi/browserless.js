@@ -339,6 +339,32 @@ const browserless = {
                 await browser.setCookie(...opt.cookie)
             }
 
+            // 开启请求拦截
+            await page.setRequestInterception(true);
+
+            page.on('request', (request) => {
+                const resourceType = request.resourceType();
+                const url = request.url().toLowerCase();
+
+                const blockedPatterns = [
+                    'syndicatedsearch.goog',
+                    'doubleclick.net',
+                ];
+
+                // 拦截图片、CSS、字体、媒体、favicon
+                if (
+                    blockedPatterns.some(pattern => url.includes(pattern)) ||
+                    ['image', 'stylesheet', 'font', 'media'].includes(resourceType) ||
+                    url.endsWith('.css') ||
+                    url.endsWith('.ico') ||              // favicon 文件
+                    url.includes('favicon')              // 例如 /favicon.png 或 favicon.ico?ver=2
+                ) {
+                    request.abort();
+                } else {
+                    request.continue();
+                }
+            });
+
             const response = await page.goto(toolurl, {
                 timeout: TIMEOUT,
                 waitUntil: 'networkidle2',
