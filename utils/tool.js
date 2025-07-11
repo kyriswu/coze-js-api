@@ -432,11 +432,11 @@ const tool = {
         }
     },
     isLocalFile: async function (url) {
-
         const downloadDir = path.join(__dirname, '..', 'downloads');
         if (!fs.existsSync(downloadDir)) {
             fs.mkdirSync(downloadDir);
         }
+
         if (url.includes('devtool.uk')){
             let filename = path.basename(url);
             // 获取文件名后缀
@@ -460,8 +460,12 @@ const tool = {
     },
     //通用下载文件
     download_file: async function (url) {
+        const downloadDir = path.join(__dirname, '..', 'downloads');
+        if (!fs.existsSync(downloadDir)) {
+            fs.mkdirSync(downloadDir);
+        }
         
-        const isf = this.isLocalFile(url)
+        const isf = await this.isLocalFile(url)
         if (isf.isLocalFile) return isf
 
 
