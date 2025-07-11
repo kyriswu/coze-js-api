@@ -835,33 +835,12 @@ const tool = {
             if (value === null){
 
                 if (input_text.includes('youtube.com') || input_text.includes('youtu.be')) {
-                    // 如果是 YouTube 链接，使用 th_youtube 模块获取视频信息
-                    const response = await th_youtube.get_video_info(input_text)
-
-                    var videoUrl = ""
-                    if (response.videos && response.videos.items && response.videos.items.length > 0) {
-                        // Sort items by size and get the smallest one
-                        const smallestVideo = response.videos.items.reduce((min, item) => {
-                            return (!min || item.size < min.size) ? item : min;
-                        });
-                        
-                        videoUrl = smallestVideo.url;
-                    }
-
-                    var audioUrl = ""
-                    if (response.audios && response.audios.items && response.audios.items.length > 0) {
-                        // Sort items by size and get the smallest one
-                        const smallestAudio = response.audios.items.reduce((min, item) => {
-                            return (!min || item.size < min.size) ? item : min;
-                        });
-                        
-                        audioUrl = smallestAudio.url;
-                    }
+                    let audio_url = await browserless.extract_youtube_audio_url("https://tuberipper.com/",input_text)
 
                     data = {
-                        title: response.title,
-                        audio_url: audioUrl,
-                        video_url: videoUrl,
+                        // title: response.title,
+                        audio_url: audio_url,
+                        video_url: audio_url
                     };
                         
                     await redis.set(key, JSON.stringify(data), 'NX', 'EX', 3600 * 1);
