@@ -298,7 +298,12 @@ const browserless = {
 
             return html
         } catch (error) {
-            console.error('Error in chromium Google Search API:', error);
+            if (error.message && error.message.includes('net::ERR_SOCKET_NOT_CONNECTED')) {
+                console.error('Google Search 网络连接失败:', error.message);
+                // 这里可以做额外处理，比如重试、报警等
+            } else {
+                console.error('Error in chromium Google Search API:', error);
+            }
             return null
         } finally {
             // 强制再执行一次 page.close，不考虑报错
