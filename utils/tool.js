@@ -843,7 +843,7 @@ const tool = {
                         video_url: audio_url
                     };
                         
-                    await redis.set(key, JSON.stringify(data), 'NX', 'EX', 3600 * 1);
+                    // await redis.set(key, JSON.stringify(data), 'NX', 'EX', 3600 * 1);
                    
                 }else{
                     
