@@ -383,7 +383,7 @@ const browserless = {
             });
 
             page.on('response', async (response) => {
-                if (response.url().includes('https://w4.tuberipper.com/getinfo')) {
+                if (response.url().includes('/getinfo')) {
                     console.log('捕获到响应:', response.url());
 
                     // 获取响应体
