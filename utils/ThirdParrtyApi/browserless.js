@@ -99,7 +99,15 @@ const browserless = {
         let browser, page
         let public_browser//公共浏览器
 
-        if (opt && opt.proxy && opt.proxy === "china") {
+        // 增加特殊域名列表，命中则走国内代理逻辑
+        const chinaDomainList = [
+            'tophub.today',
+            // 可继续添加更多域名
+        ];
+        const urlObj = new URL(url);
+        const isChinaDomain = chinaDomainList.some(domain => urlObj.hostname.endsWith(domain));
+
+        if ((opt && opt.proxy && opt.proxy === "china") || isChinaDomain) {
             chromium_endpoint = "1.15.114.179:8123";
             ({proxy,proxy_user,proxy_pass} = await getQingGuoProxy())
             //国内代理，每次都用新的浏览器
@@ -154,6 +162,32 @@ const browserless = {
                 'AppleWebKit/537.36 (KHTML, like Gecko) ' +
                 'Chrome/121.0.0.0 Safari/537.36'
             );
+
+            // 开启请求拦截
+            await page.setRequestInterception(true);
+
+            page.on('request', (request) => {
+                const resourceType = request.resourceType();
+                const url = request.url().toLowerCase();
+
+                const blockedPatterns = [
+                    'syndicatedsearch.goog',
+                    'doubleclick.net',
+                ];
+
+                // 拦截图片、CSS、字体、媒体、favicon
+                if (
+                    blockedPatterns.some(pattern => url.includes(pattern)) ||
+                    ['image', 'stylesheet', 'font', 'media'].includes(resourceType) ||
+                    url.endsWith('.css') ||
+                    url.endsWith('.ico') ||              // favicon 文件
+                    url.includes('favicon')              // 例如 /favicon.png 或 favicon.ico?ver=2
+                ) {
+                    request.abort();
+                } else {
+                    request.continue();
+                }
+            });
 
             await page.authenticate({
                 username: proxy_user,
