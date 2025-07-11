@@ -563,7 +563,6 @@ const tool = {
     },
     download_audio: async function (audio_url) {
 
-        console.log(`开始下载音频：${audio_url}`)
         const downloadDir = path.join(__dirname, '..', 'downloads');
         if (!fs.existsSync(downloadDir)) {
             fs.mkdirSync(downloadDir);
@@ -598,9 +597,13 @@ const tool = {
                 maxBodyLength: Infinity,
             });
 
+            console.log(`开始下载音频：${audio_url}`)
+            console.log(`状态码：${response.status}`)
+
             if (!this.is_audio(response.headers['content-type'])) {
                 throw new Error('音频链接无效！');
             }
+
             // Get total size
             const totalSize = parseInt(response.headers['content-length'], 10);
             let downloadedSize = 0;

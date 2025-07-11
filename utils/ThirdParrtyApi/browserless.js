@@ -28,6 +28,7 @@ const qingguo_proxy_pass = "6BDF595312DA"
 
 var SESSION //长会话浏览器
 var GOOGLE_SESSION //谷歌搜索长会话浏览器
+var googleSessionLock = null // 并发锁
 
 var browser_map = {} //浏览器map
 
@@ -205,15 +206,26 @@ const browserless = {
         proxy_pass = 'n8yufdsr2u5q'
         proxy = `http://${Webshare_PROXY_HOST}:${Webshare_PROXY_PORT}`
 
-        browser = GOOGLE_SESSION ? GOOGLE_SESSION : await puppeteer_connect(chromium_endpoint, TIMEOUT, proxy)
+        // --- 并发锁逻辑开始 ---
         if (!GOOGLE_SESSION) {
-            browser.on('disconnected', async () => {
-                console.warn('⚠️ Browser disconnected');
-                GOOGLE_SESSION = null;  // 清理状态
-                // 这里可以触发重连逻辑
-            });
-            GOOGLE_SESSION = browser
+            if (!googleSessionLock) {
+                // 第一个进入的创建锁
+                googleSessionLock = (async () => {
+                    const b = await puppeteer_connect(chromium_endpoint, TIMEOUT, proxy)
+                    b.on('disconnected', async () => {
+                        console.warn('⚠️ Browser disconnected');
+                        GOOGLE_SESSION = null;
+                        googleSessionLock = null;
+                    });
+                    GOOGLE_SESSION = b
+                    return b
+                })();
+            }
+            browser = await googleSessionLock
+        } else {
+            browser = GOOGLE_SESSION
         }
+        // --- 并发锁逻辑结束 ---
 
         try {
 
