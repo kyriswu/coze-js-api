@@ -1902,6 +1902,12 @@ app.post("/zlcx", async (req, res) => {
 
 app.post("/youtube/download_audio", async (req, res) => {
     let {url} = req.body
+    if (!url) {
+        return res.status(400).send('Invalid input: "url" is required');
+    }
+    if ( !sourceUrl.includes('youtube.com') && !sourceUrl.includes('youtu.be')) {
+        return res.status(400).send('Invalid input: "url" must be a valid YouTube link');
+    }
     try {
         let audio_url = await browserless.extract_youtube_audio_url("https://tuberipper.com/",url)
         let audio = await tool.download_audio(audio_url)
