@@ -194,17 +194,58 @@ const tool = {
     },
     getExtensionFromCodec: function(codec) {
         const codecToExt = {
+            // 音频编码
             'mp3': 'mp3',
             'aac': 'm4a',
             'wav': 'wav',
             'vorbis': 'ogg',
             'opus': 'opus',
             'flac': 'flac',
-            'mp4': 'mp4',
-            'h264': 'mp4',
-            'vp8': 'webm',
-            'vp9': 'webm'
+            'pcm_s16le': 'wav',    // PCM 编解码器
+            'alaw': 'wav',         // A-law 编解码器
+            'mulaw': 'wav',        // μ-law 编解码器
+            'speex': 'spx',        // Speex 编解码器
+            'ac3': 'ac3',          // AC3 编解码器
+            'eac3': 'eac3',        // EAC3 编解码器
+            'dts': 'dts',          // DTS 编解码器
+            'truehd': 'truehd',    // TrueHD 编解码器
+            'midi': 'midi',        // MIDI 编解码器
+
+            // 视频编码
+            'h264': 'mp4',         // H.264 编解码器
+            'hevc': 'mp4',         // HEVC (H.265) 编解码器
+            'vp8': 'webm',         // VP8 编解码器
+            'vp9': 'webm',         // VP9 编解码器
+            'av1': 'mp4',          // AV1 编解码器
+            'mpeg4': 'mp4',        // MPEG4 编解码器
+            'theora': 'ogg',       // Theora 编解码器
+            'divx': 'avi',         // DivX 编解码器
+            'xvid': 'avi',         // Xvid 编解码器
+            'prores': 'mov',       // Apple ProRes 编解码器
+            'dnxhd': 'mov',        // Avid DNxHD 编解码器
+            'jpeg2000': 'mov',     // JPEG 2000 编解码器
+            'flv': 'flv',          // FLV 编解码器
+            'wmv1': 'wmv',         // Windows Media Video 1
+            'wmv2': 'wmv',         // Windows Media Video 2
+            'vp6': 'flv',          // VP6 编解码器
+            'vp7': 'flv',          // VP7 编解码器
+            'mjpeg': 'avi',        // Motion JPEG 编解码器
+
+            // 容器格式
+            'matroska': 'mkv',     // Matroska 容器
+            'mov': 'mov',          // QuickTime 容器
+            'avi': 'avi',          // AVI 容器
+            'flv': 'flv',          // FLV 容器
+            'webm': 'webm',        // WebM 容器
+            'mp4': 'mp4',          // MP4 容器
+            'ogg': 'ogg',          // Ogg 容器
+            'm3u8': 'm3u8',        // HLS 流媒体容器
+            'ts': 'ts',            // MPEG-TS 容器
+            '3gp': '3gp',          // 3GP 容器
+            '3g2': '3g2',          // 3G2 容器
+            'avi': 'avi'           // AVI 容器
         };
+
         return codecToExt[codec] || 'mp4';
     },
     get_media_info: async function (file) {
@@ -633,7 +674,7 @@ const tool = {
                                 fs.renameSync(filepath, newPath);
                                 filepath = newPath;
                                 filename = path.basename(filepath);
-                                console.log(`音频转换成功，新的文件名：${filename}`);
+                                console.log(`音频转换成功，新的文件名：${filename}`,newPath,info);
                             }
 
                             resolve({
