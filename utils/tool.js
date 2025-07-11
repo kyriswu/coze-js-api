@@ -466,7 +466,10 @@ const tool = {
         }
         
         const isf = await this.isLocalFile(url)
-        if (isf.isLocalFile) return isf
+        if (isf.isLocalFile) return {
+            success: true,
+            ...isf
+        }
 
 
         // Generate filename with timestamp and extension
