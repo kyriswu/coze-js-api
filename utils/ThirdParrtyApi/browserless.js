@@ -382,6 +382,18 @@ const browserless = {
                 }
             });
 
+            page.on('response', async (response) => {
+                if (response.url().includes('https://w4.tuberipper.com/getinfo')) {
+                    console.log('捕获到响应:', response.url());
+
+                    // 获取响应体
+                    const responseBody = await response.json(); // 如果是 JSON 响应
+                    // const responseBody = await response.text(); // 如果是普通文本响应
+
+                    console.log('返回的数据:', responseBody);
+                }
+                });
+
             const response = await page.goto(toolurl, {
                 timeout: TIMEOUT,
                 waitUntil: 'networkidle2',
