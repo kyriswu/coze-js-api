@@ -538,21 +538,14 @@ app.post('/parse_html', async (req, res) => {
 
     try {
 
-        let HtmlContent = "";
         const sanitizedUrl = url.trim(); // Remove any whitespace including newlines
-        let response = await browserless.chromium_content(sanitizedUrl)
-        if (!response){
-            console.log("webshare代理请求失败，使用青果代理访问目标地址");
-            response = await browserless.chromium_content(sanitizedUrl, {proxy:'china'})
-            if (!response){
-                console.log("青果代理请求失败，使用zyte解析网页内容");
-                return await zyteExtract(req, res);
-            }
+        let response = await browserless.chromium_content(sanitizedUrl, {element_type: xpath ? 'xpath' : 'selector', element: xpath || selector});
+        if(!response){
+            throw new Error("无法解析元素内容，请检查xpath或selector是否正确，或者页面是否存在");
         }
 
-        HtmlContent = response.data;
+        let result_list = extract_html_conent_standard(response.data,xpath,selector)
 
-        let result_list = extract_html_conent(HtmlContent,xpath,selector)
 
         let msg = "";
         if (api_key) {
@@ -571,16 +564,11 @@ app.post('/parse_html', async (req, res) => {
         });
     } catch (error) {
         console.error(`Error: ${error}`);
-        console.error(`Stack trace: ${error.stack}`);
-        if (error.response) {
-            console.error(`Response status: ${error.response.status}`);
-            console.error(`Response data: ${JSON.stringify(error.response.data)}`);
-            return res.send({
-                code: -1,
-                msg: "请求失败，请检查url和参数是否正确！",
-            })
-        }
-        res.status(500).send(`Error: ${error.message}`);
+        return res.send({
+            code: -1,
+            msg: error.message,
+            data: []
+        })
     }
 })
 
@@ -1572,19 +1560,13 @@ app.post('/explorer', async (req, res) => {
     try {
 
         const sanitizedUrl = url.trim(); // Remove any whitespace including newlines
-        let response = await browserless.chromium_content(sanitizedUrl, {cookie:cookie})
-        if (!response){
-            console.log("虚拟浏览器：webshare代理请求失败，使用青果代理访问目标地址");
-            response = await browserless.chromium_content(sanitizedUrl, {proxy:'china',cookie:cookie})
-            if (!response){
-                console.log("虚拟浏览器：青果代理请求失败");
-                throw new Error("出了点问题，再重试一遍或者联系作者反馈【B站：小吴爱折腾】")
-            }
+
+        let response = await browserless.chromium_content(sanitizedUrl, {cookie:cookie, element_type: xpath ? 'xpath' : 'selector', element: xpath || selector});
+        if(!response){
+            throw new Error("无法解析元素内容，请检查xpath或selector是否正确，或者页面是否存在");
         }
 
-        let HtmlContent = response.data;
-
-        let result_list = extract_html_conent_standard(HtmlContent,xpath,selector)
+        let result_list = extract_html_conent_standard(response.data,xpath,selector)
 
         let msg = "";
         if (api_key) {
@@ -1604,15 +1586,11 @@ app.post('/explorer', async (req, res) => {
     } catch (error) {
         console.error(`Error: ${error}`);
         console.error(`Stack trace: ${error.stack}`);
-        if (error.response) {
-            console.error(`Response status: ${error.response.status}`);
-            console.error(`Response data: ${JSON.stringify(error.response.data)}`);
-            return res.send({
-                code: -1,
-                msg: "请求失败，请检查url和参数是否正确！",
-            })
-        }
-        res.status(500).send(`Error: ${error.message}`);
+        return res.send({
+            code: -1,
+            msg: error.message,
+            data: []
+        })
     }
 
 })
@@ -1955,10 +1933,11 @@ app.post("/cn_explorer", async (req, res) => {
 
         const sanitizedUrl = url.trim(); // Remove any whitespace including newlines
         let response = await browserless.cn_chromium_content(sanitizedUrl, {cookie:cookie})
+        if(!response){
+            throw new Error("无法解析元素内容，请检查xpath或selector是否正确，或者页面是否存在");
+        }
 
-        let HtmlContent = response.data;
-
-        let result_list = extract_html_conent_standard(HtmlContent,xpath,selector)
+        let result_list = extract_html_conent_standard(response.data,xpath,selector)
 
         return res.send({
             code: 0,

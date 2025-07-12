@@ -196,13 +196,23 @@ const browserless = {
 
             const response = await page.goto(url, {
                 timeout: TIMEOUT,
-                waitUntil: 'networkidle2',
+                waitUntil: 'domcontentloaded',
             });
 
             // 检查 HTTP 状态码
             if (response.status() !== 200) {
                 console.error(`无头浏览器：Request failed with status code: ${response.status()}`);
                 throw new Error(`HTTP request failed with status ${response.status()}`);
+            }
+
+            if (opt && opt.element_type && opt.element) {
+                if (opt.element_type === 'xpath') {
+                    console.log("等待xpath元素：", opt.element)
+                    await page.waitForSelector('xpath/' + opt.element, { timeout: 60000 });
+                }else{
+                    console.log("等待css元素：", opt.element)
+                    await page.waitForSelector(opt.element, { timeout: 60000 });
+                }
             }
 
             const html = await page.content();
@@ -213,8 +223,15 @@ const browserless = {
                 data: html
             }
         } catch (error) {
-            console.error('Error in chromium_content:', error);
-            return null
+            if (error.name === 'TimeoutError') {
+                console.error('错误：等待元素超时');
+                // 处理超时错误
+                // 可以采取重试策略、记录日志、继续执行其他操作等
+                return null
+            } else {
+                console.error('Error in chromium_content:', error);
+                throw new Error(`出现错误：${error.message}，请检查参数是否正确，或者稍后重试。如果问题持续存在，请联系管理员【B站：小吴爱折腾】。`);
+            }
         } finally {
             if(public_browser){
                 // 强制再执行一次 page.close，不考虑报错
@@ -225,7 +242,7 @@ const browserless = {
         }
 
     },
-
+    // 国内无头浏览器
     cn_chromium_content: async function (url, opt = {}) {
 
         let proxy_user, proxy_pass, chromium_endpoint, proxy
@@ -285,13 +302,23 @@ const browserless = {
 
             const response = await page.goto(url, {
                 timeout: TIMEOUT,
-                waitUntil: 'networkidle2',
+                waitUntil: 'documentloaded',
             });
 
             // 检查 HTTP 状态码
             if (response.status() !== 200) {
                 console.error(`中国无头浏览器：Request failed with status code: ${response.status()}`);
                 throw new Error(`HTTP request failed with status ${response.status()}`);
+            }
+
+            if (opt && opt.element_type && opt.element) {
+                if (opt.element_type === 'xpath') {
+                    console.log("等待xpath元素：", opt.element)
+                    await page.waitForSelector('xpath/' + opt.element, { timeout: 60000 });
+                }else{
+                    console.log("等待css元素：", opt.element)
+                    await page.waitForSelector(opt.element, { timeout: 60000 });
+                }
             }
 
             const html = await page.content();
@@ -302,8 +329,15 @@ const browserless = {
                 data: html
             }
         } catch (error) {
-            console.error('Error in chromium_content:', error);
-            return null
+            if (error.name === 'TimeoutError') {
+                console.error('错误：等待元素超时');
+                // 处理超时错误
+                // 可以采取重试策略、记录日志、继续执行其他操作等
+                return null
+            } else {
+                console.error('Error in chromium_content:', error);
+                throw new Error(`出现错误：${error.message}，请检查参数是否正确，或者稍后重试。如果问题持续存在，请联系管理员【B站：小吴爱折腾】。`);
+            }
         } finally {
             await browser.close()
         }
@@ -416,7 +450,7 @@ const browserless = {
 
             return html
         } catch (error) {
-            if (error.message && error.message.includes('net::ERR_SOCKET_NOT_CONNECTED')) {
+            if (error.message && error.message.includes('net::ERR')) {
                 console.error('Google Search 网络连接失败:', error.message);
                 // 这里可以做额外处理，比如重试、报警等
             } else {
