@@ -1194,6 +1194,7 @@ import coze from './utils/ThirdParrtyApi/coze.js';
 import cozecom from './utils/ThirdParrtyApi/cozecom.js';
 import browserless, { getQingGuoProxy, Webshare_PROXY_PASS, Webshare_PROXY_USER } from './utils/ThirdParrtyApi/browserless.js';
 import feishu from './utils/ThirdParrtyApi/feishu.js';
+import tencentapi from './utils/ThirdParrtyApi/tencentapi.js';
 
 // 静态资源服务
 app.use('/images', express.static(path.join(__dirname, 'images')));
@@ -1917,6 +1918,31 @@ app.post("/cn_explorer", async (req, res) => {
             code: 0,
             msg: 'Success',
             data: response.data
+        })
+    } catch (error) {
+        console.error(`Error: ${error}`);
+
+        return res.send({
+            code: -1,
+            msg: 'failure',
+            data: null
+        })
+    }
+    
+})
+
+app.post("/ai_online_answer", async (req, res) => {
+
+    let { q } = req.body;
+
+    try {
+
+        const data = await tencentapi.ai_online_answer(req.headers['user-identity'], q)
+
+        return res.send({
+            code: 0,
+            msg: 'Success',
+            data: data
         })
     } catch (error) {
         console.error(`Error: ${error}`);
