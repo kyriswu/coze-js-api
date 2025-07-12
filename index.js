@@ -539,8 +539,8 @@ app.post('/parse_html', async (req, res) => {
     try {
 
         const sanitizedUrl = url.trim(); // Remove any whitespace including newlines
-        
-        const htmldata = await tool.request_chromium(sanitizedUrl, cookie, xpath, selector)
+
+        const htmldata = await tool.request_chromium(sanitizedUrl, null, xpath, selector)
 
         let result_list = extract_html_conent(htmldata,xpath,selector)
 

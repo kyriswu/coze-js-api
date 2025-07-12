@@ -22,3 +22,6 @@ crontab -e
 ### 启动项目
 本地：node index.js
 远程：sh start.sh
+
+### 国内腾讯云轻量级，只为了Chromium
+sh start_lite.sh
