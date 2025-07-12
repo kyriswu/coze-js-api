@@ -1914,12 +1914,20 @@ app.post("/cn_explorer", async (req, res) => {
     try {
 
         let response = await browserless.cn_chromium_content(url, {cookie:cookie,element_type: xpath ? 'xpath' : 'selector', element: xpath || selector})
-
-        return response.data
+        console.log(response.data)
+        return res.send({
+            code: 0,
+            msg: 'Success',
+            data: response.data
+        })
     } catch (error) {
         console.error(`Error: ${error}`);
 
-        return null
+        return res.send({
+            code: -1,
+            msg: 'failure',
+            data: null
+        })
     }
     
 })
