@@ -1932,6 +1932,50 @@ app.post("/youtube/download_audio", async (req, res) => {
     }
 })
 
+app.post("/cn_explorer", async (req, res) => {
+
+    let { url, selector, xpath, action, cookie } = req.body;
+    if (selector && xpath){
+        return res.status(400).send('selector or xpath，这两个参数二选一，不要都填');
+    }
+    if (!url) {
+        return res.status(400).send('url is required');
+    }
+    if (cookie) {
+        const parsedUrl = new URL(url);
+
+        // 提取 domain 和 path
+        const domain = parsedUrl.hostname; // 'kns.cnki.net'
+        const path = '/'; // 推荐使用根路径
+
+        cookie = await tool.gen_cookie(cookie,domain,path)
+    }
+
+    try {
+
+        const sanitizedUrl = url.trim(); // Remove any whitespace including newlines
+        let response = await browserless.cn_chromium_content(sanitizedUrl, {cookie:cookie})
+
+        let HtmlContent = response.data;
+
+        let result_list = extract_html_conent_standard(HtmlContent,xpath,selector)
+
+        return res.send({
+            code: 0,
+            msg: 'success',
+            data: result_list
+        });
+    } catch (error) {
+        console.error(`Error: ${error}`);
+        return res.send({
+            code: -1,
+            msg: "请求失败，请检查url和参数是否正确！",
+            data: []
+        })
+    }
+    
+})
+
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)

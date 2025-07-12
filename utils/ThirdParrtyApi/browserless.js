@@ -226,6 +226,90 @@ const browserless = {
 
     },
 
+    cn_chromium_content: async function (url, opt = {}) {
+
+        let proxy_user, proxy_pass, chromium_endpoint, proxy
+        let browser, page
+
+        chromium_endpoint = "172.17.0.1:8123";
+        ({proxy,proxy_user,proxy_pass} = await getQingGuoProxy())
+        //国内代理，每次都用新的浏览器
+        browser = await puppeteer_connect(chromium_endpoint, TIMEOUT, proxy)
+
+        try {
+
+            page = await browser.newPage();
+
+            //设置cookie
+            if (opt && opt.cookie) {
+                await browser.setCookie(...opt.cookie)
+            }
+            
+            // 在打开任何页面之前设置 UA
+            await page.setUserAgent(
+                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) ' +
+                'AppleWebKit/537.36 (KHTML, like Gecko) ' +
+                'Chrome/121.0.0.0 Safari/537.36'
+            );
+
+            // 开启请求拦截
+            await page.setRequestInterception(true);
+
+            page.on('request', (request) => {
+                const resourceType = request.resourceType();
+                const url = request.url().toLowerCase();
+
+                const blockedPatterns = [
+                    'syndicatedsearch.goog',
+                    'doubleclick.net',
+                ];
+
+                // 拦截图片、CSS、字体、媒体、favicon
+                if (
+                    blockedPatterns.some(pattern => url.includes(pattern)) ||
+                    ['image', 'stylesheet', 'font', 'media'].includes(resourceType) ||
+                    url.endsWith('.css') ||
+                    url.endsWith('.ico') ||              // favicon 文件
+                    url.includes('favicon')              // 例如 /favicon.png 或 favicon.ico?ver=2
+                ) {
+                    request.abort();
+                } else {
+                    request.continue();
+                }
+            });
+
+            await page.authenticate({
+                username: proxy_user,
+                password: proxy_pass,
+            }); // 正式验证代理用户名密码 :contentReference[oaicite:1]{index=1}
+
+            const response = await page.goto(url, {
+                timeout: TIMEOUT,
+                waitUntil: 'networkidle2',
+            });
+
+            // 检查 HTTP 状态码
+            if (response.status() !== 200) {
+                console.error(`中国无头浏览器：Request failed with status code: ${response.status()}`);
+                throw new Error(`HTTP request failed with status ${response.status()}`);
+            }
+
+            const html = await page.content();
+
+            await page.close()
+
+            return {
+                data: html
+            }
+        } catch (error) {
+            console.error('Error in chromium_content:', error);
+            return null
+        } finally {
+            await browser.close()
+        }
+
+    },
+
     google_search: async function (keyword) {
         await redis.incr("google_search_count")
         let proxy_user, proxy_pass, chromium_endpoint, proxy
