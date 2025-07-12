@@ -539,12 +539,10 @@ app.post('/parse_html', async (req, res) => {
     try {
 
         const sanitizedUrl = url.trim(); // Remove any whitespace including newlines
-        let response = await browserless.chromium_content(sanitizedUrl, {element_type: xpath ? 'xpath' : 'selector', element: xpath || selector});
-        if(!response){
-            throw new Error("无法解析元素内容，请检查xpath或selector是否正确，或者页面是否存在");
-        }
+        
+        const htmldata = await tool.request_chromium(sanitizedUrl, cookie, xpath, selector)
 
-        let result_list = extract_html_conent(response.data,xpath,selector)
+        let result_list = extract_html_conent(htmldata,xpath,selector)
 
 
         let msg = "";
@@ -1914,7 +1912,7 @@ app.post("/cn_explorer", async (req, res) => {
     try {
 
         let response = await browserless.cn_chromium_content(url, {cookie:cookie,element_type: xpath ? 'xpath' : 'selector', element: xpath || selector})
-        console.log(response.data)
+
         return res.send({
             code: 0,
             msg: 'Success',

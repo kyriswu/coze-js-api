@@ -24,8 +24,7 @@ const tool = {
     request_chromium: async function (url, cookie, xpath, selector) {
         // 增加特殊域名列表，命中则走国内代理逻辑
         const chinaDomainList = [
-            'tophub.today',
-            'baidu.com',
+            'tophub.today'
             // 可继续添加更多域名
         ];
         const urlObj = new URL(url);
@@ -56,10 +55,7 @@ const tool = {
 
         try {
             const { data } = await axios.request(options);
-            console.log(data);
-            return {
-                data: data
-            }
+            return data.data
         } catch (error) {
             console.error(error);
             return null

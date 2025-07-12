@@ -298,9 +298,9 @@ const browserless = {
                     await page.waitForSelector(opt.element, { timeout: 60000 });
                 }
             }
-            console.log("等待页面加载完成，获取内容...")
+
             const html = await page.content();
-            console.log(html)
+
 
             await page.close()
 
