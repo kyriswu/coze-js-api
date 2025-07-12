@@ -266,7 +266,7 @@ const browserless = {
         try {
 
             page = await browser.newPage();
-
+            console.log(opt.cookie)
             //设置cookie
             if (opt && opt.cookie) {
                 await browser.setCookie(...opt.cookie)
