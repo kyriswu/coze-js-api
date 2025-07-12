@@ -3,6 +3,7 @@ import fs from 'fs';
 import { URL,fileURLToPath } from 'url';
 import { dirname } from 'path';
 import path from 'path'
+import { execFile } from 'child_process';
 import { exec } from 'child_process';
 import util from 'util';
 import { response } from 'express';
@@ -20,6 +21,21 @@ const __dirname = dirname(__filename)
 const execPromise = util.promisify(exec);
 
 const tool = {
+    whoisinfo: function (domain) {
+        const python = 'python';
+        const script = path.join(__dirname, '../whoisinfo.py');
+
+        execFile(python, [script, domain], (error, stdout, stderr) => {
+            if (error) {
+                // console.error(error);
+            }
+
+            const output = stdout.trim().split('\n');
+
+            console.log('Whois Information:', output);
+            return output[0]
+        });
+    },
     mix_videos: async function (videos) {
         try {
             const downloadDir = path.join(__dirname, '..', 'downloads');

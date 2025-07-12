@@ -544,7 +544,7 @@ app.post('/parse_html', async (req, res) => {
             throw new Error("无法解析元素内容，请检查xpath或selector是否正确，或者页面是否存在");
         }
 
-        let result_list = extract_html_conent_standard(response.data,xpath,selector)
+        let result_list = extract_html_conent(response.data,xpath,selector)
 
 
         let msg = "";
@@ -1509,7 +1509,7 @@ app.get('/cozecom-auth-callback', cozecom.callback)
 
 //虚拟浏览器
 app.post('/explorer', async (req, res) => {
-
+    
     let { url, selector, xpath, api_key, action, cookie } = req.body;
     if (selector && xpath){
         return res.status(400).send('selector or xpath，这两个参数二选一，不要都填');
@@ -1526,7 +1526,7 @@ app.post('/explorer', async (req, res) => {
 
         cookie = await tool.gen_cookie(cookie,domain,path)
     }
-
+    
     const api_id = "api_413Kmmitqy3qaDo4";
 
     //免费版的key
@@ -1563,8 +1563,9 @@ app.post('/explorer', async (req, res) => {
 
         let response = await browserless.chromium_content(sanitizedUrl, {cookie:cookie, element_type: xpath ? 'xpath' : 'selector', element: xpath || selector});
         if(!response){
-            throw new Error("无法解析元素内容，请检查xpath或selector是否正确，或者页面是否存在");
+            throw new Error("无法解析元素内容，请检查xpath或selector是否正确，或者页面是否存在。如果问题持续存在，请联系作者【B站：小吴爱折腾】");
         }
+
 
         let result_list = extract_html_conent_standard(response.data,xpath,selector)
 
@@ -1913,26 +1914,10 @@ app.post("/youtube/download_audio", async (req, res) => {
 app.post("/cn_explorer", async (req, res) => {
 
     let { url, selector, xpath, action, cookie } = req.body;
-    if (selector && xpath){
-        return res.status(400).send('selector or xpath，这两个参数二选一，不要都填');
-    }
-    if (!url) {
-        return res.status(400).send('url is required');
-    }
-    if (cookie) {
-        const parsedUrl = new URL(url);
-
-        // 提取 domain 和 path
-        const domain = parsedUrl.hostname; // 'kns.cnki.net'
-        const path = '/'; // 推荐使用根路径
-
-        cookie = await tool.gen_cookie(cookie,domain,path)
-    }
 
     try {
 
-        const sanitizedUrl = url.trim(); // Remove any whitespace including newlines
-        let response = await browserless.cn_chromium_content(sanitizedUrl, {cookie:cookie})
+        let response = await browserless.cn_chromium_content(url, {cookie:cookie})
         if(!response){
             throw new Error("无法解析元素内容，请检查xpath或selector是否正确，或者页面是否存在");
         }
