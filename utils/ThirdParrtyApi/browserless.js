@@ -106,47 +106,57 @@ const browserless = {
         ];
         const urlObj = new URL(url);
         const isChinaDomain = chinaDomainList.some(domain => urlObj.hostname.endsWith(domain));
+        console.log("当前访问的域名：", urlObj.hostname, "是否为国内域名：", isChinaDomain);
+        if (isChinaDomain) {
 
-        if ((opt && opt.proxy && opt.proxy === "china") || isChinaDomain) {
-            chromium_endpoint = "1.15.114.179:8123";
-            ({proxy,proxy_user,proxy_pass} = await getQingGuoProxy())
-            //国内代理，每次都用新的浏览器
-            browser = await puppeteer_connect(chromium_endpoint, TIMEOUT, proxy)
+            const options = {
+            method: 'POST',
+            url: 'http://1.15.114.179:3000/cn_explorer',
+            headers: {'content-type': 'application/json'},
+            data: {
+                url: url,
+                xpath: opt.element_type === 'xpath' ? opt.element : null,
+                selector: opt.element_type === 'selector' ? opt.element : null,
+                cookie: opt.cookie ? opt.cookie : null,
+            }
+            };
 
+            try {
+            const { data } = await axios.request(options);
+            console.log(data);
+             return {
+                data: data
+            }
+            } catch (error) {
+            console.error(error);
+            }
+        }
 
+        if (process.env.NODE_ENV === 'online') {
+            chromium_endpoint = "172.17.0.1:8123"
         } else {
-            if (process.env.NODE_ENV === 'online') {
-                chromium_endpoint = "172.17.0.1:8123"
-            } else {
-                chromium_endpoint = "172.245.84.92:8123"
-            }
-            proxy_user = Webshare_PROXY_USER
-            proxy_pass = Webshare_PROXY_PASS
-            proxy = `http://${Webshare_PROXY_HOST}:${Webshare_PROXY_PORT}`
+            chromium_endpoint = "172.245.84.92:8123"
+        }
+        proxy_user = Webshare_PROXY_USER
+        proxy_pass = Webshare_PROXY_PASS
+        proxy = `http://${Webshare_PROXY_HOST}:${Webshare_PROXY_PORT}`
 
-            if (opt && opt.cookie) {
-                //国外代理，传了cookie就用新浏览器，否则共享
-                browser = await puppeteer_connect(chromium_endpoint, TIMEOUT, proxy)
-            }else{
-                browser = SESSION ? SESSION : await puppeteer_connect(chromium_endpoint, TIMEOUT, proxy)
-                if (!SESSION) {
-                    browser.on('disconnected', async () => {
-                        console.warn('⚠️ Browser disconnected');
-                        SESSION = null;  // 清理状态
-                        // 这里可以触发重连逻辑
-                    });
-                    SESSION = browser
-                }
-                public_browser = true
+        if (opt && opt.cookie) {
+            //国外代理，传了cookie就用新浏览器，否则共享
+            browser = await puppeteer_connect(chromium_endpoint, TIMEOUT, proxy)
+        }else{
+            browser = SESSION ? SESSION : await puppeteer_connect(chromium_endpoint, TIMEOUT, proxy)
+            if (!SESSION) {
+                browser.on('disconnected', async () => {
+                    console.warn('⚠️ Browser disconnected');
+                    SESSION = null;  // 清理状态
+                    // 这里可以触发重连逻辑
+                });
+                SESSION = browser
             }
-
+            public_browser = true
         }
     
-        //设置cookie
-        if (opt && opt.cookie) {
-            await browser.setCookie(...opt.cookie)
-        }
-
         try {
 
             page = await browser.newPage();
@@ -302,7 +312,7 @@ const browserless = {
 
             const response = await page.goto(url, {
                 timeout: TIMEOUT,
-                waitUntil: 'documentloaded',
+                waitUntil: 'domcontentloaded',
             });
 
             // 检查 HTTP 状态码

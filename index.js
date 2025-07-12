@@ -1917,25 +1917,13 @@ app.post("/cn_explorer", async (req, res) => {
 
     try {
 
-        let response = await browserless.cn_chromium_content(url, {cookie:cookie})
-        if(!response){
-            throw new Error("无法解析元素内容，请检查xpath或selector是否正确，或者页面是否存在");
-        }
+        let response = await browserless.cn_chromium_content(url, {cookie:cookie,element_type: xpath ? 'xpath' : 'selector', element: xpath || selector})
 
-        let result_list = extract_html_conent_standard(response.data,xpath,selector)
-
-        return res.send({
-            code: 0,
-            msg: 'success',
-            data: result_list
-        });
+        return response.data
     } catch (error) {
         console.error(`Error: ${error}`);
-        return res.send({
-            code: -1,
-            msg: "请求失败，请检查url和参数是否正确！",
-            data: []
-        })
+        
+        return null
     }
     
 })
