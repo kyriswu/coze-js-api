@@ -1561,13 +1561,9 @@ app.post('/explorer', async (req, res) => {
 
         const sanitizedUrl = url.trim(); // Remove any whitespace including newlines
 
-        let response = await browserless.chromium_content(sanitizedUrl, {cookie:cookie, element_type: xpath ? 'xpath' : 'selector', element: xpath || selector});
-        if(!response){
-            throw new Error("无法解析元素内容，请检查xpath或selector是否正确，或者页面是否存在。如果问题持续存在，请联系作者【B站：小吴爱折腾】");
-        }
+        const htmldata = await tool.request_chromium(sanitizedUrl, cookie, xpath, selector)
 
-
-        let result_list = extract_html_conent_standard(response.data,xpath,selector)
+        let result_list = extract_html_conent_standard(htmldata,xpath,selector)
 
         let msg = "";
         if (api_key) {
@@ -1922,7 +1918,7 @@ app.post("/cn_explorer", async (req, res) => {
         return response.data
     } catch (error) {
         console.error(`Error: ${error}`);
-        
+
         return null
     }
     

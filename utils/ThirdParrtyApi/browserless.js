@@ -99,39 +99,7 @@ const browserless = {
         let browser, page
         let public_browser//公共浏览器
 
-        // 增加特殊域名列表，命中则走国内代理逻辑
-        const chinaDomainList = [
-            'tophub.today',
-            // 可继续添加更多域名
-        ];
-        const urlObj = new URL(url);
-        const isChinaDomain = chinaDomainList.some(domain => urlObj.hostname.endsWith(domain));
-        console.log("当前访问的域名：", urlObj.hostname, "是否为国内域名：", isChinaDomain);
-        if (isChinaDomain) {
-
-            const options = {
-            method: 'POST',
-            url: 'http://1.15.114.179:3000/cn_explorer',
-            headers: {'content-type': 'application/json'},
-            data: {
-                url: url,
-                xpath: opt.element_type === 'xpath' ? opt.element : null,
-                selector: opt.element_type === 'selector' ? opt.element : null,
-                cookie: opt.cookie ? opt.cookie : null,
-            }
-            };
-
-            try {
-            const { data } = await axios.request(options);
-            console.log(data);
-             return {
-                data: data
-            }
-            } catch (error) {
-            console.error(error);
-            }
-        }
-
+        // 设置代理和浏览器连接参数
         if (process.env.NODE_ENV === 'online') {
             chromium_endpoint = "172.17.0.1:8123"
         } else {
@@ -142,7 +110,7 @@ const browserless = {
         proxy = `http://${Webshare_PROXY_HOST}:${Webshare_PROXY_PORT}`
 
         if (opt && opt.cookie) {
-            //国外代理，传了cookie就用新浏览器，否则共享
+            //传了cookie就启用新浏览器
             browser = await puppeteer_connect(chromium_endpoint, TIMEOUT, proxy)
         }else{
             browser = SESSION ? SESSION : await puppeteer_connect(chromium_endpoint, TIMEOUT, proxy)
@@ -266,7 +234,7 @@ const browserless = {
         try {
 
             page = await browser.newPage();
-            console.log(opt.cookie)
+
             //设置cookie
             if (opt && opt.cookie) {
                 await browser.setCookie(...opt.cookie)

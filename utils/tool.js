@@ -21,6 +21,50 @@ const __dirname = dirname(__filename)
 const execPromise = util.promisify(exec);
 
 const tool = {
+    request_chromium: async function (url, cookie, xpath, selector) {
+        // 增加特殊域名列表，命中则走国内代理逻辑
+        const chinaDomainList = [
+            'tophub.today',
+            'baidu.com',
+            // 可继续添加更多域名
+        ];
+        const urlObj = new URL(url);
+        const isChinaDomain = chinaDomainList.some(domain => urlObj.hostname.endsWith(domain));
+        console.log("当前访问的域名：", urlObj.hostname, "是否为国内域名：", isChinaDomain);
+        if (!isChinaDomain) {
+             try {
+                let response = await browserless.chromium_content(url, {cookie:cookie, element_type: xpath ? 'xpath' : 'selector', element: xpath || selector});
+                return response.data;
+             }catch(err){
+                console.error("Browserless 请求失败：", err);
+                return null;
+             }
+             
+        }
+
+        const options = {
+            method: 'POST',
+            url: 'http://1.15.114.179:3000/cn_explorer',
+            headers: { 'content-type': 'application/json' },
+            data: {
+                url: url,
+                xpath: xpath ? xpath : null,
+                selector: selector ? selector : null,
+                cookie: cookie ? cookie : null,
+            }
+        };
+
+        try {
+            const { data } = await axios.request(options);
+            console.log(data);
+            return {
+                data: data
+            }
+        } catch (error) {
+            console.error(error);
+            return null
+        }
+    },
     whoisinfo: function (domain) {
         const python = 'python';
         const script = path.join(__dirname, '../whoisinfo.py');
