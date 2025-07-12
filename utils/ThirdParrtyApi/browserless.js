@@ -92,9 +92,6 @@ const browserless = {
 
     chromium_content: async function (url, opt = {}) {
 
-        if(!tool.isValidUrl(url)){
-            throw new Error("url链接不正确，请使用完整的链接")
-        }
         let proxy_user, proxy_pass, chromium_endpoint, proxy
         let browser, page
         let public_browser//公共浏览器
@@ -205,7 +202,7 @@ const browserless = {
                 console.error('错误：等待元素超时');
                 // 处理超时错误
                 // 可以采取重试策略、记录日志、继续执行其他操作等
-                return null
+                throw error
             } else {
                 console.error('Error in chromium_content:', error);
                 throw new Error(`出现错误：${error.message}，请检查参数是否正确，或者稍后重试。如果问题持续存在，请联系作者【B站：小吴爱折腾】。`);
@@ -312,7 +309,7 @@ const browserless = {
                 console.error('错误：等待元素超时');
                 // 处理超时错误
                 // 可以采取重试策略、记录日志、继续执行其他操作等
-                return null
+                throw error
             } else {
                 console.error('Error in chromium_content:', error);
                 throw new Error(`出现错误：${error.message}，请检查参数是否正确，或者稍后重试。如果问题持续存在，请联系管理员【B站：小吴爱折腾】。`);
