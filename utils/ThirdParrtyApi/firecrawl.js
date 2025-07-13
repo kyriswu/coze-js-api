@@ -40,8 +40,7 @@ const firecrawlTool = {
         };
 
         const data = {
-            url: url,
-            blockAds: false
+            url: url
         };
 
         try {
