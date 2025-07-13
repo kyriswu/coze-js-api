@@ -2021,7 +2021,32 @@ app.get('/fetch_html', async (req, res) => {
     return res.send(htmldata)
 })
 
-//公众号 文章搜索
+//公众号 文章搜索(中国服务器真正执行请求)
+app.post("/cn_gzh_search", async (req, res) => {
+    let {keyword, api_key} = req.body
+    if (!keyword) {
+        return res.status(400).send('Invalid input: keyword不能为空');
+    }
+    // if (!Number.isInteger(page) || isNaN(page) || page <= 0) {
+    //     page = 1
+    // }
+    try {
+        let data = await browserless.weixin_search(keyword)
+        return res.send({
+            code: 0,
+            msg: 'success',
+            data: data
+        })
+    }catch (error) {
+        console.error(`Error: ${error}`);
+        return res.send({
+            code: -1,
+            msg: error.message,
+            data: null
+        })
+    }   
+})
+//国外服务器接口，发起请求，调用中国服务器api
 app.post("/gzh_search", async (req, res) => {
     let {keyword, api_key} = req.body
     if (!keyword) {
@@ -2031,11 +2056,21 @@ app.post("/gzh_search", async (req, res) => {
     //     page = 1
     // }
     try {
-        let data = await tool.request_weixin_search(keyword)
+        const options = {
+            method: 'POST',
+            url: 'http://1.15.114.179:3000/cn_gzh_search',
+            headers: { 'content-type': 'application/json' },
+            data: {
+                keyword: keyword
+            }
+        };
+
+        const { data } = await axios.request(options);
+
         return res.send({
             code: 0,
             msg: 'success',
-            data: data
+            data: data.data
         })
     }catch (error) {
         console.error(`Error: ${error}`);

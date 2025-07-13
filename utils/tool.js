@@ -67,26 +67,6 @@ const tool = {
             return null
         }
     },
-    request_weixin_search: async function (keyword, page) {
-
-        const options = {
-            method: 'POST',
-            url: 'http://1.15.114.179:3000/gzh_search',
-            headers: { 'content-type': 'application/json' },
-            data: {
-                keyword: keyword,
-                page: page
-            }
-        };
-
-        try {
-            const { data } = await axios.request(options);
-            return data.data
-        } catch (error) {
-            console.error(error);
-            return null
-        }
-    },
     whoisinfo: function (domain) {
         const python = 'python';
         const script = path.join(__dirname, '../whoisinfo.py');
