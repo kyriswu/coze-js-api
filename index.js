@@ -1195,6 +1195,7 @@ import cozecom from './utils/ThirdParrtyApi/cozecom.js';
 import browserless, { getQingGuoProxy, Webshare_PROXY_PASS, Webshare_PROXY_USER } from './utils/ThirdParrtyApi/browserless.js';
 import feishu from './utils/ThirdParrtyApi/feishu.js';
 import tencentapi from './utils/ThirdParrtyApi/tencentapi.js';
+import firecrawlTool from './utils/ThirdParrtyApi/firecrawl.js';
 
 // 静态资源服务
 app.use('/images', express.static(path.join(__dirname, 'images')));
@@ -1955,6 +1956,64 @@ app.post("/ai_online_answer", async (req, res) => {
     }
     
 })
+
+app.post("/firecrawl/batch_scrape", async (req, res) => {
+    let { urls, api_key } = req.body;
+    
+    if(!urls){
+        return res.status(400).send('Invalid input: "urls" is required');
+    }
+    urls = JSON.parse(urls); // 确保 urls 是一个数组
+
+    if (!Array.isArray(urls) || urls.length === 0) {
+        return res.status(400).send('Invalid input: "urls" must be a non-empty array');
+    }
+
+    try {
+        let data = await firecrawlTool.batch_scrape(urls)
+        return res.send({
+            code: 0,
+            msg: 'Success',
+            data: data
+        })
+    }catch (error) {
+        console.error(`Error: ${error}`);
+        return res.send({
+            code: -1,
+            msg: error.message,
+            data: null
+        })
+    }
+
+
+})
+
+app.post("/firecrawl/scrape", async (req, res) => {
+    let { url, api_key } = req.body;
+    
+    if(!url){
+        return res.status(400).send('Invalid input: "url" is required');
+    }
+
+    try {
+        let data = await firecrawlTool.scrape(url)
+        return res.send({
+            code: 0,
+            msg: 'Success',
+            data: data
+        })
+    }catch (error) {
+        console.error(`Error: ${error}`);
+        return res.send({
+            code: -1,
+            msg: error.message,
+            data: null
+        })
+    }
+
+
+})
+
 
 
 app.listen(port, () => {
