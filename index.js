@@ -2021,6 +2021,32 @@ app.get('/fetch_html', async (req, res) => {
     return res.send(htmldata)
 })
 
+//公众号 文章搜索
+app.post("/gzh_search", async (req, res) => {
+    let {keyword, api_key} = req.body
+    if (!keyword) {
+        return res.status(400).send('Invalid input: keyword不能为空');
+    }
+    // if (!Number.isInteger(page) || isNaN(page) || page <= 0) {
+    //     page = 1
+    // }
+    try {
+        let data = await browserless.weixin_search(keyword)
+        return res.send({
+            code: 0,
+            msg: 'success',
+            data: data
+        })
+    }catch (error) {
+        console.error(`Error: ${error}`);
+        return res.send({
+            code: -1,
+            msg: error.message,
+            data: null
+        })
+    }   
+})
+
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)

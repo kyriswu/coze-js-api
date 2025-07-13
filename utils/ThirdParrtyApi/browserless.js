@@ -1010,6 +1010,122 @@ const browserless = {
 
     },
 
+    weixin_search: async function (keyword,page) {
+        let proxy_user, proxy_pass, chromium_endpoint, proxy
+        let browser
+
+        ({proxy,proxy_user,proxy_pass} = await getQingGuoProxy())
+        chromium_endpoint = "172.17.0.1:8123"
+        browser = await puppeteer_connect(chromium_endpoint, TIMEOUT, proxy)
+
+        try {
+
+                const p = await browser.newPage();
+                await p.setUserAgent(
+                    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) ' +
+                    'AppleWebKit/537.36 (KHTML, like Gecko) ' +
+                    'Chrome/121.0.0.0 Safari/537.36'
+                );
+                await p.authenticate({
+                    username: proxy_user,
+                    password: proxy_pass,
+                });
+                const url = "https://weixin.sogou.com/weixin?ie=utf8&s_from=input&_sug_=n&_sug_type_=1&type=2&query=" + keyword + "&page=" + page
+                const response = await p.goto(url, {
+                    timeout: TIMEOUT,
+                    waitUntil: 'networkidle2',
+                });
+                if (response.status() !== 200) {
+                    console.error(`无头浏览器：Request failed with status code: ${response.status()}`);
+                    await p.close();
+                    throw new Error(`HTTP request failed with status ${response.status()}`);
+                }
+
+                console.log("开始采集微信文章")
+                const resultList = await p.evaluate(() => {
+  const results = [];
+  for (let i = 0; i < 10; i++) {
+    const el = document.querySelector(`#sogou_vr_11002601_title_${i}`);
+    if (el) {
+      let href = el.getAttribute('href');
+      if (href) {
+        // 如果 href 已经是完整的 weixin.sogou.com 链接，就直接用它
+        if (href.includes('weixin.sogou.com')) {
+        //   results.push(href);
+        } else {
+          href = 'https://weixin.sogou.com' + href
+        }
+      }
+      const title = el.textContent.trim()
+      const from = document.querySelector(`#sogou_vr_11002601_box_${i} .all-time-y2`).textContent.trim()
+      const s2_el = document.querySelector(`#sogou_vr_11002601_box_${i} .s2`)
+     const pureText = [...s2_el.childNodes]
+                    .filter(node => node.nodeType === Node.TEXT_NODE)
+                    .map(node => node.textContent.trim())
+                    .join(' ');
+      results.push({
+        title:title,
+        href:href,
+        from:from,
+        date:pureText
+      })
+    }
+  }
+  return results;
+});
+console.log(resultList)
+const pagesData = await Promise.all(resultList.map(async (item, index) => {
+  const subpage = await browser.newPage();
+  try {
+
+    // 禁用 JS 执行，页面不会跳转
+    await subpage.setJavaScriptEnabled(false);
+    
+    await subpage.setUserAgent(
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) ' +
+        'AppleWebKit/537.36 (KHTML, like Gecko) ' +
+        'Chrome/121.0.0.0 Safari/537.36'
+    );
+    await subpage.authenticate({
+        username: proxy_user,
+        password: proxy_pass,
+    });
+
+    await subpage.goto(item.href);
+
+    const html = await subpage.content();
+
+    const regex = /url\s*\+=\s*['"`]([^'"`]+)['"`]/g;
+  let match;
+  let url = '';
+
+  while ((match = regex.exec(html)) !== null) {
+    url += match[1];
+  }
+
+  // 简单还原后清洗
+  url = url.replace('@', '').replace(/\*+/g, '*'); // 替换@符号和多余星号等
+  console.log("真实url", url)
+  resultList[index].href = url
+  return url;
+
+  } catch (err) {
+    console.error(`Failed to open ${item.href}:`, err.message);
+    await subpage.close();
+    return { error: err.message };
+  }
+}));
+     
+
+            return resultList
+        } catch (error) {
+            console.error('Error in chromium_content:', error);
+            return []
+        } finally {
+            await browser.close()
+        }
+
+    },
     
 };
 export { getQingGuoProxy, Webshare_PROXY_USER, Webshare_PROXY_PASS }
