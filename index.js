@@ -2015,6 +2015,12 @@ app.post("/firecrawl/scrape", async (req, res) => {
 })
 
 
+app.get('/fetch_html', async (req, res) => {
+    let { url } = req.query;
+    const htmldata = await tool.request_chromium(url)
+    return res.send(htmldata)
+})
+
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)

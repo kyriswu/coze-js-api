@@ -36,7 +36,7 @@ const firecrawlTool = {
 
         const api_url = base_url + '/v1/scrape';
         const headers = {
-            'Content-Type': 'application/json',
+            'Content-Type': 'application/json'
         };
 
         const data = {
