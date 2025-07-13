@@ -14,6 +14,7 @@ import { JSDOM } from 'jsdom';
 import { Throttle } from 'stream-throttle';
 import { th_youtube } from './tikhub.io.js';
 import browserless from './ThirdParrtyApi/browserless.js';
+import filetool from './ThirdParrtyApi/filetool.js';
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 
@@ -463,7 +464,7 @@ const tool = {
                     maxBodyLength: Infinity,
                 });
             }
-            if (!this.is_video(response.headers['content-type'])) {
+            if (!filetool.is_video(response.headers['content-type'])) {
                 throw new Error('视频链接无效！请查看视频教程：【https://www.bilibili.com/video/BV169TizqE58】');
             }
             
@@ -702,7 +703,7 @@ const tool = {
             console.log(`开始下载音频：${audio_url}`)
             console.log(`状态码：${response.status}`)
 
-            if (!this.is_audio(response.headers['content-type'])) {
+            if (!filetool.is_audio(response.headers['content-type'])) {
                 throw new Error('音频链接无效！');
             }
 
@@ -763,28 +764,6 @@ const tool = {
             };
         }
     },
-    is_video: function (contentType) {
-        try {
-
-            // MIME类型到文件扩展名的映射
-            const mimeToExtension = {
-                'video/mp4': 'mp4',
-                'video/mpeg': 'mpeg',
-                'video/quicktime': 'mov',
-                'video/webm': 'webm',
-            };
-            
-            // 查找匹配的视频类型
-            const matchedType = Object.keys(mimeToExtension).find(type => 
-                contentType.toLowerCase().includes(type)
-            )
-            
-            return !!matchedType
-        } catch (error) {
-            console.error('Error getting video type:', error.message);
-            return false
-        }
-    },
     video_to_audio: async function (video) {
         try {
             // Get the directory and original filen ame
@@ -829,47 +808,6 @@ const tool = {
             };
         }
     },
-    is_audio: async function (contentType) {
-        try {
-            // MIME类型到文件扩展名的映射
-            const mimeToExtension = {
-                'audio/mpeg': 'mp3',
-                'audio/mp4': 'm4a',
-                'audio/wav': 'wav',
-                'audio/x-wav': 'wav',
-                'audio/ogg': 'ogg',
-                'audio/aac': 'aac',
-                'audio/flac': 'flac',
-                'audio/webm': 'webm',
-            };
-            
-            // 查找匹配的音频类型
-            const matchedType = Object.keys(mimeToExtension).find(type => 
-                contentType.toLowerCase().includes(type)
-            );
-            
-            return !!matchedType
-
-        } catch (error) {
-
-            console.error('Error getting audio type:', error.message);
-            return false
-
-        }
-    },
-    // deal_douyin_url: async function (url) {
-    //     const urlObj = new URL(url);
-    //     if (urlObj.hostname === 'v.douyin.com') {
-    //         const response = await axios({
-    //             method: 'get',
-    //             url: url,
-    //             headers: {
-    //                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36 Edg/136.0.0.0'
-    //             }
-    //         });
-            
-    //     }
-    // },
     remove_query_param: function (url) {
         const urlObj = new URL(url);
         return urlObj.origin + urlObj.pathname;

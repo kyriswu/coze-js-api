@@ -10,6 +10,7 @@ import os from 'os';
 import { URL, fileURLToPath } from 'url';
 import tool from '../tool.js';
 import redis from '../redisClient.js';
+import filetool from './filetool.js';
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 
@@ -193,7 +194,9 @@ const browserless = {
             }
 
             const contentType = response.headers()['content-type'];
-            console.log('Content-Type:', contentType);
+            if (filetool.isSupportedFileType(contentType)) {
+                throw new Error(`请使用文件读取工具打开链接：${url}`);
+            }
 
             if (opt && opt.element_type && opt.element) {
                 if (opt.element_type === 'xpath') {
