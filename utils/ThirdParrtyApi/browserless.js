@@ -187,18 +187,18 @@ const browserless = {
                 waitUntil: opt.waitUntil || 'domcontentloaded',
             });
 
-            // 检查 HTTP 状态码
-            if (response.status() !== 200) {
-                console.error(`无头浏览器：Request failed with status code: ${response.status()}`);
-                throw new Error(`HTTP request failed with status ${response.status()}`);
-            }
-
             const contentType = response.headers()['content-type'];
             if (filetool.isSupportedFileType(contentType)) {
                 throw new Error(`请使用文件读取工具打开链接：${url}`);
             }
             if (!filetool.is_html(contentType)) {
-                throw new Error(`本工具只能解析网页`);
+                throw new Error(`本工具只支持解析网页`);
+            }
+
+            // 检查 HTTP 状态码
+            if (response.status() !== 200) {
+                console.error(`无头浏览器：Request failed with status code: ${response.status()}`);
+                throw new Error(`HTTP request failed with status ${response.status()}`);
             }
 
             if (opt && opt.element_type && opt.element) {
