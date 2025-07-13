@@ -2017,7 +2017,7 @@ app.post("/firecrawl/scrape", async (req, res) => {
 
 app.get('/fetch_html', async (req, res) => {
     let { url } = req.query;
-    const htmldata = await tool.request_chromium(url)
+    const htmldata = await tool.request_chromium(url,null,null,null,'networkidle2')
     return res.send(htmldata)
 })
 

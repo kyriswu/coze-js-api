@@ -21,7 +21,7 @@ const __dirname = dirname(__filename)
 const execPromise = util.promisify(exec);
 
 const tool = {
-    request_chromium: async function (url, cookie, xpath, selector) {
+    request_chromium: async function (url, cookie, xpath, selector, waitUntil) {
 
         if(!this.isValidUrl(url)){
             throw new Error("url链接不正确，请使用正确的链接")
@@ -37,7 +37,7 @@ const tool = {
         console.log("当前访问的域名：", urlObj.hostname, "是否为国内域名：", isChinaDomain);
         if (!isChinaDomain) {
              try {
-                let response = await browserless.chromium_content(url, {cookie:cookie, element_type: xpath ? 'xpath' : 'selector', element: xpath || selector});
+                let response = await browserless.chromium_content(url, {cookie:cookie, element_type: xpath ? 'xpath' : 'selector', element: xpath || selector, waitUntil:waitUntil || 'domcontentloaded'});
                 return response.data;
              }catch(err){
                 console.error("Browserless 请求失败：", err);

@@ -183,7 +183,7 @@ const browserless = {
 
             const response = await page.goto(url, {
                 timeout: TIMEOUT,
-                waitUntil: 'domcontentloaded',
+                waitUntil: opt.waitUntil || 'domcontentloaded',
             });
 
             // 检查 HTTP 状态码
@@ -191,8 +191,6 @@ const browserless = {
                 console.error(`无头浏览器：Request failed with status code: ${response.status()}`);
                 throw new Error(`HTTP request failed with status ${response.status()}`);
             }
-
-            setTimeout(() => {}, 1000);
 
             if (opt && opt.element_type && opt.element) {
                 if (opt.element_type === 'xpath') {
