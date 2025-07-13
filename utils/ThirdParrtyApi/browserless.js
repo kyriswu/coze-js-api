@@ -184,18 +184,8 @@ const browserless = {
 
             const response = await page.goto(url, {
                 timeout: TIMEOUT,
-                waitUntil: opt.waitUntil || 'domcontentloaded',
-                headers: {'Cache-Control': 'no-cache'}
+                waitUntil: opt.waitUntil || 'domcontentloaded'
             });
-
-            const contentType = response.headers()['content-type'];
-            console.log(`Content-Type: ${contentType}`);
-            if (filetool.isSupportedFileType(contentType)) {
-                throw new Error(`请使用文件读取工具打开链接：${url}`);
-            }
-            if (!filetool.is_html(contentType)) {
-                throw new Error(`本工具只支持解析网页`);
-            }
 
             // 检查 HTTP 状态码
             if (response.status() !== 200) {
