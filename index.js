@@ -2031,7 +2031,7 @@ app.post("/gzh_search", async (req, res) => {
     //     page = 1
     // }
     try {
-        let data = await browserless.weixin_search(keyword)
+        let data = await tool.request_weixin_search(keyword)
         return res.send({
             code: 0,
             msg: 'success',
