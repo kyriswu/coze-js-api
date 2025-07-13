@@ -6,7 +6,10 @@ const filetool = {
     isSupportedFileType: function (contentType) {
         try {
             // 检查 contentType 是否为 null 或 undefined
-            if (!contentType) {
+            if (!contentType ||
+                this.is_audio(contentType) ||
+                this.is_video(contentType) ||
+            ) {
                 return false;
             }
             if (this.is_pdf(contentType) ||
