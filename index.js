@@ -1129,13 +1129,13 @@ app.post('/pdf2img', async (req, res) => {
         return res.status(400).send('Invalid input: "url" is required');
     }
     const randomString = [...Array(16)].map(() => Math.random().toString(36)[2]).join('');
-    await downloadPdf(url, `./images/${randomString}.pdf`).then(() => {
+    await downloadPdf(url, `./downloads/${randomString}.pdf`).then(() => {
         console.log('PDF downloaded successfully');
 
         const python = 'python';
         const script = path.join(__dirname, 'pdf2images.py');
 
-        execFile(python, [script, `./images/${randomString}.pdf`, randomString], (error, stdout, stderr) => {
+        execFile(python, [script, `./downloads/${randomString}.pdf`, randomString], (error, stdout, stderr) => {
             if (error) {
                 console.error(stderr);
                 return res.send({
