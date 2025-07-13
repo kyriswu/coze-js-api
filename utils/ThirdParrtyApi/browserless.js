@@ -185,6 +185,7 @@ const browserless = {
             const response = await page.goto(url, {
                 timeout: TIMEOUT,
                 waitUntil: opt.waitUntil || 'domcontentloaded',
+                headers: {'Cache-Control': 'no-cache'}
             });
 
             const contentType = response.headers()['content-type'];
