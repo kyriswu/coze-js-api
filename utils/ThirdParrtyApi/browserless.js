@@ -192,6 +192,9 @@ const browserless = {
                 throw new Error(`HTTP request failed with status ${response.status()}`);
             }
 
+            const contentType = response.headers()['content-type'];
+            console.log('Content-Type:', contentType);
+
             if (opt && opt.element_type && opt.element) {
                 if (opt.element_type === 'xpath') {
                     console.log("等待xpath元素：", opt.element)
