@@ -26,7 +26,8 @@ const qingguo_api_url = "https://share.proxy.qg.net/get?key=FC283878"
 const qingguo_proxy_user = "FC283878"
 const qingguo_proxy_pass = "6BDF595312DA"
 
-var SESSION //长会话浏览器
+var PUBLIC_SESSION //长会话浏览器
+var publicSessionLock = null // 并发锁
 var GOOGLE_SESSION //谷歌搜索长会话浏览器
 var googleSessionLock = null // 并发锁
 
@@ -110,15 +111,26 @@ const browserless = {
             //传了cookie就启用新浏览器
             browser = await puppeteer_connect(chromium_endpoint, TIMEOUT, proxy)
         }else{
-            browser = SESSION ? SESSION : await puppeteer_connect(chromium_endpoint, TIMEOUT, proxy)
-            if (!SESSION) {
-                browser.on('disconnected', async () => {
-                    console.warn('⚠️ Browser disconnected');
-                    SESSION = null;  // 清理状态
-                    // 这里可以触发重连逻辑
-                });
-                SESSION = browser
+            // --- 并发锁逻辑开始 ---
+            if (!PUBLIC_SESSION) {
+                if (!publicSessionLock) {
+                    // 第一个进入的创建锁
+                    publicSessionLock = (async () => {
+                        const b = await puppeteer_connect(chromium_endpoint, TIMEOUT, proxy)
+                        b.on('disconnected', async () => {
+                            console.warn('⚠️ Browser disconnected');
+                            PUBLIC_SESSION = null;
+                            publicSessionLock = null;
+                        });
+                        PUBLIC_SESSION = b
+                        return b
+                    })();
+                }
+                browser = await publicSessionLock
+            } else {
+                browser = PUBLIC_SESSION
             }
+            // --- 并发锁逻辑结束 ---
             public_browser = true
         }
     
@@ -454,13 +466,26 @@ const browserless = {
         proxy_pass = Webshare_PROXY_PASS
         proxy = `http://${Webshare_PROXY_HOST}:${Webshare_PROXY_PORT}`
 
-        browser = SESSION ? SESSION : await puppeteer_connect(chromium_endpoint, TIMEOUT, proxy)
-        browser.on('disconnected', () => {
-            console.warn('⚠️ Browser disconnected');
-            SESSION = null;  // 清理状态
-            // 这里可以触发重连逻辑
-        });
-        SESSION = browser
+        // --- 并发锁逻辑开始 ---
+        if (!PUBLIC_SESSION) {
+            if (!publicSessionLock) {
+                // 第一个进入的创建锁
+                publicSessionLock = (async () => {
+                    const b = await puppeteer_connect(chromium_endpoint, TIMEOUT, proxy)
+                    b.on('disconnected', async () => {
+                        console.warn('⚠️ Browser disconnected');
+                        PUBLIC_SESSION = null;
+                        publicSessionLock = null;
+                    });
+                    PUBLIC_SESSION = b
+                    return b
+                })();
+            }
+            browser = await publicSessionLock
+        } else {
+            browser = PUBLIC_SESSION
+        }
+        // --- 并发锁逻辑结束 ---
         public_browser = true
 
         try {
@@ -619,15 +644,26 @@ const browserless = {
                 //国外代理，传了cookie就用新浏览器，否则共享
                 browser = await puppeteer_connect(chromium_endpoint, TIMEOUT, proxy)
             }else{
-                browser = SESSION ? SESSION : await puppeteer_connect(chromium_endpoint, TIMEOUT, proxy)
-                if (!SESSION) {
-                    browser.on('disconnected', async () => {
-                        console.warn('⚠️ Browser disconnected');
-                        SESSION = null;  // 清理状态
-                        // 这里可以触发重连逻辑
-                    });
-                    SESSION = browser
+                // --- 并发锁逻辑开始 ---
+                if (!PUBLIC_SESSION) {
+                    if (!publicSessionLock) {
+                        // 第一个进入的创建锁
+                        publicSessionLock = (async () => {
+                            const b = await puppeteer_connect(chromium_endpoint, TIMEOUT, proxy)
+                            b.on('disconnected', async () => {
+                                console.warn('⚠️ Browser disconnected');
+                                PUBLIC_SESSION = null;
+                                publicSessionLock = null;
+                            });
+                            PUBLIC_SESSION = b
+                            return b
+                        })();
+                    }
+                    browser = await publicSessionLock
+                } else {
+                    browser = PUBLIC_SESSION
                 }
+                // --- 并发锁逻辑结束 ---
                 public_browser = true
             }
 
