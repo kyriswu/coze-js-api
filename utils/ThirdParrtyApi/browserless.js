@@ -197,6 +197,9 @@ const browserless = {
             if (filetool.isSupportedFileType(contentType)) {
                 throw new Error(`请使用文件读取工具打开链接：${url}`);
             }
+            if (!filetool.is_html(contentType)) {
+                throw new Error(`本工具只能解析网页`);
+            }
 
             if (opt && opt.element_type && opt.element) {
                 if (opt.element_type === 'xpath') {
