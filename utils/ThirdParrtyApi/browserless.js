@@ -188,6 +188,7 @@ const browserless = {
             });
 
             const contentType = response.headers()['content-type'];
+            console.log(`Content-Type: ${contentType}`);
             if (filetool.isSupportedFileType(contentType)) {
                 throw new Error(`请使用文件读取工具打开链接：${url}`);
             }
