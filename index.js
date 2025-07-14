@@ -2082,6 +2082,26 @@ app.post("/gzh_search", async (req, res) => {
     }   
 })
 
+app.get('/jipiao', async (req, res) => {
+    let {from, to, date} = req.query
+
+    try {
+        const data = await browserless.jipiao_search()
+        return res.send({
+            code: 0,
+            msg: 'success',
+            data: data
+        })
+    }catch (error) {
+        console.error(`Error: ${error}`);
+        return res.send({
+            code: -1,
+            msg: error.message,
+            data: null
+        })
+    }
+})
+
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)

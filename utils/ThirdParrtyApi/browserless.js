@@ -1126,7 +1126,132 @@ const pagesData = await Promise.all(resultList.map(async (item, index) => {
         }
 
     },
-    
+
+    jipiao_search: async function (opt = {}) {
+
+        let proxy_user, proxy_pass, chromium_endpoint, proxy
+        let browser, page
+        let public_browser
+
+        if (process.env.NODE_ENV === 'online') {
+            chromium_endpoint = "172.17.0.1:8123"
+        } else {
+            chromium_endpoint = "172.245.84.92:8123"
+        }
+        proxy_user = Webshare_PROXY_USER
+        proxy_pass = Webshare_PROXY_PASS
+        proxy = `http://${Webshare_PROXY_HOST}:${Webshare_PROXY_PORT}`
+
+        // --- 并发锁逻辑开始 ---
+        if (!PUBLIC_SESSION) {
+            if (!publicSessionLock) {
+                // 第一个进入的创建锁
+                publicSessionLock = (async () => {
+                    const b = await puppeteer_connect(chromium_endpoint, TIMEOUT, proxy)
+                    b.on('disconnected', async () => {
+                        console.warn('⚠️ Browser disconnected');
+                        PUBLIC_SESSION = null;
+                        publicSessionLock = null;
+                    });
+                    PUBLIC_SESSION = b
+                    return b
+                })();
+            }
+            browser = await publicSessionLock
+        } else {
+            browser = PUBLIC_SESSION
+        }
+        // --- 并发锁逻辑结束 ---
+        public_browser = true
+
+        try {
+
+            page = await browser.newPage();
+
+            // 在打开任何页面之前设置 UA
+            await page.setUserAgent(
+                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) ' +
+                'AppleWebKit/537.36 (KHTML, like Gecko) ' +
+                'Chrome/121.0.0.0 Safari/537.36'
+            );
+
+            await page.authenticate({
+                username: proxy_user,
+                password: proxy_pass,
+            }); // 正式验证代理用户名密码 :contentReference[oaicite:1]{index=1}
+
+            //设置cookie
+            if (opt && opt.cookie) {
+                await browser.setCookie(...opt.cookie)
+            }
+
+            // 开启请求拦截
+            await page.setRequestInterception(true);
+
+            page.on('request', (request) => {
+                const resourceType = request.resourceType();
+                const url = request.url().toLowerCase();
+
+                const blockedPatterns = [
+                    'syndicatedsearch.goog',
+                    'doubleclick.net',
+                ];
+
+                // 拦截图片、CSS、字体、媒体、favicon
+                if (
+                    blockedPatterns.some(pattern => url.includes(pattern)) ||
+                    ['image', 'stylesheet', 'font', 'media'].includes(resourceType) ||
+                    url.endsWith('.css') ||
+                    url.endsWith('.ico') ||              // favicon 文件
+                    url.includes('favicon')              // 例如 /favicon.png 或 favicon.ico?ver=2
+                ) {
+                    request.abort();
+                } else {
+                    request.continue();
+                }
+            });
+
+            const response = await page.goto("https://www.vakatrip.com/", {
+                timeout: TIMEOUT,
+                waitUntil: 'domcontentloaded',
+            });
+
+            // 检查 HTTP 状态码
+            if (response.status() !== 200) {
+                console.error(`Request failed with status code: ${response.status()}`);
+                throw new Error(`HTTP request failed with status ${response.status()}`);
+            }
+
+                        // 等待 input 和 button 出现
+  await page.waitForSelector('input.el-input__inner');
+await page.type('input.el-input__inner', 'hkg'); // 输入出发地
+
+
+ // Generate filename with timestamp
+            const timestamp = new Date().getTime();
+            const filepath = path.join(downloadDir, `screenshot_${timestamp}.png`);
+            const filename = `screenshot_${timestamp}.png`
+
+            await page.screenshot({
+                    path: filepath,           // 保存路径
+                    fullPage: true,           // 是否截取整个滚动区域
+                });
+
+            await page.close()
+
+            return filepath
+        } catch (error) {
+            console.error('Error in chromium screen shot:', error);
+            return null
+        } finally {
+            if(public_browser){
+                // 强制再执行一次 page.close，不考虑报错
+                try { await page.close(); } catch (e) {}
+            }else{
+                await browser.close()
+            }
+        }
+    },
 };
 export { getQingGuoProxy, Webshare_PROXY_USER, Webshare_PROXY_PASS }
 export default browserless;
