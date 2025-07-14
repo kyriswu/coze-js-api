@@ -1200,8 +1200,7 @@ const pagesData = await Promise.all(resultList.map(async (item, index) => {
                 // 拦截图片、CSS、字体、媒体、favicon
                 if (
                     blockedPatterns.some(pattern => url.includes(pattern)) ||
-                    ['image', 'stylesheet', 'font', 'media'].includes(resourceType) ||
-                    url.endsWith('.css') ||
+                    ['image', 'font', 'media'].includes(resourceType) ||
                     url.endsWith('.ico') ||              // favicon 文件
                     url.includes('favicon')              // 例如 /favicon.png 或 favicon.ico?ver=2
                 ) {
@@ -1225,8 +1224,7 @@ const pagesData = await Promise.all(resultList.map(async (item, index) => {
                         // 等待 input 和 button 出现
   await page.waitForSelector('input.el-input__inner');
 await page.type('input.el-input__inner', 'hkg'); // 输入出发地
-await page.waitForSelector('div.el-autocomplete-suggestion__wrap');
-await page.click('li#el-autocomplete-2405-item-1')
+await page.waitForSelector('div.el-scrollbar');
 
 // Create downloads directory if it doesn't exist
             const downloadDir = path.join(__dirname, '../..', 'downloads');
