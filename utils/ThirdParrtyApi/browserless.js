@@ -1224,7 +1224,7 @@ const pagesData = await Promise.all(resultList.map(async (item, index) => {
                         // 等待 input 和 button 出现
   await page.waitForSelector('input.el-input__inner');
 await page.type('input.el-input__inner', 'hkg'); // 输入出发地
-await page.waitForSelector('div.el-scrollbar');
+await page.waitForSelector('div.el-scrollbar', { visible : true});
 
 // Create downloads directory if it doesn't exist
             const downloadDir = path.join(__dirname, '../..', 'downloads');
