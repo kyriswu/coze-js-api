@@ -1227,6 +1227,11 @@ const pagesData = await Promise.all(resultList.map(async (item, index) => {
 await page.type('input.el-input__inner', 'hkg'); // 输入出发地
 
 
+// Create downloads directory if it doesn't exist
+            const downloadDir = path.join(__dirname, '../..', 'downloads');
+            if (!fs.existsSync(downloadDir)) {
+                fs.mkdirSync(downloadDir);
+            }
  // Generate filename with timestamp
             const timestamp = new Date().getTime();
             const filepath = path.join(downloadDir, `screenshot_${timestamp}.png`);
