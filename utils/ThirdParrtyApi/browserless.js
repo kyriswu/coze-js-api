@@ -547,6 +547,10 @@ const browserless = {
 
                     // 获取响应体
                     const responseBody = await response.json(); // 如果是 JSON 响应
+                    if (responseBody.status !== 'success') {
+                        // 触发重试机制
+                        throw new Error('获取音频信息失败，请重试');
+                    }
                     // const responseBody = await response.text(); // 如果是普通文本响应
 
                     console.log('返回的数据:', responseBody);
