@@ -118,6 +118,7 @@ const browserless = {
                     // 第一个进入的创建锁
                     publicSessionLock = (async () => {
                         const b = await puppeteer_connect(chromium_endpoint, TIMEOUT, proxy)
+                        console.log("创建公共浏览器会话-chromium_content")
                         b.on('disconnected', async () => {
                             console.warn('⚠️ Browser disconnected');
                             PUBLIC_SESSION = null;
@@ -353,6 +354,7 @@ const browserless = {
                 // 第一个进入的创建锁
                 googleSessionLock = (async () => {
                     const b = await puppeteer_connect(chromium_endpoint, TIMEOUT, proxy)
+                    console.log("创建谷歌搜索浏览器会话")
                     b.on('disconnected', async () => {
                         console.warn('⚠️ Browser disconnected');
                         GOOGLE_SESSION = null;
@@ -478,6 +480,7 @@ const browserless = {
                 // 第一个进入的创建锁
                 publicSessionLock = (async () => {
                     const b = await puppeteer_connect(chromium_endpoint, TIMEOUT, proxy)
+                    console.log("创建公共浏览器会话-extract_youtube_audio_url")
                     b.on('disconnected', async () => {
                         console.warn('⚠️ Browser disconnected');
                         PUBLIC_SESSION = null;
@@ -660,6 +663,7 @@ const browserless = {
                         // 第一个进入的创建锁
                         publicSessionLock = (async () => {
                             const b = await puppeteer_connect(chromium_endpoint, TIMEOUT, proxy)
+                            console.log("创建公共浏览器会话-screenshot")
                             b.on('disconnected', async () => {
                                 console.warn('⚠️ Browser disconnected');
                                 PUBLIC_SESSION = null;
