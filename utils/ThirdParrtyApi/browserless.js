@@ -441,7 +441,12 @@ const browserless = {
         } catch (error) {
             if (error.message && error.message.includes('net::ERR')) {
                 console.error('Google Search 网络连接失败:', error.message);
+                return await this.google_search(keyword) //重试
                 // 这里可以做额外处理，比如重试、报警等
+            }else if (error.message && err.message.includes('Navigating frame was detached')) {
+                console.error('Google Search 页面加载失败，可能是页面被重定向或关闭:', error.message);
+                // 这里可以做额外处理，比如重试、报警等
+                return await this.google_search(keyword) //重试
             } else {
                 console.error('Error in chromium Google Search API:', error);
             }
