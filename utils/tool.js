@@ -30,7 +30,7 @@ const tool = {
 
         // 增加特殊域名列表，命中则走国内代理逻辑
         const chinaDomainList = [
-            'tophub.today'
+            'tophub.today','qunar.com'
             // 可继续添加更多域名
         ];
         const urlObj = new URL(url);
