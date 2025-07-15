@@ -90,6 +90,35 @@ async function getQingGuoProxy(){
     }
 }
 
+async function disableLoadMedia(page){
+    // 开启请求拦截
+    await page.setRequestInterception(true);
+
+    page.on('request', (request) => {
+        const resourceType = request.resourceType();
+        const url = request.url().toLowerCase();
+
+        const blockedPatterns = [
+            'syndicatedsearch.goog',
+            'doubleclick.net',
+        ];
+
+        // 拦截图片、CSS、字体、媒体、favicon
+        if (
+            blockedPatterns.some(pattern => url.includes(pattern)) ||
+            ['image', 'stylesheet', 'font', 'media'].includes(resourceType) ||
+            url.endsWith('.css') ||
+            url.endsWith('.ico') ||              // favicon 文件
+            url.includes('favicon')              // 例如 /favicon.png 或 favicon.ico?ver=2
+        ) {
+            request.abort();
+        } else {
+            request.continue();
+        }
+    });
+}
+
+
 const browserless = {
 
     chromium_content: async function (url, opt = {}) {
@@ -152,31 +181,8 @@ const browserless = {
                 'Chrome/121.0.0.0 Safari/537.36'
             );
 
-            // 开启请求拦截
-            await page.setRequestInterception(true);
-
-            page.on('request', (request) => {
-                const resourceType = request.resourceType();
-                const url = request.url().toLowerCase();
-
-                const blockedPatterns = [
-                    'syndicatedsearch.goog',
-                    'doubleclick.net',
-                ];
-
-                // 拦截图片、CSS、字体、媒体、favicon
-                if (
-                    blockedPatterns.some(pattern => url.includes(pattern)) ||
-                    ['image', 'stylesheet', 'font', 'media'].includes(resourceType) ||
-                    url.endsWith('.css') ||
-                    url.endsWith('.ico') ||              // favicon 文件
-                    url.includes('favicon')              // 例如 /favicon.png 或 favicon.ico?ver=2
-                ) {
-                    request.abort();
-                } else {
-                    request.continue();
-                }
-            });
+            // 禁止加载媒体资源（提高渲染速度）
+            await disableLoadMedia(page);
 
             await page.authenticate({
                 username: proxy_user,
@@ -258,31 +264,8 @@ const browserless = {
                 'Chrome/121.0.0.0 Safari/537.36'
             );
 
-            // 开启请求拦截
-            await page.setRequestInterception(true);
-
-            page.on('request', (request) => {
-                const resourceType = request.resourceType();
-                const url = request.url().toLowerCase();
-
-                const blockedPatterns = [
-                    'syndicatedsearch.goog',
-                    'doubleclick.net',
-                ];
-
-                // 拦截图片、CSS、字体、媒体、favicon
-                if (
-                    blockedPatterns.some(pattern => url.includes(pattern)) ||
-                    ['image', 'stylesheet', 'font', 'media'].includes(resourceType) ||
-                    url.endsWith('.css') ||
-                    url.endsWith('.ico') ||              // favicon 文件
-                    url.includes('favicon')              // 例如 /favicon.png 或 favicon.ico?ver=2
-                ) {
-                    request.abort();
-                } else {
-                    request.continue();
-                }
-            });
+            // 禁止加载媒体资源（提高渲染速度）
+            await disableLoadMedia(page);
 
             await page.authenticate({
                 username: proxy_user,
@@ -386,32 +369,8 @@ const browserless = {
                 password: proxy_pass,
             }); // 正式验证代理用户名密码 :contentReference[oaicite:1]{index=1}
 
-            // 开启请求拦截
-            await page.setRequestInterception(true);
-
-            page.on('request', (request) => {
-                const resourceType = request.resourceType();
-                const url = request.url().toLowerCase();
-
-                const blockedPatterns = [
-                    'syndicatedsearch.goog',
-                    'doubleclick.net',
-                    'https://cse.google.com/adsense/search/async-ads.js'
-                ];
-
-                // 拦截图片、CSS、字体、媒体、favicon
-                if (
-                    blockedPatterns.some(pattern => url.includes(pattern)) ||
-                    ['image', 'stylesheet', 'font', 'media'].includes(resourceType) ||
-                    url.endsWith('.css') ||
-                    url.endsWith('.ico') ||              // favicon 文件
-                    url.includes('favicon')              // 例如 /favicon.png 或 favicon.ico?ver=2
-                ) {
-                    request.abort();
-                } else {
-                    request.continue();
-                }
-            });
+            // 禁止加载媒体资源（提高渲染速度）
+            await disableLoadMedia(page);
 
             let totalBytes = 0;
 
@@ -518,31 +477,8 @@ const browserless = {
                 await browser.setCookie(...opt.cookie)
             }
 
-            // 开启请求拦截
-            await page.setRequestInterception(true);
-
-            page.on('request', (request) => {
-                const resourceType = request.resourceType();
-                const url = request.url().toLowerCase();
-
-                const blockedPatterns = [
-                    'syndicatedsearch.goog',
-                    'doubleclick.net',
-                ];
-
-                // 拦截图片、CSS、字体、媒体、favicon
-                if (
-                    blockedPatterns.some(pattern => url.includes(pattern)) ||
-                    ['image', 'stylesheet', 'font', 'media'].includes(resourceType) ||
-                    url.endsWith('.css') ||
-                    url.endsWith('.ico') ||              // favicon 文件
-                    url.includes('favicon')              // 例如 /favicon.png 或 favicon.ico?ver=2
-                ) {
-                    request.abort();
-                } else {
-                    request.continue();
-                }
-            });
+            // 禁止加载媒体资源（提高渲染速度）
+            await disableLoadMedia(page);
 
             page.on('response', async (response) => {
                 if (response.url().includes('/getinfo')) {
@@ -1039,6 +975,10 @@ const browserless = {
                     'AppleWebKit/537.36 (KHTML, like Gecko) ' +
                     'Chrome/121.0.0.0 Safari/537.36'
                 );
+
+                // 禁止加载媒体资源（提高渲染速度）
+                await disableLoadMedia(p);
+            
                 await p.authenticate({
                     username: proxy_user,
                     password: proxy_pass,
