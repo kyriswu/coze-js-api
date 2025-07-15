@@ -126,7 +126,7 @@ const cozecom = {
             //     access_token = await this.refresh_token()
             // }
             // console.log("access_token", access_token)
-            const access_token = "pat_uszZ7Pw5DecJNewpWovZvhjqBGigY8xVhWSAuJ3eZDS0NYtTFDFpTybGHZMhfm8t"
+            const access_token = "pat_cENiR5utU0NRt5iM6UFssnXqDCHpnQcBuLeUUUXLFEdRhrwOKs3MFSBfbV7jURqJ"
             console.log({
                 workflow_id: "7515067322877739016",
                 parameters: {
@@ -148,14 +148,10 @@ const cozecom = {
                 }
             });
 
-            console.log(response.headers)
-            console.log(response.data);
-
             const messageDataMatch = response.data.match(/event:\s*message\s*data:\s*(\{[\s\S]*?)(?=\n(?:id:|event:|$))/i);
 
             if (messageDataMatch) {
                 const messageData = messageDataMatch[1].trim();
-                console.log(JSON.parse(messageData));
                 return JSON.parse(messageData);
             } else {
                 throw new Error("未找到有效的 message data 内容");
