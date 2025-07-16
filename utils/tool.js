@@ -112,7 +112,7 @@ const tool = {
             const { stdout, stderr } = await execPromise(command)
             return out_video_name
         }catch(err){
-            console.err(err)
+            console.error(err)
             throw err
         }
         
