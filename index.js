@@ -1517,6 +1517,9 @@ app.post('/explorer', async (req, res) => {
     if (!url) {
         return res.status(400).send('url is required');
     }
+    if (!tool.isValidUrl(url)) {
+        return res.status(400).send('url is invalid');
+    }
     if (cookie) {
         const parsedUrl = new URL(url);
 
