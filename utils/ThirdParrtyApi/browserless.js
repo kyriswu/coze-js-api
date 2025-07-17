@@ -402,6 +402,7 @@ const browserless = {
             }
 
             const html = await page.content();
+            console.log(html)
               console.log(`💾 Total bandwidth: ${(totalBytes / 1024).toFixed(2)} KB，搜索词：${keyword}`);
             await page.close()
 
