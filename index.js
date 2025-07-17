@@ -2110,6 +2110,7 @@ app.get('/vpn/get_proxy', async (req, res) => {
         const response = await axios.get('https://dl.jisusub.cc/api/v1/client/subscribe?token=9c79dac17d0e23088411f0674035798d', {
             responseType: 'text'
         });
+        console.log(response.data)
         res.send(response.data);
     } catch (error) {
         console.error(error);
