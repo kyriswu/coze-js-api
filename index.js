@@ -706,7 +706,7 @@ app.post('/google/search/web', async (req, res) => {
             title: a ? a.textContent.trim() : null
         };
     }).filter(item => item.link !== null); // 过滤掉不符合要求的项
-
+    console.log(result_list)
     return res.send({
         code: 0,
         msg: '本插件每日有使用限制，关注【B站：小吴爱折腾】，留言：谷歌搜索api_key，获取更多使用次数',
