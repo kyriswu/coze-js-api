@@ -4,6 +4,8 @@ import path from 'path';
 import { dirname } from 'path';
 import puppeteer from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
+import pLimit from 'p-limit';
+const limit = pLimit(10); // 最多并发 5 个
 
 puppeteer.use(StealthPlugin());
 import os from 'os';
@@ -318,7 +320,8 @@ const browserless = {
     },
 
     google_search: async function (keyword) {
-        await redis.incr("google_search_count")
+        return limit(async () => {
+            await redis.incr("google_search_count")
         let proxy_user, proxy_pass, chromium_endpoint, proxy
         let browser, page
 
@@ -387,7 +390,7 @@ const browserless = {
             const ces=`https://cse.google.com/cse?cx=93d449f1c4ff047bc#gsc.tab=0&gsc.q=${keyword}&gsc.sort=&gsc.page=1`
             const response = await page.goto(ces, {
                 timeout: TIMEOUT,
-                waitUntil: 'networkidle2',
+                waitUntil: 'networkidle0',
             });
 
             // 检查 HTTP 状态码
@@ -418,6 +421,7 @@ const browserless = {
             // 强制再执行一次 page.close，不考虑报错
                 try { await page.close(); } catch (e) {}
         }
+        })
     },
 
     extract_youtube_audio_url: async function (toolurl,videourl, opt = {}) {
