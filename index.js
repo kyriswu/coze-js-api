@@ -646,7 +646,7 @@ app.post('/google/search/web', async (req, res) => {
         return res.status(400).send('Invalid input: "q" is required');
     }
 
-    免费版的key
+    //免费版的key
     const free_key = 'google_'+req.headers['user-identity']
     if (api_key) {
         const { keyId, valid, remaining, code } = await unkey.verifyKey(api_id, api_key, 0);
@@ -676,21 +676,21 @@ app.post('/google/search/web', async (req, res) => {
         }
     }
 
-    search1api.search(q).then(async (data) => {
-        let msg = "";
-        if (api_key) {
-            //付费版
-            const { remaining } = await unkey.verifyKey(api_id, api_key, 1);
-            msg = `API Key 剩余调用次数：${remaining}`;
-        }else{
-            msg = `今日免费使用次数用完，付费购买API KEY可解锁更多次数，请联系作者！【B站:小吴爱折腾】`;
-        }
-        return res.send({
-            code: 0,
-            msg: msg,
-            data: data.results
-        });
-    })
+    // search1api.search(q).then(async (data) => {
+    //     let msg = "";
+    //     if (api_key) {
+    //         //付费版
+    //         const { remaining } = await unkey.verifyKey(api_id, api_key, 1);
+    //         msg = `API Key 剩余调用次数：${remaining}`;
+    //     }else{
+    //         msg = `今日免费使用次数用完，付费购买API KEY可解锁更多次数，请联系作者！【B站:小吴爱折腾】`;
+    //     }
+    //     return res.send({
+    //         code: 0,
+    //         msg: msg,
+    //         data: data.results
+    //     });
+    // })
 
     try {
         const html = await browserless.google_search(q)
@@ -706,7 +706,8 @@ app.post('/google/search/web', async (req, res) => {
             title: a ? a.textContent.trim() : null
         };
     }).filter(item => item.link !== null); // 过滤掉不符合要求的项
-    console.log(result_list)
+    
+    
     return res.send({
         code: 0,
         msg: '本插件每日有使用限制，关注【B站：小吴爱折腾】，留言：谷歌搜索api_key，获取更多使用次数',
