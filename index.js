@@ -33,6 +33,9 @@ const agent = new HttpsProxyAgent(proxyUrl);
 app.get('/', (req, res) => {
     res.send('Hello World!')
 })
+app.get('/limit', (req, res) => {
+    res.send('达到用量限制，获取更多使用次数，请联系作者购买API Key，微信：xiaowu_azt')
+})
 app.get('/video', (req, res) => {
 
     // Then in the /video route handler:
@@ -670,7 +673,8 @@ app.post('/google/search/web', async (req, res) => {
                 msg: '每天免费使用1次，付费购买api_key，可解锁更多次数，请联系作者！【B站:小吴爱折腾】',
                 data: [{
                     'title': '每天免费使用1次，付费购买api_key，可解锁更多次数，请联系作者！【B站:小吴爱折腾】',
-                    'url': 'https://space.bilibili.com/396762480'
+                    'link': 'https://space.bilibili.com/396762480',
+                    'snippet': '每天免费使用1次，付费购买api_key，可解锁更多次数，请联系作者！【B站:小吴爱折腾】'
                 }]
             }); 
         }
@@ -707,7 +711,7 @@ app.post('/google/search/web', async (req, res) => {
         };
     }).filter(item => item.link !== null); // 过滤掉不符合要求的项
     
-    
+
     return res.send({
         code: 0,
         msg: '本插件每日有使用限制，关注【B站：小吴爱折腾】，留言：谷歌搜索api_key，获取更多使用次数',
