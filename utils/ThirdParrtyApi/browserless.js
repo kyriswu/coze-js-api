@@ -376,10 +376,11 @@ const browserless = {
 
             page.on('response', async (response) => {
                 try {
-                const buffer = await response.buffer();
-                totalBytes += buffer.length;
+                    const buffer = await response.buffer();
+                    totalBytes += buffer.length;
                 } catch (err) {
                 // 某些响应可能没有主体（如 204/304），跳过即可
+                    console.log("谷歌搜索出现错误", err.message)
                 }
             });
 
@@ -395,7 +396,7 @@ const browserless = {
             }
 
             const html = await page.content();
-              console.log(`💾 Total bandwidth: ${(totalBytes / 1024).toFixed(2)} KB`);
+              console.log(`💾 Total bandwidth: ${(totalBytes / 1024).toFixed(2)} KB，搜索词：${keyword}`);
             await page.close()
 
             return html
