@@ -480,21 +480,28 @@ const browserless = {
             // 禁止加载媒体资源（提高渲染速度）
             await disableLoadMedia(page);
 
+            // ...existing code...
+            let getinfoResult; // 用于主流程等待 getinfo 响应
+            const getinfoPromise = new Promise((resolve, reject) => {
+                getinfoResult = { resolve, reject };
+            });
+
             page.on('response', async (response) => {
                 if (response.url().includes('/getinfo')) {
                     console.log('捕获到响应:', response.url());
-
-                    // 获取响应体
-                    const responseBody = await response.json(); // 如果是 JSON 响应
-                    if (responseBody.status !== 'success') {
-                        // 触发重试机制
-                        throw new Error('获取音频信息失败，请重试');
+                    try {
+                        const responseBody = await response.json();
+                        if (responseBody.status !== 'success') {
+                            getinfoResult.reject(new Error('获取音频信息失败，请重试'));
+                        } else {
+                            getinfoResult.resolve(responseBody);
+                        }
+                        console.log('返回的数据:', responseBody);
+                    } catch (err) {
+                        getinfoResult.reject(err);
                     }
-                    // const responseBody = await response.text(); // 如果是普通文本响应
-
-                    console.log('返回的数据:', responseBody);
                 }
-                });
+            });
 
             const response = await page.goto(toolurl, {
                 timeout: TIMEOUT,
@@ -506,6 +513,8 @@ const browserless = {
                 console.error(`Request failed with status code: ${response.status()}`);
                 throw new Error(`HTTP request failed with status ${response.status()}`);
             }
+
+            console.log("getinfoResult:", getinfoResult)
 
                         // 等待 input 和 button 出现
   await page.waitForSelector('#videoUrl');
@@ -532,6 +541,11 @@ const browserless = {
 
             return audio_url
         } catch (error) {
+            if (error.message && error.message.includes('net::ERR')) {
+                console.error('Extract YouTube Audio 网络连接失败:', error.message);
+                // 这里可以做额外处理，比如重试、报警等
+                return await this.extract_youtube_audio_url(toolurl,videourl) //重试
+            }
             console.error('Error in chromium screen shot:', error);
             return null
         } finally {
