@@ -2105,6 +2105,18 @@ app.get('/jipiao', async (req, res) => {
     }
 })
 
+app.get('/vpn/get_proxy', async (req, res) => {
+    try {
+        const response = await axios.get('https://dl.jisusub.cc/api/v1/client/subscribe?token=9c79dac17d0e23088411f0674035798d', {
+            responseType: 'text'
+        });
+        res.send(response.data);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Failed to fetch proxy data');
+    }
+})
+
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
