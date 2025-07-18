@@ -328,7 +328,7 @@ async function canSearchGoogle(key) {
         const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
         const secondsSinceMidnight = Math.floor((now - midnight) / 1000);
         console.log("创建key:", key, "初始值为0，过期时间为", secondsSinceMidnight);
-        await redis.set(key, 0, 'EX', secondsSinceMidnight);
+        await redis.set(key, 0, 'EX', 10 * 60);
         return true
     }else{
         return false;
@@ -670,11 +670,11 @@ app.post('/google/search/web', async (req, res) => {
         if (!canSearch) {
             return res.send({
                 code: 0,
-                msg: '每天免费使用1次，付费购买api_key，可解锁更多次数，请联系作者！【B站:小吴爱折腾】',
+                msg: '免费用户有频率限制，10分钟内使用1次，付费购买api_key，请联系作者！【B站:小吴爱折腾】',
                 data: [{
-                    'title': '每天免费使用1次，付费购买api_key，可解锁更多次数，请联系作者！【B站:小吴爱折腾】',
+                    'title': '免费用户有频率限制，10分钟内使用1次，付费购买api_key，请联系作者！【B站:小吴爱折腾】',
                     'link': 'https://space.bilibili.com/396762480',
-                    'snippet': '每天免费使用1次，付费购买api_key，可解锁更多次数，请联系作者！【B站:小吴爱折腾】'
+                    'snippet': '免费用户有频率限制，10分钟内使用1次，付费购买api_key，请联系作者！【B站:小吴爱折腾】'
                 }]
             }); 
         }
