@@ -1,11 +1,12 @@
 import https from 'node:https';
 
 const unkey = {
-    verifyKey: async function (apiId, key, cost) {
+    verifyKey: async function (apiId, key, cost, tags) {
         const data = JSON.stringify({
             apiId: apiId,
             key: key,
-            remaining: {cost: cost}
+            tags: tags ? Object.values(tags).map(String) : [],
+            remaining: { cost: cost }
         });
 
         const options = {
