@@ -1569,7 +1569,7 @@ app.post('/explorer', async (req, res) => {
 
         const sanitizedUrl = url.trim(); // Remove any whitespace including newlines
 
-        const htmldata = await tool.request_chromium(sanitizedUrl, cookie, xpath, selector)
+        const htmldata = await tool.request_chromium(sanitizedUrl, cookie, xpath, selector, null, actions);
 
         let result_list = extract_html_conent_standard(htmldata,xpath,selector)
 
