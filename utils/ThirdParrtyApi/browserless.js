@@ -124,8 +124,8 @@ async function doActions(page, actions) {
     
     for (const act of actions) {
         if (act.action === 'click') {
+            console.log("执行点击操作：", act.selector.value)
             if (act.selector.type === 'xpath') {
-                await page.waitForSelector('xpath/' + act.selector.value, { timeout: 60000 });
                 const xp = 'xpath='+act.selector.value;
                 await page.click(xp, { timeout: 60000 });
             }else{
