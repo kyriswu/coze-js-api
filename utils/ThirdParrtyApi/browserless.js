@@ -124,12 +124,17 @@ async function doActions(page, actions) {
     
     for (const act of actions) {
         if (act.action === 'click') {
+            let el;
             if (act.selector.type === 'xpath') {
-                const xp = '::-p-xpath('+act.selector.value+')';
-                await page.click(xp, { timeout: 60000 });
-            }else{
-                await page.click(act.selector.value, { timeout: 60000 });
+                const xpath = act.selector.value;
+                await page.waitForSelector(`::-p-xpath(${xpath})`, { timeout: 60000 });
+                el = await page.$(`::-p-xpath(${xpath})`);
+            } else {
+                await page.waitForSelector(act.selector.value, { timeout: 60000 });
+                el = await page.$(act.selector.value);
             }
+            if (!el) throw new Error('元素未找到，点击失败');
+            await el.click();
         } else if (act.action === 'type') {
             let el
             if (act.selector.type === 'xpath') {
