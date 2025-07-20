@@ -126,7 +126,8 @@ async function doActions(page, actions) {
         if (act.action === 'click') {
             let el
             if (act.selector.type === 'xpath') {
-                el = await page.waitForSelector('xpath/' + act.selector.value, { timeout: 60000 });
+                const xp = '::-p-xpath('+act.selector.value+')';
+                el = await page.waitForSelector(xp, { timeout: 60000 });
             }else{
                 el = await page.waitForSelector(act.selector.value, { timeout: 60000 });
             }
@@ -134,7 +135,8 @@ async function doActions(page, actions) {
         } else if (act.action === 'type') {
             let el
             if (act.selector.type === 'xpath') {
-                el = await page.waitForSelector('xpath/' + act.selector.value, { timeout: 60000 });
+                const xp = '::-p-xpath('+act.selector.value+')';
+                el = await page.waitForSelector(xp, { timeout: 60000 });
             }else{
                 el = await page.waitForSelector(act.selector.value, { timeout: 60000 });
             }
