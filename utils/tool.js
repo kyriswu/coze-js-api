@@ -22,12 +22,16 @@ const __dirname = dirname(__filename)
 const execPromise = util.promisify(exec);
 
 const tool = {
-    request_chromium: async function (url, cookie, xpath, selector, waitUntil) {
+    request_chromium: async function (url, cookie, xpath, selector, waitUntil, actions) {
 
         if(!this.isValidUrl(url)){
             throw new Error("url链接不正确，请使用正确的链接")
         }
-
+        let parsedActions = [];
+        if (actions && typeof actions === 'string') {
+            parsedActions = actions.split('\n').map(a => a.trim()).filter(a => a.length > 0);
+            console.log("Parsed actions:", parsedActions);
+        }
         // 增加特殊域名列表，命中则走国内代理逻辑
         const chinaDomainList = [
             'tophub.today','qunar.com','zjedu.org','org.cn','news.cn'

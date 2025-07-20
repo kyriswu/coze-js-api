@@ -486,7 +486,7 @@ function extract_html_conent_standard(HtmlContent,xpath,selector){
 }
 
 app.post('/parse_html', async (req, res) => {
-    let { url, selector, xpath, api_key, action } = req.body;
+    let { url, selector, xpath, api_key, actions } = req.body;
     if (!url) {
         return res.status(400).send('url is required');
     }
@@ -506,7 +506,7 @@ app.post('/parse_html', async (req, res) => {
         });
     }
 
-    if (action) {
+    if (actions) {
         return await zyteExtract(req, res);
     }
     const api_id = "api_413Kmmitqy3qaDo4";
@@ -543,7 +543,7 @@ app.post('/parse_html', async (req, res) => {
 
         const sanitizedUrl = url.trim(); // Remove any whitespace including newlines
 
-        const htmldata = await tool.request_chromium(sanitizedUrl, null, null, null)
+        const htmldata = await tool.request_chromium(sanitizedUrl, null, null, null, null, actions)
 
         let result_list = extract_html_conent(htmldata,xpath,selector)
 
@@ -1515,7 +1515,7 @@ app.get('/cozecom-auth-callback', cozecom.callback)
 //虚拟浏览器
 app.post('/explorer', async (req, res) => {
     
-    let { url, selector, xpath, api_key, action, cookie } = req.body;
+    let { url, selector, xpath, api_key, actions, cookie } = req.body;
     if (selector && xpath){
         return res.status(400).send('selector or xpath，这两个参数二选一，不要都填');
     }
