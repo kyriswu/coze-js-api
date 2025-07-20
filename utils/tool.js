@@ -29,7 +29,19 @@ const tool = {
         }
         let parsedActions = [];
         if (actions && typeof actions === 'string') {
-            parsedActions = actions.split('\n').map(a => a.trim()).filter(a => a.length > 0);
+            parsedActions = actions
+            .split('\n')
+            .map(a => a.trim())
+            .filter(a => a.length > 0)
+            .map(a => {
+                try {
+                return JSON.parse(a);
+                } catch (e) {
+                console.error("Action JSON parse error:", a, e);
+                return null;
+                }
+            })
+            .filter(a => a !== null);
             console.log("Parsed actions:", parsedActions);
         }
         // 增加特殊域名列表，命中则走国内代理逻辑
