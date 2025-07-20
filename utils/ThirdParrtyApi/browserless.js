@@ -125,10 +125,11 @@ async function doActions(page, actions) {
     for (const act of actions) {
         if (act.action === 'click') {
             if (act.selector.type === 'xpath') {
+                await page.waitForSelector('xpath/' + act.selector.value, { timeout: 60000 });
                 const xp = '::-p-xpath('+act.selector.value+')';
                 await page.click(xp, { timeout: 60000 });
             }else{
-                console.log("点击元素：", act.selector.value)
+                await page.waitForSelector(act.selector.value, { timeout: 60000 });
                 await page.click(act.selector.value, { timeout: 60000 });
             }
         } else if (act.action === 'type') {
