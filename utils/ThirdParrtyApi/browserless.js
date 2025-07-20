@@ -120,6 +120,29 @@ async function disableLoadMedia(page){
     });
 }
 
+async function doActions(page, actions) {
+    
+    for (const act of actions) {
+        if (act.action === 'click') {
+            let el
+            if (act.selector.type === 'xpath') {
+                el = await page.waitForSelector('xpath/' + act.selector.value, { timeout: 60000 });
+            }else{
+                el = await page.waitForSelector(act.selector.value, { timeout: 60000 });
+            }
+            await el.click();
+        } else if (act.action === 'type') {
+            let el
+            if (act.selector.type === 'xpath') {
+                el = await page.waitForSelector('xpath/' + act.selector.value, { timeout: 60000 });
+            }else{
+                el = await page.waitForSelector(act.selector.value, { timeout: 60000 });
+            }
+            await el.type(act.text); // 模拟打字效果
+        }
+    }
+
+}
 
 const browserless = {
 
@@ -203,7 +226,8 @@ const browserless = {
             }
 
             if (opt && opt.actions) {
-                console.log("执行操作：", opt.actions)
+                // 执行操作
+                await doActions(page, opt.actions);
             }
 
             if (opt && opt.element_type && opt.element) {
