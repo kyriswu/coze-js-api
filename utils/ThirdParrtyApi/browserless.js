@@ -124,14 +124,12 @@ async function doActions(page, actions) {
     
     for (const act of actions) {
         if (act.action === 'click') {
-            let el
             if (act.selector.type === 'xpath') {
                 const xp = '::-p-xpath('+act.selector.value+')';
-                el = await page.waitForSelector(xp, { timeout: 60000 });
+                await page.click(xp, { timeout: 60000 });
             }else{
-                el = await page.waitForSelector(act.selector.value, { timeout: 60000 });
+                await page.click(act.selector.value, { timeout: 60000 });
             }
-            await el.click();
         } else if (act.action === 'type') {
             let el
             if (act.selector.type === 'xpath') {
