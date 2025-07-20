@@ -202,6 +202,10 @@ const browserless = {
                 throw new Error(`HTTP request failed with status ${response.status()}`);
             }
 
+            if (opt && opt.actions) {
+                console.log("执行操作：", opt.actions)
+            }
+
             if (opt && opt.element_type && opt.element) {
                 if (opt.element_type === 'xpath') {
                     console.log("等待xpath元素：", opt.element)
