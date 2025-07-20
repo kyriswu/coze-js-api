@@ -126,7 +126,7 @@ async function doActions(page, actions) {
         if (act.action === 'click') {
             if (act.selector.type === 'xpath') {
                 await page.waitForSelector('xpath/' + act.selector.value, { timeout: 60000 });
-                const xp = '::-p-xpath('+act.selector.value+')';
+                const xp = 'xpath='+act.selector.value;
                 await page.click(xp, { timeout: 60000 });
             }else{
                 await page.waitForSelector(act.selector.value, { timeout: 60000 });
