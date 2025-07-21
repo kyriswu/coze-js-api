@@ -1294,10 +1294,12 @@ app.post('/video2audio', async (req, res) => {
         const download = await tool.download_file(videoUrl)
         if (!download.success) throw new Error(download.error);
         if (download.is_audio) {
+            const convert = await tool.audio_format_convert(download.filepath, 'mp3')
+            if(!convert.success) throw new Error(convert.error)
             return res.send({
                 "code": 0,
                 "msg": "success",
-                "data": `https://coze-js-api.devtool.uk/audio/${path.basename(download.filepath)}`
+                "data": `https://coze-js-api.devtool.uk/audio/${path.basename(convert.filepath)}`
             })
         }
         const convert = await tool.video_to_audio(download.filepath)
