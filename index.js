@@ -1578,7 +1578,7 @@ app.post('/explorer', async (req, res) => {
         let msg = "";
         if (api_key) {
             //付费版
-            const { remaining } = await unkey.verifyKey(api_id, api_key, 1, { url: url, selector: selector, xpath: xpath, action: action });
+            const { remaining } = await unkey.verifyKey(api_id, api_key, 1, { url: url, selector: selector, xpath: xpath});
             msg = `API Key 剩余调用次数：${remaining}`;
         }else{
             await redis.incr(free_key);//每次调用增加一次
