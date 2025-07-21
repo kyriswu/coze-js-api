@@ -543,7 +543,7 @@ app.post('/parse_html', async (req, res) => {
 
         const sanitizedUrl = url.trim(); // Remove any whitespace including newlines
 
-        const htmldata = await tool.request_chromium(sanitizedUrl, null, null, null, null, actions)
+        const htmldata = await tool.request_chromium(sanitizedUrl, null, null, null, null)
 
         let result_list = extract_html_conent(htmldata,xpath,selector)
 
@@ -1569,7 +1569,7 @@ app.post('/explorer', async (req, res) => {
 
         const sanitizedUrl = url.trim(); // Remove any whitespace including newlines
 
-        const htmldata = await tool.request_chromium(sanitizedUrl, cookie, xpath, selector, null, actions);
+        const htmldata = await tool.request_chromium(sanitizedUrl, cookie, xpath, selector, null);
 
         let result_list = extract_html_conent_standard(htmldata,xpath,selector)
 
