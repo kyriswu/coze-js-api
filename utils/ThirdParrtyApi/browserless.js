@@ -280,6 +280,13 @@ const browserless = {
 
             page = await browser.newPage();
             await page.setJavaScriptEnabled(true);
+            // 伪装 navigator.webdriver
+            await page.evaluateOnNewDocument(() => {
+            Object.defineProperty(navigator, 'webdriver', {
+                get: () => false
+            });
+            });
+
 
             //设置cookie
             if (opt && opt.cookie) {
