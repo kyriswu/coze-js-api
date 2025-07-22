@@ -16,7 +16,7 @@ import filetool from './filetool.js';
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 
-const TIMEOUT = 600000
+const TIMEOUT = 3600 * 1000
 
 const Webshare_PROXY_USER = "umwhniat-rotate"
 const Webshare_PROXY_PASS = "eudczfs5mkzt"
