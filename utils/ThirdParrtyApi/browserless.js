@@ -310,8 +310,7 @@ const browserless = {
 
             const response = await page.goto(url, {
                 timeout: TIMEOUT,
-                // waitUntil: 'domcontentloaded',
-                waitUntil: 'networkidle2'
+                waitUntil: 'domcontentloaded'
             });
 
             // 检查 HTTP 状态码
