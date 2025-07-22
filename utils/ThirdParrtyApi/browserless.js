@@ -195,6 +195,7 @@ const browserless = {
         try {
 
             page = await browser.newPage();
+            await page.setJavaScriptEnabled(true);
 
             //设置cookie
             if (opt && opt.cookie) {
@@ -278,6 +279,7 @@ const browserless = {
         try {
 
             page = await browser.newPage();
+            await page.setJavaScriptEnabled(true);
 
             //设置cookie
             if (opt && opt.cookie) {
