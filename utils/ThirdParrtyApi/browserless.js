@@ -424,7 +424,8 @@ const browserless = {
             await page.setDefaultNavigationTimeout(120000);  // 设置导航的默认 timeout
             await page.setDefaultTimeout(150000);
 
-            const ces=`https://cse.google.com/cse?cx=93d449f1c4ff047bc#gsc.tab=0&gsc.q=${keyword}&gsc.sort=&gsc.page=1`
+            const ces=`https://cse.google.com/cse?cx=c41a0f846c1fe490c#gsc.tab=0&gsc.q=${keyword}&gsc.sort=&gsc.page=1`
+            // const ces=`https://cse.google.com/cse?cx=93d449f1c4ff047bc#gsc.tab=0&gsc.q=${keyword}&gsc.sort=&gsc.page=1`
             const response = await page.goto(ces, {
                 timeout: TIMEOUT
             });
