@@ -424,14 +424,15 @@ const browserless = {
             await page.setDefaultNavigationTimeout(120000);  // 设置导航的默认 timeout
             await page.setDefaultTimeout(150000);
 
+            let ces = ''
             if (search_count % 4 === 0) {
-                const ces=`https://cse.google.com/cse?cx=c277c25def5cf420c#gsc.tab=0&gsc.q=${keyword}&gsc.sort=&gsc.page=1`
+                 ces=`https://cse.google.com/cse?cx=c277c25def5cf420c#gsc.tab=0&gsc.q=${keyword}&gsc.sort=&gsc.page=1`
             } else if (search_count % 4 === 1) {
-                const ces=`https://cse.google.com/cse?cx=c41a0f846c1fe490c#gsc.tab=0&gsc.q=${keyword}&gsc.sort=&gsc.page=1`
+                 ces=`https://cse.google.com/cse?cx=c41a0f846c1fe490c#gsc.tab=0&gsc.q=${keyword}&gsc.sort=&gsc.page=1`
             } else if (search_count % 4 === 2) {
-                const ces=`https://cse.google.com/cse?cx=f012bf6d1cf90477e#gsc.tab=0&gsc.q=${keyword}&gsc.sort=&gsc.page=1`
+                 ces=`https://cse.google.com/cse?cx=f012bf6d1cf90477e#gsc.tab=0&gsc.q=${keyword}&gsc.sort=&gsc.page=1`
             } else {    
-                const ces=`https://cse.google.com/cse?cx=93d449f1c4ff047bc#gsc.tab=0&gsc.q=${keyword}&gsc.sort=&gsc.page=1`
+                 ces=`https://cse.google.com/cse?cx=93d449f1c4ff047bc#gsc.tab=0&gsc.q=${keyword}&gsc.sort=&gsc.page=1`
             }
 
             const response = await page.goto(ces, {
