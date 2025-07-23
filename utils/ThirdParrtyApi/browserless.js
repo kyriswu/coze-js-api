@@ -5,7 +5,7 @@ import { dirname } from 'path';
 import puppeteer from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import pLimit from 'p-limit';
-const limit = pLimit(5); // 最多并发 5 个
+const limit = pLimit(10); // 最多并发 5 个
 
 puppeteer.use(StealthPlugin());
 import os from 'os';
