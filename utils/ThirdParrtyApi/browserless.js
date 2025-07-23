@@ -443,8 +443,10 @@ const browserless = {
 await page.waitForSelector('#gsc-i-id1');
 await page.type('#gsc-i-id1', keyword); // 模拟打字效果
 await page.click('.gsc-search-button'); // 聚焦并选中文本（如果已有）
-await page.waitForSelector('.gsc-tabhActive');
-
+await page.waitForFunction(() => {
+  const el = document.querySelector('div.gsc-control-wrapper-cse');
+  return el && !el.classList.contains('gsc-loading-fade');
+});
             const html = await page.content();
             console.log(html)
               console.log(`💾 Total bandwidth: ${(totalBytes / 1024).toFixed(2)} KB，搜索词：${keyword}`);
