@@ -652,7 +652,7 @@ app.post('/google/search/web', async (req, res) => {
     //免费版的key
     const free_key = 'google_'+req.headers['user-identity']
     if (api_key) {
-        const { keyId, valid, remaining, code } = await unkey.verifyKey(api_id, api_key, 0, {q:q});
+        const { keyId, valid, remaining, code } = await unkey.verifyKey(api_id, api_key, 0);
         if (!valid) {
             return res.send({
                 code: -1,
