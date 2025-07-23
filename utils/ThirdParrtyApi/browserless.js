@@ -428,7 +428,7 @@ const browserless = {
             const cx = ['c277c25def5cf420c', 'c41a0f846c1fe490c', 'f012bf6d1cf90477e', '93d449f1c4ff047bc','10fe0d70750b2423c','74ac2ca7f804a4408','7660206f8e0b84ba3'
                 ,'6457c8d0218494fd8', '22eb5e8ce100049f4','a68056744fdfe4ca6'
             ];
-            const ces = `https://cse.google.com/cse?cx=${cx[search_count % 6]}#gsc.tab=0&gsc.q=${keyword}&gsc.sort=&gsc.page=1`
+            const ces = `https://cse.google.com/cse?cx=${cx[search_count % 10]}#gsc.tab=0&gsc.q=${keyword}&gsc.sort=&gsc.page=1`
 
             const response = await page.goto(ces, {
                 timeout: TIMEOUT
