@@ -424,16 +424,9 @@ const browserless = {
             await page.setDefaultNavigationTimeout(120000);  // 设置导航的默认 timeout
             await page.setDefaultTimeout(150000);
 
-            let ces = ''
-            if (search_count % 4 === 0) {
-                 ces=`https://cse.google.com/cse?cx=c277c25def5cf420c#gsc.tab=0&gsc.q=${keyword}&gsc.sort=&gsc.page=1`
-            } else if (search_count % 4 === 1) {
-                 ces=`https://cse.google.com/cse?cx=c41a0f846c1fe490c#gsc.tab=0&gsc.q=${keyword}&gsc.sort=&gsc.page=1`
-            } else if (search_count % 4 === 2) {
-                 ces=`https://cse.google.com/cse?cx=f012bf6d1cf90477e#gsc.tab=0&gsc.q=${keyword}&gsc.sort=&gsc.page=1`
-            } else {    
-                 ces=`https://cse.google.com/cse?cx=93d449f1c4ff047bc#gsc.tab=0&gsc.q=${keyword}&gsc.sort=&gsc.page=1`
-            }
+
+            const cx = ['c277c25def5cf420c', 'c41a0f846c1fe490c', 'f012bf6d1cf90477e', '93d449f1c4ff047bc','10fe0d70750b2423c','74ac2ca7f804a4408'];
+            const ces = `https://cse.google.com/cse?cx=${cx[search_count % 6]}#gsc.tab=0&gsc.q=${keyword}&gsc.sort=&gsc.page=1`
 
             const response = await page.goto(ces, {
                 timeout: TIMEOUT
