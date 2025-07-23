@@ -440,6 +440,10 @@ const browserless = {
                 console.error(`Request failed with status code: ${response.status()}`);
                 throw new Error(`HTTP request failed with status ${response.status()}`);
             }
+await page.waitForSelector('#gsc-i-id1');
+await page.type('#gsc-i-id1', keyword); // 模拟打字效果
+await page.click('.gsc-search-button'); // 聚焦并选中文本（如果已有）
+await page.waitForSelector('.gsc-tabhActive');
 
             const html = await page.content();
             console.log(html)
