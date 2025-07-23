@@ -469,6 +469,11 @@ await page.waitForFunction(() => {
         } finally {
             // 强制再执行一次 page.close，不考虑报错
                 try { await page.close(); } catch (e) {}
+                if (search_count % 50 === 0) {
+                    // 每50次搜索关闭一次浏览器，释放资源
+                    console.log("每50次搜索关闭一次浏览器，释放资源")
+                    await browser.close();
+                }
         }
         })
     },
