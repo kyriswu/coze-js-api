@@ -698,38 +698,45 @@ app.post('/google/search/web', async (req, res) => {
 
     try {
         const html = await browserless.google_search(q)
-    const dom = new JSDOM(html);
-    const { document, window } = dom.window;
-    const selector = "div.gsc-result"
-    const result_list = Array.from(document.querySelectorAll(selector)).map(element => {
-        const a = element.querySelector('a.gs-title');
-        const div = element.querySelector('div.gs-snippet');
-        return {
-            snippet: div ? div.textContent.trim() : null,
-            link: a ? a.href : null,
-            title: a ? a.textContent.trim() : null
-        };
-    }).filter(item => item.link !== null); // 过滤掉不符合要求的项
-    
+        const dom = new JSDOM(html);
+        const { document, window } = dom.window;
+        const selector = "div.gsc-result"
+        const result_list = Array.from(document.querySelectorAll(selector)).map(element => {
+            const a = element.querySelector('a.gs-title');
+            const div = element.querySelector('div.gs-snippet');
+            return {
+                snippet: div ? div.textContent.trim() : null,
+                link: a ? a.href : null,
+                title: a ? a.textContent.trim() : null
+            };
+        }).filter(item => item.link !== null); // 过滤掉不符合要求的项
 
-    return res.send({
-        code: 0,
-        msg: '本插件每日有使用限制，关注【B站：小吴爱折腾】，留言：谷歌搜索api_key，获取更多使用次数',
-        data: result_list
-    });
-    }catch(err){
+
+        let msg = '本插件每日有使用限制，关注【B站：小吴爱折腾】，留言：谷歌搜索api_key，获取更多使用次数';
+        if (api_key) {
+            //付费版
+            const { remaining } = await unkey.verifyKey(api_id, api_key, 1);
+            msg = `API Key 剩余调用次数：${remaining}`;
+        }
+
         return res.send({
-        code: -1,
-        msg: 'failure',
-        data: [{
-            'title':"搜索失败",
-            'snippet':"搜索失败",
-            'link':''
-        }]
-    });
+            code: 0,
+            msg: msg,
+            data: result_list
+        });
+    } catch (err) {
+        return res.send({
+            code: -1,
+            msg: 'failure',
+            data: [{
+                'title': "搜索失败",
+                'snippet': "搜索失败",
+                'link': ''
+            }]
+        });
     }
 
-    
+
 })
 
 // zyte解析网页内容
