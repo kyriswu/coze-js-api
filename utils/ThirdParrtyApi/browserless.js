@@ -381,7 +381,7 @@ const browserless = {
 
     },
 
-    google_search: async function (keyword) {
+    google_search: async function (keyword, retryCount = 0) {
         return limit(async () => {
         const search_count = await redis.incr("google_search_count")
         let proxy_user, proxy_pass, chromium_endpoint, proxy
@@ -482,18 +482,17 @@ await page.waitForFunction(() => {
 
             return html
         } catch (error) {
-            if (error.message && error.message.includes('net::ERR')) {
-                console.error('Google Search 网络连接失败:', error.message);
-                return await this.google_search(keyword) //重试
-                // 这里可以做额外处理，比如重试、报警等
-            }else if (error.message && err.message.includes('Navigating frame was detached')) {
-                console.error('Google Search 页面加载失败，可能是页面被重定向或关闭:', error.message);
-                // 这里可以做额外处理，比如重试、报警等
-                return await this.google_search(keyword) //重试
-            } else {
-                console.error('Error in chromium Google Search API:', error);
+            // 断开时重置全局变量，防止死锁
+            if (browser === GOOGLE_SESSION) {
+                try { await browser.close(); } catch (e) {}
             }
-            return null
+            if ( retryCount < 1 ) {
+                console.error('Google Search 网络/页面异常，重试:', error.message);
+                return await this.google_search(keyword, retryCount + 1);
+            } else {
+                console.error('Error in chromium Google Search API:', error.message);
+                return null;
+            }
         } finally {
             // 强制再执行一次 page.close，不考虑报错
                 try { await page.close(); } catch (e) {}
