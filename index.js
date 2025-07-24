@@ -2176,9 +2176,16 @@ app.post("/gzh_search", async (req, res) => {
 
         const { data } = await axios.request(options);
 
+        let msg = '为了保证付费用户的使用体验，本插件对免费用户进行了访问频率限制，购买API_KEY，联系作者【B站:小吴爱折腾】';
+        if (api_key) {
+            //付费版
+            const { remaining } = await unkey.verifyKey(api_id, api_key, 1);
+            msg = `API Key 剩余调用次数：${remaining}`;
+        }
+
         return res.send({
             code: 0,
-            msg: 'success',
+            msg: msg,
             data: data.data
         })
     }catch (error) {
