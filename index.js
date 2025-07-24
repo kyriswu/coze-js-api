@@ -1777,7 +1777,7 @@ app.post("/mix_video_and_audio", async (req, res) => {
             msg: 'video_url 和 audio_url 参数不能为空'
         })
     }
-    
+
     // 判断 video_url 和 audio_url 是否为合法的 http(s) 链接
     if (!/^https?:\/\/.+\.mp4$/i.test(video_url) || !/^https?:\/\/.+\.(mp3|wav|aac|ogg|flac)$/i.test(audio_url)) {
         return res.send({

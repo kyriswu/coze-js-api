@@ -29,6 +29,14 @@ const qingguo_api_url = "https://share.proxy.qg.net/get?key=FC283878"
 const qingguo_proxy_user = "FC283878"
 const qingguo_proxy_pass = "6BDF595312DA"
 
+//临时代理
+var TEMP_PROXY = {
+    api_url: "https://share.proxy.qg.net/get?key=KY5JZ4X2",
+    proxy_user: "KY5JZ4X2",
+    proxy_pass: "5C2D184F943D",
+}
+
+
 var PUBLIC_SESSION //长会话浏览器
 var publicSessionLock = null // 并发锁
 var GOOGLE_SESSION //谷歌搜索长会话浏览器
@@ -67,7 +75,7 @@ function generateConnectionId() {
 async function getQingGuoProxy(){
     let attempts = 0;
     let success = false;
-    while (attempts < 5 && !success) {
+    while (attempts < 2 && !success) {
         try {
             const res = await axios.get(qingguo_api_url);
             console.log("使用青果代理：", res.data)
@@ -86,10 +94,30 @@ async function getQingGuoProxy(){
         }
         attempts++;
     }
-    if (attempts === 3) {
-        console.log("获取3次代理IP失败，退出浏览器")
-        return null
+
+    attempts = 0;
+    while (attempts < 2 && !success) {
+        try {
+            const res = await axios.get(TEMP_PROXY.api_url);
+            console.log("使用青果备用代理：", res.data)
+            if (res.data && res.data.code === 'SUCCESS' && res.data.data && res.data.data.length > 0) {
+                success = true;
+                return {
+                    proxy:'http://' + res.data.data[0].server,
+                    proxy_user:TEMP_PROXY.proxy_user,
+                    proxy_pass:TEMP_PROXY.proxy_pass,
+                    proxy_server:res.data.data[0].server
+                }
+            }
+        } catch (err) {
+            console.log("获取备用代理IP失效，重新获取", err.message)
+            // 可选：打印错误日志
+        }
+        attempts++;
     }
+
+    console.log("获取3次备用代理IP失败，退出浏览器")
+    return null
 }
 
 async function disableLoadMedia(page){
