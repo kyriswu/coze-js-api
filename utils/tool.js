@@ -116,25 +116,25 @@ const tool = {
         }
         
     },
-    mix_video_and_audio: async function(video_url, audio_url) {
-        const downloadDir = path.join(__dirname, '..', 'downloads');
-        const video = await this.download_video(video_url)
-        const audio = await this.download_audio(audio_url)
-        const timestamp = new Date().getTime();
-        const output_video = `video_${timestamp}.mp4`;
-        const output_path = path.join(downloadDir, output_video);
-         try {
+    mix_video_and_audio: async function (video_url, audio_url) {
+        try {
+            const downloadDir = path.join(__dirname, '..', 'downloads');
+            const video = await this.download_video(video_url)
+            const audio = await this.download_audio(audio_url)
+            const timestamp = new Date().getTime();
+            const output_video = `video_${timestamp}.mp4`;
+            const output_path = path.join(downloadDir, output_video);
             // Construct ffmpeg command
             const command = `ffmpeg -i ${video.filepath} -i ${audio.filepath} -filter_complex "[1:a]apad=pad_dur=100000[aud]" -map 0:v:0 -map "[aud]" -c:v copy -c:a aac -shortest ${output_path}`
-            
+
             // Execute ffmpeg command
             const { stdout, stderr } = await execPromise(command);
-            
+
             return output_video
-         }catch(err) {
+        } catch (err) {
             console.error('Error mixing video and audio:', err);
             return err.message;
-         }
+        }
     },
     gen_cookie: async function (cookieStr, domain, path) {
         // 目标网站的域名和路径（需替换为实际值）
