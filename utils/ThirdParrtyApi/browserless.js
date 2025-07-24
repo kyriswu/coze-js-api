@@ -1037,7 +1037,7 @@ await page.waitForFunction(() => {
                 const url = "https://kns.cnki.net/kns8s/defaultresult/index?classid=VUDIXAIY&korder=SU&kw=" + keyword
                 const response = await p.goto(url, {
                     timeout: TIMEOUT,
-                    waitUntil: 'networkidle2',
+                    waitUntil: 'domcontentloaded',
                 });
                 if (response.status() !== 200) {
                     console.error(`无头浏览器：Request failed with status code: ${response.status()}`);
