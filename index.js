@@ -345,6 +345,15 @@ async function canUseHtmlParse(key) {
     }
     return true;
 }
+async function dailyUse(key) {
+    const value = await redis.get(key);
+    if (value === null) {
+        await redis.set(key, 0, 'EX', 60 * 60);
+        return true
+    }else{
+        return false;
+    }
+}
 
 app.post('/jina_reader', async (req, res) => {
 
@@ -2087,6 +2096,40 @@ app.post("/gzh_search", async (req, res) => {
     // if (!Number.isInteger(page) || isNaN(page) || page <= 0) {
     //     page = 1
     // }
+
+    const api_id = "api_413Kmmitqy3qaDo4";
+    //免费版的key
+    const free_key = "gzh_search_" + req.headers['user-identity']
+    if(api_key){
+        //付费版
+        const { keyId, valid, remaining, code } = await unkey.verifyKey(api_id, api_key, 0);
+        if (!valid) {
+            return res.send({
+                code: -1,
+                msg: 'API Key 无效或已过期，请检查后重试！'
+            }); 
+        }
+        if (remaining == 0) {
+            return res.send({
+                code: -1,
+                msg: 'API Key 使用次数已用完，请联系作者续费！'
+            }); 
+        }
+    }else{
+        //免费版
+        const canParse = await dailyUse(free_key);
+        if (!canParse) {
+            return res.send({
+                code: -1,
+                msg: '本插件访问量大，免费用户限制使用频率，如需稳定使用请付费购买API_KEY【B站:小吴爱折腾】',
+                data: [{
+                    "title": "为了保证付费用户的使用体验，本插件对免费用户进行了访问频率限制",
+                    "href": "https://space.bilibili.com/396762480"
+                }]
+            }); 
+        }
+    }
+
     try {
         const options = {
             method: 'POST',
