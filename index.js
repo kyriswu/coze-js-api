@@ -679,7 +679,7 @@ app.post('/google/search/web', async (req, res) => {
         if (!canSearch) {
             return res.send({
                 code: 0,
-                msg: '免费用户有频率限制，1小时内使用1次，付费购买api_key，请联系作者！【B站:小吴爱折腾】',
+                msg: '为了保证付费用户的使用体验，免费用户有使用频率限制，请联系作者购买api_key！【B站:小吴爱折腾】',
                 data: [{
                     'title': '免费用户有频率限制，1小时内使用1次，付费购买api_key，请联系作者！【B站:小吴爱折腾】',
                     'link': 'https://space.bilibili.com/396762480',
