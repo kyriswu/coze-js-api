@@ -721,7 +721,7 @@ app.post('/google/search/web', async (req, res) => {
         }).filter(item => item.link !== null); // 过滤掉不符合要求的项
 
 
-        let msg = '本插件每日有使用限制，付费购买api_key可解锁更多次数，请联系作者！【B站:小吴爱折腾】';
+        let msg = '为了保证付费用户的使用体验，对免费用户进行了访问频率限制，购买API_KEY，联系作者【B站:小吴爱折腾】';
         if (api_key) {
             //付费版
             const { remaining } = await unkey.verifyKey(api_id, api_key, 1);
@@ -734,6 +734,7 @@ app.post('/google/search/web', async (req, res) => {
             data: result_list
         });
     } catch (err) {
+        console.error(`Error searching Google: ${err.message}`);
         return res.send({
             code: -1,
             msg: 'failure',
