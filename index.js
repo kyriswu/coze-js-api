@@ -721,7 +721,7 @@ app.post('/google/search/web', async (req, res) => {
         }).filter(item => item.link !== null); // 过滤掉不符合要求的项
 
 
-        let msg = '本插件每日有使用限制，关注【B站：小吴爱折腾】，留言：谷歌搜索api_key，获取更多使用次数';
+        let msg = '本插件每日有使用限制，付费购买api_key可解锁更多次数，请联系作者！【B站:小吴爱折腾】';
         if (api_key) {
             //付费版
             const { remaining } = await unkey.verifyKey(api_id, api_key, 1);
