@@ -179,119 +179,122 @@ const browserless = {
 
     chromium_content: async function (url, opt = {}) {
 
-        let proxy_user, proxy_pass, chromium_endpoint, proxy
-        let browser, page
-        let public_browser//公共浏览器
+        return limit(async () => {
 
-        // 设置代理和浏览器连接参数
-        if (process.env.NODE_ENV === 'online') {
-            chromium_endpoint = "172.17.0.1:8123"
-        } else {
-            chromium_endpoint = "172.245.84.92:8123"
-        }
-        proxy_user = Webshare_PROXY_USER
-        proxy_pass = Webshare_PROXY_PASS
-        proxy = `http://${Webshare_PROXY_HOST}:${Webshare_PROXY_PORT}`
+            let proxy_user, proxy_pass, chromium_endpoint, proxy
+            let browser, page
+            let public_browser//公共浏览器
 
-        if (opt && opt.cookie) {
-            //传了cookie就启用新浏览器
-            browser = await puppeteer_connect(chromium_endpoint, TIMEOUT, proxy)
-        }else{
-            // --- 并发锁逻辑开始 ---
-            if (!PUBLIC_SESSION) {
-                if (!publicSessionLock) {
-                    // 第一个进入的创建锁
-                    publicSessionLock = (async () => {
-                        const b = await puppeteer_connect(chromium_endpoint, TIMEOUT, proxy)
-                        console.log("创建公共浏览器会话-chromium_content")
-                        b.on('disconnected', async () => {
-                            console.warn('⚠️ Browser disconnected');
-                            PUBLIC_SESSION = null;
-                            publicSessionLock = null;
-                        });
-                        PUBLIC_SESSION = b
-                        return b
-                    })();
-                }
-                browser = await publicSessionLock
+            // 设置代理和浏览器连接参数
+            if (process.env.NODE_ENV === 'online') {
+                chromium_endpoint = "172.17.0.1:8123"
             } else {
-                browser = PUBLIC_SESSION
+                chromium_endpoint = "172.245.84.92:8123"
             }
-            // --- 并发锁逻辑结束 ---
-            public_browser = true
-        }
-    
-        try {
+            proxy_user = Webshare_PROXY_USER
+            proxy_pass = Webshare_PROXY_PASS
+            proxy = `http://${Webshare_PROXY_HOST}:${Webshare_PROXY_PORT}`
 
-            page = await browser.newPage();
-            await page.setJavaScriptEnabled(true);
-
-            //设置cookie
             if (opt && opt.cookie) {
-                await browser.setCookie(...opt.cookie)
-            }
-            
-            // 在打开任何页面之前设置 UA
-            await page.setUserAgent(
-                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) ' +
-                'AppleWebKit/537.36 (KHTML, like Gecko) ' +
-                'Chrome/121.0.0.0 Safari/537.36'
-            );
-
-            // 禁止加载媒体资源（提高渲染速度）
-            await disableLoadMedia(page);
-
-            await page.authenticate({
-                username: proxy_user,
-                password: proxy_pass,
-            }); // 正式验证代理用户名密码 :contentReference[oaicite:1]{index=1}
-
-            const response = await page.goto(url, {
-                timeout: TIMEOUT,
-                waitUntil: opt.waitUntil || 'domcontentloaded'
-            });
-
-            // 检查 HTTP 状态码
-            if (response.status() !== 200) {
-                console.error(`无头浏览器：Request failed with status code: ${response.status()}`);
-                throw new Error(`HTTP request failed with status ${response.status()}`);
+                //传了cookie就启用新浏览器
+                browser = await puppeteer_connect(chromium_endpoint, TIMEOUT, proxy)
+            } else {
+                // --- 并发锁逻辑开始 ---
+                if (!PUBLIC_SESSION) {
+                    if (!publicSessionLock) {
+                        // 第一个进入的创建锁
+                        publicSessionLock = (async () => {
+                            const b = await puppeteer_connect(chromium_endpoint, TIMEOUT, proxy)
+                            console.log("创建公共浏览器会话-chromium_content")
+                            b.on('disconnected', async () => {
+                                console.warn('⚠️ Browser disconnected');
+                                PUBLIC_SESSION = null;
+                                publicSessionLock = null;
+                            });
+                            PUBLIC_SESSION = b
+                            return b
+                        })();
+                    }
+                    browser = await publicSessionLock
+                } else {
+                    browser = PUBLIC_SESSION
+                }
+                // --- 并发锁逻辑结束 ---
+                public_browser = true
             }
 
-            if (opt && opt.element_type && opt.element) {
-                if (opt.element_type === 'xpath') {
-                    console.log("等待xpath元素：", opt.element)
-                    await page.waitForSelector('xpath/' + opt.element, { timeout: 60000 });
-                }else{
-                    console.log("等待css元素：", opt.element)
-                    await page.waitForSelector(opt.element, { timeout: 60000 });
+            try {
+
+                page = await browser.newPage();
+                await page.setJavaScriptEnabled(true);
+
+                //设置cookie
+                if (opt && opt.cookie) {
+                    await browser.setCookie(...opt.cookie)
+                }
+
+                // 在打开任何页面之前设置 UA
+                await page.setUserAgent(
+                    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) ' +
+                    'AppleWebKit/537.36 (KHTML, like Gecko) ' +
+                    'Chrome/121.0.0.0 Safari/537.36'
+                );
+
+                // 禁止加载媒体资源（提高渲染速度）
+                await disableLoadMedia(page);
+
+                await page.authenticate({
+                    username: proxy_user,
+                    password: proxy_pass,
+                }); // 正式验证代理用户名密码 :contentReference[oaicite:1]{index=1}
+
+                const response = await page.goto(url, {
+                    timeout: TIMEOUT,
+                    waitUntil: opt.waitUntil || 'domcontentloaded'
+                });
+
+                // 检查 HTTP 状态码
+                if (response.status() !== 200) {
+                    console.error(`无头浏览器：Request failed with status code: ${response.status()}`);
+                    throw new Error(`HTTP request failed with status ${response.status()}`);
+                }
+
+                if (opt && opt.element_type && opt.element) {
+                    if (opt.element_type === 'xpath') {
+                        console.log("等待xpath元素：", opt.element)
+                        await page.waitForSelector('xpath/' + opt.element, { timeout: 60000 });
+                    } else {
+                        console.log("等待css元素：", opt.element)
+                        await page.waitForSelector(opt.element, { timeout: 60000 });
+                    }
+                }
+
+                const html = await page.content();
+
+                await page.close()
+
+                return {
+                    data: html
+                }
+            } catch (error) {
+                if (error.name === 'TimeoutError') {
+                    console.error('错误：等待元素超时');
+                    // 处理超时错误
+                    // 可以采取重试策略、记录日志、继续执行其他操作等
+                    throw error
+                } else {
+                    console.error('Error in chromium_content:', error);
+                    throw new Error(`出现错误：${error.message}，请检查参数是否正确，或者稍后重试。如果问题持续存在，请联系作者【B站：小吴爱折腾】。`);
+                }
+            } finally {
+                if (public_browser) {
+                    // 强制再执行一次 page.close，不考虑报错
+                    try { await page.close(); } catch (e) { }
+                } else {
+                    await browser.close()
                 }
             }
-
-            const html = await page.content();
-
-            await page.close()
-
-            return {
-                data: html
-            }
-        } catch (error) {
-            if (error.name === 'TimeoutError') {
-                console.error('错误：等待元素超时');
-                // 处理超时错误
-                // 可以采取重试策略、记录日志、继续执行其他操作等
-                throw error
-            } else {
-                console.error('Error in chromium_content:', error);
-                throw new Error(`出现错误：${error.message}，请检查参数是否正确，或者稍后重试。如果问题持续存在，请联系作者【B站：小吴爱折腾】。`);
-            }
-        } finally {
-            if(public_browser){
-                // 强制再执行一次 page.close，不考虑报错
-                try { await page.close(); } catch (e) {}
-            }else{
-                await browser.close()
-            }
-        }
+        })
 
     },
     // 国内无头浏览器
