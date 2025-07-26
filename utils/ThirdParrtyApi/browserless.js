@@ -121,6 +121,7 @@ async function getQingGuoProxy(){
 }
 
 async function disableLoadMedia(page){
+    await page.setCacheEnabled(false);
     // 开启请求拦截
     await page.setRequestInterception(true);
 
