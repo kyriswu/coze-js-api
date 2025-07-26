@@ -1789,14 +1789,6 @@ app.post("/mix_video_and_audio", async (req, res) => {
         })
     }
 
-    // 判断 video_url 和 audio_url 是否为合法的 http(s) 链接
-    if (!/^https?:\/\/.+\.mp4$/i.test(video_url) || !/^https?:\/\/.+\.(mp3|wav|aac|ogg|flac)$/i.test(audio_url)) {
-        return res.send({
-            code: -1,
-            msg: '必须是在线视频链接，不能是本地文件链接'
-        })
-    }
-
     let new_video_url = await tool.mix_video_and_audio(video_url, audio_url)
     
     return res.send({
