@@ -593,8 +593,7 @@ await page.waitForFunction(() => {
                     }
                 }
             });
-            // 等待 getinfo 响应，如果 reject 会直接抛出错误
-            const getinfoResponse = await getinfoPromise;
+      
 
             const response = await page.goto(toolurl, {
                 timeout: TIMEOUT,
