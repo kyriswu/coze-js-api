@@ -37,7 +37,7 @@ const tool = {
         console.log("当前访问的域名：", urlObj.hostname, "是否为国内域名：", isChinaDomain);
         if (!isChinaDomain) {
              try {
-                let response = await browserless.chromium_content(url, {cookie:cookie, element_type: xpath ? 'xpath' : 'selector', element: xpath || selector, waitUntil:waitUntil || 'domcontentloaded'});
+                let response = await browserless.chromium_content(url, {cookie:cookie, element_type: xpath ? 'xpath' : 'selector', element: xpath || selector, waitUntil:waitUntil || 'networkidle2'});
                 return response.data;
              }catch(err){
                 console.error("Browserless 请求失败：", err);
