@@ -1982,7 +1982,7 @@ app.post("/cn_explorer", async (req, res) => {
 
     try {
 
-        let response = await browserless.cn_chromium_content(url, {cookie:cookie,element_type: xpath ? 'xpath' : 'selector', element: xpath || selector, waitUntil: 'networkidle2'})
+        let response = await browserless.cn_chromium_content(url, {cookie:cookie,element_type: xpath ? 'xpath' : 'selector', element: xpath || selector, waitUntil: 'networkidle0'})
 
         return res.send({
             code: 0,
