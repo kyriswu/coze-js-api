@@ -342,7 +342,7 @@ const browserless = {
 
             const response = await page.goto(url, {
                 timeout: TIMEOUT,
-                waitUntil: 'domcontentloaded'
+                waitUntil: opt.waitUntil || 'domcontentloaded'
             });
 
             // 检查 HTTP 状态码
