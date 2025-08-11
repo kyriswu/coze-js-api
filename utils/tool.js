@@ -29,7 +29,7 @@ const tool = {
         }
         // 增加特殊域名列表，命中则走国内代理逻辑
         const chinaDomainList = [
-            'tophub.today','qunar.com','zjedu.org','org.cn','news.cn','douyin.com','gz-cmc.com','10jqka.com.cn','sina.com.cn','gov.cn','chinamobile.com','eastmoney.com'
+            'tophub.today','qunar.com','zjedu.org','org.cn','news.cn','douyin.com','gz-cmc.com','10jqka.com.cn','sina.com.cn','gov.cn','chinamobile.com'
             // 可继续添加更多域名
         ];
         const urlObj = new URL(url);
@@ -37,7 +37,7 @@ const tool = {
         console.log("当前访问的域名：", urlObj.hostname, "是否为国内域名：", isChinaDomain);
         if (!isChinaDomain) {
              try {
-                let response = await browserless.chromium_content(url, {cookie:cookie, element_type: xpath ? 'xpath' : 'selector', element: xpath || selector, waitUntil:waitUntil || 'networkidle2'});
+                let response = await browserless.chromium_content(url, {cookie:cookie, element_type: xpath ? 'xpath' : 'selector', element: xpath || selector, waitUntil:waitUntil || 'domcontentloaded'});
                 return response.data;
              }catch(err){
                 console.error("Browserless 请求失败：", err);

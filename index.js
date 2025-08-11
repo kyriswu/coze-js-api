@@ -675,19 +675,19 @@ app.post('/google/search/web', async (req, res) => {
             }); 
         }
     }else{
-        // const canSearch = await canSearchGoogle(free_key);
-        // if (!canSearch) {
-        //     console.log(`用户 ${req.headers['user-identity']} 的免费版 Google 搜索次数已用完`);
-        //     return res.send({
-        //         code: 0,
-        //         msg: '为了保证付费用户的使用体验，免费用户有使用频率限制，请联系作者购买api_key！【B站:小吴爱折腾】',
-        //         data: [{
-        //             'title': '免费用户有频率限制，1小时内使用1次，付费购买api_key，请联系作者！【B站:小吴爱折腾】',
-        //             'link': 'https://space.bilibili.com/396762480',
-        //             'snippet': '免费用户有频率限制，1小时内使用1次，付费购买api_key，请联系作者！【B站:小吴爱折腾】'
-        //         }]
-        //     }); 
-        // }
+        const canSearch = await canSearchGoogle(free_key);
+        if (!canSearch) {
+            console.log(`用户 ${req.headers['user-identity']} 的免费版 Google 搜索次数已用完`);
+            return res.send({
+                code: 0,
+                msg: '为了保证付费用户的使用体验，免费用户有使用频率限制，请联系作者购买api_key！【B站:小吴爱折腾】',
+                data: [{
+                    'title': '免费用户有频率限制，1小时内使用1次，付费购买api_key，请联系作者！【B站:小吴爱折腾】',
+                    'link': 'https://space.bilibili.com/396762480',
+                    'snippet': '免费用户有频率限制，1小时内使用1次，付费购买api_key，请联系作者！【B站:小吴爱折腾】'
+                }]
+            }); 
+        }
     }
 
     // search1api.search(q).then(async (data) => {
@@ -1982,7 +1982,7 @@ app.post("/cn_explorer", async (req, res) => {
 
     try {
 
-        let response = await browserless.cn_chromium_content(url, {cookie:cookie,element_type: xpath ? 'xpath' : 'selector', element: xpath || selector, waitUntil: 'networkidle0'})
+        let response = await browserless.cn_chromium_content(url, {cookie:cookie,element_type: xpath ? 'xpath' : 'selector', element: xpath || selector})
 
         return res.send({
             code: 0,
