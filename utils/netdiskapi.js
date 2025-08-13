@@ -29,7 +29,7 @@ const netdiskapi = {
                 page = 1;
             }
             // 百度网盘API的分页是每500个结果一页，所以需要将page转换为百度网盘API的页码
-            new_page = Math.floor(((page-1)*10) / 500) + 1
+            let new_page = Math.floor(((page-1)*10) / 500) + 1
             const response = await axios.get(API_BASE_URL + "/xpan/search" + '?access_token=' + access_token + '&dir=' + encodeURIComponent(dir) + '&key=' + encodeURIComponent(key || '') + '&page=' + new_page);
             const data = response.data;
             if (data.message && data.message.includes('身份验证失败')) {
