@@ -250,7 +250,7 @@ const browserless = {
 
                 const response = await page.goto(url, {
                     timeout: TIMEOUT,
-                    waitUntil: opt.waitUntil || 'domcontentloaded'
+                    waitUntil: opt.waitUntil || 'networkidle2'
                 });
 
                 // 检查 HTTP 状态码
