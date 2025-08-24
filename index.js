@@ -2235,6 +2235,32 @@ app.get('/vpn/get_proxy', async (req, res) => {
     }
 })
 
+app.post('/extract-element-from-html', async (req, res) => {
+     let { htmlContent, xpath, selector } = req.body;
+    if (selector && xpath){
+        return res.status(400).send('selector or xpath，这两个参数二选一，不要都填');
+    }
+
+    try {
+
+        let result_list = extract_html_conent_standard(htmlContent,xpath,selector)
+
+        return res.send({
+            code: 0,
+            msg: msg,
+            data: result_list
+        });
+    } catch (error) {
+        console.error(`Error: ${error}`);
+        console.error(`Stack trace: ${error.stack}`);
+        return res.send({
+            code: -1,
+            msg: error.message,
+            data: []
+        })
+    }
+})
+
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
