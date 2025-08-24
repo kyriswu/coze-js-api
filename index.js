@@ -2247,7 +2247,7 @@ app.post('/extract-element-from-html', async (req, res) => {
 
         return res.send({
             code: 0,
-            msg: msg,
+            msg: "success",
             data: result_list
         });
     } catch (error) {
