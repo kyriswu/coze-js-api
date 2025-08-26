@@ -2155,17 +2155,17 @@ app.post("/gzh_search", async (req, res) => {
         }
     }else{
         //免费版
-        // const canParse = await dailyUse(free_key);
-        // if (!canParse) {
-        //     return res.send({
-        //         code: -1,
-        //         msg: '本插件访问量大，免费用户限制使用频率，如需稳定使用请付费购买API_KEY【B站:小吴爱折腾】',
-        //         data: [{
-        //             "title": "为了保证付费用户的使用体验，本插件对免费用户进行了访问频率限制",
-        //             "href": "https://space.bilibili.com/396762480"
-        //         }]
-        //     }); 
-        // }
+        const canParse = await dailyUse(free_key);
+        if (!canParse) {
+            return res.send({
+                code: -1,
+                msg: '本插件访问量大，免费用户限制使用频率，如需稳定使用请付费购买API_KEY【B站:小吴爱折腾】',
+                data: [{
+                    "title": "为了保证付费用户的使用体验，本插件对免费用户进行了访问频率限制",
+                    "href": "https://space.bilibili.com/396762480"
+                }]
+            }); 
+        }
     }
 
     try {
