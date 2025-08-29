@@ -1585,14 +1585,14 @@ app.post('/explorer', async (req, res) => {
             }); 
         }
     }else{
-        //免费版
-        // const canParse = await canUseHtmlParse(free_key);
-        // if (!canParse) {
-        //     return res.send({
-        //         code: -1,
-        //         msg: '免费版每天限量3次，付费可以解锁更多次数，请联系作者！【B站:小吴爱折腾】'
-        //     }); 
-        // }
+        // 免费版
+        const canParse = await canUseHtmlParse(free_key);
+        if (!canParse) {
+            return res.send({
+                code: -1,
+                msg: '免费版每天限量3次，付费可以解锁更多次数，请联系作者！【B站:小吴爱折腾】'
+            }); 
+        }
     }
 
     try {
