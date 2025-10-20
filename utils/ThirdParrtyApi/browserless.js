@@ -332,6 +332,16 @@ const browserless = {
                 'Chrome/121.0.0.0 Safari/537.36'
             );
 
+            await page.setExtraHTTPHeaders({
+                'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+                'accept-language': 'zh-CN,zh;q=0.9',
+                'upgrade-insecure-requests': '1',
+                'sec-fetch-site': 'same-origin',
+                'sec-fetch-mode': 'navigate',
+                'sec-fetch-dest': 'document'
+            });
+
+
             // 禁止加载媒体资源（提高渲染速度）
             await disableLoadMedia(page);
 
