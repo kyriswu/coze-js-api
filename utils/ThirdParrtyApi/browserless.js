@@ -48,7 +48,7 @@ async function puppeteer_connect(chromium_endpoint, timeout, proxy){
     try {
         let b = await puppeteer.connect({
             browserWSEndpoint: `ws://${chromium_endpoint}/chromium?timeout=${timeout}&--proxy-server=${proxy}&--no-sandbox&--proxy-bypass-list=<-loopback>;localhost;127.0.0.1;172.17.0.1`,  // 替换为你的本地端口
-            headless: 'new',  // 设置为 false 以便调试
+            headless: true,  // 设置为 false 以便调试
             defaultViewport: { width: 1280, height: 800 },
             args: [
                 `--proxy-server=${proxy}`,
@@ -332,13 +332,37 @@ const browserless = {
                 'Chrome/121.0.0.0 Safari/537.36'
             );
 
+            // 在新文档注入，尽量把 headless 指纹伪装得更真实
+            await page.evaluateOnNewDocument(() => {
+                try {
+                Object.defineProperty(navigator, 'webdriver', { get: () => false });
+                window.chrome = { runtime: {} };
+                Object.defineProperty(navigator, 'languages', { get: () => ['zh-CN', 'zh'] });
+                Object.defineProperty(navigator, 'plugins', { get: () => [1,2,3,4,5] });
+                // permissions spoof
+                const _origPerm = navigator.permissions && navigator.permissions.query;
+                if (_origPerm) {
+                    navigator.permissions.__proto__.query = (params) => {
+                    if (params && params.name === 'notifications') {
+                        return Promise.resolve({ state: Notification.permission });
+                    }
+                    return _origPerm.call(navigator.permissions, params);
+                    };
+                }
+                } catch (e) {}
+            });
+            // 补齐 extra headers — 注意 sec-fetch-site 我设为 none（顶级导航通常是 none）
             await page.setExtraHTTPHeaders({
                 'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
                 'accept-language': 'zh-CN,zh;q=0.9',
                 'upgrade-insecure-requests': '1',
-                'sec-fetch-site': 'same-origin',
+                'sec-fetch-site': 'none',
                 'sec-fetch-mode': 'navigate',
-                'sec-fetch-dest': 'document'
+                'sec-fetch-dest': 'document',
+                // 一些服务器会期待 client hints
+                'sec-ch-ua': '"Chromium";v="119", "Google Chrome";v="119", "Not:A-Brand";v="99"',
+                'sec-ch-ua-mobile': '?0',
+                'sec-ch-ua-platform': '"Windows"',
             });
 
 
