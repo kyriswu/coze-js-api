@@ -48,7 +48,7 @@ async function puppeteer_connect(chromium_endpoint, timeout, proxy){
     try {
         let b = await puppeteer.connect({
             browserWSEndpoint: `ws://${chromium_endpoint}/chromium?timeout=${timeout}&--proxy-server=${proxy}&--no-sandbox&--proxy-bypass-list=<-loopback>;localhost;127.0.0.1;172.17.0.1`,  // 替换为你的本地端口
-            headless: true,  // 设置为 false 以便调试
+            headless: false,  // 设置为 false 以便调试
             defaultViewport: { width: 1280, height: 800 },
             args: [
                 `--proxy-server=${proxy}`,
@@ -332,25 +332,51 @@ const browserless = {
                 'Chrome/121.0.0.0 Safari/537.36'
             );
 
-            // 在新文档注入，尽量把 headless 指纹伪装得更真实
-            await page.evaluateOnNewDocument(() => {
-                try {
-                Object.defineProperty(navigator, 'webdriver', { get: () => false });
-                window.chrome = { runtime: {} };
-                Object.defineProperty(navigator, 'languages', { get: () => ['zh-CN', 'zh'] });
-                Object.defineProperty(navigator, 'plugins', { get: () => [1,2,3,4,5] });
-                // permissions spoof
-                const _origPerm = navigator.permissions && navigator.permissions.query;
-                if (_origPerm) {
-                    navigator.permissions.__proto__.query = (params) => {
-                    if (params && params.name === 'notifications') {
-                        return Promise.resolve({ state: Notification.permission });
-                    }
-                    return _origPerm.call(navigator.permissions, params);
-                    };
-                }
-                } catch (e) {}
-            });
+            // 在页面加载之前注入一堆伪装，覆盖 headless 指纹
+  await page.evaluateOnNewDocument(() => {
+    try {
+      // webdriver
+      Object.defineProperty(navigator, 'webdriver', { get: () => false, configurable: true });
+      // languages
+      Object.defineProperty(navigator, 'languages', { get: () => ['zh-CN', 'zh'], configurable: true });
+      // plugins: 用更真实的对象而非数字
+      Object.defineProperty(navigator, 'plugins', { get: () => [{name:'Chrome PDF Plugin'},{name:'Shockwave Flash'}], configurable: true });
+
+      // chrome object
+      window.chrome = { runtime: {} };
+
+      // hardware concurrency / device memory
+      Object.defineProperty(navigator, 'hardwareConcurrency', { get: () => 8, configurable: true });
+      Object.defineProperty(navigator, 'deviceMemory', { get: () => 8, configurable: true });
+
+      // permissions spoof
+      const oldQuery = navigator.permissions && navigator.permissions.query;
+      if (oldQuery) {
+        navigator.permissions.__proto__.query = (parameters) => {
+          if (parameters && parameters.name === 'notifications') {
+            return Promise.resolve({ state: Notification.permission });
+          }
+          return oldQuery(parameters);
+        };
+      }
+
+      // WebGL spoof (simple)
+      const getParameter = WebGLRenderingContext.prototype.getParameter;
+      WebGLRenderingContext.prototype.getParameter = function(parameter) {
+        // UNMASKED_VENDOR_WEBGL = 37445, UNMASKED_RENDERER_WEBGL = 37446
+        if (parameter === 37445) return 'Intel Inc.';
+        if (parameter === 37446) return 'Intel Iris OpenGL Engine';
+        return getParameter(parameter);
+      };
+
+      // AudioContext fingerprint mitigation (basic)
+      try {
+        const orig = window.OfflineAudioContext.prototype.createAnalyser;
+        // noop - just ensure exists (advanced spoofing需要更多)
+      } catch (e) {}
+    } catch (e) {}
+  });
+
             // 补齐 extra headers — 注意 sec-fetch-site 我设为 none（顶级导航通常是 none）
             await page.setExtraHTTPHeaders({
                 'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
