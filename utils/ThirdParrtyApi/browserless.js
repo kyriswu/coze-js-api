@@ -377,6 +377,8 @@ const browserless = {
     } catch (e) {}
   });
 
+  
+
             // 补齐 extra headers — 注意 sec-fetch-site 我设为 none（顶级导航通常是 none）
             await page.setExtraHTTPHeaders({
                 'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
@@ -407,6 +409,16 @@ const browserless = {
 
             // 检查 HTTP 状态码
             if (response.status() !== 200) {
+
+                console.log('----ERROR RESPONSE----');
+        console.log('URL:', response.url());
+        console.log('STATUS:', response.status());
+        console.log('HEADERS:', response.headers());
+        const text = await response.text();
+        console.log('BODY (first 2000 chars):\n', response.slice(0, 2000));
+        console.log('----END RESPONSE----\n');
+
+
                 console.error(`中国无头浏览器：Request failed with status code: ${response.status()}`);
                 throw new Error(`HTTP request failed with status ${response.status()}`);
             }
