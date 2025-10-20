@@ -415,7 +415,7 @@ const browserless = {
         console.log('STATUS:', response.status());
         console.log('HEADERS:', response.headers());
         const text = await response.text();
-        console.log('BODY (first 2000 chars):\n', response.slice(0, 2000));
+        console.log('BODY (first 2000 chars):\n', text.slice(0, 2000));
         console.log('----END RESPONSE----\n');
 
 
