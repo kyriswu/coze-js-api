@@ -333,64 +333,99 @@ const browserless = {
             );
 
             // 在页面加载之前注入一堆伪装，覆盖 headless 指纹
-  await page.evaluateOnNewDocument(() => {
-    try {
-      // webdriver
-      Object.defineProperty(navigator, 'webdriver', { get: () => false, configurable: true });
-      // languages
-      Object.defineProperty(navigator, 'languages', { get: () => ['zh-CN', 'zh'], configurable: true });
-      // plugins: 用更真实的对象而非数字
-      Object.defineProperty(navigator, 'plugins', { get: () => [{name:'Chrome PDF Plugin'},{name:'Shockwave Flash'}], configurable: true });
+            await page.evaluateOnNewDocument(() => {
+                try {
+                    // webdriver
+                    Object.defineProperty(navigator, 'webdriver', { get: () => false, configurable: true });
+                    // languages
+                    Object.defineProperty(navigator, 'languages', { get: () => ['zh-CN', 'zh'], configurable: true });
+                    // plugins: 用更真实的对象而非数字
+                    Object.defineProperty(navigator, 'plugins', { get: () => [{ name: 'Chrome PDF Plugin' }, { name: 'Shockwave Flash' }], configurable: true });
 
-      // chrome object
-      window.chrome = { runtime: {} };
+                    // chrome object
+                    window.chrome = { runtime: {} };
 
-      // hardware concurrency / device memory
-      Object.defineProperty(navigator, 'hardwareConcurrency', { get: () => 8, configurable: true });
-      Object.defineProperty(navigator, 'deviceMemory', { get: () => 8, configurable: true });
+                    // hardware concurrency / device memory
+                    Object.defineProperty(navigator, 'hardwareConcurrency', { get: () => 8, configurable: true });
+                    Object.defineProperty(navigator, 'deviceMemory', { get: () => 8, configurable: true });
 
-      // permissions spoof
-      const oldQuery = navigator.permissions && navigator.permissions.query;
-      if (oldQuery) {
-        navigator.permissions.__proto__.query = (parameters) => {
-          if (parameters && parameters.name === 'notifications') {
-            return Promise.resolve({ state: Notification.permission });
-          }
-          return oldQuery(parameters);
-        };
-      }
+                    // permissions spoof
+                    const oldQuery = navigator.permissions && navigator.permissions.query;
+                    if (oldQuery) {
+                        navigator.permissions.__proto__.query = (parameters) => {
+                            if (parameters && parameters.name === 'notifications') {
+                                return Promise.resolve({ state: Notification.permission });
+                            }
+                            return oldQuery(parameters);
+                        };
+                    }
 
-      // WebGL spoof (simple)
-      const getParameter = WebGLRenderingContext.prototype.getParameter;
-      WebGLRenderingContext.prototype.getParameter = function(parameter) {
-        // UNMASKED_VENDOR_WEBGL = 37445, UNMASKED_RENDERER_WEBGL = 37446
-        if (parameter === 37445) return 'Intel Inc.';
-        if (parameter === 37446) return 'Intel Iris OpenGL Engine';
-        return getParameter(parameter);
-      };
+                    // 添加更多浏览器指纹特征
+                    Object.defineProperties(navigator, {
+                        hardwareConcurrency: { value: 8 },
+                        deviceMemory: { value: 8 },
+                        platform: { value: 'Win32' },
+                        plugins: { value: [
+                            { name: 'Chrome PDF Plugin' },
+                            { name: 'Chrome PDF Viewer' },
+                            { name: 'Native Client' }
+                        ]},
+                        languages: { value: ['zh-CN', 'zh', 'en-US', 'en'] }
+                    });
 
-      // AudioContext fingerprint mitigation (basic)
-      try {
-        const orig = window.OfflineAudioContext.prototype.createAnalyser;
-        // noop - just ensure exists (advanced spoofing需要更多)
-      } catch (e) {}
-    } catch (e) {}
-  });
+                    // WebGL spoof (simple)
+                    const getParameter = WebGLRenderingContext.prototype.getParameter;
+                    WebGLRenderingContext.prototype.getParameter = function (parameter) {
+                        // UNMASKED_VENDOR_WEBGL = 37445, UNMASKED_RENDERER_WEBGL = 37446
+                        if (parameter === 37445) return 'Intel Inc.';
+                        if (parameter === 37446) return 'Intel Iris OpenGL Engine';
+                        return getParameter(parameter);
+                    };
+
+                    // AudioContext fingerprint mitigation (basic)
+                    try {
+                        const orig = window.OfflineAudioContext.prototype.createAnalyser;
+                        // noop - just ensure exists (advanced spoofing需要更多)
+                    } catch (e) { }
+                } catch (e) { }
+            });
+
+            // 设置默认cookie
+            const defaultCookies = [
+                {
+                    name: 'user_session_variant',
+                    value: Math.random().toString(36).substring(7),
+                    domain: new URL(url).hostname
+                },
+                {
+                    name: 'session_id',
+                    value: Date.now().toString(36),
+                    domain: new URL(url).hostname
+                }
+            ];
+
+            // 合并自定义cookie和默认cookie
+            if (opt && opt.cookie) {
+                await browser.setCookie(...[...defaultCookies, ...opt.cookie]);
+            } else {
+                await browser.setCookie(...defaultCookies);
+            }
 
   
 
             // 补齐 extra headers — 注意 sec-fetch-site 我设为 none（顶级导航通常是 none）
             await page.setExtraHTTPHeaders({
                 'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
-                'accept-language': 'zh-CN,zh;q=0.9',
-                'upgrade-insecure-requests': '1',
-                'sec-fetch-site': 'none',
-                'sec-fetch-mode': 'navigate',
-                'sec-fetch-dest': 'document',
-                // 一些服务器会期待 client hints
-                'sec-ch-ua': '"Chromium";v="119", "Google Chrome";v="119", "Not:A-Brand";v="99"',
+                'accept-language': 'zh-CN,zh;q=0.9,en;q=0.8',
+                'cache-control': 'max-age=0',
+                'sec-ch-ua': '"Chromium";v="121", "Google Chrome";v="121"',
                 'sec-ch-ua-mobile': '?0',
                 'sec-ch-ua-platform': '"Windows"',
+                'sec-fetch-dest': 'document',
+                'sec-fetch-mode': 'navigate',
+                'sec-fetch-site': 'none',
+                'sec-fetch-user': '?1',
+                'upgrade-insecure-requests': '1'
             });
 
 
