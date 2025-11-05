@@ -4,9 +4,6 @@ import { HttpsProxyAgent } from 'https-proxy-agent';
 import fs from 'fs';
 import { execFile } from 'child_process';
 import { JSDOM } from 'jsdom';
-import TurndownService from '@joplin/turndown';
-import turndownPluginGfm from '@joplin/turndown-plugin-gfm';
-import { Readability, isProbablyReaderable } from '@mozilla/readability';
 import { URL,fileURLToPath } from 'url';
 import unkey from './utils/unkey.js'
 import { dirname } from 'path';
@@ -56,38 +53,6 @@ app.get('/cozechatsdk', (req, res) => {
     })
 })
 
-// 假设你有成千上万个 URL 和相应的处理函数
-const urlHandlers = {
-    'www.xiaohongshu.com': (dom) => {
-        const { document } = dom.window;
-        const { body, head } = document;
-        // 检查 <head> 中是否存在 <meta name="og:type" content="article"> 标签
-        const metaTag = head.querySelector('meta[name="og:type"][content="article"]');
-        if (metaTag) {
-            const descriptionMetaTag = head.querySelector('meta[name="description"]');
-            if (descriptionMetaTag) {
-                const descriptionContent = descriptionMetaTag.getAttribute('content');
-                if (descriptionContent) {
-                    return descriptionContent
-                }  
-            }
-        }
-        // 跳去默认处理函数
-        urlHandlers['default'](dom);
-    },
-    'default': (dom) => {
-      //默认处理函数
-        const filteredDom = filterHtmlContent(dom);
-        const article = _readability(filteredDom);
-        console.log(article.htmlContent)
-        const turndownService = new TurndownService().use(turndownPluginGfm.gfm);
-        let markdown = turndownService.turndown(article);
-        content = filterMarkdown(markdown);
-        return content
-    },
-    // 其它 URL 处理函数……
-};
-
 import redis from './utils/redisClient.js';
 import search1api from './utils/search1api.js';
 import zyte from './utils/zyte.js';
@@ -108,147 +73,6 @@ async function getUsage(key) {
     }
     return value;
 }
-
-/**
- * 过滤 Markdown 文档中的图片、换行符和超链接（只保留文本）。
- *
- * @param {string} markdown - 原始 Markdown 文本
- * @returns {string} 过滤后的 Markdown 文本
- */
-function filterMarkdown(markdown) {
-    // 1. 删除嵌入链接的图片
-    // markdown = markdown.replace(/\[!\[.*?\]\(.*?\)\]\(.*?\)/g, '');
-    // 2. 删除独立图片语法
-    // markdown = markdown.replace(/!\[.*?\]\(.*?\)/g, '');
-    // 3. 替换超链接，仅保留链接文本
-    markdown = markdown.replace(/\[([^\]]+)\]\(.*?\)/g, '$1');
-    // 4. 删除所有换行符
-    markdown = markdown.replace(/\n/g, '');
-    
-    return markdown;
-}
-
-function _readability(dom) {
-    const { document } = dom.window;
-    // 新版，这个直接返回，不判断isProbablyReaderable了
-    // return new Readability(document).parse().content;
-    // 旧版
-    if (isProbablyReaderable(document)) {
-        console.log("自动识别正文区域");
-        return new Readability(document).parse().content;
-    }
-    return document.body.innerHTML;
-}
-
-function filterHtmlContent(dom) {
-    const { document } = dom.window;
-    const { body } = document;
-    const filters = ['script', 'style', 'link', 'footer'];
-    const meaningfulTags = ['pre', 'code', 'iframe', 'template', 'object', 'svg', 'form', 'canvas'];
-
-    Array.from(body.querySelectorAll(filters.join(', ')))
-        .forEach(element => {
-            if (!element.closest(meaningfulTags.join(','))) {
-                element.remove();
-            }
-        });
-
-    body.innerHTML = body.innerHTML.replace(/<img [^>]*src=["']data:image\/[^"']*["'][^>]*>/gi, '');
-    return dom;
-}
-
-// app.post('/parseUrlContent', async (req, res) => {
-//     const urls = req.body.urls
-
-//     if (!Array.isArray(urls) || urls.length === 0) {
-//         return res.status(400).send('Invalid input: "urls" should be a non-empty array')
-//     }
-
-//     const x_api_key = "f528f374df3f44c1b62d005f81f63fab"
-
-//     try {
-//         // The following requests are executed concurrently
-//         const results = await Promise.all(urls.map(async (url) => {
-//             try {
-//                 let content = "" //最终返回的内容
-//                 // --时间点1--
-//                 const time1 = new Date();
-//                 console.log('时间点1:', time1.toLocaleString('zh-CN', { hour12: false }));
-
-//                 const encodedUrl = encodeURIComponent(url);
-//                 const scrapingAntUrl = `https://api.scrapingant.com/v2/general?url=${encodedUrl}&x-api-key=${x_api_key}`;
-//                 const response = await axios.get(scrapingAntUrl);
-//                 let HtmlContent = response.data;
-//                 const dom = new JSDOM(HtmlContent);
-
-//                 // --时间点2--
-//                 const time2 = new Date();
-//                 // console.log('时间点2:', time2.toLocaleString('zh-CN', { hour12: false }));
-
-//                 const timeDiff = (time2 - time1) / 1000;
-//                 console.log(`时间点1和时间点2的时差: ${timeDiff}秒`);
-
-//                 const myURL = new URL(url);
-//                 const hostname = myURL.hostname;
-//                 if (urlHandlers[hostname]) {
-//                     content = urlHandlers[hostname](dom);
-//                 } else {
-//                     content = urlHandlers['default'](dom);
-//                 }
-
-//                 // --时间点3--
-//                 return { url, content }
-//             } catch (error) {
-//                 console.error(`Error scraping URL ${url}: ${error.message}`);
-//                 throw error;
-//             }
-//         }))
-//         res.send(results)
-//     } catch (error) {
-//         res.status(500).send(`Error scraping web pages: ${error.message}`)
-//     }
-// })
-
-app.post('/parseUrlContent', async (req, res) => {
-    const url = req.body.url
-
-    if (!url) {
-        return res.status(400).send('Invalid input: "url" should be a non-empty array')
-    }
-
-    const x_api_key = "f528f374df3f44c1b62d005f81f63fab"
-
-    try {
-        let content = "" //最终返回的内容
-        // --时间点1--
-        const time1 = new Date();
-        console.log('时间点1:', time1.toLocaleString('zh-CN', { hour12: false }));
-
-        const encodedUrl = encodeURIComponent(url);
-        const scrapingAntUrl = `https://api.scrapingant.com/v2/general?url=${encodedUrl}&x-api-key=${x_api_key}`;
-        const response = await axios.get(scrapingAntUrl);
-        let HtmlContent = response.data;
-        const dom = new JSDOM(HtmlContent);
-
-        // --时间点2--
-        const time2 = new Date();
-        // console.log('时间点2:', time2.toLocaleString('zh-CN', { hour12: false }));
-
-        const timeDiff = (time2 - time1) / 1000;
-        console.log(`时间点1和时间点2的时差: ${timeDiff}秒`);
-
-        const myURL = new URL(url);
-        const hostname = myURL.hostname;
-        if (urlHandlers[hostname]) {
-            content = urlHandlers[hostname](dom);
-        } else {
-            content = urlHandlers['default'](dom);
-        }
-        res.send(content)
-    } catch (error) {
-        res.status(500).send(`Error scraping web pages: ${error.message}`)
-    }
-})
 
 // 从维基百科搜索条目
 app.post('/zh_wikipedia/search_item', async (req, res) => {
