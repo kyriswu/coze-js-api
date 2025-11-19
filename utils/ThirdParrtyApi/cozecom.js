@@ -126,7 +126,7 @@ const cozecom = {
             //     access_token = await this.refresh_token()
             // }
             // console.log("access_token", access_token)
-            const access_token = "pat_5KkifLEIh2eOZ4cSkPAbo1Jy2qEVRa1P8U9bjvTSRPo8ScSmB0HHhzloBaJPNVCV"
+            const access_token = "pat_BdtGIHBK3ysqp9BUsbQeNDMNxOPd2oi8temf4RI94ZWCj3ctMJQfLwqVH8lVR3P8"
             console.log({
                 workflow_id: "7515067322877739016",
                 parameters: {
