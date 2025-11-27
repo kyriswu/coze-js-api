@@ -234,14 +234,15 @@ export const th_xiaohongshu = {
         }
         var config = {
             method: 'get',
-            url: `https://api.tikhub.io/api/v1/xiaohongshu/web_v2/fetch_home_notes?user_id=${user_id}&cursor=${cursor}`,
+            // url: `https://api.tikhub.io/api/v1/xiaohongshu/web_v2/fetch_home_notes?user_id=${user_id}&cursor=${cursor}`,
+            url: `https://api.tikhub.io/api/v1/xiaohongshu/app/get_user_notes?user_id=${user_id}&cursor=${cursor}`,
             headers: {
                 "Authorization": "Bearer " + tikhub_api_token
             }
         };
         try {
             const response = await axios(config)
-            const notes = response.data.data.notes
+            const notes = response.data.data
             var msg = null
             if (api_key) {
                 const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
