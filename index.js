@@ -56,7 +56,7 @@ app.get('/cozechatsdk', (req, res) => {
 import redis from './utils/redisClient.js';
 import search1api from './utils/search1api.js';
 import zyte from './utils/zyte.js';
-import { th_bilibili, th_youtube } from './utils/tikhub.io.js';
+import { th_bilibili, th_youtube, th_xiaohongshu } from './utils/tikhub.io.js';
 // 从 Redis 中获取用户使用量
 async function getUsage(key) {
     let value = await redis.get(key);
@@ -872,6 +872,7 @@ app.post('/web/inputText', async (req, res) => {
 });
 
 app.post('/bilibili/subtitle', th_bilibili.fetch_one_video_v2);
+app.post('/xiaohongshu/home_notes', th_xiaohongshu.fetch_home_notes);
 
 app.post('/redis/get_string', async (req, res) => {
     const { key } = req.body;

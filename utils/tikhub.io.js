@@ -185,7 +185,85 @@ export const th_bilibili = {
     }
 }
 
+// 小红书
+export const th_xiaohongshu = {
+    // 小红书主页笔记
+    fetch_home_notes:async function (req, res) {
+        var url = req.body.url
+        if (!url) {
+            return res.send({msg: "url is required"})
+        }
+        // 从链接中提取出user_id
+        const matched = req.body.url.match(/profile\/([0-9a-fA-F]{24})(?:\?|#|$)/i);
+        if (!matched) {
+            return res.send({msg: "不是小红书链接，无法从链接中提取用户ID"})
+        }
+        const user_id = matched[1];
+        var api_key = req.body.api_key
+        // if (!api_key) {
+        //     return res.send({msg: "api_key is required"})
+        // }
+        var cursor = req.body.cursor
+        if (!cursor) {
+            cursor = null
+        }
+        const redis_key = req.headers['user-identity'] ? 'th_xiaohongshu_'+req.headers['user-identity'] : 'test';
+        const value = await redis.get(redis_key);
+        if (value === null) {
+            // 不存在，创建 key 并设置初始值
+            const now = new Date();
+            const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const secondsSinceMidnight = Math.floor((now - midnight) / 1000);
+            await redis.set(redis_key, 0, 'EX', secondsSinceMidnight);
+        }else{ 
+            if(!api_key){
+                return res.send({msg: "维护成本大，每天免费使用1次，购买api_key解锁更多次数，需要请请联系作者【B站：小吴爱折腾】"})
+            }else{
+                const { keyId, valid, remaining, code } = await unkey.verifyKey(unkey_api_id, api_key, 0);
+                if (!valid) {
+                    return res.send({
+                        msg: 'API Key 无效或已过期，请检查后重试！'
+                    }); 
+                }
+                if (remaining == 0) {
+                    return res.send({
+                        msg: 'API Key 使用次数已用完，请联系作者续费！'
+                    }); 
+                }
+            }
+        }
+        var config = {
+            method: 'get',
+            url: `https://api.tikhub.io/api/v1/xiaohongshu/web_v2/fetch_home_notes?user_id=${user_id}&cursor=${cursor}`,
+            headers: {
+                "Authorization": "Bearer " + tikhub_api_token
+            }
+        };
+        try {
+            const response = await axios(config)
+            const notes = response.data.data.notes
+            var msg = null
+            if (api_key) {
+                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
+                msg = `API Key 剩余调用次数：${remaining}`;
+            }
+            if (!response.data.code == 200) {
+                return res.send({msg: "获取用户笔记失败"});
+            }   
+            if (notes.length == 0) {
+                return res.send({msg: "该用户没有笔记"})
+            }else{
+                return res.send({msg: msg, data: notes})    
+            }
+        } catch (error) {
+            console.log(error)
+            return res.send({msg: "服务器错误，请重试"})
+        }
+
+    }
+}
 export default {
     th_youtube,
-    th_bilibili
+    th_bilibili,
+    th_xiaohongshu
 }
