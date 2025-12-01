@@ -187,6 +187,198 @@ export const th_bilibili = {
 
 // 小红书
 export const th_xiaohongshu = {
+    // 获取笔记信息 V1
+    get_note_info_v1:async function (req, res) {
+        var note_id = req.body.note_id
+        var share_text = req.body.share_text
+        if (!note_id && !share_text) {
+            return res.send({msg: "note_id or share_text is required"})
+        }
+
+        var api_key = req.body.api_key
+
+        const redis_key = req.headers['user-identity'] ? 'th_xiaohongshu_'+req.headers['user-identity'] : 'test';
+        const value = await redis.get(redis_key);
+        if (value === null) {
+            // 不存在，创建 key 并设置初始值
+            const now = new Date();
+            const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const secondsSinceMidnight = Math.floor((now - midnight) / 1000);
+            await redis.set(redis_key, 0, 'EX', secondsSinceMidnight);
+        }else{
+            if(!api_key){
+                return res.send({msg: "维护成本大，每天免费使用1次，购买api_key解锁更多次数，需要请请联系作者【B站：小吴爱折腾】"})
+            }else{
+                const { keyId, valid, remaining, code } = await unkey.verifyKey(unkey_api_id, api_key, 0);
+                if (!valid) {
+                    return res.send({msg: "API Key 无效或已过期，请检查后重试！"})
+                }
+                if(remaining==0){
+                    return res.send({msg: "API Key 使用次数已用完，请联系作者续费！"})
+                }
+            }
+        }
+        var config = {
+            method: 'get',
+            url: `https://api.tikhub.io/api/v1/xiaohongshu/app/get_note_info?`+ (note_id ? `note_id=${note_id}` : `share_text=${share_text}`),
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + tikhub_api_token
+            }
+        };
+        try {
+            const response = await axios(config)
+            const note = response.data.data
+            var msg = null
+            if (api_key) {
+                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
+                msg = `API Key 剩余调用次数：${remaining}`;
+            }
+            if(!response.data.code==200){
+                return res.send({msg: "获取笔记失败"})
+            }
+            if(note.length==0){
+                return res.send({msg: "没有找到笔记"})
+            }else{
+                return res.send({msg: msg, data: note})
+            }
+            
+        } catch (error) {
+            console.log(error)
+            return res.send({msg: "服务器错误，请重试"})
+        }
+        
+    },
+    // 关键词搜索笔记
+    search_notes_v2:async function (req, res) {
+        var keyword = req.body.keyword
+        if (!keyword) {
+            return res.send({msg: "keyword is required"})
+        }
+        var keyword = req.body.keyword
+        if (!keyword) {
+            return res.send({msg: "keyword is required"})
+        }
+        var api_key = req.body.api_key  
+
+        // 页码
+        var page = req.body.page
+        if (!page) {
+            page = 1
+        }
+        
+        // 排序
+        var sort = req.body.sort
+        if (!sort) {
+            sort = "general"
+        }else{
+            switch (sort) {
+                case "综合排序":
+                    sort = "general"
+                    break
+                case "最热排序":
+                    sort = "popularity_descending"
+                    break
+                case "最新排序":
+                    sort = "time_descending"
+                    break
+                case "最多评论":
+                    sort = "comment_descending"
+                    break
+                case "最多收藏":
+                    sort = "collect_descending"
+                    break
+                default:
+                    sort = "general"
+                    break
+            }
+        }
+
+        // 发布时间
+        var publish_time = req.body.publish_time
+        if (!publish_time) {
+            publish_time = ""
+        }else{
+           if(publish_time == "不限"){
+                publish_time = ""
+           }
+        }
+
+        // 笔记类型
+        var type = req.body.type
+        if (!type) {
+            type = "_0"
+        }else{
+            switch (type) {
+                case "综合笔记":
+                    type = "_0"
+                    break
+                case "图文笔记":
+                    type = "_2"
+                    break
+                case "视频笔记":
+                    type = "_1"
+                    break
+                case "直播":
+                    type = "_3"
+                    break
+                default:
+                    type = "_0"
+                    break
+            }
+        }
+        const redis_key = req.headers['user-identity'] ? 'th_xiaohongshu_'+req.headers['user-identity'] : 'test';
+        const value = await redis.get(redis_key);
+        if (value === null) {
+            // 不存在，创建 key 并设置初始值
+            const now = new Date();
+            const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const secondsSinceMidnight = Math.floor((now - midnight) / 1000);
+            await redis.set(redis_key, 0, 'EX', secondsSinceMidnight);
+        }
+        if (!api_key) {
+            return res.send({msg: "维护成本大，每天免费使用1次，购买api_key解锁更多次数，需要请请联系作者【B站：小吴爱折腾】"})
+        }else{
+            const { keyId, valid, remaining, code } = await unkey.verifyKey(unkey_api_id, api_key, 0);
+            if (!valid) {
+                return res.send({msg: "API Key 无效或已过期，请检查后重试！"})
+            } 
+            if (remaining == 0) {
+                return res.send({msg: "API Key 使用次数已用完，请联系作者续费！"})
+            }
+        }
+
+        var config = {
+            method: 'get',
+            url: `https://api.tikhub.io/api/v1/xiaohongshu/app/search_notes_v2?keyword=${keyword}&page=${page}&sort=${sort}&type=${type}&publish_time=${publish_time}`,
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + tikhub_api_token
+            }
+        };
+        try {
+            const response = await axios(config)
+            console.log(response.data)
+            const notes = response.data.data
+            var msg = null
+            if (api_key) {
+                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
+                msg = `API Key 剩余调用次数：${remaining}`;
+            }
+            if(!response.data.code==200){
+                return res.send({msg: "获取笔记失败"})
+            }
+            if(notes.length===0){
+                return res.send({msg: "没有找到笔记"})
+            }else{
+                return res.send({msg: msg, data: notes})
+            }
+        } catch (error) {
+            console.log(error)
+            return res.send({msg: "服务器错误，请重试"})
+        }
+    },
+
     // 小红书主页笔记
     fetch_home_notes:async function (req, res) {
         var url = req.body.url
@@ -200,9 +392,6 @@ export const th_xiaohongshu = {
         }
         const user_id = matched[1];
         var api_key = req.body.api_key
-        // if (!api_key) {
-        //     return res.send({msg: "api_key is required"})
-        // }
         var cursor = req.body.cursor
         if (!cursor) {
             cursor = null
@@ -234,9 +423,9 @@ export const th_xiaohongshu = {
         }
         var config = {
             method: 'get',
-            // url: `https://api.tikhub.io/api/v1/xiaohongshu/web_v2/fetch_home_notes?user_id=${user_id}&cursor=${cursor}`,
             url: `https://api.tikhub.io/api/v1/xiaohongshu/app/get_user_notes?user_id=${user_id}&cursor=${cursor}`,
             headers: {
+                "Content-Type": "application/json",
                 "Authorization": "Bearer " + tikhub_api_token
             }
         };
