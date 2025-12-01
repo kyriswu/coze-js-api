@@ -487,8 +487,9 @@ app.post('/openai-hub/chat/completions', async (req, res) => {
 
 app.post('/google/search/web', async (req, res) => {
     const { q, api_key} = req.body;
-    const api_id = "api_41vHKzNmXf5xx23f";
-
+    // var api_id = "api_41vHKzNmXf5xx23f"; //原有的 api_id 
+    var api_id = ""; 
+   
     if (!q) {
         return res.status(400).send('Invalid input: "q" is required');
     }
@@ -496,19 +497,48 @@ app.post('/google/search/web', async (req, res) => {
     //免费版的key
     const free_key = 'google_'+req.headers['user-identity']
     if (api_key) {
-        const { keyId, valid, remaining, code } = await unkey.verifyKey(api_id, api_key, 0);
-        if (!valid) {
-            return res.send({
-                code: -1,
-                msg: 'API Key 无效或已过期，请检查后重试！'
-            }); 
+        // 验证虚拟浏览器的api_id 新key
+        const newKey = "api_413Kmmitqy3qaDo4";
+        //原有的key
+        const oldKey = "api_41vHKzNmXf5xx23f" 
+        const { keyI, valid, remaining, code } = await unkey.verifyKey(newKey, api_key, 0);
+        if(!valid){
+            api_id = oldKey
+            const { keyId, valid, remaining, code } = await unkey.verifyKey(oldKey, api_key, 0);
+             if (!valid) {
+                return res.send({
+                    code: -1,
+                    msg: 'API Key 无效或已过期，请检查后重试！'
+                }); 
+            }
+            if(remaining === 0) {
+                return res.send({
+                    code: -1,
+                    msg: 'API Key 使用次数已用完，请联系作者续费！'
+                }); 
+            }
+        }else{
+            api_id = newKey
+            if(remaining === 0) {
+                return res.send({
+                    code: -1,
+                    msg: 'API Key 使用次数已用完，请联系作者续费！'
+                }); 
+            }
         }
-        if (remaining == 0) {
-            return res.send({
-                code: -1,
-                msg: 'API Key 使用次数已用完，请联系作者续费！'
-            }); 
-        }
+                // if (!valid) {
+        //     return res.send({
+        //         code: -1,
+        //         msg: 'API Key 无效或已过期，请检查后重试！'
+        //     }); 
+        // }
+        // if (remaining == 0) {
+        //     return res.send({
+        //         code: -1,
+        //         msg: 'API Key 使用次数已用完，请联系作者续费！'
+        //     }); 
+        // }
+       
     }else{
         const canSearch = await canSearchGoogle(free_key);
         if (!canSearch) {
@@ -524,7 +554,7 @@ app.post('/google/search/web', async (req, res) => {
             }); 
         }
     }
-
+   
     // search1api.search(q).then(async (data) => {
     //     let msg = "";
     //     if (api_key) {
