@@ -1,6 +1,9 @@
 import axios from 'axios';
 import unkey from './unkey.js';
 import redis from './redisClient.js';
+import commonUtils from './commonUtils.js'; 
+
+
 
 const tikhub_api_token = "k500F2ou70UEuXsHzWKAolU82AYOsIfGsK5N5ivGrXNC+VY2TN8qyjynJg=="
 const unkey_api_id = "api_413Kmmitqy3qaDo4"
@@ -196,28 +199,7 @@ export const th_xiaohongshu = {
         }
 
         var api_key = req.body.api_key
-
-        const redis_key = req.headers['user-identity'] ? 'th_xiaohongshu_'+req.headers['user-identity'] : 'test';
-        const value = await redis.get(redis_key);
-        if (value === null) {
-            // 不存在，创建 key 并设置初始值
-            const now = new Date();
-            const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-            const secondsSinceMidnight = Math.floor((now - midnight) / 1000);
-            await redis.set(redis_key, 0, 'EX', secondsSinceMidnight);
-        }else{
-            if(!api_key){
-                return res.send({msg: "维护成本大，每天免费使用1次，购买api_key解锁更多次数，需要请请联系作者【B站：小吴爱折腾】"})
-            }else{
-                const { keyId, valid, remaining, code } = await unkey.verifyKey(unkey_api_id, api_key, 0);
-                if (!valid) {
-                    return res.send({msg: "API Key 无效或已过期，请检查后重试！"})
-                }
-                if(remaining==0){
-                    return res.send({msg: "API Key 使用次数已用完，请联系作者续费！"})
-                }
-            }
-        }
+        const free_key = commonUtils.valid_redis_key("th_xiaohongshu_get_note_info_v1",unkey_api_id,api_key,req)
         var config = {
             method: 'get',
             url: `https://api.tikhub.io/api/v1/xiaohongshu/app/get_note_info?`+ (note_id ? `note_id=${note_id}` : `share_text=${share_text}`),
@@ -233,6 +215,9 @@ export const th_xiaohongshu = {
             if (api_key) {
                 const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
                 msg = `API Key 剩余调用次数：${remaining}`;
+            }else{
+                await redis.incr(free_key);//每次调用增加一次
+                msg = `今日免费使用次数：${3 - await commonUtils.free_key_used(free_key)}`;
             }
             if(!response.data.code==200){
                 return res.send({msg: "获取笔记失败"})
@@ -327,26 +312,8 @@ export const th_xiaohongshu = {
                     break
             }
         }
-        const redis_key = req.headers['user-identity'] ? 'th_xiaohongshu_'+req.headers['user-identity'] : 'test';
-        const value = await redis.get(redis_key);
-        if (value === null) {
-            // 不存在，创建 key 并设置初始值
-            const now = new Date();
-            const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-            const secondsSinceMidnight = Math.floor((now - midnight) / 1000);
-            await redis.set(redis_key, 0, 'EX', secondsSinceMidnight);
-        }
-        if (!api_key) {
-            return res.send({msg: "维护成本大，每天免费使用1次，购买api_key解锁更多次数，需要请请联系作者【B站：小吴爱折腾】"})
-        }else{
-            const { keyId, valid, remaining, code } = await unkey.verifyKey(unkey_api_id, api_key, 0);
-            if (!valid) {
-                return res.send({msg: "API Key 无效或已过期，请检查后重试！"})
-            } 
-            if (remaining == 0) {
-                return res.send({msg: "API Key 使用次数已用完，请联系作者续费！"})
-            }
-        }
+
+        const free_key = commonUtils.valid_redis_key("th_xiaohongshu_search_notes_v2",unkey_api_id,api_key,req);
 
         var config = {
             method: 'get',
@@ -364,6 +331,9 @@ export const th_xiaohongshu = {
             if (api_key) {
                 const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
                 msg = `API Key 剩余调用次数：${remaining}`;
+            }else{
+                await redis.incr(free_key);//每次调用增加一次
+                msg = `今日免费使用次数：${3 - await commonUtils.free_key_used(free_key)}`;
             }
             if(!response.data.code==200){
                 return res.send({msg: "获取笔记失败"})
@@ -396,31 +366,8 @@ export const th_xiaohongshu = {
         if (!cursor) {
             cursor = null
         }
-        const redis_key = req.headers['user-identity'] ? 'th_xiaohongshu_'+req.headers['user-identity'] : 'test';
-        const value = await redis.get(redis_key);
-        if (value === null) {
-            // 不存在，创建 key 并设置初始值
-            const now = new Date();
-            const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-            const secondsSinceMidnight = Math.floor((now - midnight) / 1000);
-            await redis.set(redis_key, 0, 'EX', secondsSinceMidnight);
-        }else{ 
-            if(!api_key){
-                return res.send({msg: "维护成本大，每天免费使用1次，购买api_key解锁更多次数，需要请请联系作者【B站：小吴爱折腾】"})
-            }else{
-                const { keyId, valid, remaining, code } = await unkey.verifyKey(unkey_api_id, api_key, 0);
-                if (!valid) {
-                    return res.send({
-                        msg: 'API Key 无效或已过期，请检查后重试！'
-                    }); 
-                }
-                if (remaining == 0) {
-                    return res.send({
-                        msg: 'API Key 使用次数已用完，请联系作者续费！'
-                    }); 
-                }
-            }
-        }
+
+        const free_key = commonUtils.valid_redis_key('th_xiaohongshu_fetch_home_notes',unkey_api_id,api_key,req);
         var config = {
             method: 'get',
             url: `https://api.tikhub.io/api/v1/xiaohongshu/app/get_user_notes?user_id=${user_id}&cursor=${cursor}`,
@@ -436,6 +383,9 @@ export const th_xiaohongshu = {
             if (api_key) {
                 const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
                 msg = `API Key 剩余调用次数：${remaining}`;
+            }else{
+                await redis.incr(free_key);//每次调用增加一次
+                msg = `今日免费使用次数：${3 - await commonUtils.free_key_used(free_key)}`;
             }
             if (!response.data.code == 200) {
                 return res.send({msg: "获取用户笔记失败"});
