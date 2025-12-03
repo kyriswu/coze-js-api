@@ -199,7 +199,7 @@ export const th_xiaohongshu = {
         }
 
         var api_key = req.body.api_key
-        const free_key = commonUtils.valid_redis_key("th_xiaohongshu_get_note_info_v1",unkey_api_id,api_key,req)
+        const free_key = await commonUtils.valid_redis_key("th_xiaohongshu_get_note_info_v1",unkey_api_id,api_key,req)
         var config = {
             method: 'get',
             url: `https://api.tikhub.io/api/v1/xiaohongshu/app/get_note_info?`+ (note_id ? `note_id=${note_id}` : `share_text=${share_text}`),
@@ -313,7 +313,7 @@ export const th_xiaohongshu = {
             }
         }
 
-        const free_key = commonUtils.valid_redis_key("th_xiaohongshu_search_notes_v2",unkey_api_id,api_key,req);
+        const free_key = await commonUtils.valid_redis_key("th_xiaohongshu_search_notes_v2",unkey_api_id,api_key,req);
 
         var config = {
             method: 'get',
@@ -367,7 +367,7 @@ export const th_xiaohongshu = {
             cursor = null
         }
 
-        const free_key = commonUtils.valid_redis_key('th_xiaohongshu_fetch_home_notes',unkey_api_id,api_key,req);
+        const free_key = await commonUtils.valid_redis_key('th_xiaohongshu_fetch_home_notes',unkey_api_id,api_key,req);
         var config = {
             method: 'get',
             url: `https://api.tikhub.io/api/v1/xiaohongshu/app/get_user_notes?user_id=${user_id}&cursor=${cursor}`,
