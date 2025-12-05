@@ -30,6 +30,9 @@ const agent = new HttpsProxyAgent(proxyUrl);
 app.get('/', (req, res) => {
     res.send('Hello World!')
 })
+app.get('/wiki', (req, res) => {
+    res.redirect(302, 'https://ccn8h804ayou.feishu.cn/wiki/RoHKwF0AbiXqxAkDJR2czoGUnMd');
+})
 app.get('/limit', (req, res) => {
     res.send('达到用量限制，获取更多使用次数，请联系作者购买API Key，微信：xiaowu_azt')
 })
