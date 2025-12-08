@@ -1,4 +1,5 @@
 import redis from "./redisClient.js"
+import unkey from './unkey.js';
 
 /**
  * 通用工具类，用于存放通用方法
@@ -40,12 +41,12 @@ const commonUtils = {
      * @param {string} key_header reids密钥抬头
      * @param {string} unkey_api_id  unkey_api_id
      * @param {string} api_key 接口访问令牌
-     * @param {*} req 
+     * @param {*} req
+     * @param {*} res
      * @returns 
      */
-    valid_redis_key: async function (key_header, unkey_api_id, api_key, req) {
-        const free_key = key_header + req.headers['user-identity']
-        if (api_key) {
+    valid_redis_key: async function (key_header, unkey_api_id, api_key, req,res) {
+        if (!api_key) {
             const redis_key = req.headers['user-identity'] ? key_header + req.headers['user-identity'] : 'test';
             const value = await redis.get(redis_key);
             if (value === null) {
@@ -55,25 +56,20 @@ const commonUtils = {
                 const secondsSinceMidnight = Math.floor((now - midnight) / 1000);
                 await redis.set(redis_key, 0, 'EX', secondsSinceMidnight);
             } else {
-                if (!api_key) {
-                    return res.send({ msg: "维护成本大，每天免费使用1次，购买api_key解锁更多次数，需要请请联系作者【B站：小吴爱折腾】" })
-                } else {
-                    const { keyId, valid, remaining, code } = await unkey.verifyKey(unkey_api_id, api_key, 0);
-                    if (!valid) {
-                        return res.send({
-                            msg: 'API Key 无效或已过期，请检查后重试！'
-                        });
-                    }
-                    if (remaining == 0) {
-                        return res.send({
-                            msg: 'API Key 使用次数已用完，请联系作者续费！'
-                        });
-                    }
-                }
+                return res.send({ msg: "维护成本大，每天免费使用1次，购买api_key解锁更多次数，需要请请联系作者【B站：小吴爱折腾】" })
             }
         } else {
-            this.valid_free_key(free_key)
-            return free_key
+            const { keyId, valid, remaining, code } = await unkey.verifyKey(unkey_api_id, api_key, 0);
+            if (!valid) {
+                return res.send({
+                    msg: 'API Key 无效或已过期，请检查后重试！'
+                });
+            }
+            if (remaining == 0) {
+                return res.send({
+                    msg: 'API Key 使用次数已用完，请联系作者续费！'
+                });
+            }
         }
     },
 

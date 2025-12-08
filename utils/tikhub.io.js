@@ -199,7 +199,7 @@ export const th_xiaohongshu = {
         }
 
         var api_key = req.body.api_key
-        const free_key = await commonUtils.valid_redis_key("th_xiaohongshu_get_note_info_v1",unkey_api_id,api_key,req)
+        await commonUtils.valid_redis_key("th_xiaohongshu_get_note_info_v1",unkey_api_id,api_key,req,res)
         var config = {
             method: 'get',
             url: `https://api.tikhub.io/api/v1/xiaohongshu/app/get_note_info?`+ (note_id ? `note_id=${note_id}` : `share_text=${share_text}`),
@@ -215,9 +215,6 @@ export const th_xiaohongshu = {
             if (api_key) {
                 const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
                 msg = `API Key 剩余调用次数：${remaining}`;
-            }else{
-                await redis.incr(free_key);//每次调用增加一次
-                msg = `今日免费使用次数：${3 - await commonUtils.free_key_used(free_key)}`;
             }
             if(!response.data.code==200){
                 return res.send({msg: "获取笔记失败"})
@@ -313,7 +310,7 @@ export const th_xiaohongshu = {
             }
         }
 
-        const free_key = await commonUtils.valid_redis_key("th_xiaohongshu_search_notes_v2",unkey_api_id,api_key,req);
+        await commonUtils.valid_redis_key("th_xiaohongshu_search_notes_v2",unkey_api_id,api_key,req,res);
 
         var config = {
             method: 'get',
@@ -331,9 +328,6 @@ export const th_xiaohongshu = {
             if (api_key) {
                 const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
                 msg = `API Key 剩余调用次数：${remaining}`;
-            }else{
-                await redis.incr(free_key);//每次调用增加一次
-                msg = `今日免费使用次数：${3 - await commonUtils.free_key_used(free_key)}`;
             }
             if(!response.data.code==200){
                 return res.send({msg: "获取笔记失败"})
@@ -367,7 +361,7 @@ export const th_xiaohongshu = {
             cursor = null
         }
 
-        const free_key = await commonUtils.valid_redis_key('th_xiaohongshu_fetch_home_notes',unkey_api_id,api_key,req);
+        await commonUtils.valid_redis_key('th_xiaohongshu_fetch_home_notes',unkey_api_id,api_key,req,res);
         var config = {
             method: 'get',
             url: `https://api.tikhub.io/api/v1/xiaohongshu/app/get_user_notes?user_id=${user_id}&cursor=${cursor}`,
@@ -383,9 +377,6 @@ export const th_xiaohongshu = {
             if (api_key) {
                 const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
                 msg = `API Key 剩余调用次数：${remaining}`;
-            }else{
-                await redis.incr(free_key);//每次调用增加一次
-                msg = `今日免费使用次数：${3 - await commonUtils.free_key_used(free_key)}`;
             }
             if (!response.data.code == 200) {
                 return res.send({msg: "获取用户笔记失败"});
