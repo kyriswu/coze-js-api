@@ -110,7 +110,7 @@ export const th_bilibili = {
             await redis.set(redis_key, 0, 'EX', secondsSinceMidnight);
         }else{
             if(!api_key){
-                return res.send({msg: "维护成本大，每天免费使用1次，购买api_key解锁更多次数，需要请请联系作者【B站：小吴爱折腾】"})
+                return res.send({msg: commonUtils.MESSAGE.FREE_KEY_EXPIRED_1})
             }else{
                 const { keyId, valid, remaining, code } = await unkey.verifyKey(unkey_api_id, api_key, 0);
                 if (!valid) {
@@ -339,7 +339,7 @@ export const th_xiaohongshu = {
             }
         } catch (error) {
             console.log(error)
-            return res.send({msg: "服务器错误，请重试"})
+            return res.send({msg: commonUtils.MESSAGE.SERVER_ERROR})
         }
     },
 
@@ -388,7 +388,7 @@ export const th_xiaohongshu = {
             }
         } catch (error) {
             console.log(error)
-            return res.send({msg: "服务器错误，请重试"})
+            return res.send({msg: commonUtils.MESSAGE.SERVER_ERROR})
         }
 
     }

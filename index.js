@@ -12,6 +12,7 @@ import crypto from 'crypto';
 import qs from 'querystring'; // 用于将参数编码为 x-www-form-urlencoded 格式
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
+import commonUtils from './utils/commonUtils.js';
 
 const app = express();
 const port = 3000;
@@ -392,7 +393,7 @@ app.post('/parse_html', async (req, res) => {
         if (!canParse) {
             return res.send({
                 code: -1,
-                msg: '免费版每天限量3次，付费可以解锁更多次数，请联系作者！【B站:小吴爱折腾】'
+                msg: commonUtils.MESSAGE.FREE_KEY_EXPIRED_3
             }); 
         }
     }
@@ -522,13 +523,13 @@ app.post('/google/search/web', async (req, res) => {
              if (!valid) {
                 return res.send({
                     code: -1,
-                    msg: 'API Key 无效或已过期，请检查后重试！'
+                    msg: commonUtils.MESSAGE.TOKEN_EXPIRED
                 }); 
             }
             if(remaining === 0) {
                 return res.send({
                     code: -1,
-                    msg: 'API Key 使用次数已用完，请联系作者续费！'
+                    msg: commonUtils.MESSAGE.TOKEN_NO_TIMES
                 }); 
             }
         }else{
@@ -536,7 +537,7 @@ app.post('/google/search/web', async (req, res) => {
             if(remaining === 0) {
                 return res.send({
                     code: -1,
-                    msg: 'API Key 使用次数已用完，请联系作者续费！'
+                    msg: commonUtils.MESSAGE.TOKEN_NO_TIMES
                 }); 
             }
         }
@@ -559,11 +560,11 @@ app.post('/google/search/web', async (req, res) => {
             console.log(`用户 ${req.headers['user-identity']} 的免费版 Google 搜索次数已用完`);
             return res.send({
                 code: 0,
-                msg: '为了保证付费用户的使用体验，免费用户有使用频率限制，请联系作者购买api_key！【B站:小吴爱折腾】',
+                msg: commonUtils.MESSAGE.FREE_API_USE_LIMIT,
                 data: [{
-                    'title': '免费用户有频率限制，1小时内使用1次，付费购买api_key，请联系作者！【B站:小吴爱折腾】',
-                    'link': 'https://space.bilibili.com/396762480',
-                    'snippet': '免费用户有频率限制，1小时内使用1次，付费购买api_key，请联系作者！【B站:小吴爱折腾】'
+                    'title': commonUtils.MESSAGE.FREE_API_HOUR_USE_LIMIT,
+                    'link': commonUtils.MESSAGE.HELP_LINK,
+                    'snippet': commonUtils.MESSAGE.FREE_API_HOUR_USE_LIMIT
                 }]
             }); 
         }
@@ -601,7 +602,7 @@ app.post('/google/search/web', async (req, res) => {
         }).filter(item => item.link !== null); // 过滤掉不符合要求的项
 
 
-        let msg = '为了保证付费用户的使用体验，对免费用户进行了访问频率限制，购买API_KEY，联系作者【B站:小吴爱折腾】';
+        let msg = commonUtils.MESSAGE.FREE_API_USE_LIMIT;
         if (api_key) {
             //付费版
             const { remaining } = await unkey.verifyKey(api_id, api_key, 1);
@@ -667,8 +668,8 @@ async function zyteExtract(req, res) {
         if (!canParse) {
             return res.send({
                 code: -1,
-                msg: '免费版每天限量3次，付费可以解锁更多次数，请联系作者！【B站:小吴爱折腾】',
-                data: [{ htmlContent: "免费版每天限量3次，付费可以解锁更多次数，请联系作者！【B站:小吴爱折腾】" }]
+                msg: commonUtils.MESSAGE.FREE_KEY_EXPIRED_3,
+                data: [{ htmlContent: commonUtils.MESSAGE.FREE_KEY_EXPIRED_3 }]
             }); 
         }
     }
@@ -773,7 +774,7 @@ app.post('/download_video', async (req, res) => {
         }else{
             left_time = await redis.get(free_key)
             if (!left_time || isNaN(left_time)) left_time = 1
-            if (left_time <= 0) throw new QuotaExceededError("每天免费使用1次，如果您想继续使用，联系作者付费购买更多次数【vx：xiaowu_azt】【B站：小吴爱折腾】")
+            if (left_time <= 0) throw new QuotaExceededError(commonUtils.MESSAGE.FREE_KEY_EXPIRED_1)
         }
 
         //查询直链
@@ -835,17 +836,17 @@ app.post('/get_sitemap', async (req, res) => {
         await redis.set(redis_key, 0, 'EX', secondsSinceMidnight);
     }else{
         if(!api_key){
-            return res.send({msg: "维护成本大，每天免费使用1次，购买api_key解锁更多次数，需要请请联系作者【B站：小吴爱折腾】"})
+            return res.send({msg: commonUtils.MESSAGE.FREE_KEY_EXPIRED_1})
         }else{
             const { keyId, valid, remaining, code } = await unkey.verifyKey(unkey_api_id, api_key, 0);
             if (!valid) {
                 return res.send({
-                    msg: 'API Key 无效或已过期，请检查后重试！'
+                    msg: commonUtils.MESSAGE.TOKEN_EXPIRED
                 }); 
             }
             if (remaining == 0) {
                 return res.send({
-                    msg: 'API Key 使用次数已用完，请联系作者续费！'
+                    msg: commonUtils.MESSAGE.TOKEN_NO_TIMES
                 }); 
             }
         }
@@ -1276,13 +1277,13 @@ app.post('/whisper/speech-to-text', async (req, res) => {
     try{
 
         var videoLink = tool.extract_url(url)
-        if (!videoLink) throw new Error("无法解析此链接，本插件支持快手/抖音/小红书/B站/Youtube/tiktok，有问题联系作者【vx：xiaowu_azt】")
+        if (!videoLink) throw new Error(commonUtils.MESSAGE.VIDEO_PARSE_ERROR)
         if (!(videoLink.includes('www.youtube.com') || videoLink.includes('youtu.be') || videoLink.includes('xiaohongshu.com'))) {
             videoLink = tool.remove_query_param(videoLink)
         }
         
         if (!api_key) {
-            if (left_time <= 0) throw new QuotaExceededError("每天免费使用1次，如果您想继续使用，联系作者购买api_key【vx：xiaowu_azt】更多扣子教程，可以关注【B站：小吴爱折腾】")
+            if (left_time <= 0) throw new QuotaExceededError(commonUtils.MESSAGE.FREE_KEY_EXPIRED_1)
             const lock_ttl = await redis.ttl(lock_key)
             if(lock_ttl > 0) {
                 throw new Error(`上一个任务还在处理中，剩余${lock_ttl}秒`)
@@ -1292,13 +1293,13 @@ app.post('/whisper/speech-to-text', async (req, res) => {
             if (!valid) {
                 return res.send({
                     code: -1,
-                    msg: 'API Key 无效或已过期，请检查后重试！'
+                    msg: commonUtils.MESSAGE.TOKEN_EXPIRED
                 }); 
             }
             if (remaining == 0) {
                 return res.send({
                     code: -1,
-                    msg: 'API Key 使用次数已用完，请联系作者续费！'
+                    msg: commonUtils.MESSAGE.TOKEN_NO_TIMES
                 }); 
             }
         }
@@ -1470,7 +1471,7 @@ app.post('/explorer', async (req, res) => {
         if (!canParse) {
             return res.send({
                 code: -1,
-                msg: '免费版每天限量3次，付费可以解锁更多次数，请联系作者！【B站:小吴爱折腾】'
+                msg: commonUtils.MESSAGE.FREE_KEY_EXPIRED_3
             }); 
         }
     }
@@ -1617,7 +1618,7 @@ app.post("/flfg", async (req, res) => {
 
         return res.send({
             code: 0,
-            msg: '本插件后期将收费，关注【B站：小吴爱折腾】，以防失联',
+            msg: commonUtils.MESSAGE.PLUGIN_NEED_PAY,
             data: {
             'list': law_list,
             'totalSizes': data.result.totalSizes,
@@ -1788,10 +1789,10 @@ app.post("/zlcx", async (req, res) => {
         if (!canParse) {
             return res.send({
                 code: -1,
-                msg: '本插件访问量大，为了保证付费用户的使用体验，本插件对免费用户进行了访问频率限制，购买API_KEY，联系作者【B站:小吴爱折腾】',
+                msg: commonUtils.MESSAGE.FREE_API_USE_LIMIT,
                 data: [{
                     "title": "API_KEY可以通用于本人开发的所有插件",
-                    "link": "https://space.bilibili.com/396762480"
+                    "link": commonUtils.MESSAGE.HELP_LINK
                 }]
             }); 
         }
@@ -2039,10 +2040,10 @@ app.post("/gzh_search", async (req, res) => {
         if (!canParse) {
             return res.send({
                 code: -1,
-                msg: '本插件访问量大，免费用户限制使用频率，如需稳定使用请付费购买API_KEY【B站:小吴爱折腾】',
+                msg: commonUtils.MESSAGE.FREE_API_USE_LIMIT,
                 data: [{
                     "title": "为了保证付费用户的使用体验，本插件对免费用户进行了访问频率限制",
-                    "href": "https://space.bilibili.com/396762480"
+                    "href": commonUtils.MESSAGE.HELP_LINK
                 }]
             }); 
         }
@@ -2060,7 +2061,7 @@ app.post("/gzh_search", async (req, res) => {
 
         const { data } = await axios.request(options);
 
-        let msg = '为了保证付费用户的使用体验，本插件对免费用户进行了访问频率限制，购买API_KEY，联系作者【B站:小吴爱折腾】';
+        let msg = commonUtils.MESSAGE.FREE_API_USE_LIMIT;
         if (api_key) {
             //付费版
             const { remaining } = await unkey.verifyKey(api_id, api_key, 1);

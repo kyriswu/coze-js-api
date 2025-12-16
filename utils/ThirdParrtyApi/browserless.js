@@ -284,7 +284,7 @@ const browserless = {
                     throw error
                 } else {
                     console.error('Error in chromium_content:', error);
-                    throw new Error(`出现错误：${error.message}，请检查参数是否正确，或者稍后重试。如果问题持续存在，请联系作者【B站：小吴爱折腾】。`);
+                    throw new Error(`出现错误：${error.message}，请检查参数是否正确，或者稍后重试。相关咨询、帮助及开通方式，均在 https://devtool.uk/plugin。`);
                 }
             } finally {
                 if (public_browser) {
@@ -484,7 +484,7 @@ const browserless = {
                 throw error
             } else {
                 console.error('Error in chromium_content:', error);
-                throw new Error(`出现错误：${error.message}，请检查参数是否正确，或者稍后重试。如果问题持续存在，请联系管理员【B站：小吴爱折腾】。`);
+                throw new Error(`出现错误：${error.message}，请检查参数是否正确，或者稍后重试。相关咨询、帮助及开通方式，均在 https://devtool.uk/plugin`);
             }
         } finally {
             await browser.close()

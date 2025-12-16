@@ -8,10 +8,29 @@ const feishu_app_secret = "L2YlP93rB84bwQgfT1U8cbFepNBR26sd"
 const workflow_info_bitable_token = "Doodb9MS2aH8wksKAm0cxwPank3"
 
 const workflow_info_bitable_table_token = "tblWUWiaquWZrh8p"
+
+
 /**
  * 通用工具类，用于存放通用方法
  */
 const commonUtils = {
+    /**
+     * 报错信息(统一处理)
+     */
+    MESSAGE:{
+        TOKEN_EXPIRED:'令牌无效，续费或者购买，请访问：https://devtool.uk/plugin',
+        TOKEN_NO_TIMES:'令牌无可用次数，续费或者购买，请访问：https://devtool.uk/plugin',
+        FREE_KEY_EXPIRED_1:"免费版每日仅能使用 1 次，付费即可解锁不限次 / 更多次数权益！相关咨询、帮助及开通方式，均在 https://devtool.uk/plugin ",
+        FREE_KEY_EXPIRED_3:"免费版每日仅能使用 3 次，付费即可解锁不限次 / 更多次数权益！相关咨询、帮助及开通方式，均在 https://devtool.uk/plugin ",
+        LARK_ACCESS_KEY_ERROR:"获取飞书授权令牌失败。相关咨询、帮助及开通方式，均在 https://devtool.uk/plugin ",
+        COZE_WORKFLOE_ERROR:"请核对工作流序号是否填写无误。相关咨询、帮助及开通方式，均在 https://devtool.uk/plugin ",
+        SERVER_ERROR:'服务器内部异常，请稍后重试',
+        FREE_API_USE_LIMIT:"为了保证付费用户的使用体验，免费用户有使用频率限制。付费即可解锁不限次 / 更多次数权益！相关咨询、帮助及开通方式，均在 https://devtool.uk/plugin",
+        FREE_API_HOUR_USE_LIMIT:"免费用户有频率限制，1小时内使用1次。付费即可解锁不限次 / 更多次数权益！相关咨询、帮助及开通方式，均在 https://devtool.uk/plugin",
+        HELP_LINK:"https://devtool.uk/plugin",
+        VIDEO_PARSE_ERROR:"无法解析此链接，本插件支持快手/抖音/小红书/B站/Youtube/tiktok。相关咨询、帮助及开通方式，均在 https://devtool.uk/plugin",
+        PLUGIN_NEED_PAY:"本插件后期将收费。相关咨询、帮助及开通方式，均在 https://devtool.uk/plugin"
+    },
     /**
      * 验证免费key是否可用
      * @param {string} key 免费key
@@ -33,11 +52,11 @@ const commonUtils = {
             console.log(`用户 ${req.headers['user-identity']} 的免费版使用次数已用完`);
             return res.send({
                 code: 0,
-                msg: '为了保证付费用户的使用体验，免费用户有使用频率限制，请联系作者购买api_key！【B站:小吴爱折腾】',
+                msg: MESSAGE.TOKEN_NO_TIMES,
                 data: [{
-                    'title': '免费用户有频率限制，1小时内使用1次，付费购买api_key，请联系作者！【B站:小吴爱折腾】',
-                    'link': 'https://space.bilibili.com/396762480',
-                    'snippet': '免费用户有频率限制，1小时内使用1次，付费购买api_key，请联系作者！【B站:小吴爱折腾】'
+                    'title': commonUtils.MESSAGE.FREE_API_USE_LIMIT,
+                    'link': commonUtils.MESSAGE.HELP_LINK,
+                    'snippet': commonUtils.MESSAGE.FREE_API_USE_LIMIT
                 }]
             });
         }
@@ -63,18 +82,18 @@ const commonUtils = {
                 const secondsSinceMidnight = Math.floor((now - midnight) / 1000);
                 await redis.set(redis_key, 0, 'EX', secondsSinceMidnight);
             } else {
-                return res.send({ msg: "维护成本大，每天免费使用1次，购买api_key解锁更多次数，需要请请联系作者【B站：小吴爱折腾】" })
+                return res.send({ msg: MESSAGE.FREE_KEY_EXPIRED_1 })
             }
         } else {
             const { keyId, valid, remaining, code } = await unkey.verifyKey(unkey_api_id, api_key, 0);
             if (!valid) {
                 return res.send({
-                    msg: 'API Key 无效或已过期，请检查后重试！'
+                    msg: commonUtils.MESSAGE.TOKEN_EXPIRED
                 });
             }
             if (remaining == 0) {
                 return res.send({
-                    msg: 'API Key 使用次数已用完，请联系作者续费！'
+                    msg: commonUtils.MESSAGE.TOKEN_NO_TIMES
                 });
             }
         }
@@ -114,7 +133,7 @@ const commonUtils = {
         } else {
             const access_token = await feishu.getAccessToken(feishu_app_id, feishu_app_secret)
             if (!access_token) {
-                res.send({ msg: "获取飞书授权令牌失败。如果多次重试无效，请联系管理员处理。" })
+                res.send({ msg: commonUtils.MESSAGE.LARK_ACCESS_KEY_ERROR})
             } else {
                 const fitler = {
                     "filter": {
@@ -136,7 +155,7 @@ const commonUtils = {
                 }else {
                     res.send({
                         code:-1,
-                        msg:"请核对一下工作流序号是否填写无误。如果多次重试无效，请联系管理员处理。"
+                        msg:commonUtils.MESSAGE.COZE_WORKFLOE_ERROR
                     })
                 }
             }

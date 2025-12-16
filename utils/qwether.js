@@ -46,7 +46,7 @@ export const qweather_tool = {
             }
         } catch (error) {
             console.log(error)
-            return res.send({ msg: "服务器错误，请重试" })
+            return res.send({ msg: commonUtils.MESSAGE.SERVER_ERROR})
         }
     },
 
@@ -110,7 +110,7 @@ export const qweather_tool = {
             }
         } catch (error) {
             console.log(error)
-            return res.send({ msg: "服务器错误，请重试" })
+            return res.send({ msg: commonUtils.MESSAGE.SERVER_ERROR })
         }
     }
 }
