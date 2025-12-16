@@ -913,6 +913,11 @@ app.post("/qweather/history_weather",qweather_tool.get_history_weather)
 
 app.post("/qweather/city_weather_code",qweather_tool.get_city_weather_code)
 
+/**
+ * api调用coze工作流
+ */
+app.post("/workflow/run",coze.workflow_run)
+
 app.post('/redis/get_string', async (req, res) => {
     const { key } = req.body;
     if (!key) {
