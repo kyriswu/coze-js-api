@@ -36,6 +36,14 @@ app.get('/wiki', (req, res) => {
 app.get('/vip', (req, res) => {
     res.redirect(302, 'https://ccn8h804ayou.feishu.cn/wiki/NJutwV9z6igh6zkbxpJc6YGqnob');
 })
+app.get('/plugin', (req, res) => {
+
+    res.redirect(302, 'https://ccn8h804ayou.feishu.cn/wiki/CI7hw3L9YimAKTkyhFGcIrcWnid');
+})
+app.get('/vip-zl', (req, res) => {
+
+    res.redirect(302, 'https://ccn8h804ayou.feishu.cn/wiki/LSN4w0H6giK7kbkalwYcW783nth');
+})
 app.get('/limit', (req, res) => {
     res.send('达到用量限制，获取更多使用次数，请联系作者购买API Key，微信：xiaowu_azt')
 })
