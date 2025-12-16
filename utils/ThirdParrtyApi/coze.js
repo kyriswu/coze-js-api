@@ -1,7 +1,10 @@
 import { getWebAuthenticationUrl, getWebOAuthToken, refreshOAuthToken, CozeAPI } from '@coze/api';
 import redis from '../redisClient.js';  // 注意：引入redis时也需要添加.js扩展名
 import axios from 'axios';
+import commonUtils from '../commonUtils.js';
+import unkey from '../unkey.js';
 
+const unkey_api_id = "api_413Kmmitqy3qaDo4"
 
 const config = {
     "client_type": "web",
@@ -36,7 +39,7 @@ const coze = {
         if(!access_token){
             const refresh_token = await redis.get("coze_api_refresh_token")
             access_token = await this.refresh_token(refresh_token)
-            
+
         }
         console.log(access_token)
         const apiClient = new CozeAPI({
@@ -110,7 +113,7 @@ const coze = {
             console.error("Failed to refresh token:", error);
             return ""
         }
-        
+
     },
     generate_video_caption: async function (url, retried = false) {
         console.log("audio地址：", url)
@@ -157,7 +160,74 @@ const coze = {
             console.error("Failed to generate video caption:", error);
             throw error;
         }
-}
+    },
+    /**
+     * 工作流运行接口
+     * @param {*} req 
+     * @param {*} res 
+     */
+    workflow_run: async function (req, res) {
+        const workflow_name = req.body.workflow
+        // 工作流id获取，从己方多维表格获取
+        const workflow_id = await commonUtils.get_one_workflow_id_from_bitable(workflow_name, res)
+
+        //  验证api密钥
+        const api_key = req.body.api_key
+        if (!api_key) {
+            res.send({ 
+                code:-1,
+                msg: "API Key不能为空！" 
+            })
+        } else {
+            const { keyI, valid, remaining, code } = await unkey.verifyKey(unkey_api_id, api_key, 0);
+            if (!valid) {
+                return res.send({
+                    code:-1,
+                    msg: 'API Key 无效或已过期，请检查后重试！'
+                });
+            }
+            if (remaining === 0) {
+                return res.send({
+                    code:-1,
+                    msg: 'API Key 使用次数已用完，请联系作者续费！'
+                });
+            }
+        }
+
+        // 验证请求体参数
+        const parameters = req.body.parameters
+        if (!parameters) {
+            res.send({ 
+                code:-1,
+                msg:"请输入工作流运行参数！"
+            })
+        }
+        try{
+            // 获取coze平台token
+            var access_token = await redis.get("coze_api_access_token")
+            if (!access_token) {
+                access_token = await coze.refresh_token()
+            }
+            const response = await axios({
+                method: 'post',
+                url: 'https://api.coze.cn/v1/workflow/run',
+                headers: {
+                    'Authorization': `Bearer ${access_token}`,
+                    'Content-Type': 'application/json'
+                },
+                data: {
+                    workflow_id: workflow_id,
+                    parameters: parameters
+                }
+            });
+            const { keyI, valid, remaining, code } = await unkey.verifyKey(unkey_api_id, api_key, 1);
+        }catch(error){
+            res.send({ 
+                code: -1,
+                msg: error.message
+            })
+        }
+    }
 }
 
 export default coze

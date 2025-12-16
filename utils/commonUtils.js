@@ -1,6 +1,13 @@
 import redis from "./redisClient.js"
+import feishu from "./ThirdParrtyApi/feishu.js";
 import unkey from './unkey.js';
 
+const feishu_app_id = "cli_a9ac6d7fbbb89cda"
+const feishu_app_secret = "L2YlP93rB84bwQgfT1U8cbFepNBR26sd"
+
+const workflow_info_bitable_token = "Doodb9MS2aH8wksKAm0cxwPank3"
+
+const workflow_info_bitable_table_token = "tblWUWiaquWZrh8p"
 /**
  * 通用工具类，用于存放通用方法
  */
@@ -45,7 +52,7 @@ const commonUtils = {
      * @param {*} res
      * @returns 
      */
-    valid_redis_key: async function (key_header, unkey_api_id, api_key, req,res) {
+    valid_redis_key: async function (key_header, unkey_api_id, api_key, req, res) {
         if (!api_key) {
             const redis_key = req.headers['user-identity'] ? key_header + req.headers['user-identity'] : 'test';
             const value = await redis.get(redis_key);
@@ -92,6 +99,49 @@ const commonUtils = {
             console.log(`键 ${key} 已存在，当前值为 ${value}`);
         }
         return value;
+    },
+
+    /**
+     * 从飞书多维表格中读取工作流信息
+     * @param {*} workflow_num 工作流编号
+     */
+    get_one_workflow_id_from_bitable: async function (workflow_num,res) {
+        if (!workflow_num) {
+            res.send({ 
+                code:-1,
+                msg: "工作流编号不可以为空！" 
+            })
+        } else {
+            const access_token = await feishu.getAccessToken(feishu_app_id, feishu_app_secret)
+            if (!access_token) {
+                res.send({ msg: "获取飞书授权令牌失败。如果多次重试无效，请联系管理员处理。" })
+            } else {
+                const fitler = {
+                    "filter": {
+                        "conjunction": "and",
+                        "conditions": [
+                            {
+                                "field_name": "工作流编号",
+                                "operator": "is",
+                                "value": [
+                                    workflow_num
+                                ]
+                            }
+                        ]
+                    }
+                }
+                const response = await feishu.bitable_search(access_token,workflow_info_bitable_token,workflow_info_bitable_table_token,fitler);
+                if ( response.data.items.length > 0) {
+                    return response.data.items[0].fields.工作流ID[0].text
+                }else {
+                    res.send({
+                        code:-1,
+                        msg:"请核对一下工作流序号是否填写无误。如果多次重试无效，请联系管理员处理。"
+                    })
+                }
+            }
+        }
+
     }
 
 }

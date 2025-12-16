@@ -33,6 +33,29 @@ const feishu = {
         } catch (error) {
             throw new Error(`读取文档失败: ${error.message}`);
         }
+    },
+
+    /**
+     * 多维表格查询记录
+     * @param {*} access_token 飞书通行证
+     * @param {*} bitable_token 多维表格id
+     * @param {*} table_token 需要查询的数据表id
+     * @param {*} filter 查询条件
+     */
+    bitable_search: async function (access_token,bitable_token,table_token,filter) {
+        const headers = {
+            'Authorization': `Bearer ${access_token}`,
+        }
+        try{
+            const response = await axios.post(`https://open.feishu.cn/open-apis/bitable/v1/apps/${bitable_token}/tables/${table_token}/records/search`,filter,{
+                headers: {
+                    Authorization: `Bearer ${access_token}`
+                }
+            })
+            return response.data
+        }catch(error){
+            throw new Error(`多维表格查询失败: ${error.message}`);
+        }
     }
     
 };
