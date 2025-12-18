@@ -168,6 +168,8 @@ const coze = {
      */
     workflow_run: async function (req, res) {
         const workflow_name = req.body.workflow
+
+        console.log("workflow_run:",res)
         // 工作流id获取，从己方多维表格获取
         const workflow_id = await commonUtils.get_one_workflow_id_from_bitable(workflow_name, res)
 
@@ -183,13 +185,13 @@ const coze = {
             if (!valid) {
                 return res.send({
                     code:-1,
-                    msg: 'API Key 无效或已过期，请检查后重试！'
+                    msg: commonUtils.MESSAGE.TOKEN_EXPIRED
                 });
             }
             if (remaining === 0) {
                 return res.send({
                     code:-1,
-                    msg: 'API Key 使用次数已用完，请联系作者续费！'
+                    msg: commonUtils.MESSAGE.TOKEN_NO_TIMES
                 });
             }
         }

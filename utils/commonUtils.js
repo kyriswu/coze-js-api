@@ -52,7 +52,7 @@ const commonUtils = {
             console.log(`用户 ${req.headers['user-identity']} 的免费版使用次数已用完`);
             return res.send({
                 code: 0,
-                msg: MESSAGE.TOKEN_NO_TIMES,
+                msg: commonUtils.MESSAGE.TOKEN_NO_TIMES,
                 data: [{
                     'title': commonUtils.MESSAGE.FREE_API_USE_LIMIT,
                     'link': commonUtils.MESSAGE.HELP_LINK,
@@ -82,7 +82,7 @@ const commonUtils = {
                 const secondsSinceMidnight = Math.floor((now - midnight) / 1000);
                 await redis.set(redis_key, 0, 'EX', secondsSinceMidnight);
             } else {
-                return res.send({ msg: MESSAGE.FREE_KEY_EXPIRED_1 })
+                return res.send({ msg: commonUtils.MESSAGE.FREE_KEY_EXPIRED_1 })
             }
         } else {
             const { keyId, valid, remaining, code } = await unkey.verifyKey(unkey_api_id, api_key, 0);
