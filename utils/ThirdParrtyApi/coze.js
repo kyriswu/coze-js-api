@@ -223,6 +223,8 @@ const coze = {
                 }
             });
             const { keyI, valid, remaining, code } = await unkey.verifyKey(unkey_api_id, api_key, 1);
+            var msg = `API Key 剩余调用次数：${remaining}`;
+            return res.send({ msg: msg})
         }catch(error){
             res.send({ 
                 code: -1,
