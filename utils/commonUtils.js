@@ -18,6 +18,7 @@ const commonUtils = {
      * 报错信息(统一处理)
      */
     MESSAGE:{
+        TOKEN_EMPTY:"API_KEY不能为空！相关咨询、帮助及开通方式，均在 https://devtool.uk/plugin ",
         TOKEN_EXPIRED:'令牌无效，续费或者购买，请访问：https://devtool.uk/plugin',
         TOKEN_NO_TIMES:'令牌无可用次数，续费或者购买，请访问：https://devtool.uk/plugin',
         FREE_KEY_EXPIRED_1:"免费版每日仅能使用 1 次，付费即可解锁不限次 / 更多次数权益！相关咨询、帮助及开通方式，均在 https://devtool.uk/plugin ",

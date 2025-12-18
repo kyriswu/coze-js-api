@@ -30,6 +30,7 @@ function timestampToDatetime(timestamp) {
     return new Date(timestamp * 1000).toLocaleString();
 }
 
+const personal_key = "pat_LFKXTpOajVc0AXlu0SM7zTppJv8yHOtlQpdxWkC5J3Xp3amTR2acHX0di0l8Dv9z"
 
 const AuthUrl = `https://www.coze.cn/api/permission/oauth2/authorize?response_type=code&client_id=02946235786684291985716943699095.app.coze&redirect_uri=http://localhost:3000/coze-auth-callback&state=1294848`
 
@@ -178,7 +179,7 @@ const coze = {
         if (!api_key) {
             res.send({ 
                 code:-1,
-                msg: "API Key不能为空！" 
+                msg: commonUtils.MESSAGE.TOKEN_EMPTY
             })
         } else {
             const { keyI, valid, remaining, code } = await unkey.verifyKey(unkey_api_id, api_key, 0);
@@ -206,15 +207,15 @@ const coze = {
         }
         try{
             // 获取coze平台token
-            var access_token = await redis.get("coze_api_access_token")
-            if (!access_token) {
-                access_token = await coze.refresh_token()
-            }
+            // var access_token = await redis.get("coze_api_access_token")
+            // if (!access_token) {
+            //     access_token = await coze.refresh_token()
+            // }
             const response = await axios({
                 method: 'post',
                 url: 'https://api.coze.cn/v1/workflow/run',
                 headers: {
-                    'Authorization': `Bearer ${access_token}`,
+                    'Authorization': `Bearer ${personal_key}`,
                     'Content-Type': 'application/json'
                 },
                 data: {
