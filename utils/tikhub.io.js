@@ -1,7 +1,7 @@
 import axios from 'axios';
 import unkey from './unkey.js';
 import redis from './redisClient.js';
-import commonUtils from './commonUtils.js'; 
+import commonUtils from './commonUtils.js';
 
 
 
@@ -224,36 +224,36 @@ export const th_xiaohongshu = {
             }else{
                 return res.send({msg: msg, data: note})
             }
-            
+
         } catch (error) {
             console.log(error)
-            return res.send({msg: "服务器错误，请重试"})
+            return res.send({ msg: "服务器错误，请重试" })
         }
-        
+
     },
     // 关键词搜索笔记
-    search_notes_v2:async function (req, res) {
+    search_notes_v2: async function (req, res) {
         var keyword = req.body.keyword
         if (!keyword) {
-            return res.send({msg: "keyword is required"})
+            return res.send({ msg: "keyword is required" })
         }
         var keyword = req.body.keyword
         if (!keyword) {
-            return res.send({msg: "keyword is required"})
+            return res.send({ msg: "keyword is required" })
         }
-        var api_key = req.body.api_key  
+        var api_key = req.body.api_key
 
         // 页码
         var page = req.body.page
         if (!page) {
             page = 1
         }
-        
+
         // 排序
         var sort = req.body.sort
         if (!sort) {
             sort = "general"
-        }else{
+        } else {
             switch (sort) {
                 case "综合排序":
                     sort = "general"
@@ -280,17 +280,17 @@ export const th_xiaohongshu = {
         var publish_time = req.body.publish_time
         if (!publish_time) {
             publish_time = ""
-        }else{
-           if(publish_time == "不限"){
+        } else {
+            if (publish_time == "不限") {
                 publish_time = ""
-           }
+            }
         }
 
         // 笔记类型
         var type = req.body.type
         if (!type) {
             type = "_0"
-        }else{
+        } else {
             switch (type) {
                 case "综合笔记":
                     type = "_0"
@@ -310,7 +310,7 @@ export const th_xiaohongshu = {
             }
         }
 
-        await commonUtils.valid_redis_key("th_xiaohongshu_search_notes_v2",unkey_api_id,api_key,req,res);
+        await commonUtils.valid_redis_key("th_xiaohongshu_search_notes_v2", unkey_api_id, api_key, req, res);
 
         var config = {
             method: 'get',
@@ -329,30 +329,30 @@ export const th_xiaohongshu = {
                 const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
                 msg = `API Key 剩余调用次数：${remaining}`;
             }
-            if(!response.data.code==200){
-                return res.send({msg: "获取笔记失败"})
+            if (response.data.code !== 200) {
+                return res.send({ msg: "获取笔记失败" })
             }
-            if(notes.length===0){
-                return res.send({msg: "没有找到笔记"})
-            }else{
-                return res.send({msg: msg, data: notes})
+            if (notes.length === 0) {
+                return res.send({ msg: "没有找到笔记" })
+            } else {
+                return res.send({ msg: msg, data: notes })
             }
         } catch (error) {
             console.log(error)
-            return res.send({msg: commonUtils.MESSAGE.SERVER_ERROR})
+            return res.send({ msg: commonUtils.MESSAGE.SERVER_ERROR })
         }
     },
 
     // 小红书主页笔记
-    fetch_home_notes:async function (req, res) {
+    fetch_home_notes: async function (req, res) {
         var url = req.body.url
         if (!url) {
-            return res.send({msg: "url is required"})
+            return res.send({ msg: "url is required" })
         }
         // 从链接中提取出user_id
         const matched = req.body.url.match(/profile\/([0-9a-fA-F]{24})(?:\?|#|$)/i);
         if (!matched) {
-            return res.send({msg: "不是小红书链接，无法从链接中提取用户ID"})
+            return res.send({ msg: "不是小红书链接，无法从链接中提取用户ID" })
         }
         const user_id = matched[1];
         var api_key = req.body.api_key
@@ -361,7 +361,7 @@ export const th_xiaohongshu = {
             cursor = null
         }
 
-        await commonUtils.valid_redis_key('th_xiaohongshu_fetch_home_notes',unkey_api_id,api_key,req,res);
+        await commonUtils.valid_redis_key('th_xiaohongshu_fetch_home_notes', unkey_api_id, api_key, req, res);
         var config = {
             method: 'get',
             url: `https://api.tikhub.io/api/v1/xiaohongshu/app/get_user_notes?user_id=${user_id}&cursor=${cursor}`,
@@ -378,23 +378,429 @@ export const th_xiaohongshu = {
                 const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
                 msg = `API Key 剩余调用次数：${remaining}`;
             }
-            if (!response.data.code == 200) {
-                return res.send({msg: "获取用户笔记失败"});
-            }   
+            if (response.data.code !== 200) {
+                return res.send({ msg: "获取用户笔记失败" });
+            }
             if (notes.length == 0) {
-                return res.send({msg: "该用户没有笔记"})
-            }else{
-                return res.send({msg: msg, data: notes})    
+                return res.send({ msg: "该用户没有笔记" })
+            } else {
+                return res.send({ msg: msg, data: notes })
             }
         } catch (error) {
             console.log(error)
-            return res.send({msg: commonUtils.MESSAGE.SERVER_ERROR})
+            return res.send({ msg: commonUtils.MESSAGE.SERVER_ERROR })
         }
 
     }
 }
+
+// 公众号
+export const th_wechat_media = {
+    //通过公众号用户id获取微信公众号文章列表
+    get_wechat_mp_article_list: async function (req, res) {
+        const gh_id = req.body.gh_id
+        if (!gh_id) {
+            res.send({ msg: "公众号用户id不能为空" })
+        }
+        // 偏移量
+        const offset = req.body.offset
+        const api_key = req.body.api_key
+        await commonUtils.valid_redis_key("th_wx_mp_articles", unkey_api_id, api_key, req, res)
+        const config = {
+            method: 'get',
+            url: `https://api.tikhub.io/api/v1/wechat_mp/web/fetch_mp_article_list?ghid=${gh_id}`,
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + tikhub_api_token
+            }
+        };
+        try {
+            const response = await axios(config)
+            const d = response.data.data
+            let msg = null;
+            if (api_key) {
+                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
+                msg = `API Key 剩余调用次数：${remaining}`;
+            }
+            if (response.data.code !== 200) {
+                return res.send({ msg: "获取微信公众号文章列表失败" });
+            }
+            if (d.length === 0) {
+                return res.send({ msg: "未获取微信公众号文章列表" })
+            } else {
+                return res.send({ msg: msg, data: d })
+            }
+        } catch (error) {
+            console.log(error)
+            return res.send({ msg: commonUtils.MESSAGE.SERVER_ERROR })
+        }
+    },
+
+    // 获取公众号文章详情JSON
+    fetch_mp_article_detail_json: async function (req, res) {
+        const url = req.body.url
+        if (!url) {
+            res.send({ msg: "公众号文章链接不能为空" })
+        }
+        const api_key = req.body.api_key
+        await commonUtils.valid_redis_key("th_wx_mp_article_json", unkey_api_id, api_key, req, res)
+        const config = {
+            method: 'get',
+            url: `https://api.tikhub.io/api/v1/wechat_mp/web/fetch_mp_article_detail_json?url=${url}`,
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + tikhub_api_token
+            }
+        };
+        try {
+            const response = await axios(config)
+            const d = response.data.data
+            let msg = null;
+            if (api_key) {
+                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
+                msg = `API Key 剩余调用次数：${remaining}`;
+            }
+            if (response.data.code !== 200) {
+                return res.send({ msg: "获取公众号文章详情JSON失败" });
+            }
+            if (d.length === 0) {
+                return res.send({ msg: "未获取公众号文章详情JSON" })
+            } else {
+                return res.send({ msg: msg, data: d })
+            }
+        } catch (error) {
+            console.log(error)
+            return res.send({ msg: commonUtils.MESSAGE.SERVER_ERROR })
+        }
+    },
+
+    // 获取公众号文章详情html
+    fetch_mp_article_detail_html: async function (req, res) {
+        const url = req.body.url
+        if (!url) {
+            res.send({ msg: "公众号文章链接不能为空" })
+        }
+        const api_key = req.body.api_key
+        await commonUtils.valid_redis_key("th_wx_mp_article_html", unkey_api_id, api_key, req, res)
+        const config = {
+            method: 'get',
+            url: `https://api.tikhub.io/api/v1/wechat_mp/web/fetch_mp_article_detail_html?url=${url}`,
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + tikhub_api_token
+            }
+        };
+        try {
+            const response = await axios(config)
+            const d = response.data.data
+            let msg = null;
+            if (api_key) {
+                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
+                msg = `API Key 剩余调用次数：${remaining}`;
+            }
+            if (response.data.code !== 200) {
+                return res.send({ msg: "获取公众号文章详情html失败" });
+            }
+            if (d.length === 0) {
+                return res.send({ msg: "未获取公众号文章详情html内容" })
+            } else {
+                return res.send({ msg: msg, data: d })
+            }
+        } catch (error) {
+            console.log(error)
+            return res.send({ msg: commonUtils.MESSAGE.SERVER_ERROR })
+        }
+    },
+
+
+    // 获取公众号文章阅读量
+    fetch_mp_article_read_count: async function (req, res) {
+        const url = req.body.url
+        if (!url) {
+            res.send({ msg: "公众号文章链接不能为空" })
+        }
+        const api_key = req.body.api_key
+        await commonUtils.valid_redis_key("th_wx_mp_article_read_count", unkey_api_id, api_key, req, res)
+
+        const config = {
+            method: 'get',
+            url: `https://api.tikhub.io/api/v1/wechat_mp/web/fetch_mp_article_read_count?url=${url}`,
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + tikhub_api_token
+            }
+        };
+        try {
+            const response = await axios(config)
+            const d = response.data.data
+            let msg = null;
+            if (api_key) {
+                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
+                msg = `API Key 剩余调用次数：${remaining}`;
+            }
+            if (response.data.code !== 200) {
+                return res.send({ msg: "获取公众号文章阅读量失败" });
+            }
+            if (d.length === 0) {
+                return res.send({ msg: "未获取到阅读量" })
+            } else {
+                return res.send({ msg: msg, data: d })
+            }
+        } catch (error) {
+            console.log(error)
+            return res.send({ msg: commonUtils.MESSAGE.SERVER_ERROR })
+        }
+    },
+
+    // 获取微信公众号文章评论列表
+    fetch_mp_article_comment_list: async function (req, res) {
+        const url = req.body.url
+        if (!url) {
+            res.send({ msg: "公众号文章链接不能为空" })
+        }
+        const api_key = req.body.api_key
+        await commonUtils.valid_redis_key("th_wx_mp_article_comments", unkey_api_id, api_key, req, res)
+
+        const config = {
+            method: 'get',
+            url: `https://api.tikhub.io/api/v1/wechat_mp/web/fetch_mp_article_comment_list?url=${url}`,
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + tikhub_api_token
+            }
+        };
+        try {
+            const response = await axios(config)
+            const d = response.data.data
+            let msg = null;
+            if (api_key) {
+                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
+                msg = `API Key 剩余调用次数：${remaining}`;
+            }
+            if (response.data.code !== 200) {
+                return res.send({ msg: "获取微信公众号文章评论列表失败" });
+            }
+            if (d.length === 0) {
+                return res.send({ msg: "该文章没有评论" })
+            } else {
+                return res.send({ msg: msg, data: d })
+            }
+        } catch (error) {
+            console.log(error)
+            return res.send({ msg: commonUtils.MESSAGE.SERVER_ERROR })
+        }
+    },
+
+    // 获取微信公众号长链接转短链接
+    mp_url_long2short: async function (req, res) {
+        const url = req.body.url
+        if (!url) {
+            res.send({ msg: "公众号文章链接不能为空" })
+        }
+        const api_key = req.body.api_key
+        await commonUtils.valid_redis_key("th_wx_mp_article_comments", unkey_api_id, api_key, req, res)
+
+        const config = {
+            method: 'get',
+            url: `https://api.tikhub.io/api/v1/wechat_mp/web/fetch_mp_article_url_conversion?url=${url}`,
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + tikhub_api_token
+            }
+        };
+        try {
+            const response = await axios(config)
+            const d = response.data.data
+            let msg = null;
+            if (api_key) {
+                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
+                msg = `API Key 剩余调用次数：${remaining}`;
+            }
+            if (response.data.code !== 200) {
+                return res.send({ msg: "链接长转短失败" });
+            }
+            if (d.length === 0) {
+                return res.send({ msg: "未获取到短链接" })
+            } else {
+                return res.send({ msg: msg, data: d })
+            }
+        } catch (error) {
+            console.log(error)
+            return res.send({ msg: commonUtils.MESSAGE.SERVER_ERROR })
+        }
+    }
+}
+
+// 视频号
+export const th_wechat_channels = {
+    // 微信视频号搜索
+    search_videos_by_keyword: async function (req, res) {
+        const keyword = req.body.keyword
+        const type = req.body.type
+        if (!keyword) {
+            res.send({ msg: "搜索关键词不可为空！" })
+        }
+        let api = "fetch_default_search"
+        if (type) {
+            if (type === "默认") {
+                api = "fetch_default_search"
+            } else if (type === "最新") {
+                api = "fetch_search_latest"
+            } else if (type === "综合") {
+                api = "fetch_search_ordinary"
+            }
+        }
+        const api_key = req.body.api_key
+        const session_buffer = req.body.session_buffer
+        await commonUtils.valid_redis_key("th_wx_channels_key_search", unkey_api_id, api_key, req, res)
+
+        const config = {
+            method: 'get',
+            url: `https://api.tikhub.io/api/v1/wechat_channels/${api}?keywords=${keyword}`,
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + tikhub_api_token
+            }
+        };
+        try {
+            const response = await axios(config)
+            const d = response.data.data
+            let msg = null;
+            if (api_key) {
+                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
+                msg = `API Key 剩余调用次数：${remaining}`;
+            }
+            if (response.data.code !== 200) {
+                return res.send({ msg: "获取相关信息失败" });
+            }
+            if (d.length === 0) {
+                return res.send({ msg: "未获取到相关信息" })
+            } else {
+                return res.send({ msg: msg, data: d })
+            }
+        } catch (error) {
+            console.log(error)
+            return res.send({ msg: commonUtils.MESSAGE.SERVER_ERROR })
+        }
+    },
+
+    //微信视频号视频详情
+    fetch_video_detail: async function (req, res) {
+        const id = req.body.id
+        if (!id) {
+            res.send({ msg: "视频id不能为空" })
+        }
+        const api_key = req.body.api_key
+        await commonUtils.valid_redis_key("th_wx_video_detail", unkey_api_id, api_key, req, res)
+        const config = {
+            method: 'get',
+            url: `https://api.tikhub.io/api/v1/wechat_channels/fetch_video_detail?id=${id}`,
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + tikhub_api_token
+            }
+        };
+        try {
+            const response = await axios(config)
+            const d = response.data.data
+            let msg = null;
+            if (api_key) {
+                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
+                msg = `API Key 剩余调用次数：${remaining}`;
+            }
+            if (response.data.code !== 200) {
+                return res.send({ msg: "获取微信视频号视频详情失败" });
+            }
+            if (d.length === 0) {
+                return res.send({ msg: "未获取到视频号视频详情" })
+            } else {
+                return res.send({ msg: msg, data: d })
+            }
+        } catch (error) {
+            console.log(error)
+            return res.send({ msg: commonUtils.MESSAGE.SERVER_ERROR })
+        }
+    },
+
+    //微信视频号主页
+    fetch_home_page: async function (req, res) {
+        const username = req.body.username
+        if (!username) {
+            res.send({ msg: "用户名不能为空" })
+        }
+        const last_buffer = req.body.last_buffer
+        const api_key = req.body.api_key
+        await commonUtils.valid_redis_key("th_wx_video_detail", unkey_api_id, api_key, req, res)
+        const config = {
+            method: 'get',
+            url: `https://api.tikhub.io/api/v1/wechat_channels/fetch_home_page?username=${username}&last_buffer=${last_buffer ? last_buffer : ""}`,
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + tikhub_api_token
+            }
+        };
+        try {
+            const response = await axios(config)
+            const d = response.data.data
+            let msg = null;
+            if (api_key) {
+                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
+                msg = `API Key 剩余调用次数：${remaining}`;
+            }
+            if (response.data.code !== 200) {
+                return res.send({ msg: "获取微信视频号主页信息失败" });
+            }
+            if (d.length === 0) {
+                return res.send({ msg: "没有获取到相关信息" })
+            } else {
+                return res.send({ msg: msg, data: d })
+            }
+        } catch (error) {
+            console.log(error)
+            return res.send({ msg: commonUtils.MESSAGE.SERVER_ERROR })
+        }
+    },
+
+    //微信视频号热门话题
+    fetch_hot_words: async function (req, res) {
+        const api_key = req.body.api_key
+        await commonUtils.valid_redis_key("th_wx_video_detail", unkey_api_id, api_key, req, res)
+        const config = {
+            method: 'get',
+            url: `https://api.tikhub.io/api/v1/wechat_channels/fetch_hot_words`,
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + tikhub_api_token
+            }
+        };
+        try {
+            const response = await axios(config)
+            const d = response.data.data
+            let msg = null;
+            if (api_key) {
+                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
+                msg = `API Key 剩余调用次数：${remaining}`;
+            }
+            if (response.data.code !== 200) {
+                return res.send({ msg: "获取热门话题失败" });
+            }
+            if (d.length === 0) {
+                return res.send({ msg: "未获取到热门话题" })
+            } else {
+                return res.send({ msg: msg, data: d })
+            }
+        } catch (error) {
+            console.log(error)
+            return res.send({ msg: commonUtils.MESSAGE.SERVER_ERROR })
+        }
+    },
+
+}
+
 export default {
     th_youtube,
     th_bilibili,
-    th_xiaohongshu
+    th_xiaohongshu,
+    th_wechat_media,
+    th_wechat_channels
 }

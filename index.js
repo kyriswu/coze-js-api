@@ -13,6 +13,7 @@ import qs from 'querystring'; // 用于将参数编码为 x-www-form-urlencoded 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 import commonUtils from './utils/commonUtils.js';
+import thirdPartyUsed from "./utils/thirdPartyUsed.js";
 
 const app = express();
 const port = 3000;
@@ -71,7 +72,7 @@ app.get('/cozechatsdk', (req, res) => {
 import redis from './utils/redisClient.js';
 import search1api from './utils/search1api.js';
 import zyte from './utils/zyte.js';
-import { th_bilibili, th_youtube, th_xiaohongshu } from './utils/tikhub.io.js';
+import { th_bilibili, th_youtube, th_xiaohongshu,th_wechat_media,th_wechat_channels } from './utils/tikhub.io.js';
 import {qweather_tool}  from './utils/qwether.js';
 // 从 Redis 中获取用户使用量
 async function getUsage(key) {
@@ -921,6 +922,37 @@ app.post('/bilibili/subtitle', th_bilibili.fetch_one_video_v2);
 app.post('/xiaohongshu/home_notes', th_xiaohongshu.fetch_home_notes);
 app.post('/xiaohongshu/search_notes_v2', th_xiaohongshu.search_notes_v2);
 app.post('/xiaohongshu/get_note_info_v1', th_xiaohongshu.get_note_info_v1);
+// 通过公众号用户id获取文章
+app.post('/wx_gzh/get_user_articles', th_wechat_media.get_wechat_mp_article_list);
+
+// // 获取公众号文章详情JSON
+// app.post('/wx_gzh/fetch_mp_article_detail_json', th_wechat_media.fetch_mp_article_detail_json);
+//
+// // 获取公众号文章详情html
+// app.post('/wx_gzh/fetch_mp_article_detail_html', th_wechat_media.fetch_mp_article_detail_html);
+//
+// // 获取公众号文章阅读量
+// app.post('/wx_gzh/fetch_mp_article_read_count', th_wechat_media.fetch_mp_article_read_count);
+//
+// // 获取微信公众号文章评论列表
+// app.post('/wx_gzh/fetch_mp_article_comment_list', th_wechat_media.fetch_mp_article_comment_list);
+//
+// // 获取微信公众号长链接转短链接
+// app.post('/wx_gzh/mp_url_long2short', th_wechat_media.mp_url_long2short);
+//
+// // 微信视频号搜索
+// app.post('/wx_sph/search_videos_by_keyword', th_wechat_channels.search_videos_by_keyword);
+//
+// //微信视频号视频详情
+// app.post('/wx_sph/fetch_video_detail', th_wechat_channels.fetch_video_detail);
+//
+// //微信视频号主页
+// app.post('/wx_sph/fetch_home_page', th_wechat_channels.fetch_home_page);
+//
+// //微信视频号热门话题
+// app.post('/wx_sph/fetch_hot_words', th_wechat_channels.fetch_hot_words);
+
+
 app.post("/qweather/history_weather",qweather_tool.get_history_weather)
 
 app.post("/qweather/city_weather_code",qweather_tool.get_city_weather_code)
@@ -2141,6 +2173,9 @@ app.post('/extract-element-from-html', async (req, res) => {
         })
     }
 })
+
+// 三方接口请求api_key验证和减扣次数
+app.post('/thirdParty/verifyKey',thirdPartyUsed.key_used)
 
 
 app.listen(port, () => {
