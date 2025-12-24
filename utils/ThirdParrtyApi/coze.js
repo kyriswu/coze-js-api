@@ -162,75 +162,76 @@ const coze = {
             throw error;
         }
     },
+
     /**
-     * 工作流运行接口
+     * 运行工作流
      * @param {*} req 
      * @param {*} res 
+     * @returns 
      */
-    workflow_run: async function (req, res) {
-        const workflow_name = req.body.workflow
+    workflow_run: async  (req, res) => {
+        const { workflow: workflow_name, api_key, parameters = {} } = req.body;
 
-        console.log("workflow_run:",res)
-        // 工作流id获取，从己方多维表格获取
-        const workflow_id = await commonUtils.get_one_workflow_id_from_bitable(workflow_name, res)
+        if (!workflow_name) return res.send({ code: -1, msg: "工作流名称不能为空！" });
+        if (!api_key) return res.send({ code: -1, msg: commonUtils.MESSAGE.TOKEN_EMPTY });
 
-        //  验证api密钥
-        const api_key = req.body.api_key
-        if (!api_key) {
-            res.send({ 
-                code:-1,
-                msg: commonUtils.MESSAGE.TOKEN_EMPTY
-            })
-        } else {
-            const { keyI, valid, remaining, code } = await unkey.verifyKey(unkey_api_id, api_key, 0);
-            if (!valid) {
-                return res.send({
-                    code:-1,
-                    msg: commonUtils.MESSAGE.TOKEN_EXPIRED
-                });
-            }
-            if (remaining === 0) {
-                return res.send({
-                    code:-1,
-                    msg: commonUtils.MESSAGE.TOKEN_NO_TIMES
-                });
-            }
+        try {
+            const check = await unkey.verifyKey(unkey_api_id, api_key, 0);
+            if (!check.valid) return res.send({ code: -1, msg: commonUtils.MESSAGE.TOKEN_EXPIRED });
+            if (check.remaining <= 0) return res.send({ code: -1, msg: commonUtils.MESSAGE.TOKEN_NO_TIMES });
+
+            const workflow_id = await commonUtils.get_one_workflow_id_from_bitable(workflow_name);
+
+            // 【核心修复】：使用 coze 直接调用，避免 this 指向错误
+            coze._runBackgroundWorkflow(workflow_id, parameters, api_key).catch(e => {
+                console.error("[Fatal] 后台任务启动器异常:", e.message);
+            });
+
+            return res.send({ 
+                code: 200, 
+                msg: "运行中，请稍后",
+                data: {
+                    status: "processing",
+                    workflow: workflow_name,
+                    remaining_before: check.remaining
+                }
+            });
+
+        } catch (error) {
+            console.error("Workflow Run 入口异常:", error.message);
+            return res.send({ 
+                code: -1, 
+                msg: error.message || commonUtils.MESSAGE.SERVER_ERROR 
+            });
         }
+    },
 
-        // 验证请求体参数
-        const parameters = req.body.parameters
-        if (!parameters) {
-            res.send({ 
-                code:-1,
-                msg:"请输入工作流运行参数！"
-            })
-        }
-        try{
-            // 获取coze平台token
-            // var access_token = await redis.get("coze_api_access_token")
-            // if (!access_token) {
-            //     access_token = await coze.refresh_token()
-            // }
+    /**
+     * 异步执行调用工作流任务
+     */
+    _runBackgroundWorkflow: async function (workflow_id, parameters, api_key) {
+        try {
+            // 这里同样建议使用 coze.getAccessToken() 替代 this.getAccessToken()
+            const token = await coze.getAccessToken();
+            const finalAuth = token ? `Bearer ${token}` : `Bearer ${PERSONAL_KEY}`;
+
             const response = await axios({
                 method: 'post',
                 url: 'https://api.coze.cn/v1/workflow/run',
+                timeout: 180000,
                 headers: {
-                    'Authorization': `Bearer ${personal_key}`,
+                    'Authorization': finalAuth,
                     'Content-Type': 'application/json'
                 },
-                data: {
-                    workflow_id: workflow_id,
-                    parameters: parameters
-                }
+                data: { workflow_id, parameters }
             });
-            const { keyI, valid, remaining, code } = await unkey.verifyKey(unkey_api_id, api_key, 1);
-            var msg = `API Key 剩余调用次数：${remaining}`;
-            return res.send({ msg: msg})
-        }catch(error){
-            res.send({ 
-                code: -1,
-                msg: error.message
-            })
+
+            if (response.data.code === 0) {
+                const consume = await unkey.verifyKey(unkey_api_id, api_key, 1);
+                console.log(`[Success] 执行成功，扣费完成`);
+            }
+        } catch (error) {
+            console.error(`[Background Task Failed]`, error.message);
         }
     }
 }
