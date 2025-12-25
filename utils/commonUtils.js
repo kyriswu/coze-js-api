@@ -1,170 +1,143 @@
-import redis from "./redisClient.js"
+import redis from "./redisClient.js";
 import feishu from "./ThirdParrtyApi/feishu.js";
 import unkey from './unkey.js';
 
-const feishu_app_id = "cli_a9ac6d7fbbb89cda"
-const feishu_app_secret = "L2YlP93rB84bwQgfT1U8cbFepNBR26sd"
+const CONFIG = {
+    FEISHU_APP_ID: "cli_a9ac6d7fbbb89cda",
+    FEISHU_APP_SECRET: "L2YlP93rB84bwQgfT1U8cbFepNBR26sd",
+    BITABLE_TOKEN: "Doodb9MS2aH8wksKAm0cxwPank3",
+    BITABLE_TABLE_TOKEN: "tblWUWiaquWZrh8p"
+};
 
-const workflow_info_bitable_token = "Doodb9MS2aH8wksKAm0cxwPank3"
-
-const workflow_info_bitable_table_token = "tblWUWiaquWZrh8p"
-
-
-/**
- * 通用工具类，用于存放通用方法
- */
 const commonUtils = {
-    /**
-     * 报错信息(统一处理)
-     */
-    MESSAGE:{
-        TOKEN_EMPTY:"API_KEY不能为空！相关咨询、帮助及开通方式，均在 https://devtool.uk/plugin ",
-        TOKEN_EXPIRED:'令牌无效，续费或者购买，请访问：https://devtool.uk/plugin',
-        TOKEN_NO_TIMES:'令牌无可用次数，续费或者购买，请访问：https://devtool.uk/plugin',
-        FREE_KEY_EXPIRED_1:"免费版每日仅能使用 1 次，付费即可解锁不限次 / 更多次数权益！相关咨询、帮助及开通方式，均在 https://devtool.uk/plugin ",
-        FREE_KEY_EXPIRED_3:"免费版每日仅能使用 3 次，付费即可解锁不限次 / 更多次数权益！相关咨询、帮助及开通方式，均在 https://devtool.uk/plugin ",
-        LARK_ACCESS_KEY_ERROR:"获取飞书授权令牌失败。相关咨询、帮助及开通方式，均在 https://devtool.uk/plugin ",
-        COZE_WORKFLOE_ERROR:"请核对工作流序号是否填写无误。相关咨询、帮助及开通方式，均在 https://devtool.uk/plugin ",
-        SERVER_ERROR:'服务器内部异常，请稍后重试',
-        FREE_API_USE_LIMIT:"为了保证付费用户的使用体验，免费用户有使用频率限制。付费即可解锁不限次 / 更多次数权益！相关咨询、帮助及开通方式，均在 https://devtool.uk/plugin",
-        FREE_API_HOUR_USE_LIMIT:"免费用户有频率限制，1小时内使用1次。付费即可解锁不限次 / 更多次数权益！相关咨询、帮助及开通方式，均在 https://devtool.uk/plugin",
-        HELP_LINK:"https://devtool.uk/plugin",
-        VIDEO_PARSE_ERROR:"无法解析此链接，本插件支持快手/抖音/小红书/B站/Youtube/tiktok。相关咨询、帮助及开通方式，均在 https://devtool.uk/plugin",
-        PLUGIN_NEED_PAY:"本插件后期将收费。相关咨询、帮助及开通方式，均在 https://devtool.uk/plugin"
-    },
-    /**
-     * 验证免费key是否可用
-     * @param {string} key 免费key
-     * @returns 相关提示信息
-     */
-    valid_free_key: async function (key) {
-        var flag = false;
-        const value = await redis.get(key)
-        if (value === null) {
-            // 不存在，创建 key 并设置初始值
-            const now = new Date();
-            const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-            const secondsSinceMidnight = Math.floor((now - midnight) / 1000);
-            console.log("创建key:", key, "初始值为0，过期时间为", secondsSinceMidnight);
-            await redis.set(key, 0, 'EX', 60 * 60);
-            flag = true
-        }
-        if (!flag) {
-            console.log(`用户 ${req.headers['user-identity']} 的免费版使用次数已用完`);
-            return res.send({
-                code: 0,
-                msg: commonUtils.MESSAGE.TOKEN_NO_TIMES,
-                data: [{
-                    'title': commonUtils.MESSAGE.FREE_API_USE_LIMIT,
-                    'link': commonUtils.MESSAGE.HELP_LINK,
-                    'snippet': commonUtils.MESSAGE.FREE_API_USE_LIMIT
-                }]
-            });
-        }
+    MESSAGE: {
+        TOKEN_EMPTY: "API_KEY不能为空！相关咨询、帮助及开通方式，均在 https://devtool.uk/plugin",
+        TOKEN_EXPIRED: '令牌无效，续费或者购买，请访问：https://devtool.uk/plugin',
+        TOKEN_NO_TIMES: '令牌无可用次数，续费或者购买，请访问：https://devtool.uk/plugin',
+        FREE_KEY_EXPIRED_1: "免费版每日仅能使用 1 次，付费即可解锁不限次权益！详情：https://devtool.uk/plugin",
+        LARK_ACCESS_KEY_ERROR: "获取飞书授权令牌失败。",
+        COZE_WORKFLOW_ERROR: "请核对工作流序号是否填写无误。",
+        SERVER_ERROR: '服务器内部异常，请稍后重试',
+        HELP_LINK: "https://devtool.uk/plugin"
     },
 
     /**
-     * 
-     * @param {string} key_header reids密钥抬头
-     * @param {string} unkey_api_id  unkey_api_id
-     * @param {string} api_key 接口访问令牌
-     * @param {*} req
-     * @param {*} res
-     * @returns 
+     * 获取距离今日结束（午夜）的剩余秒数
+     */
+    _getSecondsUntilMidnight: function () {
+        const now = new Date();
+        const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+        return Math.floor((midnight - now) / 1000);
+    },
+
+    /**
+     * 统一校验入口
+     * 重点：返回 true 代表通过，返回 false 代表已处理响应并拦截后续逻辑
      */
     valid_redis_key: async function (key_header, unkey_api_id, api_key, req, res) {
-        if (!api_key) {
-            const redis_key = req.headers['user-identity'] ? key_header + req.headers['user-identity'] : 'test';
-            const value = await redis.get(redis_key);
-            if (value === null) {
-                // 不存在，创建 key 并设置初始值
-                const now = new Date();
-                const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-                const secondsSinceMidnight = Math.floor((now - midnight) / 1000);
-                await redis.set(redis_key, 0, 'EX', secondsSinceMidnight);
+        try {
+            if (!api_key) {
+                // --- 免费版逻辑 ---
+                const userId = req.headers['user-identity'] || 'test';
+                const redis_key = `${key_header}:${userId}`;
+
+                const exists = await redis.exists(redis_key);
+                if (!exists) {
+                    await redis.set(redis_key, "1", 'EX', this._getSecondsUntilMidnight());
+                    return true;
+                } else {
+                    res.send({ code: -1, msg: this.MESSAGE.FREE_KEY_EXPIRED_1 });
+                    return false;
+                }
             } else {
-                return res.send({ msg: commonUtils.MESSAGE.FREE_KEY_EXPIRED_1 })
+                // --- 付费版逻辑 (Unkey) ---
+                const { valid, remaining } = await unkey.verifyKey(unkey_api_id, api_key, 0);
+
+                if (!valid) {
+                    res.send({ code: -1, msg: this.MESSAGE.TOKEN_EXPIRED });
+                    return false;
+                }
+                if (remaining <= 0) {
+                    res.send({ code: -1, msg: this.MESSAGE.TOKEN_NO_TIMES });
+                    return false;
+                }
+                return true;
             }
-        } else {
-            const { keyId, valid, remaining, code } = await unkey.verifyKey(unkey_api_id, api_key, 0);
-            if (!valid) {
-                return res.send({
-                    msg: commonUtils.MESSAGE.TOKEN_EXPIRED
-                });
+        } catch (error) {
+            console.error("Validation Error:", error);
+            if (!res.headersSent) {
+                res.send({ code: -1, msg: this.MESSAGE.SERVER_ERROR });
             }
-            if (remaining == 0) {
-                return res.send({
-                    msg: commonUtils.MESSAGE.TOKEN_NO_TIMES
-                });
-            }
+            return false;
         }
     },
 
     /**
-     * 验证免费key使用次数还够不够
-     * @param {string} key 
-     * @returns 
+     * 获取飞书 AccessToken（增加 Redis 缓存）
      */
-    free_key_used: async function (key) {
-        let value = await redis.get(key);
-        if (value === null) {
-            // 不存在，创建 key 并设置初始值
-            const now = new Date();
-            const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-            const secondsSinceMidnight = Math.floor((now - midnight) / 1000);
-            await redis.set(key, 0, 'EX', secondsSinceMidnight);
-            value = 0;
-            console.log(`键 ${key} 不存在，已创建并初始化为 0`);
-        } else {
-            console.log(`键 ${key} 已存在，当前值为 ${value}`);
+    _getFeishuAccessToken: async function () {
+        const cacheKey = "token:feishu_access_token";
+        let token = await redis.get(cacheKey);
+        if (token) return token;
+
+        token = await feishu.getAccessToken(CONFIG.FEISHU_APP_ID, CONFIG.FEISHU_APP_SECRET);
+        if (token) {
+            // 飞书 token 有效期 2 小时，缓存 7000 秒
+            await redis.set(cacheKey, token, 'EX', 7000);
         }
-        return value;
+        return token;
     },
 
     /**
-     * 从飞书多维表格中读取工作流信息
-     * @param {*} workflow_num 工作流编号
+     * 从飞书多维表格查询工作流 ID
      */
-    get_one_workflow_id_from_bitable: async function (workflow_num,res) {
-        if (!workflow_num) {
-            res.send({ 
-                code:-1,
-                msg: "工作流编号不可以为空！" 
-            })
-        } else {
-            const access_token = await feishu.getAccessToken(feishu_app_id, feishu_app_secret)
-            if (!access_token) {
-                res.send({ msg: commonUtils.MESSAGE.LARK_ACCESS_KEY_ERROR})
-            } else {
-                const fitler = {
-                    "filter": {
-                        "conjunction": "and",
-                        "conditions": [
-                            {
-                                "field_name": "工作流编号",
-                                "operator": "is",
-                                "value": [
-                                    workflow_num
-                                ]
-                            }
-                        ]
-                    }
+    get_one_workflow_id_from_bitable: async function (workflow_num) {
+        if (!workflow_num) throw new Error("工作流编号不可以为空！");
+
+        // --- 增加 Workflow ID 缓存，减少对飞书 API 的查询频率 ---
+        const workflowCacheKey = `cache:workflow_id:${workflow_num}`;
+        const cachedId = await redis.get(workflowCacheKey);
+        if (cachedId) return cachedId;
+
+        try {
+            const access_token = await this._getFeishuAccessToken();
+            if (!access_token) throw new Error(this.MESSAGE.LARK_ACCESS_KEY_ERROR);
+
+            const filter = {
+                filter: {
+                    conjunction: "and",
+                    conditions: [{
+                        field_name: "工作流编号",
+                        operator: "is",
+                        value: [workflow_num]
+                    }]
                 }
-                const response = await feishu.bitable_search(access_token,workflow_info_bitable_token,workflow_info_bitable_table_token,fitler);
-                if ( response.data.items.length > 0) {
-                    return response.data.items[0].fields.工作流ID[0].text
-                }else {
-                    res.send({
-                        code:-1,
-                        msg:commonUtils.MESSAGE.COZE_WORKFLOE_ERROR
-                    })
+            };
+
+            const response = await feishu.bitable_search(
+                access_token,
+                CONFIG.BITABLE_TOKEN,
+                CONFIG.BITABLE_TABLE_TOKEN,
+                filter
+            );
+
+            const items = response?.data?.items || [];
+            if (items.length > 0) {
+                const workflowId = items[0].fields?.工作流ID?.[0]?.text;
+                if (workflowId) {
+                    // 缓存 Workflow ID 1 小时，因为这个 ID 几乎不会变动
+                    await redis.set(workflowCacheKey, workflowId, 'EX', 3600);
+                    return workflowId;
                 }
             }
-        }
 
+            throw new Error(this.MESSAGE.COZE_WORKFLOW_ERROR);
+
+        } catch (error) {
+            console.error("Feishu Bitable Error Trace:", error.message);
+            throw error;
+        }
     }
+};
 
-}
-
-
-export default commonUtils
+export default commonUtils;
