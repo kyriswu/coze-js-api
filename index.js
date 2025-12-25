@@ -505,72 +505,49 @@ app.post('/google/search/web', async (req, res) => {
     const { q, api_key} = req.body;
     // var api_id = "api_41vHKzNmXf5xx23f"; //原有的 api_id 
     var api_id = ""; 
-   
+    let final_remaining = null;
     if (!q) {
         return res.status(400).send('Invalid input: "q" is required');
     }
+    try {
+        // --- 逻辑分流：付费 Key 验证 vs 免费限流 ---
+        if (api_key) {
+            const NEW_KEY_ID = "api_413Kmmitqy3qaDo4";
+            const OLD_KEY_ID = "api_41vHKzNmXf5xx23f";
 
-    //免费版的key
-    const free_key = 'google_'+req.headers['user-identity']
-    if (api_key) {
-        // 验证虚拟浏览器的api_id 新key
-        const newKey = "api_413Kmmitqy3qaDo4";
-        //原有的key
-        const oldKey = "api_41vHKzNmXf5xx23f" 
-        const { keyI, valid, remaining, code } = await unkey.verifyKey(newKey, api_key, 0);
-        if(!valid){
-            api_id = oldKey
-            const { keyId, valid, remaining, code } = await unkey.verifyKey(oldKey, api_key, 0);
-             if (!valid) {
-                return res.send({
-                    code: -1,
-                    msg: commonUtils.MESSAGE.TOKEN_EXPIRED
-                }); 
+            // 尝试新 Key
+            let check = await unkey.verifyKey(NEW_KEY_ID, api_key, 0);
+            api_id = NEW_KEY_ID;
+            // 如果新 Key 无效，尝试旧 Key
+            if (!check.valid) {
+                check = await unkey.verifyKey(OLD_KEY_ID, api_key, 0);
+                api_id = OLD_KEY_ID;
             }
-            if(remaining === 0) {
-                return res.send({
-                    code: -1,
-                    msg: commonUtils.MESSAGE.TOKEN_NO_TIMES
-                }); 
+            // 最终校验结果处理
+            if (!check.valid) {
+                return res.send({ code: -1, msg: commonUtils.MESSAGE.TOKEN_EXPIRED });
             }
+            if (check.remaining <= 0) {
+                return res.send({ code: -1, msg: commonUtils.MESSAGE.TOKEN_NO_TIMES });
+            }
+            final_remaining = check.remaining;
         }else{
-            api_id = newKey
-            if(remaining === 0) {
+            // 免费版逻辑
+            const free_key = 'google_'+req.headers['user-identity']
+            const canSearch = await canSearchGoogle(free_key);
+            if (!canSearch) {
+                console.log(`用户 ${req.headers['user-identity']} 的免费版 Google 搜索次数已用完`);
                 return res.send({
-                    code: -1,
-                    msg: commonUtils.MESSAGE.TOKEN_NO_TIMES
+                    code: 0,
+                    msg: commonUtils.MESSAGE.FREE_API_USE_LIMIT,
+                    data: [{
+                        'title': commonUtils.MESSAGE.FREE_API_HOUR_USE_LIMIT,
+                        'link': commonUtils.MESSAGE.HELP_LINK,
+                        'snippet': commonUtils.MESSAGE.FREE_API_HOUR_USE_LIMIT
+                    }]
                 }); 
             }
         }
-                // if (!valid) {
-        //     return res.send({
-        //         code: -1,
-        //         msg: 'API Key 无效或已过期，请检查后重试！'
-        //     }); 
-        // }
-        // if (remaining == 0) {
-        //     return res.send({
-        //         code: -1,
-        //         msg: 'API Key 使用次数已用完，请联系作者续费！'
-        //     }); 
-        // }
-       
-    }else{
-        const canSearch = await canSearchGoogle(free_key);
-        if (!canSearch) {
-            console.log(`用户 ${req.headers['user-identity']} 的免费版 Google 搜索次数已用完`);
-            return res.send({
-                code: 0,
-                msg: commonUtils.MESSAGE.FREE_API_USE_LIMIT,
-                data: [{
-                    'title': commonUtils.MESSAGE.FREE_API_HOUR_USE_LIMIT,
-                    'link': commonUtils.MESSAGE.HELP_LINK,
-                    'snippet': commonUtils.MESSAGE.FREE_API_HOUR_USE_LIMIT
-                }]
-            }); 
-        }
-    }
-   
     // search1api.search(q).then(async (data) => {
     //     let msg = "";
     //     if (api_key) {
@@ -586,8 +563,6 @@ app.post('/google/search/web', async (req, res) => {
     //         data: data.results
     //     });
     // })
-
-    try {
         const html = await browserless.google_search(q)
         const dom = new JSDOM(html);
         const { document, window } = dom.window;

@@ -164,10 +164,7 @@ const coze = {
     },
 
     /**
-     * 运行工作流
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * 工作流主运行接口
      */
     workflow_run: async  (req, res) => {
         const { workflow: workflow_name, api_key, parameters = {} } = req.body;
@@ -207,13 +204,12 @@ const coze = {
     },
 
     /**
-     * 异步执行调用工作流任务
+     * 内部异步处理线程
      */
     _runBackgroundWorkflow: async function (workflow_id, parameters, api_key) {
         try {
             // 这里同样建议使用 coze.getAccessToken() 替代 this.getAccessToken()
-            const token = await coze.getAccessToken();
-            const finalAuth = token ? `Bearer ${token}` : `Bearer ${PERSONAL_KEY}`;
+            const finalAuth = `Bearer ${personal_key}`;
 
             const response = await axios({
                 method: 'post',
