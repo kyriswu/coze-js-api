@@ -548,6 +548,7 @@ const browserless = {
             // 禁止加载媒体资源（提高渲染速度）
             await disableLoadMedia(page);
 
+            console.log(chromium_endpoint, proxy_user, proxy_pass)
             let totalBytes = 0;
 
             page.on('response', async (response) => {
