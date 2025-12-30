@@ -16,7 +16,7 @@ import commonUtils from './utils/commonUtils.js';
 import thirdPartyUsed from "./utils/thirdPartyUsed.js";
 
 const app = express();
-const port = 3001;
+const port = 3000;
 const environment = process.env.NODE_ENV || 'development';
 
 app.use(express.json())
