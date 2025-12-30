@@ -317,14 +317,12 @@ export const th_xiaohongshu = {
 
 // 辅助函数：统一处理 TikHub 的请求逻辑
 async function tikhubRequest(url) {
-    return axios({
-        method: 'get',
+    return axios.get(
         url,
-        headers: {
-            "Content-Type": "application/json",
+        {headers: {
             "Authorization": `Bearer ${tikhub_api_token}` // 请确保该变量已在作用域内定义
-        }
-    });
+        }}
+    );
 }
 
 // 微信公众号
@@ -333,25 +331,28 @@ export const th_wechat_media = {
      * 获取微信公众号文章列表
      */
     get_wechat_mp_article_list: async function (req, res) {
-        const { gh_id, offset = 0, api_key } = req.body;
+        const { gh_id, offset, api_key } = req.body;
         if (!gh_id) return res.send({ code: -1, msg: "公众号用户id不能为空" });
-
         try {
             const isValid = await commonUtils.valid_redis_key("wx_mp_list", unkey_api_id, api_key, req, res);
             if (!isValid) return;
 
-            const url = `https://api.tikhub.io/api/v1/wechat_mp/web/fetch_mp_article_list?ghid=${gh_id}&offset=${offset}`;
-            const response = await tikhubRequest(url);
+            const apiUrl = "https://api.tikhub.io/api/v1/wechat_mp/web/fetch_mp_article_list";
 
+            const response = await axios.get(apiUrl, {
+                params: {
+                    ghid: gh_id,   // 这里会自动被编码，例如 '+' 变成 '%2B'
+                    offset: offset
+                },
+                headers: { "Authorization": `Bearer ${tikhub_api_token}`,"Content-Type": "application/json", }
+            });
             if (response.data?.code !== 200) return res.send({ code: -1, msg: "获取列表失败" });
-
             const data = response.data.data || [];
             let msg = "success";
             if (api_key) {
                 const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
                 msg = `API Key 剩余调用次数：${remaining}`;
             }
-
             return res.send({ code: 200, msg, data });
         } catch (error) {
             if (!res.headersSent) return res.send({ code: -1, msg: commonUtils.MESSAGE.SERVER_ERROR });
@@ -396,6 +397,7 @@ export const th_wechat_media = {
 
 // 视频号
 export const th_wechat_channels = {
+    
     /**
      * 视频号搜索
      */
@@ -456,10 +458,159 @@ export const th_wechat_channels = {
     }
 };
 
+
+export const th_douyin ={
+    //获取用户主页作品数据
+    fetch_user_post_videos: async function (req,res) {
+        // sec_user_id: 用户sec_user_id
+        // max_cursor: 最大游标，用于翻页，第一页为0，第二页为第一次响应中的max_cursor值。
+        // count: 最大数量，不要超过20，建议保持不变。
+        // sort_type: 排序类型，可选值如下：
+        // 0: 最新排序-默认
+        // 1: 最热排序
+        let { sec_user_id, max_cursor,count,sort_type, api_key } = req.body;
+        if (!sec_user_id ) {
+            return res.send({ code: -1, msg: "抖音用户ID不能为空" });
+        }
+        if(!max_cursor){
+            max_cursor = "0"
+        }
+        if(!count){
+            count = "10"
+        }
+        if(!sort_type){
+            sort_type="0"
+        }
+        try {
+            // 重要：必须判断并 return。如果校验失败，commonUtils 内部会发出 res.send
+            const isValid = await commonUtils.valid_redis_key("dy_user_post_videos", unkey_api_id, api_key, req, res);
+            if (!isValid) return;
+
+            const url = `https://api.tikhub.io/api/v1/douyin/app/v3/fetch_user_post_videos?sec_user_id=${sec_user_id}&max_cursor=${max_cursor}&count=${count}&sort_type=${sort_type}`;
+
+            const response = await axios.get(url, {
+                headers: { "Authorization": `Bearer ${tikhub_api_token}` }
+            });
+
+            // 修正判断逻辑：response.data.code !== 200
+            if (response.data?.code !== 200) {
+                return res.send({ code: -1, msg: "第三方接口获取笔记失败" });
+            }
+
+            const d = response.data.data;
+            if (!d || (Array.isArray(d) && d.length === 0)) {
+                return res.send({ code: -1, msg: "没有找到相关数据" });
+            }
+
+            // 统一扣费与消息处理
+            let msg = "success";
+            if (api_key) {
+                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
+                msg = `API Key 剩余调用次数：${remaining}`;
+            }
+
+            return res.send({ code: 200, msg, data: d });
+
+        } catch (error) {
+            console.error("DouYin Viedos Info Error:", error.message);
+            return res.send({ code: -1, msg: commonUtils.MESSAGE.SERVER_ERROR });
+        }
+    },
+    //获取综合搜索
+    fetch_general_search_v3:async function (req,res) {
+        //keyword: 搜索关键词，如 "猫咪"
+        // cursor: 翻页游标（首次请求传 0）
+        // sort_type: 排序方式
+            // 0: 综合排序
+            // 1: 最多点赞
+            // 2: 最新发布
+        // publish_time: 发布时间筛选
+            // 0: 不限
+            // 1: 最近一天
+            // 7: 最近一周
+            // 180: 最近半年
+        // filter_duration: 视频时长筛选
+            // 0: 不限
+            // 0-1: 1分钟以内
+            // 1-5: 1-5分钟
+            // 5-10000: 5分钟以上
+        // content_type: 内容类型筛选
+            // 0: 不限
+            // 1: 视频
+            // 2: 图片
+            // 3: 文章
+        // search_id: 搜索ID（首次请求传空，翻页时从上次响应获取）
+        // backtrace: 翻页回溯标识（首次请求传空，翻页时从上次响应获取）
+        let { keyword, cursor,publish_time,filter_duration,content_type,search_id,backtrace, sort_type,api_key } = req.body;
+        if(!cursor){
+            cursor = 0
+        }
+        if(!sort_type){
+            sort_type="0"
+        }
+        if(!keyword){
+            return res.send({ code: -1, msg: "搜索关键词不能为空" });
+        }
+        if(!publish_time){
+            publish_time = "0"
+        }
+        if(!filter_duration){
+            filter_duration="0"
+        }
+        if(!content_type){
+            content_type="0"
+        }
+        const data = {
+            "keyword": keyword,
+            "cursor": cursor,
+            "sort_type": sort_type,
+            "publish_time":publish_time,
+            "filter_duration": filter_duration,
+            "content_type": content_type,
+            "search_id": search_id,
+            "backtrace": backtrace
+        }
+        try {
+            // 重要：必须判断并 return。如果校验失败，commonUtils 内部会发出 res.send
+            const isValid = await commonUtils.valid_redis_key("dy_general_search_v3", unkey_api_id, api_key, req, res);
+            if (!isValid) return;
+
+            const url = `https://api.tikhub.io/api/v1/douyin/search/fetch_general_search_v3`;
+
+            const response = await axios.post(url, data,{
+                headers: { "Authorization": `Bearer ${tikhub_api_token}` }
+            });
+
+            // 修正判断逻辑：response.data.code !== 200
+            if (response.data?.code !== 200) {
+                return res.send({ code: -1, msg: "第三方接口获取笔记失败" });
+            }
+
+            const d = response.data.data;
+            if (!d || (Array.isArray(d) && d.length === 0)) {
+                return res.send({ code: -1, msg: "没有找到相关数据" });
+            }
+            // 统一扣费与消息处理
+            let msg = "success";
+            if (api_key) {
+                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
+                msg = `API Key 剩余调用次数：${remaining}`;
+            }
+            return res.send({ code: 200, msg, data: d });
+
+        } catch (error) {
+            console.error("DouYin Viedos Info Error:", error.message);
+            return res.send({ code: -1, msg: commonUtils.MESSAGE.SERVER_ERROR });
+        }
+        
+    }
+}
+
 export default {
     th_youtube,
     th_bilibili,
     th_xiaohongshu,
     th_wechat_media,
-    th_wechat_channels
+    th_wechat_channels,
+    th_douyin
 }

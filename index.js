@@ -16,7 +16,7 @@ import commonUtils from './utils/commonUtils.js';
 import thirdPartyUsed from "./utils/thirdPartyUsed.js";
 
 const app = express();
-const port = 3000;
+const port = 3001;
 const environment = process.env.NODE_ENV || 'development';
 
 app.use(express.json())
@@ -72,7 +72,7 @@ app.get('/cozechatsdk', (req, res) => {
 import redis from './utils/redisClient.js';
 import search1api from './utils/search1api.js';
 import zyte from './utils/zyte.js';
-import { th_bilibili, th_youtube, th_xiaohongshu,th_wechat_media,th_wechat_channels } from './utils/tikhub.io.js';
+import { th_bilibili, th_youtube, th_xiaohongshu,th_wechat_media,th_wechat_channels,th_douyin } from './utils/tikhub.io.js';
 import {qweather_tool}  from './utils/qwether.js';
 // 从 Redis 中获取用户使用量
 async function getUsage(key) {
@@ -899,6 +899,13 @@ app.post('/xiaohongshu/search_notes_v2', th_xiaohongshu.search_notes_v2);
 app.post('/xiaohongshu/get_note_info_v1', th_xiaohongshu.get_note_info_v1);
 // 通过公众号用户id获取文章
 app.post('/wx_gzh/get_user_articles', th_wechat_media.get_wechat_mp_article_list);
+
+//抖音获取用户主页作品数据
+app.post('/douyin/fetch_user_post_videos', th_douyin.fetch_user_post_videos);
+
+//抖音综合搜索
+app.post('/douyin/fetch_general_search_v3', th_douyin.fetch_general_search_v3);
+
 
 // // 获取公众号文章详情JSON
 // app.post('/wx_gzh/fetch_mp_article_detail_json', th_wechat_media.fetch_mp_article_detail_json);
