@@ -904,7 +904,7 @@ app.post('/wx_gzh/get_user_articles', th_wechat_media.get_wechat_mp_article_list
 app.post('/douyin/fetch_user_post_videos', th_douyin.fetch_user_post_videos);
 
 //抖音综合搜索
-app.post('/douyin/fetch_general_search_v3', th_douyin.fetch_general_search_v3);
+app.post('/douyin/fetch_general_search_v1', th_douyin.fetch_general_search_v1);
 
 
 // // 获取公众号文章详情JSON

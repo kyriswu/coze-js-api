@@ -517,7 +517,7 @@ export const th_douyin ={
         }
     },
     //获取综合搜索
-    fetch_general_search_v3:async function (req,res) {
+    fetch_general_search_v1:async function (req,res) {
         //keyword: 搜索关键词，如 "猫咪"
         // cursor: 翻页游标（首次请求传 0）
         // sort_type: 排序方式
@@ -575,12 +575,11 @@ export const th_douyin ={
             const isValid = await commonUtils.valid_redis_key("dy_general_search_v3", unkey_api_id, api_key, req, res);
             if (!isValid) return;
 
-            const url = `https://api.tikhub.io/api/v1/douyin/search/fetch_general_search_v3`;
+            const url = `https://api.tikhub.io/api/v1/douyin/search/fetch_general_search_v1`;
 
             const response = await axios.post(url, data,{
                 headers: { "Authorization": `Bearer ${tikhub_api_token}` }
             });
-
             // 修正判断逻辑：response.data.code !== 200
             if (response.data?.code !== 200) {
                 return res.send({ code: -1, msg: "第三方接口获取笔记失败" });
@@ -590,13 +589,37 @@ export const th_douyin ={
             if (!d || (Array.isArray(d) && d.length === 0)) {
                 return res.send({ code: -1, msg: "没有找到相关数据" });
             }
+            const list = d.data || [];
+            const arr = list.map(item => {
+                // 提取 aweme_info，防止 item 为空报错
+                const info = item.aweme_info || {};
+                const author = info.author || {};
+                const video = info.video || {};
+                const statistics = info.statistics || {};
+                return {
+                    author_name: author.nickname || "",     // 作者昵称
+                    signature: author.signature || "",      // 简介
+                    sec_uid: author.sec_uid || "",          // 用户ID
+                    share_url: info.share_url || "",        // 分享链接
+                    desc: info.desc || "",                  // 视频描述
+                    caption: info.caption || "",            // 视频tag
+                    title: info.item_title || "",           // 视频标题
+                    video_duration: video.duration || 0,    // 视频时长
+                    // 使用可选链 ?. 防止深层路径不存在导致报错
+                    video_url: video.play_addr?.url_list?.[0] || "", 
+                    comment_count: statistics.comment_count || 0, // 评论量
+                    like_count: statistics.digg_count || 0,       // 点赞量
+                    collect_count: statistics.collect_count || 0, // 收藏量
+                    share_count: statistics.share_count || 0,     // 分享量
+                };
+            });
             // 统一扣费与消息处理
             let msg = "success";
             if (api_key) {
                 const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
                 msg = `API Key 剩余调用次数：${remaining}`;
             }
-            return res.send({ code: 200, msg, data: d });
+            return res.send({ code: 200, msg, data: {info:arr,cursor:d.cursor,has_more:d.has_more} });
 
         } catch (error) {
             console.error("DouYin Viedos Info Error:", error.message);
