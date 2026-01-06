@@ -494,22 +494,44 @@ export const th_douyin ={
 
             // 修正判断逻辑：response.data.code !== 200
             if (response.data?.code !== 200) {
-                return res.send({ code: -1, msg: "第三方接口获取笔记失败" });
+                return res.send({ code: -1, msg: "获取笔记失败" });
             }
 
             const d = response.data.data;
             if (!d || (Array.isArray(d) && d.length === 0)) {
                 return res.send({ code: -1, msg: "没有找到相关数据" });
             }
-
-            // 统一扣费与消息处理
+            const list = d.aweme_list || [];
+            const arr = list.map(item => {
+                // 提取 aweme_info，防止 item 为空报错
+                const author = item.author || {};
+                const video = item.video || {};
+                const statistics = item.statistics || {};
+                return {
+                    author_name: author.nickname || "",     // 作者昵称
+                    signature: author.signature || "",      // 简介
+                    sec_uid: author.sec_uid || "",          // 用户ID
+                    author_avatar:author.avatar_larger?.url_list?.[0] || "",          // 用户头像
+                    share_url: item.share_url || "",        // 分享链接
+                    desc: item.desc || "",                  // 视频描述
+                    caption: item.caption || "",            // 视频tag
+                    title: item.item_title || "",           // 视频标题
+                    video_duration: video.duration || 0,    // 视频时长
+                    // 使用可选链 ?. 防止深层路径不存在导致报错
+                    video_url: video.play_addr?.url_list?.[0] || "", 
+                    comment_count: statistics.comment_count || 0, // 评论量
+                    like_count: statistics.digg_count || 0,       // 点赞量
+                    collect_count: statistics.collect_count || 0, // 收藏量
+                    share_count: statistics.share_count || 0,     // 分享量
+                };
+            });
+             // 统一扣费与消息处理
             let msg = "success";
             if (api_key) {
                 const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
                 msg = `API Key 剩余调用次数：${remaining}`;
             }
-
-            return res.send({ code: 200, msg, data: d });
+            return res.send({ code: 200, msg, data: {info:arr,max_cursor:d.max_cursor,min_cursor:d.min_cursor} });
 
         } catch (error) {
             console.error("DouYin Viedos Info Error:", error.message);
