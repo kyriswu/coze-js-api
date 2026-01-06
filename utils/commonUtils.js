@@ -18,7 +18,22 @@ const commonUtils = {
         LARK_ACCESS_KEY_ERROR: "获取飞书授权令牌失败。",
         COZE_WORKFLOW_ERROR: "请核对工作流序号是否填写无误。",
         SERVER_ERROR: '服务器内部异常，请稍后重试',
-        HELP_LINK: "https://devtool.uk/plugin"
+        HELP_LINK: "https://devtool.uk/plugin",
+        MISSING_PARAMETERS: '缺少必要参数',
+    },
+    // 性别映射
+    GENDER_MAP : {
+        // 数字/字符串数字映射
+        '1': '男',
+        '0': '女',
+        // 英文标准映射 (兼容更多国际化场景)
+        'male': '男',
+        'm': '男',
+        'female': '女',
+        'f': '女',
+        // 中文直接透传
+        '男': '男',
+        '女': '女'
     },
 
     /**

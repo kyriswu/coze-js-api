@@ -939,6 +939,13 @@ app.post("/qweather/history_weather",qweather_tool.get_history_weather)
 
 app.post("/qweather/city_weather_code",qweather_tool.get_city_weather_code)
 
+import { calc_ba_zi , calc_zi_wei} from './utils/bazi.js';
+// 计算八字
+app.post('/bazi/calc_ba_zi', calc_ba_zi.calc_ba_zi)
+
+// 计算紫薇
+app.post('/bazi/calc_zi_wei', calc_zi_wei.calc_zi_wei)
+
 /**
  * api调用coze工作流
  */
