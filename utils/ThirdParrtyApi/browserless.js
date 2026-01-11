@@ -47,13 +47,15 @@ var browser_map = {} //浏览器map
 async function puppeteer_connect(chromium_endpoint, timeout, proxy){
     try {
         let b = await puppeteer.connect({
-            browserWSEndpoint: `ws://${chromium_endpoint}/chromium?timeout=${timeout}&--proxy-server=${proxy}&--no-sandbox&--proxy-bypass-list=<-loopback>;localhost;127.0.0.1;172.17.0.1`,  // 替换为你的本地端口
+            browserWSEndpoint: `ws://${chromium_endpoint}/chromium?timeout=${timeout}&--proxy-server=${proxy}&--no-sandbox&--proxy-bypass-list=<-loopback>;localhost;127.0.0.1;172.17.0.1&--ignore-certificate-errors&--disable-web-security`,  // 替换为你的本地端口
             headless: false,  // 设置为 false 以便调试
             defaultViewport: { width: 1280, height: 800 },
             args: [
                 `--proxy-server=${proxy}`,
                 '--no-sandbox',
-                '--proxy-bypass-list=<-loopback>;localhost;127.0.0.1;172.17.0.1'  // 移除 localhost 的跳过规则
+                '--proxy-bypass-list=<-loopback>;localhost;127.0.0.1;172.17.0.1',  // 移除 localhost 的跳过规则
+                '--ignore-certificate-errors',
+                '--disable-web-security'
             ],
         });
         return b
