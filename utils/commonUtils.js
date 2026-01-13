@@ -15,11 +15,13 @@ const commonUtils = {
         TOKEN_EXPIRED: '令牌无效，续费或者购买，请访问：https://devtool.uk/plugin',
         TOKEN_NO_TIMES: '令牌无可用次数，续费或者购买，请访问：https://devtool.uk/plugin',
         FREE_KEY_EXPIRED_1: "免费版每日仅能使用 1 次，付费即可解锁不限次权益！详情：https://devtool.uk/plugin",
+        FREE_KEY_EXPIRED_3: "免费版每日仅能使用 3 次，付费即可解锁不限次权益！详情：https://devtool.uk/plugin",
         LARK_ACCESS_KEY_ERROR: "获取飞书授权令牌失败。",
         COZE_WORKFLOW_ERROR: "请核对工作流序号是否填写无误。",
         SERVER_ERROR: '服务器内部异常，请稍后重试',
         HELP_LINK: "https://devtool.uk/plugin",
         MISSING_PARAMETERS: '缺少必要参数',
+        SUCCESS: '成功',
     },
     // 性别映射
     GENDER_MAP : {
