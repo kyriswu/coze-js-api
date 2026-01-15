@@ -841,6 +841,52 @@ app.post('/get_sitemap', async (req, res) => {
     });
 })
 
+app.post('/crawl', async (req, res) => {
+    const { url, api_key } = req.body;
+    const unkey_api_id = "api_413Kmmitqy3qaDo4";
+    if (!url) {
+        return res.status(400).send('Invalid input: "url" is required');
+    }
+
+    //==验证==
+    const redis_key = req.headers['user-identity'] ? 'crawl_'+req.headers['user-identity'] : 'crawl';
+    const value = await redis.get(redis_key);
+    if (value === null) {
+        const now = new Date();
+        const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const secondsSinceMidnight = Math.floor((now - midnight) / 1000);
+        await redis.set(redis_key, 0, 'EX', secondsSinceMidnight);
+    }else{
+        if(!api_key){
+            return res.send({msg: commonUtils.MESSAGE.FREE_KEY_EXPIRED_1})
+        }else{
+            const { keyId, valid, remaining, code } = await unkey.verifyKey(unkey_api_id, api_key, 0);
+            if (!valid) {
+                return res.send({
+                    msg: commonUtils.MESSAGE.TOKEN_EXPIRED
+                }); 
+            }
+            if (remaining == 0) {
+                return res.send({
+                    msg: commonUtils.MESSAGE.TOKEN_NO_TIMES
+                }); 
+            }
+        }
+    }
+
+    const data = await search1api.crawl(url);
+    var msg = null
+    if (api_key) {
+        const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
+        msg = `API Key 剩余调用次数：${remaining}`;
+    }
+    return res.send({
+        code: 0,
+        msg: msg,
+        data: data
+    });
+})
+
 //生成zyte点击元素的代码
 app.post('/web/click', async (req, res) => {
     const { type, value} = req.body;
