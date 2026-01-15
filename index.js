@@ -883,7 +883,7 @@ app.post('/crawl', async (req, res) => {
     return res.send({
         code: 0,
         msg: msg,
-        data: data
+        data: data.results
     });
 })
 
