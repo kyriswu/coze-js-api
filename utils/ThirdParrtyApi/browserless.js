@@ -140,7 +140,7 @@ async function disableLoadMedia(page){
         if (
             blockedPatterns.some(pattern => url.includes(pattern)) ||
             ['image', 'stylesheet', 'font', 'media'].includes(resourceType) ||
-            url.endsWith('.css') ||
+            // url.endsWith('.css') ||
             url.endsWith('.ico') ||              // favicon 文件
             url.includes('favicon')              // 例如 /favicon.png 或 favicon.ico?ver=2
         ) {
