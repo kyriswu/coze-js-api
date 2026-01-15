@@ -10,7 +10,7 @@ const unkey = {
         });
 
         const options = {
-            hostname: 'api.unkey.dev',
+            hostname: 'api.unkey.com',
             path: '/v1/keys.verifyKey',
             method: 'POST',
             headers: {
@@ -55,7 +55,7 @@ const unkey = {
         };
 
         try {
-            const response = await fetch('https://api.unkey.dev/v1/analytics.getVerifications', options);
+            const response = await fetch('https://api.unkey.com/v1/analytics.getVerifications', options);
             const data = await response.json();
             return data;
         } catch (err) {
