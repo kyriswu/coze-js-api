@@ -990,7 +990,7 @@ import { calc_ba_zi , calc_zi_wei} from './utils/bazi.js';
 app.post('/bazi/calc_ba_zi', calc_ba_zi.calc_ba_zi)
 
 // 计算紫薇
-app.post('/bazi/calc_zi_wei', calc_zi_wei.calc_zi_wei)
+app.post('/bazi/calc_astro', calc_zi_wei.calc_zi_wei)
 
 /**
  * api调用coze工作流
