@@ -37,6 +37,50 @@ const commonUtils = {
         '男': '男',
         '女': '女'
     },
+    i18nMessage:{
+        'zh':{
+            'TOKEN_EMPTY': 'API_KEY不能为空！相关咨询、帮助及开通方式，均在 https://devtool.uk/plugin',
+            'TOKEN_EXPIRED': '令牌无效，续费或者购买，请访问：https://devtool.uk/plugin',
+            'TOKEN_NO_TIMES': '令牌无可用次数，续费或者购买，请访问：https://devtool.uk/plugin',
+            'FREE_KEY_EXPIRED_1': '免费版每日仅能使用 1 次，付费即可解锁不限次权益！详情：https://devtool.uk/plugin',
+            'FREE_KEY_EXPIRED_3': '免费版每日仅能使用 3 次，付费即可解锁不限次权益！详情：https://devtool.uk/plugin',
+            'LARK_ACCESS_KEY_ERROR': '获取飞书授权令牌失败。',
+            'COZE_WORKFLOW_ERROR': '请核对工作流序号是否填写无误。',
+            'SERVER_ERROR': '服务器内部异常，请稍后重试',
+            'HELP_LINK': 'https://devtool.uk/plugin',
+            'MISSING_PARAMETERS': '缺少必要参数',
+            'SUCCESS': '成功',
+            'INVALID_PARAMETER_NUMBER': '非法参数：必须为非负整数',
+        },
+        'en':{
+            'TOKEN_EMPTY': 'API_KEY cannot be empty! For more information, please visit https://devtool.uk/plugin',
+            'TOKEN_EXPIRED': 'Token is expired. Please renew or purchase at https://devtool.uk/plugin',
+            'TOKEN_NO_TIMES': 'Token has no available times. Please renew or purchase at https://devtool.uk/plugin',
+            'FREE_KEY_EXPIRED_1': 'Free version can only be used 1 time per day. Please purchase for unlimited times at https://devtool.uk/plugin',
+            'FREE_KEY_EXPIRED_3': 'Free version can only be used 3 times per day. Please purchase for unlimited times at https://devtool.uk/plugin',
+            'LARK_ACCESS_KEY_ERROR': 'Failed to get Lark access token. Please check your configuration.',
+            'COZE_WORKFLOW_ERROR': 'Please check if the Coze workflow number is correct.',
+            'SERVER_ERROR': 'Server internal error. Please try again later.',
+            'HELP_LINK': 'https://devtool.uk/plugin',
+            'MISSING_PARAMETERS': 'Missing required parameters',
+            'SUCCESS': 'Success',
+            'INVALID_PARAMETER_NUMBER': 'Invalid parameter: must be a non-negative integer',
+        },
+    },
+    // 获取对应语言的文案
+    getI18nMessage: (lang = 'zh', key) => {
+        return commonUtils.i18nMessage[lang]?.[key] || commonUtils.i18nMessage.zh[key];
+    },
+
+    /**
+     * 获取请求语言
+     */
+    getLang: (req) => {
+        const acceptLang = req.headers['accept-language'];
+        // 处理 'en-US,en;q=0.9' 这种情况，只取第一段的前两部分
+        const headerLang = acceptLang ? acceptLang.split(',')[0].split(';')[0] : null;
+        return headerLang || req.query.lang || req.body.lang || 'zh';
+    },
 
     /**
      * 获取距离今日结束（午夜）的剩余秒数
