@@ -36,7 +36,7 @@ export const calc_ba_zi = {
 
             // 参数校验
             if (!year || !month || !day || hour === undefined || hour === null || hour === '') {
-                return res.status(400).send({
+                return res.send({
                     code: 400,
                     msg: commonUtils.MESSAGE?.MISSING_PARAMETERS,
                 });
@@ -44,13 +44,13 @@ export const calc_ba_zi = {
             // 确保参数是数字类型
             const y = parseInt(year), m = parseInt(month), d = parseInt(day), h = parseInt(hour);
             if (isNaN(y) || isNaN(m) || isNaN(d) || isNaN(h)) {
-                return res.status(400).send({ code: 400, msg: 'Date parameters must be numbers' });
+                return res.send({ code: 400, msg: 'Date parameters must be numbers' });
             }
             // 不传时区，默认东八区
             const targetTimeZone = timeZone || 'Asia/Shanghai';
             let dayjsDate = dayjs.tz(`${y}-${m}-${d} ${h}:00:00`, targetTimeZone);
             if (!dayjsDate.isValid()) {
-                return res.status(400).send({ code: 400, msg: 'Invalid date format' });
+                return res.send({ code: 400, msg: 'Invalid date format' });
             }
             let finalDateObj = dayjsDate.toDate();
             // 3. 根据时间生成 Solar 对象
@@ -150,7 +150,7 @@ export const calc_ba_zi = {
             });
         } catch (error) {
             console.error('BaZi Calculation Error:', error);
-            return res.status(500).send({
+            return res.send({
                 code: 500,
                 msg: commonUtils.MESSAGE.SERVER_ERROR,
                 error: error.message
@@ -168,13 +168,13 @@ export const calc_zi_wei = {
             const { birthday, gender, hour, isLunar } = req.body;
             // 1. 必填校验
             if (!birthday || hour === undefined || hour === null) {
-                return res.status(400).send({
+                return res.send({
                     code: 400,
                     msg: commonUtils.MESSAGE?.MISSING_PARAMETERS,
                 });
             }
             if (gender === undefined || gender === null || String(gender).trim() === '') {
-                return res.status(400).send({
+                return res.send({   
                     code: 400,
                     msg: 'Missing parameter: gender/性别 (1=Male/男, 0=Female/女)'
                 });
@@ -184,14 +184,14 @@ export const calc_zi_wei = {
             // 校验日期格式 (简单正则 YYYY-MM-DD )
             const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
             if (!dateRegex.test(cleanDate)) {
-                return res.status(400).send({ code: 400, msg: 'Invalid birthday format. Use YYYY-MM-DD.' });
+                return res.send({ code: 400, msg: 'Invalid birthday format. Use YYYY-MM-DD.' });
             }
 
             const genderKey = String(gender).trim().toLowerCase();
             let finalGender = commonUtils.GENDER_MAP[genderKey];
             // 2. 性别校验
             if (!finalGender) {
-                return res.status(400).send({ code: 400, msg: 'Invalid gender/性别. Use 1 for male/男, 0 for female/女.' });
+                return res.send({ code: 400, msg: 'Invalid gender/性别. Use 1 for male/男, 0 for female/女.' });
             }
             // 24时转12时辰
             const hourIndex = astroUtil.timeToIndex(hour);
@@ -245,7 +245,7 @@ export const calc_zi_wei = {
 
         } catch (error) {
             console.error('ZiWei Calculation Error:', error);
-            return res.status(500).send({
+            return res.send({
                 code: 500,
                 msg: commonUtils.MESSAGE.SERVER_ERROR,
                 error: error.message
@@ -266,7 +266,7 @@ export const points = {
             let {api_key, cost } = req.body;
             // 2. 必填校验
             if (!api_key || cost === undefined) {
-                return res.status(400).send({
+                return res.send({
                     code: 400,
                     msg: commonUtils.getI18nMessage(lang, 'MISSING_PARAMETERS'),
                 });
@@ -274,7 +274,7 @@ export const points = {
             // 3. 类型与范围强校验 (防止负数攻击、防止小数)
             cost = Number(cost);
             if (!Number.isInteger(cost) || cost < 0) {
-                return res.status(400).send({
+                return res.send({
                     code: 400,
                     msg: commonUtils.getI18nMessage(lang, 'INVALID_PARAMETER_NUMBER'),
                 });
@@ -298,20 +298,20 @@ export const points = {
 
             // 5. Token 无效
             if (!valid) {
-                return res.status(403).send({
-                    code: 403,
+                return res.send({
+                    code: 503,
                     msg: commonUtils.getI18nMessage(lang, 'TOKEN_EXPIRED')
                 });
             }
             // 6. 余额<0
             if (remaining < 0) {
-                return res.status(403).send({
-                    code: 403,
+                return res.send({
+                    code: 503,
                     msg: commonUtils.getI18nMessage(lang, 'TOKEN_NO_TIMES')
                 });
             }
             // 7. 成功返回
-            return res.status(200).send({
+            return res.send({
                 code: 200,
                 msg: commonUtils.getI18nMessage(lang, 'SUCCESS'),
                 data: {
@@ -323,7 +323,7 @@ export const points = {
             // 8. 记录真实错误日志到服务端
             console.error('[CalcPoints Error]:', error);
             // 9. 返回通用错误信息
-            return res.status(500).send({
+            return res.send({
                 code: 500,
                 msg: commonUtils.getI18nMessage(lang, 'SERVER_ERROR'),
             });
