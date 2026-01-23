@@ -952,6 +952,9 @@ app.post('/douyin/fetch_user_post_videos', th_douyin.fetch_user_post_videos);
 //抖音综合搜索
 app.post('/douyin/fetch_general_search_v1', th_douyin.fetch_general_search_v1);
 
+//抖音综合搜索
+app.post('/douyin/comments', th_douyin.fetch_video_comments);
+
 
 // // 获取公众号文章详情JSON
 // app.post('/wx_gzh/fetch_mp_article_detail_json', th_wechat_media.fetch_mp_article_detail_json);
