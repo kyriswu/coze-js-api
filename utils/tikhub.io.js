@@ -661,9 +661,6 @@ export const th_douyin = {
         if (!aweme_id) {
             return res.send({ code: -1, msg: "作品ID不能为空" });
         }
-        if (!api_key) {
-            return res.send({ code: -1, msg: "API Key不能为空" });
-        }
         try {
             // 重要：必须判断并 return。如果校验失败，commonUtils 内部会发出 res.send
             const isValid = await commonUtils.valid_redis_key("dy_fetch_video_comments", unkey_api_id, api_key, req, res);
