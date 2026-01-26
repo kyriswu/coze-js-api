@@ -410,8 +410,9 @@ app.post('/parse_html', async (req, res) => {
 
         let msg = "";
         if (api_key) {
+            const regex = /[^a-zA-Z0-9_=/.:-]/g;
             //付费版
-            const { remaining } = await unkey.verifyKey(api_id, api_key, 1, {url:url, selector:selector, xpath:xpath});
+            const { remaining } = await unkey.verifyKey(api_id, api_key, 1, {url:url?.replace(regex, ''), selector:selector?.replace(regex, ''), xpath:xpath?.replace(regex, '')});
             msg = `API Key 剩余调用次数：${remaining}`;
         }else{
             await redis.incr(free_key);//每次调用增加一次
@@ -1558,8 +1559,9 @@ app.post('/explorer', async (req, res) => {
 
         let msg = "";
         if (api_key) {
+            const regex = /[^a-zA-Z0-9_=/.:-]/g;
             //付费版
-            const { remaining } = await unkey.verifyKey(api_id, api_key, 1, { url: url, selector: selector, xpath: xpath});
+            const { remaining } = await unkey.verifyKey(api_id, api_key, 1, { url: url?.replace(regex, ''), selector: selector?.replace(regex, ''), xpath: xpath?.replace(regex, '')});
             msg = `API Key 剩余调用次数：${remaining}`;
         }else{
             await redis.incr(free_key);//每次调用增加一次
