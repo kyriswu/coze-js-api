@@ -32,8 +32,17 @@ const unkey = {
                 res.on('end', () => {
                     try {
                         const parsedData = JSON.parse(responseData);
-                        console.log('Parsed data:', JSON.stringify(parsedData));
-                        resolve(parsedData.data);
+                        let result = parsedData.data;
+                        // --- 格式化核心逻辑开始 ---
+                        if (result && typeof result === 'object' && 'credits' in result) {
+                            const { credits, ...rest } = result;
+                            result = {
+                                ...rest,
+                                remaining: credits // 将 credits 转化为 remaining
+                            };
+                        }
+                        console.log('Formatted data:', JSON.stringify(result));
+                        resolve(result);
                     } catch (error) {
                         reject(error);
                     }
