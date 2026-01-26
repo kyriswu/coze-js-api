@@ -1,19 +1,21 @@
 import https from 'node:https';
 
+const token = "unkey_3ZitUkc7AjAzfTDJZhpDMHPP"
+
 const unkey = {
     verifyKey: async function (apiId, key, cost, tags) {
         const data = JSON.stringify({
-            apiId: apiId,
+            // apiId: apiId,
             key: key,
             tags: tags ? Object.values(tags).map(String) : [],
-            remaining: { cost: cost }
+            credits: { cost: cost }
         });
-
         const options = {
-            hostname: 'api.unkey.dev',
-            path: '/v1/keys.verifyKey',
+            hostname: 'api.unkey.com',
+            path: '/v2/keys.verifyKey',
             method: 'POST',
             headers: {
+                'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json',
                 'Content-Length': data.length
             }
@@ -31,7 +33,7 @@ const unkey = {
                     try {
                         const parsedData = JSON.parse(responseData);
                         console.log('Parsed data:', JSON.stringify(parsedData));
-                        resolve(parsedData);
+                        resolve(parsedData.data);
                     } catch (error) {
                         reject(error);
                     }
