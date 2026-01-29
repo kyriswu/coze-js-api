@@ -510,6 +510,11 @@ app.post('/google/search/web', async (req, res) => {
     if (!q) {
         return res.status(400).send('Invalid input: "q" is required');
     }
+    res.setTimeout(140000, () => {
+        if (!res.headersSent) {
+            res.status(504).send({ code: -1, msg: 'Request Timeout' });
+        }
+    });
     try {
         // --- 逻辑分流：付费 Key 验证 vs 免费限流 ---
         if (api_key) {
@@ -534,7 +539,8 @@ app.post('/google/search/web', async (req, res) => {
             final_remaining = check.remaining;
         }else{
             // 免费版逻辑
-            const free_key = 'google_'+req.headers['user-identity']
+            const userIdent = req.headers['user-identity'] ? `${req.ip}_${req.headers['user-identity']}` : req.ip;
+            const free_key = 'google_' + userIdent;
             const canSearch = await canSearchGoogle(free_key);
             if (!canSearch) {
                 console.log(`用户 ${req.headers['user-identity']} 的免费版 Google 搜索次数已用完`);
@@ -564,11 +570,28 @@ app.post('/google/search/web', async (req, res) => {
     //         data: data.results
     //     });
     // })
-        const html = await browserless.google_search(q)
-        const dom = new JSDOM(html);
-        const { document, window } = dom.window;
-        const selector = "div.gsc-result"
-        const result_list = Array.from(document.querySelectorAll(selector)).map(element => {
+        // const html = await browserless.google_search_new(q)
+        // let dom = new JSDOM(html);
+        // const { document, window } = dom.window;
+        // const selector = "div.gsc-result"
+        // const result_list = Array.from(document.querySelectorAll(selector)).map(element => {
+        //     const a = element.querySelector('a.gs-title');
+        //     const div = element.querySelector('div.gs-snippet');
+        //     return {
+        //         snippet: div ? div.textContent.trim() : null,
+        //         link: a ? a.href : null,
+        //         title: a ? a.textContent.trim() : null
+        //     };
+        // }).filter(item => item.link !== null); // 过滤掉不符合要求的项
+        const searchTask = browserless.google_search_new(q);
+        const timeoutTask = new Promise((_, reject) => setTimeout(() => reject(new Error('Search Service Timeout')), 130000));
+        const html = await Promise.race([searchTask, timeoutTask]);
+        if (!html) {
+            throw new Error("Empty HTML response");
+        }
+        const fragment = JSDOM.fragment(html);
+        const selector = "div.gsc-result";
+        const result_list = Array.from(fragment.querySelectorAll(selector)).map(element => {
             const a = element.querySelector('a.gs-title');
             const div = element.querySelector('div.gs-snippet');
             return {
@@ -576,23 +599,24 @@ app.post('/google/search/web', async (req, res) => {
                 link: a ? a.href : null,
                 title: a ? a.textContent.trim() : null
             };
-        }).filter(item => item.link !== null); // 过滤掉不符合要求的项
-
-
-        let msg = commonUtils.MESSAGE.FREE_API_USE_LIMIT;
+        }).filter(item => item.link !== null && item.link.startsWith('http')); // 过滤掉不符合要求的项
+        console.log(result_list)
+        let msg = '';
         if (api_key) {
             //付费版
             const { remaining } = await unkey.verifyKey(api_id, api_key, 1);
             msg = `API Key 剩余调用次数：${remaining}`;
         }
-
-        return res.send({
-            code: 0,
-            msg: msg,
-            data: result_list
-        });
+        if (!res.headersSent) {
+            return res.send({
+                code: 0,
+                msg: msg,
+                data: result_list
+            });
+        }
     } catch (err) {
         console.error(`Error searching Google: ${err.message}`);
+        if(res.headersSent){
         return res.send({
             code: -1,
             msg: 'failure',
@@ -603,8 +627,7 @@ app.post('/google/search/web', async (req, res) => {
             }]
         });
     }
-
-
+    }
 })
 
 // zyte解析网页内容
