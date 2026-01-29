@@ -546,7 +546,7 @@ app.post('/google/search/web', async (req, res) => {
                 console.log(`用户 ${req.headers['user-identity']} 的免费版 Google 搜索次数已用完`);
                 return res.send({
                     code: 0,
-                    msg: commonUtils.MESSAGE.FREE_API_USE_LIMIT,
+                    msg: "为了保证付费用户的使用体验，免费用户有使用频率限制。详情：https://devtool.uk/plugin",
                     data: [{
                         'title': commonUtils.MESSAGE.FREE_API_HOUR_USE_LIMIT,
                         'link': commonUtils.MESSAGE.HELP_LINK,
