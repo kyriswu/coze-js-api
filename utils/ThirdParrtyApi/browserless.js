@@ -41,6 +41,7 @@ var PUBLIC_SESSION //长会话浏览器
 var publicSessionLock = null // 并发锁
 var GOOGLE_SESSION //谷歌搜索长会话浏览器
 var googleSessionLock = null // 并发锁
+let activeRequestCount = 0; // 新增：追踪当前正在进行的请求数
 
 var browser_map = {} //浏览器map
 
@@ -617,6 +618,135 @@ await page.waitForFunction(() => {
                 }
         }
         })
+    },
+
+    google_search_new: async function (keyword, retryCount = 0) {
+        return limit(async () => {
+            const search_count = await redis.incr("google_search_count");
+            let page = null;
+            let browser = null;
+
+            // --- 1. 智能单例获取逻辑 ---
+            const getBrowser = async () => {
+                // 如果会话不存在或已断开，则创建
+                if (!GOOGLE_SESSION || !GOOGLE_SESSION.isConnected()) {
+                    if (!googleSessionLock) {
+                        googleSessionLock = (async () => {
+                            const chromium_endpoint = process.env.NODE_ENV === 'online' ? "172.17.0.1:8123" : "172.245.84.92:8123";
+                            const proxy = `http://${Webshare_PROXY_HOST}:${Webshare_PROXY_PORT}`;
+                            
+                            console.log("🚀 正在创建新的谷歌搜索浏览器会话...");
+                            const b = await puppeteer_connect(chromium_endpoint, TIMEOUT, proxy);
+                            
+                            b.on('disconnected', () => {
+                                console.warn('⚠️ 浏览器连接已断开');
+                                GOOGLE_SESSION = null;
+                                googleSessionLock = null;
+                            });
+                            return b;
+                        })();
+                    }
+                    GOOGLE_SESSION = await googleSessionLock;
+                }
+                return GOOGLE_SESSION;
+            };
+
+            try {
+                browser = await getBrowser();
+                activeRequestCount++; // ✅ 计数器+1
+                
+                page = await browser.newPage();
+                
+                // 设置严格的超时，防止代理资源被挂起的请求长期占用
+                page.setDefaultNavigationTimeout(150000); 
+                page.setDefaultTimeout(150000);
+
+                await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36');
+                await page.authenticate({ username: 'liyylnev-rotate', password: 'n8yufdsr2u5q' });
+                await disableLoadMedia(page);
+
+                // 流量监控优化：只在开发环境或抽样开启，减少 CPU 压力
+                let totalBytes = 0;
+                const onResponse = async (res) => {
+                    try { const buf = await res.buffer(); totalBytes += buf.length; } catch(e) {}
+                };
+                page.on('response', onResponse);
+
+                const cxList = ['c277c25def5cf420c', 'c41a0f846c1fe490c', 'f012bf6d1cf90477e', '93d449f1c4ff047bc', '10fe0d70750b2423c', '74ac2ca7f804a4408', '7660206f8e0b84ba3', '6457c8d0218494fd8', '22eb5e8ce100049f4', 'a68056744fdfe4ca6'];
+                
+                // 随机 CX 避免并发冲突
+                const selectedCx = cxList[Math.floor(Math.random() * cxList.length)];
+                const ces = `https://cse.google.com/cse?cx=${selectedCx}`;
+
+                const response = await page.goto(ces, { waitUntil: 'networkidle2' });
+                if (response.status() !== 200) throw new Error(`HTTP ${response.status()}`);
+
+                await page.waitForSelector('#gsc-i-id1');
+                await page.type('#gsc-i-id1', keyword, { delay: 50 });
+                await page.click('.gsc-search-button');
+
+                await page.waitForFunction(() => {
+                    const el = document.querySelector('div.gsc-control-wrapper-cse');
+                    return el && !el.classList.contains('gsc-loading-fade');
+                }, { timeout: 15000 });
+
+                const html = await page.content();
+                return html;
+
+            } catch (error) {
+                console.error(`❌ [Attempt ${retryCount}] 搜索失败: ${keyword} - ${error.message}`);
+                
+                if (page) {
+                    try {
+                        page.removeAllListeners();
+                        await page.close().catch(() => {});
+                    } catch (e) {}
+                    page = null; // 显式置空
+                }
+                
+                // 失败后立即释放计数器 (因为我们要开启一个新的递归请求，那个请求会再次 +1)
+                activeRequestCount--; 
+    
+                // 递归重试
+                if (retryCount < 1) {
+                    return await this.google_search_new(keyword, retryCount + 1);
+                }
+                return null;
+            } finally {
+                // --- 资源清理核心 ---
+                if (page) {
+                    activeRequestCount--; // ✅ 计数器-1 只有当 page 还没被 catch 块清理过时，才执行清理
+                    try {
+                        // 1. 先关闭拦截器，防止后续网络请求报错
+                        if (page.isClosed() === false) { 
+                            await page.setRequestInterception(false).catch(() => {});
+                        }
+                        // 2. 移除所有监听器 (关键步骤，防止闭包内存泄露)
+                        page.removeAllListeners();
+                        // 3. 关闭页面
+                        await page.close().catch(() => {});
+                    } catch (e) {}
+                    page = null; // 4. 显式解除引用，帮助 V8 GC 回收
+                }
+                // --- 2. 平滑重启逻辑 ---
+                if (search_count % 50 === 0 && GOOGLE_SESSION) {
+                    console.log(`♻️ [自动维护] 触发第 ${search_count} 次请求的资源回收...`);
+                    
+                    const oldBrowser = GOOGLE_SESSION;
+                    GOOGLE_SESSION = null;     // 立即切断新请求的入口
+                    googleSessionLock = null;  // 重置锁
+    
+                    // 30秒后杀死旧浏览器，此时旧请求应该都跑完了
+                    setTimeout(async () => {
+                        if (oldBrowser) {
+                            const pages = await oldBrowser.pages().catch(() => []);
+                            console.log(`🧹 执行清理：旧浏览器剩余 ${pages.length} 个页面，强制关闭。`);
+                            await oldBrowser.close().catch(err => console.error("旧浏览器关闭异常:", err.message));
+                        }
+                    }, 30000);
+                }
+            }
+        });
     },
 
     extract_youtube_audio_url: async function (toolurl,videourl, opt = {}) {

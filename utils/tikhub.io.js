@@ -2,6 +2,7 @@ import axios from 'axios';
 import unkey from './unkey.js';
 import redis from './redisClient.js';
 import commonUtils from './commonUtils.js';
+import { text } from 'express';
 
 
 
@@ -17,40 +18,40 @@ export const th_youtube = {
         }
         const videoId = matched[1];
         // 2. 调用 TikHub API 获取视频信息
-        try{
+        try {
             var config = {
-            method: 'get',
-            url: 'https://api.tikhub.io/api/v1/youtube/web/get_video_info?video_id='+videoId,
-            headers: {
-                "Authorization": "Bearer k500F2ou70UEuXsHzWKAolU82AYOsIfGsK5N5ivGrXNC+VY2TN8qyjynJg=="
-            }
-        };
+                method: 'get',
+                url: 'https://api.tikhub.io/api/v1/youtube/web/get_video_info?video_id=' + videoId,
+                headers: {
+                    "Authorization": "Bearer k500F2ou70UEuXsHzWKAolU82AYOsIfGsK5N5ivGrXNC+VY2TN8qyjynJg=="
+                }
+            };
 
-        const response = await axios(config)
-        if (response.data.code == 200) {
-            return response.data.data
-        }
-        }catch (error) {
+            const response = await axios(config)
+            if (response.data.code == 200) {
+                return response.data.data
+            }
+        } catch (error) {
             console.error("获取Youtube视频信息失败:", error.message);
             throw new Error("获取Youtube视频信息失败，请稍后再试");
         }
     }
-    
+
 };
 
 export const th_bilibili = {
-    get_aid_cid: async function(url) {
+    get_aid_cid: async function (url) {
         return new Promise(async (resolve, reject) => {
             // 1. 从链接中提取出 BV 号
             const matched = url.match(/\/video\/(BV[0-9A-Za-z]+)/i);
             if (!matched) {
-                reject({success: false,aid:null,cid:null,error:"不是B站链接"})
+                reject({ success: false, aid: null, cid: null, error: "不是B站链接" })
             }
             const bvid = matched[1];
 
             // 2. 调用 B 站接口获取信息
             const apiUrl = `https://api.bilibili.com/x/web-interface/view?bvid=${bvid}`;
-            const response = await fetch(apiUrl, { 
+            const response = await fetch(apiUrl, {
                 headers: { 'Accept': 'application/json' }
             });
             // if (!response.ok) {
@@ -59,31 +60,31 @@ export const th_bilibili = {
             const json = await response.json();
             console.log(json.data)
             if (json.code != 0) {
-                reject({success: false,aid:null,cid:null,error:"获取aid,cid失败"})
+                reject({ success: false, aid: null, cid: null, error: "获取aid,cid失败" })
             }
             // 3. 解析 aid 和 cid
             const aid = json.data.aid;
             const cid = json.data.pages[0].cid;
-            resolve({success:true,aid:aid,cid:cid,error:null})
+            resolve({ success: true, aid: aid, cid: cid, error: null })
         })
     },
     fetch_one_video_v2: async function (req, res) {
         var api_key = req.body.api_key
         var url = req.body.url
         if (!url) {
-            return res.send({msg: "url is required"})
+            return res.send({ msg: "url is required" })
         }
 
         // 1. 从链接中提取出 BV 号
         const matched = url.match(/\/video\/(BV[0-9A-Za-z]+)/i);
         if (!matched) {
-            return res.send({msg: "无法从链接中提取 BV 号"})
+            return res.send({ msg: "无法从链接中提取 BV 号" })
         }
         const bvid = matched[1];
 
         // 2. 调用 B 站接口获取信息
         const apiUrl = `https://api.bilibili.com/x/web-interface/view?bvid=${bvid}`;
-        const response = await fetch(apiUrl, { 
+        const response = await fetch(apiUrl, {
             headers: { 'Accept': 'application/json' }
         });
         // if (!response.ok) {
@@ -92,7 +93,7 @@ export const th_bilibili = {
         const json = await response.json();
         console.log(json)
         if (json.code != 0) {
-            return res.send({msg: "视频不存在或已被删除"})
+            return res.send({ msg: "视频不存在或已被删除" })
         }
         // 3. 解析 aid 和 cid
         const aid = json.data.aid;
@@ -100,7 +101,7 @@ export const th_bilibili = {
 
 
         //==验证==
-        const redis_key = req.headers['user-identity'] ? 'th_bilibili_'+req.headers['user-identity'] : 'test';
+        const redis_key = req.headers['user-identity'] ? 'th_bilibili_' + req.headers['user-identity'] : 'test';
         const value = await redis.get(redis_key);
         if (value === null) {
             // 不存在，创建 key 并设置初始值
@@ -108,20 +109,20 @@ export const th_bilibili = {
             const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
             const secondsSinceMidnight = Math.floor((now - midnight) / 1000);
             await redis.set(redis_key, 0, 'EX', secondsSinceMidnight);
-        }else{
-            if(!api_key){
-                return res.send({msg: commonUtils.MESSAGE.FREE_KEY_EXPIRED_1})
-            }else{
+        } else {
+            if (!api_key) {
+                return res.send({ msg: commonUtils.MESSAGE.FREE_KEY_EXPIRED_1 })
+            } else {
                 const { keyId, valid, remaining, code } = await unkey.verifyKey(unkey_api_id, api_key, 0);
                 if (!valid) {
                     return res.send({
                         msg: 'API Key 无效或已过期，请检查后重试！'
-                    }); 
+                    });
                 }
                 if (remaining == 0) {
                     return res.send({
                         msg: 'API Key 使用次数已用完，请联系作者续费！'
-                    }); 
+                    });
                 }
             }
         }
@@ -145,14 +146,14 @@ export const th_bilibili = {
             }
 
             if (videoInfo.subtitle.subtitles.length == 0) {
-                return res.send({msg: "该视频没有字幕"})
-            }else{
+                return res.send({ msg: "该视频没有字幕" })
+            } else {
                 const subtitleUrl = "https:" + videoInfo.subtitle.subtitles[0].subtitle_url;
-                const subtitleResponse = await fetch(subtitleUrl, { 
+                const subtitleResponse = await fetch(subtitleUrl, {
                     headers: { 'Accept': 'application/json' }
                 });
                 if (!subtitleResponse.ok) {
-                    return res.send({msg: "字幕内容获取失败"});
+                    return res.send({ msg: "字幕内容获取失败" });
                 }
                 const subtitleContent = await subtitleResponse.json();
                 return res.send({
@@ -162,15 +163,15 @@ export const th_bilibili = {
             }
         } catch (error) {
             console.log(error)
-            return res.send({msg: "服务器错误，请重试"})
+            return res.send({ msg: "服务器错误，请重试" })
         }
     },
 
     get_video_link: async function (url) {
-        const {success,aid,cid,error} = await this.get_aid_cid(url)
-        console.log(success,aid,cid,error)
+        const { success, aid, cid, error } = await this.get_aid_cid(url)
+        console.log(success, aid, cid, error)
         if (!success) throw new Error(error.error)
-         var config = {
+        var config = {
             method: 'get',
             url: `https://api.tikhub.io/api/v1/bilibili/web/fetch_one_video_v2?a_id=${aid}&c_id=${cid}`,
             headers: {
@@ -181,9 +182,9 @@ export const th_bilibili = {
         try {
             const response = await axios(config)
             console.log(response.data)
-        }catch (error) {
+        } catch (error) {
             console.log(error)
-            return res.send({msg: "服务器错误，请重试"})
+            return res.send({ msg: "服务器错误，请重试" })
         }
     }
 }
@@ -319,9 +320,11 @@ export const th_xiaohongshu = {
 async function tikhubRequest(url) {
     return axios.get(
         url,
-        {headers: {
-            "Authorization": `Bearer ${tikhub_api_token}` // 请确保该变量已在作用域内定义
-        }}
+        {
+            headers: {
+                "Authorization": `Bearer ${tikhub_api_token}` // 请确保该变量已在作用域内定义
+            }
+        }
     );
 }
 
@@ -344,7 +347,7 @@ export const th_wechat_media = {
                     ghid: gh_id,   // 这里会自动被编码，例如 '+' 变成 '%2B'
                     offset: offset
                 },
-                headers: { "Authorization": `Bearer ${tikhub_api_token}`,"Content-Type": "application/json", }
+                headers: { "Authorization": `Bearer ${tikhub_api_token}`, "Content-Type": "application/json", }
             });
             if (response.data?.code !== 200) return res.send({ code: -1, msg: "获取列表失败" });
             const data = response.data.data || [];
@@ -388,16 +391,16 @@ export const th_wechat_media = {
         }
     },
 
-    fetch_mp_article_detail_json: function(req, res) { return this._fetch_detail('json', req, res); },
-    fetch_mp_article_detail_html: function(req, res) { return this._fetch_detail('html', req, res); },
-    fetch_mp_article_read_count: function(req, res) { return this._fetch_detail('read_count', req, res); },
-    fetch_mp_article_comment_list: function(req, res) { return this._fetch_detail('comment_list', req, res); },
-    mp_url_long2short: function(req, res) { return this._fetch_detail('url_conversion', req, res); }
+    fetch_mp_article_detail_json: function (req, res) { return this._fetch_detail('json', req, res); },
+    fetch_mp_article_detail_html: function (req, res) { return this._fetch_detail('html', req, res); },
+    fetch_mp_article_read_count: function (req, res) { return this._fetch_detail('read_count', req, res); },
+    fetch_mp_article_comment_list: function (req, res) { return this._fetch_detail('comment_list', req, res); },
+    mp_url_long2short: function (req, res) { return this._fetch_detail('url_conversion', req, res); }
 };
 
 // 视频号
 export const th_wechat_channels = {
-    
+
     /**
      * 视频号搜索
      */
@@ -459,27 +462,27 @@ export const th_wechat_channels = {
 };
 
 
-export const th_douyin ={
+export const th_douyin = {
     //获取用户主页作品数据
-    fetch_user_post_videos: async function (req,res) {
+    fetch_user_post_videos: async function (req, res) {
         // sec_user_id: 用户sec_user_id
         // max_cursor: 最大游标，用于翻页，第一页为0，第二页为第一次响应中的max_cursor值。
         // count: 最大数量，不要超过20，建议保持不变。
         // sort_type: 排序类型，可选值如下：
         // 0: 最新排序-默认
         // 1: 最热排序
-        let { sec_user_id, max_cursor,count,sort_type, api_key } = req.body;
-        if (!sec_user_id ) {
+        let { sec_user_id, max_cursor, count, sort_type, api_key } = req.body;
+        if (!sec_user_id) {
             return res.send({ code: -1, msg: "抖音用户ID不能为空" });
         }
-        if(!max_cursor){
+        if (!max_cursor) {
             max_cursor = "0"
         }
-        if(!count){
+        if (!count) {
             count = "10"
         }
-        if(!sort_type){
-            sort_type="0"
+        if (!sort_type) {
+            sort_type = "0"
         }
         try {
             // 重要：必须判断并 return。如果校验失败，commonUtils 内部会发出 res.send
@@ -511,27 +514,28 @@ export const th_douyin ={
                     author_name: author.nickname || "",     // 作者昵称
                     signature: author.signature || "",      // 简介
                     sec_uid: author.sec_uid || "",          // 用户ID
-                    author_avatar:author.avatar_larger?.url_list?.[0] || "",          // 用户头像
+                    author_avatar: author.avatar_larger?.url_list?.[0] || "",          // 用户头像
                     share_url: item.share_url || "",        // 分享链接
                     desc: item.desc || "",                  // 视频描述
                     caption: item.caption || "",            // 视频tag
                     title: item.item_title || "",           // 视频标题
                     video_duration: video.duration || 0,    // 视频时长
                     // 使用可选链 ?. 防止深层路径不存在导致报错
-                    video_url: video.play_addr?.url_list?.[0] || "", 
+                    video_url: video.play_addr?.url_list?.[0] || "",
                     comment_count: statistics.comment_count || 0, // 评论量
                     like_count: statistics.digg_count || 0,       // 点赞量
                     collect_count: statistics.collect_count || 0, // 收藏量
-                    share_count: statistics.share_count || 0,     // 分享量
+                    share_count: statistics.share_count || 0,
+                    aweme_id: item.aweme_id || "",          // 视频ID
                 };
             });
-             // 统一扣费与消息处理
+            // 统一扣费与消息处理
             let msg = "success";
             if (api_key) {
                 const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
                 msg = `API Key 剩余调用次数：${remaining}`;
             }
-            return res.send({ code: 200, msg, data: {info:arr,max_cursor:d.max_cursor,min_cursor:d.min_cursor} });
+            return res.send({ code: 200, msg, data: { info: arr, max_cursor: d.max_cursor, min_cursor: d.min_cursor } });
 
         } catch (error) {
             console.error("DouYin Viedos Info Error:", error.message);
@@ -539,54 +543,54 @@ export const th_douyin ={
         }
     },
     //获取综合搜索
-    fetch_general_search_v1:async function (req,res) {
+    fetch_general_search_v1: async function (req, res) {
         //keyword: 搜索关键词，如 "猫咪"
         // cursor: 翻页游标（首次请求传 0）
         // sort_type: 排序方式
-            // 0: 综合排序
-            // 1: 最多点赞
-            // 2: 最新发布
+        // 0: 综合排序
+        // 1: 最多点赞
+        // 2: 最新发布
         // publish_time: 发布时间筛选
-            // 0: 不限
-            // 1: 最近一天
-            // 7: 最近一周
-            // 180: 最近半年
+        // 0: 不限
+        // 1: 最近一天
+        // 7: 最近一周
+        // 180: 最近半年
         // filter_duration: 视频时长筛选
-            // 0: 不限
-            // 0-1: 1分钟以内
-            // 1-5: 1-5分钟
-            // 5-10000: 5分钟以上
+        // 0: 不限
+        // 0-1: 1分钟以内
+        // 1-5: 1-5分钟
+        // 5-10000: 5分钟以上
         // content_type: 内容类型筛选
-            // 0: 不限
-            // 1: 视频
-            // 2: 图片
-            // 3: 文章
+        // 0: 不限
+        // 1: 视频
+        // 2: 图片
+        // 3: 文章
         // search_id: 搜索ID（首次请求传空，翻页时从上次响应获取）
         // backtrace: 翻页回溯标识（首次请求传空，翻页时从上次响应获取）
-        let { keyword, cursor,publish_time,filter_duration,content_type,search_id,backtrace, sort_type,api_key } = req.body;
-        if(!cursor){
+        let { keyword, cursor, publish_time, filter_duration, content_type, search_id, backtrace, sort_type, api_key } = req.body;
+        if (!cursor) {
             cursor = 0
         }
-        if(!sort_type){
-            sort_type="0"
+        if (!sort_type) {
+            sort_type = "0"
         }
-        if(!keyword){
+        if (!keyword) {
             return res.send({ code: -1, msg: "搜索关键词不能为空" });
         }
-        if(!publish_time){
+        if (!publish_time) {
             publish_time = "0"
         }
-        if(!filter_duration){
-            filter_duration="0"
+        if (!filter_duration) {
+            filter_duration = "0"
         }
-        if(!content_type){
-            content_type="0"
+        if (!content_type) {
+            content_type = "0"
         }
         const data = {
             "keyword": keyword,
             "cursor": cursor,
             "sort_type": sort_type,
-            "publish_time":publish_time,
+            "publish_time": publish_time,
             "filter_duration": filter_duration,
             "content_type": content_type,
             "search_id": search_id,
@@ -599,7 +603,7 @@ export const th_douyin ={
 
             const url = `https://api.tikhub.io/api/v1/douyin/search/fetch_general_search_v1`;
 
-            const response = await axios.post(url, data,{
+            const response = await axios.post(url, data, {
                 headers: { "Authorization": `Bearer ${tikhub_api_token}` }
             });
             // 修正判断逻辑：response.data.code !== 200
@@ -628,11 +632,12 @@ export const th_douyin ={
                     title: info.item_title || "",           // 视频标题
                     video_duration: video.duration || 0,    // 视频时长
                     // 使用可选链 ?. 防止深层路径不存在导致报错
-                    video_url: video.play_addr?.url_list?.[0] || "", 
+                    video_url: video.play_addr?.url_list?.[0] || "",
                     comment_count: statistics.comment_count || 0, // 评论量
                     like_count: statistics.digg_count || 0,       // 点赞量
                     collect_count: statistics.collect_count || 0, // 收藏量
                     share_count: statistics.share_count || 0,     // 分享量
+                    aweme_id: info.aweme_id || "",          // 视频ID
                 };
             });
             // 统一扣费与消息处理
@@ -641,13 +646,69 @@ export const th_douyin ={
                 const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
                 msg = `API Key 剩余调用次数：${remaining}`;
             }
-            return res.send({ code: 200, msg, data: {info:arr,cursor:d.cursor,has_more:d.has_more} });
+            return res.send({ code: 200, msg, data: { info: arr, cursor: d.cursor, has_more: d.has_more } });
 
         } catch (error) {
             console.error("DouYin Viedos Info Error:", error.message);
             return res.send({ code: -1, msg: commonUtils.MESSAGE.SERVER_ERROR });
         }
-        
+
+    },
+
+    // 通过id获取一二级评论信息
+    fetch_video_comments: async function (req, res) {
+        let { aweme_id, api_key, cursor = "0" } = req.body;
+        if (!aweme_id) {
+            return res.send({ code: -1, msg: "作品ID不能为空" });
+        }
+        try {
+            // 重要：必须判断并 return。如果校验失败，commonUtils 内部会发出 res.send
+            const isValid = await commonUtils.valid_redis_key("dy_fetch_video_comments", unkey_api_id, api_key, req, res);
+            if (!isValid) return;
+            const url = `https://api.tikhub.io/api/v1/douyin/web/fetch_video_comments`;
+            const response = await axios.get(url, {
+                params: { "aweme_id": aweme_id, "cursor": cursor },
+                headers: { "Authorization": `Bearer ${tikhub_api_token}` }
+            });
+            // 修正判断逻辑：response.data.code !== 200
+            if (response.data?.code !== 200) {
+                return res.send({ code: -1, msg: "获取评论失败" });
+            }
+            const d = response.data.data;
+            if (!d || (Array.isArray(d) && d.length === 0)) {
+                return res.send({ code: -1, msg: "没有找到相关数据" });
+            }
+            const list = d.comments || [];
+            const arr = list.map(item => {
+                const reply_text = (item.reply_comment || []).map(r => {
+                    return {
+                        aweme_id: item.aweme_id || "", // 视频ID
+                        text: r.text || "", // 回复评论内容
+                        cid: r.cid || "", // 回复评论ID
+                        cip: r.ip_label || "", // 回复IP地址
+                        reply_time: r.create_time || 0, // 回复时间
+                    };
+                })
+                return {
+                    aweme_id: item.aweme_id || "", // 视频ID
+                    text: item.text || "",     // 评论
+                    cid: item.cid || "", // 评论ID
+                    cip: item.ip_label || "",   // 评论IP地址
+                    comment_time: item.create_time || 0, // 评论时间
+                    reply_text: reply_text || [], // 回复评论
+                };
+            });
+            let msg = "success";
+            if (api_key) {
+                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
+                msg = `API Key 剩余调用次数：${remaining}`;
+            }
+            return res.send({ code: 200, msg, data: { info: arr, has_more: d.has_more, cursor: d.cursor } });
+
+        } catch (error) {
+            console.error("DouYin Viedos Info Error:", error.message);
+            return res.send({ code: -1, msg: commonUtils.MESSAGE.SERVER_ERROR });
+        }
     }
 }
 

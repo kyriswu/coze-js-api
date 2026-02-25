@@ -410,8 +410,9 @@ app.post('/parse_html', async (req, res) => {
 
         let msg = "";
         if (api_key) {
+            const regex = /[^a-zA-Z0-9_=/.:-]/g;
             //付费版
-            const { remaining } = await unkey.verifyKey(api_id, api_key, 1, {url:url, selector:selector, xpath:xpath});
+            const { remaining } = await unkey.verifyKey(api_id, api_key, 1, {url:url?.replace(regex, ''), selector:selector?.replace(regex, ''), xpath:xpath?.replace(regex, '')});
             msg = `API Key 剩余调用次数：${remaining}`;
         }else{
             await redis.incr(free_key);//每次调用增加一次
@@ -509,6 +510,11 @@ app.post('/google/search/web', async (req, res) => {
     if (!q) {
         return res.status(400).send('Invalid input: "q" is required');
     }
+    res.setTimeout(140000, () => {
+        if (!res.headersSent) {
+            res.status(504).send({ code: -1, msg: 'Request Timeout' });
+        }
+    });
     try {
         // --- 逻辑分流：付费 Key 验证 vs 免费限流 ---
         if (api_key) {
@@ -533,13 +539,14 @@ app.post('/google/search/web', async (req, res) => {
             final_remaining = check.remaining;
         }else{
             // 免费版逻辑
-            const free_key = 'google_'+req.headers['user-identity']
+            const userIdent = req.headers['user-identity'] ? `${req.ip}_${req.headers['user-identity']}` : req.ip;
+            const free_key = 'google_' + userIdent;
             const canSearch = await canSearchGoogle(free_key);
             if (!canSearch) {
                 console.log(`用户 ${req.headers['user-identity']} 的免费版 Google 搜索次数已用完`);
                 return res.send({
                     code: 0,
-                    msg: commonUtils.MESSAGE.FREE_API_USE_LIMIT,
+                    msg: "为了保证付费用户的使用体验，免费用户有使用频率限制。详情：https://devtool.uk/plugin",
                     data: [{
                         'title': commonUtils.MESSAGE.FREE_API_HOUR_USE_LIMIT,
                         'link': commonUtils.MESSAGE.HELP_LINK,
@@ -563,11 +570,28 @@ app.post('/google/search/web', async (req, res) => {
     //         data: data.results
     //     });
     // })
-        const html = await browserless.google_search(q)
-        const dom = new JSDOM(html);
-        const { document, window } = dom.window;
-        const selector = "div.gsc-result"
-        const result_list = Array.from(document.querySelectorAll(selector)).map(element => {
+        // const html = await browserless.google_search_new(q)
+        // let dom = new JSDOM(html);
+        // const { document, window } = dom.window;
+        // const selector = "div.gsc-result"
+        // const result_list = Array.from(document.querySelectorAll(selector)).map(element => {
+        //     const a = element.querySelector('a.gs-title');
+        //     const div = element.querySelector('div.gs-snippet');
+        //     return {
+        //         snippet: div ? div.textContent.trim() : null,
+        //         link: a ? a.href : null,
+        //         title: a ? a.textContent.trim() : null
+        //     };
+        // }).filter(item => item.link !== null); // 过滤掉不符合要求的项
+        const searchTask = browserless.google_search_new(q);
+        const timeoutTask = new Promise((_, reject) => setTimeout(() => reject(new Error('Search Service Timeout')), 130000));
+        const html = await Promise.race([searchTask, timeoutTask]);
+        if (!html) {
+            throw new Error("Empty HTML response");
+        }
+        const fragment = JSDOM.fragment(html);
+        const selector = "div.gsc-result";
+        const result_list = Array.from(fragment.querySelectorAll(selector)).map(element => {
             const a = element.querySelector('a.gs-title');
             const div = element.querySelector('div.gs-snippet');
             return {
@@ -575,23 +599,24 @@ app.post('/google/search/web', async (req, res) => {
                 link: a ? a.href : null,
                 title: a ? a.textContent.trim() : null
             };
-        }).filter(item => item.link !== null); // 过滤掉不符合要求的项
-
-
-        let msg = commonUtils.MESSAGE.FREE_API_USE_LIMIT;
+        }).filter(item => item.link !== null && item.link.startsWith('http')); // 过滤掉不符合要求的项
+        console.log(result_list)
+        let msg = '';
         if (api_key) {
             //付费版
             const { remaining } = await unkey.verifyKey(api_id, api_key, 1);
             msg = `API Key 剩余调用次数：${remaining}`;
         }
-
-        return res.send({
-            code: 0,
-            msg: msg,
-            data: result_list
-        });
+        if (!res.headersSent) {
+            return res.send({
+                code: 0,
+                msg: msg,
+                data: result_list
+            });
+        }
     } catch (err) {
         console.error(`Error searching Google: ${err.message}`);
+        if(res.headersSent){
         return res.send({
             code: -1,
             msg: 'failure',
@@ -602,8 +627,7 @@ app.post('/google/search/web', async (req, res) => {
             }]
         });
     }
-
-
+    }
 })
 
 // zyte解析网页内容
@@ -952,6 +976,9 @@ app.post('/douyin/fetch_user_post_videos', th_douyin.fetch_user_post_videos);
 //抖音综合搜索
 app.post('/douyin/fetch_general_search_v1', th_douyin.fetch_general_search_v1);
 
+//抖音综合搜索
+app.post('/douyin/comments', th_douyin.fetch_video_comments);
+
 
 // // 获取公众号文章详情JSON
 // app.post('/wx_gzh/fetch_mp_article_detail_json', th_wechat_media.fetch_mp_article_detail_json);
@@ -985,13 +1012,15 @@ app.post("/qweather/history_weather",qweather_tool.get_history_weather)
 
 app.post("/qweather/city_weather_code",qweather_tool.get_city_weather_code)
 
-import { calc_ba_zi , calc_zi_wei} from './utils/bazi.js';
+import { calc_ba_zi , calc_zi_wei, points} from './utils/bazi.js';
 // 计算八字
 app.post('/bazi/calc_ba_zi', calc_ba_zi.calc_ba_zi)
 
 // 计算紫薇
-app.post('/bazi/calc_zi_wei', calc_zi_wei.calc_zi_wei)
+app.post('/bazi/calc_astro', calc_zi_wei.calc_zi_wei)
 
+// 计算积分
+app.post('/bazi/points', points.calc_points)
 /**
  * api调用coze工作流
  */
@@ -1553,8 +1582,9 @@ app.post('/explorer', async (req, res) => {
 
         let msg = "";
         if (api_key) {
+            const regex = /[^a-zA-Z0-9_=/.:-]/g;
             //付费版
-            const { remaining } = await unkey.verifyKey(api_id, api_key, 1, { url: url, selector: selector, xpath: xpath});
+            const { remaining } = await unkey.verifyKey(api_id, api_key, 1, { url: url?.replace(regex, ''), selector: selector?.replace(regex, ''), xpath: xpath?.replace(regex, '')});
             msg = `API Key 剩余调用次数：${remaining}`;
         }else{
             await redis.incr(free_key);//每次调用增加一次
