@@ -687,6 +687,7 @@ export const th_douyin = {
                         cid: r.cid || "", // 回复评论ID
                         cip: r.ip_label || "", // 回复IP地址
                         reply_time: r.create_time || 0, // 回复时间
+                        nickname: r.user.nickname || "", // 回复用户昵称
                     };
                 })
                 return {
@@ -696,6 +697,7 @@ export const th_douyin = {
                     cip: item.ip_label || "",   // 评论IP地址
                     comment_time: item.create_time || 0, // 评论时间
                     reply_text: reply_text || [], // 回复评论
+                    nickname: item.user.nickname || "", // 评论用户昵称
                 };
             });
             let msg = "success";
