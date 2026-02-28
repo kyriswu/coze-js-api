@@ -712,11 +712,47 @@ export const th_douyin = {
     }
 }
 
+export const th_tiktok = {
+    // TikTok 通过 aweme_id 获取评论
+    fetch_post_comment: async function (req, res) {
+        let { aweme_id, cursor = "0", count = "20", current_region = "", api_key } = req.body;
+        if (!aweme_id) {
+            return res.send({ code: -1, msg: "作品ID不能为空" });
+        }
+        try {
+            const isValid = await commonUtils.valid_redis_key("tt_fetch_post_comment", unkey_api_id, api_key, req, res);
+            if (!isValid) return;
+
+            const url = `https://api.tikhub.io/api/v1/tiktok/web/fetch_post_comment`;
+            const response = await axios.get(url, {
+                params: { aweme_id, cursor, count, current_region },
+                headers: { "Authorization": `Bearer ${tikhub_api_token}` }
+            });
+
+            if (response.data?.code !== 200) {
+                return res.send({ code: -1, msg: "获取评论失败" });
+            }
+
+            let msg = "success";
+            if (api_key) {
+                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
+                msg = `API Key 剩余调用次数：${remaining}`;
+            }
+
+            return res.send({ code: 200, msg, data: response.data.data || {} });
+        } catch (error) {
+            console.error("TikTok Comments Error:", error.message);
+            return res.send({ code: -1, msg: commonUtils.MESSAGE.SERVER_ERROR });
+        }
+    }
+}
+
 export default {
     th_youtube,
     th_bilibili,
     th_xiaohongshu,
     th_wechat_media,
     th_wechat_channels,
-    th_douyin
+    th_douyin,
+    th_tiktok
 }

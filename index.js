@@ -72,7 +72,7 @@ app.get('/cozechatsdk', (req, res) => {
 import redis from './utils/redisClient.js';
 import search1api from './utils/search1api.js';
 import zyte from './utils/zyte.js';
-import { th_bilibili, th_youtube, th_xiaohongshu,th_wechat_media,th_wechat_channels,th_douyin } from './utils/tikhub.io.js';
+import { th_bilibili, th_youtube, th_xiaohongshu,th_wechat_media,th_wechat_channels,th_douyin,th_tiktok } from './utils/tikhub.io.js';
 import {qweather_tool}  from './utils/qwether.js';
 // 从 Redis 中获取用户使用量
 async function getUsage(key) {
@@ -978,6 +978,9 @@ app.post('/douyin/fetch_general_search_v1', th_douyin.fetch_general_search_v1);
 
 //抖音综合搜索
 app.post('/douyin/comments', th_douyin.fetch_video_comments);
+
+//TikTok 通过作品ID获取评论
+app.post('/tiktok/fetch_post_comment', th_tiktok.fetch_post_comment);
 
 
 // // 获取公众号文章详情JSON
