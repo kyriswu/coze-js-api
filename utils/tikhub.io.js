@@ -657,7 +657,7 @@ export const th_douyin = {
 
     // 通过id获取一二级评论信息
     fetch_video_comments: async function (req, res) {
-        let { aweme_id, api_key, cursor = "0" } = req.body;
+        let { aweme_id, api_key, cursor = "0", count = "20" } = req.body;
         if (!aweme_id) {
             return res.send({ code: -1, msg: "作品ID不能为空" });
         }
@@ -665,9 +665,9 @@ export const th_douyin = {
             // 重要：必须判断并 return。如果校验失败，commonUtils 内部会发出 res.send
             const isValid = await commonUtils.valid_redis_key("dy_fetch_video_comments", unkey_api_id, api_key, req, res);
             if (!isValid) return;
-            const url = `https://api.tikhub.io/api/v1/douyin/web/fetch_video_comments`;
+            const url = `https://api.tikhub.io/api/v1/douyin/app/v3/fetch_video_comments`;
             const response = await axios.get(url, {
-                params: { "aweme_id": aweme_id, "cursor": cursor },
+                params: { "aweme_id": aweme_id, "cursor": cursor, "count": count },
                 headers: { "Authorization": `Bearer ${tikhub_api_token}` }
             });
             // 修正判断逻辑：response.data.code !== 200
