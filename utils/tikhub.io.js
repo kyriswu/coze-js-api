@@ -538,7 +538,7 @@ export const th_douyin = {
             return res.send({ code: 200, msg, data: { info: arr, max_cursor: d.max_cursor, min_cursor: d.min_cursor } });
 
         } catch (error) {
-            console.error("DouYin Viedos Info Error:", error.message);
+            console.error("DouYin Viedos Info Error:", error);
             return res.send({ code: -1, msg: commonUtils.MESSAGE.SERVER_ERROR });
         }
     },
