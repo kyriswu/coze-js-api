@@ -1207,6 +1207,7 @@ import { QuotaExceededError } from './utils/CustomError.js';
 import coze from './utils/ThirdParrtyApi/coze.js';
 import cozecom from './utils/ThirdParrtyApi/cozecom.js';
 import browserless, { getQingGuoProxy, Webshare_PROXY_PASS, Webshare_PROXY_USER } from './utils/ThirdParrtyApi/browserless.js';
+import CloudFlareApi from './utils/ThirdParrtyApi/cloudflare.js';
 import feishu from './utils/ThirdParrtyApi/feishu.js';
 import tencentapi from './utils/ThirdParrtyApi/tencentapi.js';
 import firecrawlTool from './utils/ThirdParrtyApi/firecrawl.js';
@@ -1515,6 +1516,53 @@ app.post('/whisper/speech-to-text', async (req, res) => {
             return res.send({
                 'code': -1,
                 'msg': error.message
+            });
+        }
+    }
+})
+
+app.post('/cloudflare/run_whisper', async (req, res) => {
+    const { url, language } = req.body;
+
+    if (!url) {
+        return res.status(400).send('Invalid input: "url" is required');
+    }
+
+    let audioPath = null;
+    let shouldCleanup = false;
+
+    try {
+        const download = await tool.download_file(url);
+        if (!download.success) {
+            throw new Error(download.error);
+        }
+        if (!download.is_audio) {
+            throw new Error('仅支持音频链接');
+        }
+
+        audioPath = download.filepath;
+        shouldCleanup = !download.isLocalFile;
+
+        const data = await CloudFlareApi.run_whisper(audioPath, language);
+
+        return res.send({
+            code: 0,
+            msg: 'Success',
+            data: data
+        });
+    } catch (error) {
+        console.error(`Error calling Cloudflare Whisper: ${error.message}`);
+        return res.send({
+            code: -1,
+            msg: error.message,
+            data: null
+        });
+    } finally {
+        if (shouldCleanup && audioPath && fs.existsSync(audioPath)) {
+            fs.unlink(audioPath, (unlinkError) => {
+                if (unlinkError) {
+                    console.error('Error deleting temporary audio file:', unlinkError.message);
+                }
             });
         }
     }

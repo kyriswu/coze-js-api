@@ -579,6 +579,23 @@ const tool = {
             ...isf
         }
 
+        // Check if URL is from devtool.uk downloads directory
+        if (url.includes('devtool.uk') && url.includes('/downloads/')) {
+            let filename = path.basename(url);
+            let filepath = path.join(downloadDir, filename);
+            if (fs.existsSync(filepath)) {
+                const ext = path.extname(filename);
+                return {
+                    success: true,
+                    isLocalFile: true,
+                    filepath: filepath,
+                    filename: filename,
+                    is_video: ext === '.mp4' || ext === '.webm' || ext === '.mov' || ext === '.avi',
+                    is_audio: ext === '.mp3' || ext === '.wav' || ext === '.aac' || ext === '.ogg' || ext === '.m4a',
+                };
+            }
+        }
+
 
         // Generate filename with timestamp and extension
         const timestamp = new Date().getTime();
