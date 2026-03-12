@@ -608,6 +608,7 @@ app.post('/google/search/web', async (req, res) => {
             msg = `API Key 剩余调用次数：${remaining}`;
         }
         if (!res.headersSent) {
+            await redis.incr('google_search_requests');
             return res.send({
                 code: 0,
                 msg: msg,
