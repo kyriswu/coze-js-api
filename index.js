@@ -1571,12 +1571,37 @@ app.post('/cloudflare/run_whisper', async (req, res) => {
 })
 
 app.post('/transcribe-douyin', async (req, res) => {
-    let { url, language } = req.body;
+    let { url, language, api_key } = req.body;
     if (!url) {
         return res.status(400).send('Invalid input: "url" is required');
     }
     if (!language) {
         language = 'zh';
+    }
+
+    const unkey_api_id = "api_413Kmmitqy3qaDo4";
+    if (!api_key) {
+        return res.send({
+            code: -1,
+            msg: 'Invalid input: "api_key" is required',
+            data: null
+        });
+    }
+
+    const { valid, remaining } = await unkey.verifyKey(unkey_api_id, api_key, 0);
+    if (!valid) {
+        return res.send({
+            code: -1,
+            msg: commonUtils.MESSAGE.TOKEN_EXPIRED,
+            data: null
+        });
+    }
+    if (remaining === 0) {
+        return res.send({
+            code: -1,
+            msg: commonUtils.MESSAGE.TOKEN_NO_TIMES,
+            data: null
+        });
     }
 
     let videoPath = null;
@@ -1621,10 +1646,11 @@ app.post('/transcribe-douyin', async (req, res) => {
 
         // 5. 语音转字幕
         const data = await CloudFlareApi.run_whisper(audioPath, language);
+        const keyResult = await unkey.verifyKey(unkey_api_id, api_key, 1);
 
         return res.send({
             code: 0,
-            msg: 'success',
+            msg: `success, API Key 剩余调用次数：${keyResult.remaining}`,
             data: data
         });
     } catch (error) {

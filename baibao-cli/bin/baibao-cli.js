@@ -5,6 +5,7 @@ function printHelp() {
 
 Usage:
   baibao-cli whisper --data '{"url":"https://example.com/audio.mp3"}'
+  baibao-cli transcribe-douyin --data '{"url":"https://v.douyin.com/xxxx/"}'
   baibao-cli redis-get-string --data '{"key":"google_search_requests"}'
   baibao-cli redis-get-string --key google_search_requests
 
@@ -75,6 +76,25 @@ function parseJsonOrThrow(raw) {
   }
 }
 
+function withBaibaoApiKey(body) {
+  if (!body || typeof body !== "object") {
+    return body;
+  }
+
+  if (Object.prototype.hasOwnProperty.call(body, "api_key")) {
+    throw new Error("transcribe-douyin does not accept api_key in --data; use BAIBAO_API_KEY env var");
+  }
+
+  if (process.env.BAIBAO_API_KEY) {
+    return {
+      ...body,
+      api_key: process.env.BAIBAO_API_KEY,
+    };
+  }
+
+  return body;
+}
+
 async function postJson(baseUrl, path, body, timeout) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeout);
@@ -137,6 +157,12 @@ async function run() {
   if (command === "whisper") {
     endpoint = "/cloudflare/run_whisper";
     body = parseJsonOrThrow(options.data);
+  } else if (command === "transcribe-douyin") {
+    endpoint = "/transcribe-douyin";
+    body = withBaibaoApiKey(parseJsonOrThrow(options.data));
+    if (!process.env.BAIBAO_API_KEY) {
+      process.stderr.write("Warning: BAIBAO_API_KEY is not set; request will be sent without api_key\n");
+    }
   } else if (command === "redis-get-string") {
     endpoint = "/redis/get_string";
 
