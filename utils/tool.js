@@ -315,6 +315,164 @@ const tool = {
 
         return codecToExt[codec] || 'mp4';
     },
+    getExtensionFromContentType: function(contentType) {
+        if (!contentType) {
+            return null;
+        }
+
+        const mimeToExtension = {
+            'video/mp4': 'mp4',
+            'video/mpeg': 'mpeg',
+            'video/quicktime': 'mov',
+            'video/webm': 'webm',
+            'audio/mpeg': 'mp3',
+            'audio/mp4': 'm4a',
+            'audio/wav': 'wav',
+            'audio/x-wav': 'wav',
+            'audio/ogg': 'ogg',
+            'audio/aac': 'aac',
+            'audio/flac': 'flac',
+            'audio/webm': 'webm',
+        };
+
+        const normalized = String(contentType).toLowerCase();
+        const matchedType = Object.keys(mimeToExtension).find(type => normalized.includes(type));
+        return matchedType ? mimeToExtension[matchedType] : null;
+    },
+    getMediaInfoFromExtension: function(extension) {
+        const normalized = String(extension || '').replace(/^\./, '').toLowerCase();
+        const videoExtensions = new Set(['mp4', 'mpeg', 'mov', 'mkv', 'avi', 'flv', '3gp', '3g2']);
+        const audioExtensions = new Set(['mp3', 'm4a', 'aac', 'wav', 'flac']);
+
+        if (videoExtensions.has(normalized)) {
+            return {
+                extension: normalized,
+                is_video: true,
+                is_audio: false,
+                confident: true
+            };
+        }
+
+        if (audioExtensions.has(normalized)) {
+            return {
+                extension: normalized,
+                is_video: false,
+                is_audio: true,
+                confident: true
+            };
+        }
+
+        return {
+            extension: normalized || null,
+            is_video: false,
+            is_audio: false,
+            confident: false
+        };
+    },
+    getMediaInfoFromContentType: function(contentType) {
+        if (!contentType) {
+            return {
+                extension: null,
+                is_video: false,
+                is_audio: false,
+                confident: false
+            };
+        }
+
+        const normalized = String(contentType).toLowerCase();
+        const extension = this.getExtensionFromContentType(normalized);
+
+        if (normalized.includes('video/')) {
+            return {
+                extension: extension,
+                is_video: true,
+                is_audio: false,
+                confident: true
+            };
+        }
+
+        if (normalized.includes('audio/')) {
+            return {
+                extension: extension,
+                is_video: false,
+                is_audio: true,
+                confident: true
+            };
+        }
+
+        return {
+            extension: extension,
+            is_video: false,
+            is_audio: false,
+            confident: false
+        };
+    },
+    renameFileWithExtension: function(filepath, extension) {
+        if (!extension) {
+            return filepath;
+        }
+
+        const normalized = String(extension).replace(/^\./, '').toLowerCase();
+        const currentExtension = path.extname(filepath).replace(/^\./, '').toLowerCase();
+        if (currentExtension === normalized) {
+            return filepath;
+        }
+
+        const newPath = currentExtension
+            ? filepath.replace(/\.[^.]+$/, `.${normalized}`)
+            : `${filepath}.${normalized}`;
+
+        fs.renameSync(filepath, newPath);
+        return newPath;
+    },
+    getExtensionFromFormat: function(formatName, hasVideo) {
+        if (!formatName) {
+            return hasVideo ? 'mp4' : 'mp3';
+        }
+
+        const formats = String(formatName).split(',');
+        if (hasVideo) {
+            if (formats.includes('mp4') || formats.includes('mov') || formats.includes('3gp') || formats.includes('3g2') || formats.includes('mj2')) {
+                return 'mp4';
+            }
+            if (formats.includes('matroska')) {
+                return 'mkv';
+            }
+            if (formats.includes('webm')) {
+                return 'webm';
+            }
+            if (formats.includes('avi')) {
+                return 'avi';
+            }
+            if (formats.includes('flv')) {
+                return 'flv';
+            }
+            if (formats.includes('ogg')) {
+                return 'ogg';
+            }
+        } else {
+            if (formats.includes('mp3')) {
+                return 'mp3';
+            }
+            if (formats.includes('wav')) {
+                return 'wav';
+            }
+            if (formats.includes('ogg')) {
+                return 'ogg';
+            }
+            if (formats.includes('flac')) {
+                return 'flac';
+            }
+            if (formats.includes('aac')) {
+                return 'aac';
+            }
+            if (formats.includes('mp4') || formats.includes('mov') || formats.includes('3gp') || formats.includes('3g2') || formats.includes('mj2') || formats.includes('ipod')) {
+                return 'm4a';
+            }
+        }
+
+        return null;
+    },
     get_media_info: async function (file) {
         var command = ""
         if (process.env.NODE_ENV === 'online'){
@@ -328,15 +486,23 @@ const tool = {
             const { stdout, stderr } = await execPromise(command);
 
             const info = JSON.parse(stdout);
-            // Get file type info
-            const stream = info.streams[0];
+            const streams = info.streams || [];
             const format = info.format;
+            const videoStream = streams.find(stream => stream.codec_type === 'video');
+            const audioStream = streams.find(stream => stream.codec_type === 'audio');
+            const hasVideo = Boolean(videoStream);
+            const hasAudio = Boolean(audioStream);
+            const primaryStream = videoStream || audioStream || streams[0] || {};
+            const extension = this.getExtensionFromFormat(format?.format_name, hasVideo) || this.getExtensionFromCodec(primaryStream.codec_name);
+
             return {
                 success: true,
-                type: stream.codec_type, // 'audio' or 'video'
-                codec: stream.codec_name,
+                type: hasVideo ? 'video' : (hasAudio ? 'audio' : primaryStream.codec_type),
+                codec: primaryStream.codec_name,
                 format: format.format_name,
-                extension: this.getExtensionFromCodec(stream.codec_name)
+                extension: extension,
+                hasVideo: hasVideo,
+                hasAudio: hasAudio
             };
         } catch (error) {
             console.log(error)
@@ -469,14 +635,13 @@ const tool = {
                     maxBodyLength: Infinity,
                 });
             }
+            console.log("下载格式", response.headers['content-type']);
             if (!filetool.is_video(response.headers['content-type'])) {
                 throw new Error('视频链接无效！请查看视频教程：【https://www.bilibili.com/video/BV169TizqE58】');
             }
+            const mediaInfo = this.getMediaInfoFromContentType(response.headers['content-type']);
             
             const totalSize = parseInt(response.headers['content-length'], 10);
-            let downloadedSize = 0;
-            let lastTime = Date.now();
-            let bytesThisSecond = 0;
 
             const writer = fs.createWriteStream(filepath);
             const throttle = new Throttle({ rate: rateLimit });
@@ -505,27 +670,22 @@ const tool = {
             return new Promise((resolve, reject) => {
                 writer.on('finish', () => {
                     console.log(`视频下载成功，视频大小：${this.bytesToMB(totalSize)}MB`)
-                     this.get_media_info(filepath)
-                        .then(info => {
-                            if (!info.success) {
-                                return reject(new Error(info.error));
-                            }
-                            if (info.success) {
-                                const newPath = filepath.replace(/\.[^.]+$/, `.${info.extension}`);
-                                fs.renameSync(filepath, newPath);
-                                filepath = newPath;
-                                filename = path.basename(filepath);
-                                console.log(`视频转换成功，新的文件名：${filename}`);
-                            }
+                    try {
+                        filepath = this.renameFileWithExtension(filepath, mediaInfo.extension || 'mp4');
+                        filename = path.basename(filepath);
+                        console.log(`视频保存成功，新的文件名：${filename}`);
 
-                            resolve({
-                                success: true,
-                                filepath: filepath,
-                                filename: filename,
-                                size: this.bytesToMB(totalSize)
-                            });
-                        })
-                        .catch(error => reject(error));
+                        resolve({
+                            success: true,
+                            filepath: filepath,
+                            filename: filename,
+                            size: this.bytesToMB(totalSize),
+                            is_video: true,
+                            is_audio: false
+                        });
+                    } catch (error) {
+                        reject(error);
+                    }
                     });
 
                 writer.on('error', reject);
@@ -617,11 +777,10 @@ const tool = {
                 maxContentLength: Infinity,
                 maxBodyLength: Infinity,
             });
+            const contentTypeMediaInfo = this.getMediaInfoFromContentType(response.headers['content-type']);
+            const urlExtensionMediaInfo = this.getMediaInfoFromExtension(path.extname(new URL(url).pathname));
             
             const totalSize = parseInt(response.headers['content-length'], 10);
-            let downloadedSize = 0;
-            let lastTime = Date.now();
-            let bytesThisSecond = 0;
 
             const writer = fs.createWriteStream(filepath);
             const throttle = new Throttle({ rate: rateLimit });
@@ -650,15 +809,35 @@ const tool = {
             return new Promise((resolve, reject) => {
                 writer.on('finish', () => {
                     console.log(`文件下载成功，文件大小：${this.bytesToMB(totalSize)}MB`)
-                     this.get_media_info(filepath)
+                    const inferredMediaInfo = contentTypeMediaInfo.confident ? contentTypeMediaInfo : urlExtensionMediaInfo;
+
+                    if (inferredMediaInfo.confident) {
+                        try {
+                            filepath = this.renameFileWithExtension(filepath, inferredMediaInfo.extension);
+                            filename = path.basename(filepath);
+                            console.log(`文件保存成功，新的文件名：${filename}`);
+
+                            resolve({
+                                success: true,
+                                filepath: filepath,
+                                filename: filename,
+                                size: this.bytesToMB(totalSize),
+                                is_video: inferredMediaInfo.is_video,
+                                is_audio: inferredMediaInfo.is_audio,
+                            });
+                        } catch (error) {
+                            reject(error);
+                        }
+                        return;
+                    }
+
+                    this.get_media_info(filepath)
                         .then(info => {
                             if (!info.success) {
                                 return reject(new Error(info.error));
                             }
                             if (info.success) {
-                                const newPath = filepath + `.${info.extension}`;
-                                fs.renameSync(filepath, newPath);
-                                filepath = newPath;
+                                filepath = this.renameFileWithExtension(filepath, info.extension);
                                 filename = path.basename(filepath);
                                 console.log(`文件保存成功，新的文件名：${filename}`);
                             }
@@ -728,6 +907,7 @@ const tool = {
             if (!filetool.is_audio(response.headers['content-type'])) {
                 throw new Error('音频链接无效！');
             }
+            const mediaInfo = this.getMediaInfoFromContentType(response.headers['content-type']);
 
             // Get total size
             const totalSize = parseInt(response.headers['content-length'], 10);
@@ -747,28 +927,20 @@ const tool = {
 
             return new Promise((resolve, reject) => {
                 writer.on('finish', () => {
+                    try {
+                        filepath = this.renameFileWithExtension(filepath, mediaInfo.extension || 'mp3');
+                        filename = path.basename(filepath);
+                        console.log(`音频保存成功，新的文件名：${filename}`);
 
-                 this.get_media_info(filepath)
-                        .then(info => {
-                            if (!info.success) {
-                                return reject(new Error(info.error));
-                            }
-                            if (info.success) {
-                                const newPath = filepath.replace(/\.[^.]+$/, `.${info.extension}`);
-                                fs.renameSync(filepath, newPath);
-                                filepath = newPath;
-                                filename = path.basename(filepath);
-                                console.log(`音频转换成功，新的文件名：${filename}`,newPath,info);
-                            }
-
-                            resolve({
-                                success: true,
-                                filepath: filepath,
-                                filename: filename,
-                                size: this.bytesToMB(totalSize)
-                            });
-                        })
-                        .catch(error => reject(error));
+                        resolve({
+                            success: true,
+                            filepath: filepath,
+                            filename: filename,
+                            size: this.bytesToMB(totalSize)
+                        });
+                    } catch (error) {
+                        reject(error);
+                    }
                     });
 
                 writer.on('error', reject);

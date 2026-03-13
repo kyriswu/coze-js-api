@@ -977,6 +977,9 @@ app.post('/douyin/fetch_user_post_videos', th_douyin.fetch_user_post_videos);
 //抖音综合搜索
 app.post('/douyin/fetch_general_search_v1', th_douyin.fetch_general_search_v1);
 
+//抖音视频搜索
+app.post('/douyin/fetch_video_search_v2', th_douyin.fetch_video_search_v2);
+
 //抖音综合搜索
 app.post('/douyin/comments', th_douyin.fetch_video_comments);
 
@@ -1315,7 +1318,6 @@ app.post('/video2audio', async (req, res) => {
         const convert = await tool.video_to_audio(download.filepath)
         if (!convert.success) throw new Error(convert.error);
 
-        const protocol = req.headers['x-forwarded-proto'] || req.protocol;
         return res.send({
             "code": 0,
             "msg": "success",
@@ -1564,6 +1566,82 @@ app.post('/cloudflare/run_whisper', async (req, res) => {
                     console.error('Error deleting temporary audio file:', unlinkError.message);
                 }
             });
+        }
+    }
+})
+
+app.post('/transcribe-douyin', async (req, res) => {
+    let { url, language } = req.body;
+    if (!url) {
+        return res.status(400).send('Invalid input: "url" is required');
+    }
+    if (!language) {
+        language = 'zh';
+    }
+
+    let videoPath = null;
+    let audioPath = null;
+
+    try {
+        // 1. 提取并清理抖音链接
+        let videoLink = tool.extract_url(url);
+        if (!videoLink) throw new Error("无法解析此链接，请输入有效的抖音分享链接");
+        videoLink = tool.remove_query_param(videoLink);
+
+        // 2. 获取视频直链
+        videoLink = await tool.url_preprocess(videoLink);
+        let retries = 3;
+        let XiaZaiTool;
+        while (retries > 0) {
+            XiaZaiTool = await tool.get_video_url(videoLink);
+            if (XiaZaiTool.success) break;
+            retries--;
+            if (retries > 0) {
+                await new Promise(resolve => setTimeout(resolve, 2000));
+            }
+        }
+        if (!XiaZaiTool.success) throw new Error(XiaZaiTool.data);
+        const downloadUrl = XiaZaiTool.data.video_url;
+
+        // 3. 下载视频
+        const download = await tool.download_video(downloadUrl, url);
+        if (!download.success) throw new Error(download.error);
+        videoPath = download.filepath;
+
+        // 4. 视频转音频
+        if (download.is_audio) {
+            const convertResult = await tool.audio_format_convert(videoPath, 'mp3');
+            if (!convertResult.success) throw new Error(convertResult.error);
+            audioPath = convertResult.filepath;
+        } else {
+            const convertResult = await tool.video_to_audio(videoPath);
+            if (!convertResult.success) throw new Error(convertResult.error);
+            audioPath = convertResult.outputFile;
+        }
+
+        // 5. 语音转字幕
+        const data = await CloudFlareApi.run_whisper(audioPath, language);
+
+        return res.send({
+            code: 0,
+            msg: 'success',
+            data: data
+        });
+    } catch (error) {
+        console.error(`Error in /transcribe-douyin: ${error.message}`);
+        return res.send({
+            code: -1,
+            msg: error.message,
+            data: null
+        });
+    } finally {
+        // 清理临时文件
+        for (const filePath of [videoPath, audioPath]) {
+            if (filePath && fs.existsSync(filePath)) {
+                fs.unlink(filePath, (err) => {
+                    if (err) console.error('Error deleting temp file:', err.message);
+                });
+            }
         }
     }
 })

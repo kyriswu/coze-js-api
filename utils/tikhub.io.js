@@ -3,6 +3,7 @@ import unkey from './unkey.js';
 import redis from './redisClient.js';
 import commonUtils from './commonUtils.js';
 import { text } from 'express';
+import fs from 'fs';
 
 
 
@@ -653,6 +654,110 @@ export const th_douyin = {
             return res.send({ code: -1, msg: commonUtils.MESSAGE.SERVER_ERROR });
         }
 
+    },
+
+    // 获取视频搜索结果
+    fetch_video_search_v2: async function (req, res) {
+        let { keyword, cursor, publish_time, filter_duration, content_type, search_id, backtrace, sort_type, api_key } = req.body;
+        if (!cursor) {
+            cursor = 0
+        }
+        if (!sort_type) {
+            sort_type = "0"
+        }
+        if (!keyword) {
+            return res.send({ code: -1, msg: "搜索关键词不能为空" });
+        }
+        if (!publish_time) {
+            publish_time = "0"
+        }
+        if (!filter_duration) {
+            filter_duration = "0"
+        }
+        if (!content_type) {
+            content_type = "0"
+        }
+        const data = {
+            "keyword": keyword,
+            "cursor": cursor,
+            "sort_type": sort_type,
+            "publish_time": publish_time,
+            "filter_duration": filter_duration,
+            "content_type": content_type,
+            "search_id": search_id || "",
+            "backtrace": backtrace || ""
+        }
+        try {
+            const isValid = await commonUtils.valid_redis_key("dy_video_search_v2", unkey_api_id, api_key, req, res);
+            if (!isValid) return;
+
+            const url = `https://api.tikhub.io/api/v1/douyin/search/fetch_video_search_v2`;
+
+            const response = await axios.post(url, data, {
+                headers: { "Authorization": `Bearer ${tikhub_api_token}` }
+            });
+
+            if (response.data?.code !== 200) {
+                return res.send({ code: -1, msg: "第三方接口获取视频搜索结果失败" });
+            }
+
+            const d = response.data.data;
+            if (!d || (Array.isArray(d) && d.length === 0)) {
+                return res.send({ code: -1, msg: "没有找到相关数据" });
+            }
+            const businessConfig = d.business_config || {};
+            const nextPage = businessConfig.next_page || {};
+            const list = d.business_data || d.data || d.aweme_list || [];
+ 
+            const arr = list.map(item => {
+                const info = item.data?.aweme_info || item.data || item.aweme_info || item;
+                const author = info.author || {};
+                const video = info.video || {};
+                const statistics = info.statistics || {};
+                const share_info = info.share_info || {};
+                // console.log(share_info)
+                return {
+                    author_name: author.nickname || "",
+                    signature: author.signature || "",
+                    sec_uid: author.sec_uid || "",
+                    author_avatar: author.avatar_larger?.url_list?.[0] || "",
+                    share_url: info.share_url || "",
+                    desc: info.desc || "",
+                    caption: info.caption || "",
+                    title: info.item_title || info.desc || "",
+                    create_time: info.create_time || 0,
+                    video_duration: video.duration || 0,
+                    video_url: video.play_addr?.url_list?.[0] || "",
+                    comment_count: statistics.comment_count || 0,
+                    like_count: statistics.digg_count || 0,
+                    collect_count: statistics.collect_count || 0,
+                    share_count: statistics.share_count || 0,
+                    aweme_id: info.aweme_id || "",
+                };
+            });
+
+            let msg = "success";
+            if (api_key) {
+                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
+                msg = `API Key 剩余调用次数：${remaining}`;
+            }
+
+            return res.send({
+                code: 200,
+                msg,
+                data: {
+                    info: arr,
+                    cursor: nextPage.cursor,
+                    has_more: businessConfig.has_more,
+                    search_id: nextPage.search_id || d.log?.search_id,
+                    backtrace: businessConfig.backtrace
+                }
+            });
+
+        } catch (error) {
+            console.error("DouYin Video Search Error:", error.message);
+            return res.send({ code: -1, msg: commonUtils.MESSAGE.SERVER_ERROR });
+        }
     },
 
     // 通过id获取一二级评论信息
