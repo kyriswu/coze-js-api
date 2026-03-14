@@ -1425,17 +1425,12 @@ app.post('/whisper/speech-to-text', async (req, res) => {
         }
 
         let creditsToConsume = 1;
+        let usedCache = false;
         var transcription = await redis.get(transcriptionCacheKey)
         if (transcription && cache){
+            usedCache = true;
             
             transcription = JSON.parse(transcription)
-            creditsToConsume = calcCreditsFromVtt(transcription.vtt);
-            if (remaining < creditsToConsume) {
-                return res.send({
-                    code: -1,
-                    msg: `余额不足：当前视频预计消耗 ${creditsToConsume} 点，剩余 ${remaining} 点`
-                });
-            }
         }else{
             
             let retries = 3;
@@ -1493,30 +1488,21 @@ app.post('/whisper/speech-to-text', async (req, res) => {
             console.log("字幕生成结束")
         }
 
-        // 生成SRT内容
-        const srt = transcription.vtt
-            ? transcription.vtt
-                .replace(/^WEBVTT\n+/, '')
-                .trim()
-                .split('\n\n')
-                .filter(block => block.trim())
-                .map((block, i) => {
-                    const srtBlock = block.replace(/(\d{2}:\d{2}:\d{2})\.(\d{3})/g, '$1,$2');
-                    return `${i + 1}\n${srtBlock}`;
-                })
-                .join('\n\n')
-            : '';
         const data = {
             text: transcription.text,
-            srt: srt
+            srt: ''
         }
         
         var msg = ""
-        const { valid: consumeValid, remaining: finalRemaining } = await unkey.verifyKey("api_413Kmmitqy3qaDo4", api_key, creditsToConsume);
-        if (!consumeValid) {
-            throw new Error(commonUtils.MESSAGE.TOKEN_EXPIRED);
+        if (!usedCache) {
+            const { valid: consumeValid, remaining: finalRemaining } = await unkey.verifyKey("api_413Kmmitqy3qaDo4", api_key, creditsToConsume);
+            if (!consumeValid) {
+                throw new Error(commonUtils.MESSAGE.TOKEN_EXPIRED);
+            }
+            msg = `API Key 剩余调用次数：${finalRemaining}`;
+        } else {
+            msg = `API Key 剩余调用次数：${remaining}`;
         }
-        msg = `API Key 剩余调用次数：${finalRemaining}`;
 
         return res.send({
             'code': 0,

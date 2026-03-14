@@ -4,6 +4,7 @@ function printHelp() {
   const helpText = `baibao-cli (百宝箱)
 
 Usage:
+  BAIBAO_API_KEY=sk_xxx baibao-cli whisper-speech-to-text --url https://www.douyin.com/video/xxx [--language zh]
   baibao-cli whisper --data '{"url":"https://example.com/audio.mp3"}'
   baibao-cli transcribe-douyin --data '{"url":"https://v.douyin.com/xxxx/"}'
   baibao-cli redis-get-string --data '{"key":"google_search_requests"}'
@@ -12,6 +13,8 @@ Usage:
 Options:
   --data       JSON string request body
   --key        Shortcut for redis-get-string key field
+  --url        URL for whisper-speech-to-text
+  --language   Optional language for whisper-speech-to-text
   --timeout    Request timeout in ms (default: 60000)
   -h, --help   Show help
 `;
@@ -48,6 +51,18 @@ function parseArgs(argv) {
 
     if (token === "--base-url") {
       options.baseUrl = args[i + 1];
+      i += 1;
+      continue;
+    }
+
+    if (token === "--url") {
+      options.url = args[i + 1];
+      i += 1;
+      continue;
+    }
+
+    if (token === "--language") {
+      options.language = args[i + 1];
       i += 1;
       continue;
     }
@@ -154,7 +169,26 @@ async function run() {
   let endpoint;
   let body;
 
-  if (command === "whisper") {
+  if (command === "whisper-speech-to-text") {
+    endpoint = "/whisper/speech-to-text";
+
+    if (!process.env.BAIBAO_API_KEY) {
+      throw new Error("whisper-speech-to-text requires BAIBAO_API_KEY env var");
+    }
+
+    if (!options.url) {
+      throw new Error("whisper-speech-to-text requires --url");
+    }
+
+    body = {
+      url: options.url,
+      api_key: process.env.BAIBAO_API_KEY,
+    };
+
+    if (options.language) {
+      body.language = options.language;
+    }
+  } else if (command === "whisper") {
     endpoint = "/cloudflare/run_whisper";
     body = parseJsonOrThrow(options.data);
   } else if (command === "transcribe-douyin") {

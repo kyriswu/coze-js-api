@@ -11,6 +11,10 @@ npx baibao-cli whisper --data '{"url":"https://coze-js-api.devtool.uk/downloads/
 ```
 
 ```bash
+BAIBAO_API_KEY=sk_xxx npx baibao-cli whisper-speech-to-text --url "https://www.douyin.com/video/7615449939635773171"
+```
+
+```bash
 BAIBAO_API_KEY=sk_xxx npx baibao-cli transcribe-douyin --data '{"url":"https://v.douyin.com/xxxx/"}'
 ```
 
@@ -22,7 +26,32 @@ npm i -g baibao-cli
 
 ## Commands
 
-### 1) Whisper
+### 1) Whisper Speech To Text
+
+Equivalent to:
+
+```bash
+curl --request POST \
+  --url http://localhost:3000/whisper/speech-to-text \
+  --header 'content-type: application/json' \
+  --data '{"url":"https://www.douyin.com/video/7615449939635773171","language":"zh","api_key":"sk_xxx"}'
+```
+
+CLI:
+
+```bash
+BAIBAO_API_KEY=sk_xxx baibao-cli whisper-speech-to-text --url "https://www.douyin.com/video/7615449939635773171"
+```
+
+```bash
+BAIBAO_API_KEY=sk_xxx baibao-cli whisper-speech-to-text --url "https://www.douyin.com/video/7615449939635773171" --language en
+```
+
+说明：
+- `api_key` 必须通过环境变量 `BAIBAO_API_KEY` 提供。
+- `--language` 可选，不传则由服务端使用默认语言。
+
+### 2) Whisper
 
 Equivalent to:
 
@@ -39,7 +68,7 @@ CLI:
 baibao-cli whisper --data '{"url":"https://coze-js-api.devtool.uk/downloads/file_1773295373374.m4a.mp3"}'
 ```
 
-### 2) Redis get string
+### 3) Redis get string
 
 Equivalent to:
 
@@ -58,7 +87,7 @@ baibao-cli redis-get-string --data '{"key":"google_search_requests"}'
 baibao-cli redis-get-string --key google_search_requests
 ```
 
-### 3) Transcribe Douyin
+### 4) Transcribe Douyin
 
 Equivalent to:
 
