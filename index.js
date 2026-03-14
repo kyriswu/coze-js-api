@@ -1366,16 +1366,38 @@ app.post('/whisper/speech-to-text', async (req, res) => {
          return res.status(400).send('Invalid input: "url" is required');
     }
     if (!language){
-        language="chinese"
+        language="zh"
     }
-    if (cache===null){
+    if (cache === null || cache === undefined){
         cache = true; // 默认读取缓存
     }
 
-    const free_key = "FreeASR_" + req.headers['user-identity']//免费版的key
+    if (!api_key) {
+        return res.send({
+            code: -1,
+            msg: commonUtils.MESSAGE.TOKEN_EXPIRED
+        });
+    }
+
     const lock_key = "asr:lock:" + req.headers['user-identity']//并发锁
-    var left_time = await redis.get(free_key)//免费版剩余次数
-    if (!left_time || isNaN(left_time)) left_time = 1
+    const calcCreditsBySeconds = (seconds) => {
+        const safeSeconds = Number.isFinite(seconds) && seconds > 0 ? seconds : 0;
+        return Math.max(1, Math.ceil(safeSeconds / 60));
+    };
+    const calcCreditsFromVtt = (vtt) => {
+        if (!vtt || typeof vtt !== 'string') return 1;
+        const reg = /(\d{2}):(\d{2}):(\d{2})\.(\d{3})/g;
+        let maxSeconds = 0;
+        let match;
+        while ((match = reg.exec(vtt)) !== null) {
+            const seconds = Number(match[1]) * 3600 + Number(match[2]) * 60 + Number(match[3]) + Number(match[4]) / 1000;
+            if (seconds > maxSeconds) maxSeconds = seconds;
+        }
+        return calcCreditsBySeconds(maxSeconds);
+    };
+
+    let videoPath = null;
+    let audioPath = null;
 
     try{
 
@@ -1384,38 +1406,38 @@ app.post('/whisper/speech-to-text', async (req, res) => {
         if (!(videoLink.includes('www.youtube.com') || videoLink.includes('youtu.be') || videoLink.includes('xiaohongshu.com'))) {
             videoLink = tool.remove_query_param(videoLink)
         }
+        // 统一缓存key使用预处理后的链接，避免读取与写入不一致导致缓存失效
+        videoLink = await tool.url_preprocess(videoLink)
+        const transcriptionCacheKey = "transcription_v2_" + videoLink;
         
-        if (!api_key) {
-            if (left_time <= 0) throw new QuotaExceededError(commonUtils.MESSAGE.FREE_KEY_EXPIRED_1)
-            const lock_ttl = await redis.ttl(lock_key)
-            if(lock_ttl > 0) {
-                throw new Error(`上一个任务还在处理中，剩余${lock_ttl}秒`)
-            }
-        }else{
-            const { keyId, valid, remaining, code } = await unkey.verifyKey("api_413Kmmitqy3qaDo4", api_key, 0);
-            if (!valid) {
-                return res.send({
-                    code: -1,
-                    msg: commonUtils.MESSAGE.TOKEN_EXPIRED
-                }); 
-            }
-            if (remaining == 0) {
-                return res.send({
-                    code: -1,
-                    msg: commonUtils.MESSAGE.TOKEN_NO_TIMES
-                }); 
-            }
+        const { keyId, valid, remaining, code } = await unkey.verifyKey("api_413Kmmitqy3qaDo4", api_key, 0);
+        if (!valid) {
+            return res.send({
+                code: -1,
+                msg: commonUtils.MESSAGE.TOKEN_EXPIRED
+            }); 
         }
-        
+        if (remaining == 0) {
+            return res.send({
+                code: -1,
+                msg: commonUtils.MESSAGE.TOKEN_NO_TIMES
+            }); 
+        }
 
-        var transcription = await redis.get("transcription_"+videoLink)
+        let creditsToConsume = 1;
+        var transcription = await redis.get(transcriptionCacheKey)
         if (transcription && cache){
             
             transcription = JSON.parse(transcription)
+            creditsToConsume = calcCreditsFromVtt(transcription.vtt);
+            if (remaining < creditsToConsume) {
+                return res.send({
+                    code: -1,
+                    msg: `余额不足：当前视频预计消耗 ${creditsToConsume} 点，剩余 ${remaining} 点`
+                });
+            }
         }else{
             
-            //链接预处理（av转bv）
-            videoLink = await tool.url_preprocess(videoLink)
             let retries = 3;
             let XiaZaiTool;
             while (retries > 0) {
@@ -1434,68 +1456,67 @@ app.post('/whisper/speech-to-text', async (req, res) => {
             //下载mp4文件
             const download = await tool.download_video(downloadUrl,url)
             if (!download.success) throw new Error(download.error);
+            videoPath = download.filepath;
+
+            const durationResult = await tool.getMediaDuration(download.filepath);
+            if (!durationResult.success || !Number.isFinite(durationResult.duration)) {
+                throw new Error("无法获取视频时长，请稍后重试");
+            }
+            creditsToConsume = calcCreditsBySeconds(durationResult.duration);
+            if (remaining < creditsToConsume) {
+                throw new Error(`余额不足：当前视频预计消耗 ${creditsToConsume} 点，剩余 ${remaining} 点`);
+            }
+
             let convert;
             if (!download.is_audio){
                 //mp4转mp3
                 convert = await tool.video_to_audio(download.filepath)
                 if (!convert.success) throw new Error(convert.error);
+                audioPath = convert.outputFile;
             }else{
                 convert = {
                     outputFile: download.filepath
                 }
+                audioPath = download.filepath;
             }
 
-            const protocol = req.headers['x-forwarded-proto'] || req.protocol;
-            // var audio_url = `${protocol}://coze-js-api-noproxy.devtool.uk/audio/${path.basename(convert.outputFile)}`
-            var audio_url = `${protocol}://${req.get('host')}/audio/${path.basename(convert.outputFile)}`
-            // audio_url = "https://coze-js-api.devtool.uk/audio/audio_1749559334235.mp3"
             //语音转文字
             console.log("开始生成字幕")
-            let result = await coze.generate_video_caption(audio_url)
-            transcription = JSON.parse(result.content).output
-            
-            // Check if content_chunks exists, if not retry once
-            if (!transcription) {
-                console.log("No content_chunks found, retrying...第一次重试")
-                result = await coze.generate_video_caption(audio_url)
-                transcription = JSON.parse(result.content).output
-                if(!transcription) {
-                    console.log("No content_chunks found, retrying...第二次重试")
-                    result = await coze.generate_video_caption(audio_url)
-                    transcription = JSON.parse(result.content).output
-                    if(!transcription) {
-                        throw new Error("字幕生成失败，可能是视频时长太长，或者服务器压力太大，请稍后再试！")
-                    }
-                }
+            const whisperResult = await CloudFlareApi.run_whisper(convert.outputFile, language)
+            transcription = whisperResult.result
+            if (!transcription || !transcription.text) {
+                throw new Error("字幕生成失败，可能是视频时长太长，或者服务器压力太大，请稍后再试！")
             }
     
-            await redis.set("transcription_"+videoLink, JSON.stringify(transcription), "EX", 3600 * 24 * 60)
+            await redis.set(transcriptionCacheKey, JSON.stringify(transcription), "EX", 3600 * 24 * 60)
             await redis.del(lock_key)//关闭并发锁
             console.log("字幕生成结束")
         }
 
         // 生成SRT内容
-        const srt = transcription.content_chunks.map((item, index) => {
-            const start = tool.format_SRT_timestamp(item.start_time);
-            const end = tool.format_SRT_timestamp(item.start_time);
-            return `${index + 1}\n${start} --> ${end}\n${item.text}\n`;
-        }).join('\n');
+        const srt = transcription.vtt
+            ? transcription.vtt
+                .replace(/^WEBVTT\n+/, '')
+                .trim()
+                .split('\n\n')
+                .filter(block => block.trim())
+                .map((block, i) => {
+                    const srtBlock = block.replace(/(\d{2}:\d{2}:\d{2})\.(\d{3})/g, '$1,$2');
+                    return `${i + 1}\n${srtBlock}`;
+                })
+                .join('\n\n')
+            : '';
         const data = {
-            text:transcription.content,
-            srt:srt
+            text: transcription.text,
+            srt: srt
         }
         
         var msg = ""
-        if (api_key) {
-            //付费版
-            const { remaining } = await unkey.verifyKey("api_413Kmmitqy3qaDo4", api_key, 1);
-            msg = `API Key 剩余调用次数：${remaining}`;
-        }else{
-            //免费版
-            left_time = left_time - 1
-            await redis.set(free_key, left_time, 'EX', tool.getSecondsToMidnight()); // 每次调用减少一次
-            msg = `今日免费使用次数：${left_time}`;
+        const { valid: consumeValid, remaining: finalRemaining } = await unkey.verifyKey("api_413Kmmitqy3qaDo4", api_key, creditsToConsume);
+        if (!consumeValid) {
+            throw new Error(commonUtils.MESSAGE.TOKEN_EXPIRED);
         }
+        msg = `API Key 剩余调用次数：${finalRemaining}`;
 
         return res.send({
             'code': 0,
@@ -1505,20 +1526,21 @@ app.post('/whisper/speech-to-text', async (req, res) => {
     }catch(error){
         console.error(error)
         await redis.del(lock_key)
-        if (error instanceof QuotaExceededError) {
-            return res.send({
-                'code': 0,
-                'msg': '抱歉，达到用量限制',
-                'data': {
-                    "text": error.message,
-                    "srt": "1\n00:00:00,000 --> 00:00:03,480\n" + error.message
-                }
-            });
-        } else {
-            return res.send({
-                'code': -1,
-                'msg': error.message
-            });
+        return res.send({
+            'code': -1,
+            'msg': error.message
+        });
+    } finally {
+        // 清理临时文件
+        const filesToClean = videoPath === audioPath
+            ? [videoPath]
+            : [videoPath, audioPath];
+        for (const filePath of filesToClean) {
+            if (filePath && fs.existsSync(filePath)) {
+                fs.unlink(filePath, (err) => {
+                    if (err) console.error('Error deleting temporary file:', err.message);
+                });
+            }
         }
     }
 })
