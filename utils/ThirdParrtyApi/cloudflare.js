@@ -4,6 +4,9 @@ import fs from 'fs';
 const accountId = process.env.CLOUDFLARE_ACCOUNT_ID || '105fc485028350ba9832c8963646e986';
 const apiToken = process.env.CLOUDFLARE_API_TOKEN || 'VLiGvDC-iD1Lv-ExmLU5AhAFuhhdUA3OW5gz70_I';
 
+// https://api.cloudflare.com/client/v4/accounts/105fc485028350ba9832c8963646e986/ai/v1/chat/completions
+
+
 const CloudFlareApi = {
     
     run_whisper: async function (filePath, language) {

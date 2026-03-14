@@ -6,11 +6,12 @@ import os
 import sys
 import urllib.error
 import urllib.request
+from typing import Tuple
 
 ENDPOINT = "https://coze-js-api.devtool.uk/whisper/speech-to-text"
 
 
-def post_json(url: str, payload: dict, timeout: int = 180) -> tuple[int, str]:
+def post_json(url: str, payload: dict, timeout: int = 600) -> Tuple[int, str]:
     data = json.dumps(payload, ensure_ascii=False).encode("utf-8")
     req = urllib.request.Request(
         url,

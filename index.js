@@ -1365,9 +1365,9 @@ app.post('/whisper/speech-to-text', async (req, res) => {
     if (!url) {
          return res.status(400).send('Invalid input: "url" is required');
     }
-    if (!language){
-        language="zh"
-    }
+    // if (!language){
+    //     language="zh"
+    // }
     if (cache === null || cache === undefined){
         cache = true; // 默认读取缓存
     }
