@@ -75,16 +75,16 @@ function generateConnectionId() {
     });
 }
 
-function safelyHandleRequestInterception(request, shouldBlock) {
+async function safelyHandleRequestInterception(request, shouldBlock) {
     try {
         if (typeof request.isInterceptResolutionHandled === 'function' && request.isInterceptResolutionHandled()) {
             return;
         }
 
         if (shouldBlock) {
-            request.abort();
+            await request.abort();
         } else {
-            request.continue();
+            await request.continue();
         }
     } catch (err) {
         const msg = err?.message || '';
@@ -151,7 +151,7 @@ async function disableLoadMedia(page){
     // 开启请求拦截
     await page.setRequestInterception(true);
 
-    page.on('request', (request) => {
+    page.on('request', async (request) => {
         const resourceType = request.resourceType();
         const url = request.url().toLowerCase();
 
@@ -169,7 +169,7 @@ async function disableLoadMedia(page){
             url.includes('favicon')              // 例如 /favicon.png 或 favicon.ico?ver=2
         );
 
-        safelyHandleRequestInterception(request, shouldBlock);
+        await safelyHandleRequestInterception(request, shouldBlock);
     });
 }
 
@@ -738,12 +738,12 @@ await page.waitForFunction(() => {
                 if (page) {
                     activeRequestCount--; // ✅ 计数器-1 只有当 page 还没被 catch 块清理过时，才执行清理
                     try {
-                        // 1. 先关闭拦截器，防止后续网络请求报错
-                        if (page.isClosed() === false) { 
+                        // 1. 先移除监听器，避免关闭拦截后旧监听器仍处理尾部请求
+                        page.removeAllListeners();
+                        // 2. 再关闭拦截器
+                        if (page.isClosed() === false) {
                             await page.setRequestInterception(false).catch(() => {});
                         }
-                        // 2. 移除所有监听器 (关键步骤，防止闭包内存泄露)
-                        page.removeAllListeners();
                         // 3. 关闭页面
                         await page.close().catch(() => {});
                     } catch (e) {}
@@ -1280,7 +1280,7 @@ await page.waitForFunction(() => {
                 // 开启请求拦截
             await p.setRequestInterception(true);
 
-            p.on('request', (request) => {
+            p.on('request', async (request) => {
                 const resourceType = request.resourceType();
                 const url = request.url().toLowerCase();
 
@@ -1298,7 +1298,7 @@ await page.waitForFunction(() => {
                     url.includes('favicon')              // 例如 /favicon.png 或 favicon.ico?ver=2
                 );
 
-                safelyHandleRequestInterception(request, shouldBlock);
+                await safelyHandleRequestInterception(request, shouldBlock);
             });
 
                 const url = "https://kns.cnki.net/kns8s/defaultresult/index?classid=VUDIXAIY&korder=SU&kw=" + keyword
@@ -1509,7 +1509,7 @@ const pagesData = await Promise.all(resultList.map(async (item, index) => {
             // 开启请求拦截
             await page.setRequestInterception(true);
 
-            page.on('request', (request) => {
+            page.on('request', async (request) => {
                 const resourceType = request.resourceType();
                 const url = request.url().toLowerCase();
 
@@ -1526,7 +1526,7 @@ const pagesData = await Promise.all(resultList.map(async (item, index) => {
                     url.includes('favicon')              // 例如 /favicon.png 或 favicon.ico?ver=2
                 );
 
-                safelyHandleRequestInterception(request, shouldBlock);
+                await safelyHandleRequestInterception(request, shouldBlock);
             });
 
             const response = await page.goto("https://www.vakatrip.com/", {
