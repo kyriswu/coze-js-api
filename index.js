@@ -543,7 +543,9 @@ app.post('/google/search/web', async (req, res) => {
             const free_key = 'google_' + userIdent;
             const canSearch = await canSearchGoogle(free_key);
             if (!canSearch) {
-                console.log(`用户 ${req.headers['user-identity']} 的免费版 Google 搜索次数已用完`);
+                if (req.headers['user-identity'] !== 'c4ca4238a0b923820dcc509a6f75849b') {
+                    console.log(`用户 ${req.headers['user-identity']} 的免费版 Google 搜索次数已用完`);
+                }
                 return res.send({
                     code: 0,
                     msg: "为了保证付费用户的使用体验，免费用户有使用频率限制。详情：https://devtool.uk/plugin",
@@ -600,7 +602,7 @@ app.post('/google/search/web', async (req, res) => {
                 title: a ? a.textContent.trim() : null
             };
         }).filter(item => item.link !== null && item.link.startsWith('http')); // 过滤掉不符合要求的项
-        console.log(result_list)
+
         let msg = '';
         if (api_key) {
             //付费版

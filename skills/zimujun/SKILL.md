@@ -84,9 +84,8 @@ npx --yes zimujun@latest "<normalized_url>" 2>&1
 建议输出格式：
 
 ```markdown
-# Zimujun Transcript
-- command: zimujun "<normalized_url>"
-- used_url: <normalized_url>
+# 字幕菌(zimujun) 文案提取结果
+- video_url: <normalized_url>
 - status: <success|failed>
 
 ## Result
