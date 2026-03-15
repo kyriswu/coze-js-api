@@ -75,6 +75,29 @@ function generateConnectionId() {
     });
 }
 
+function safelyHandleRequestInterception(request, shouldBlock) {
+    try {
+        if (typeof request.isInterceptResolutionHandled === 'function' && request.isInterceptResolutionHandled()) {
+            return;
+        }
+
+        if (shouldBlock) {
+            request.abort();
+        } else {
+            request.continue();
+        }
+    } catch (err) {
+        const msg = err?.message || '';
+        if (
+            msg.includes('Request Interception is not enabled') ||
+            msg.includes('Request is already handled')
+        ) {
+            return;
+        }
+        console.warn('request interception handler error:', msg || err);
+    }
+}
+
 async function getQingGuoProxy(){
     let attempts = 0;
     let success = false;
@@ -138,17 +161,15 @@ async function disableLoadMedia(page){
         ];
 
         // 拦截图片、CSS、字体、媒体、favicon
-        if (
+        const shouldBlock = (
             blockedPatterns.some(pattern => url.includes(pattern)) ||
             ['image', 'stylesheet', 'font', 'media'].includes(resourceType) ||
             url.endsWith('.css') ||
             url.endsWith('.ico') ||              // favicon 文件
             url.includes('favicon')              // 例如 /favicon.png 或 favicon.ico?ver=2
-        ) {
-            request.abort();
-        } else {
-            request.continue();
-        }
+        );
+
+        safelyHandleRequestInterception(request, shouldBlock);
     });
 }
 
@@ -1269,17 +1290,15 @@ await page.waitForFunction(() => {
                 ];
 
                 // 拦截图片、CSS、字体、媒体、favicon
-                if (
+                const shouldBlock = (
                     blockedPatterns.some(pattern => url.includes(pattern)) ||
                     ['image', 'stylesheet', 'font', 'media'].includes(resourceType) ||
                     url.endsWith('.css') ||
                     url.endsWith('.ico') ||              // favicon 文件
                     url.includes('favicon')              // 例如 /favicon.png 或 favicon.ico?ver=2
-                ) {
-                    request.abort();
-                } else {
-                    request.continue();
-                }
+                );
+
+                safelyHandleRequestInterception(request, shouldBlock);
             });
 
                 const url = "https://kns.cnki.net/kns8s/defaultresult/index?classid=VUDIXAIY&korder=SU&kw=" + keyword
@@ -1500,16 +1519,14 @@ const pagesData = await Promise.all(resultList.map(async (item, index) => {
                 ];
 
                 // 拦截图片、CSS、字体、媒体、favicon
-                if (
+                const shouldBlock = (
                     blockedPatterns.some(pattern => url.includes(pattern)) ||
                     ['image', 'font', 'media'].includes(resourceType) ||
                     url.endsWith('.ico') ||              // favicon 文件
                     url.includes('favicon')              // 例如 /favicon.png 或 favicon.ico?ver=2
-                ) {
-                    request.abort();
-                } else {
-                    request.continue();
-                }
+                );
+
+                safelyHandleRequestInterception(request, shouldBlock);
             });
 
             const response = await page.goto("https://www.vakatrip.com/", {
