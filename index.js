@@ -47,7 +47,7 @@ app.get('/vip-zl', (req, res) => {
     res.redirect(302, 'https://ccn8h804ayou.feishu.cn/wiki/LSN4w0H6giK7kbkalwYcW783nth');
 })
 app.get('/limit', (req, res) => {
-    res.send('达到用量限制，获取更多使用次数，请联系作者购买API Key，微信：xiaowu_azt')
+    res.send('达到用量限制，获取更多积分，请联系作者购买API Key，微信：xiaowu_azt')
 })
 app.get('/video', (req, res) => {
 
@@ -385,7 +385,7 @@ app.post('/parse_html', async (req, res) => {
         if (remaining == 0) {
             return res.send({
                 code: -1,
-                msg: 'API Key 使用次数已用完，请联系作者续费！'
+                msg: 'API Key 积分已用完，请联系作者续费！'
             }); 
         }
     }else{
@@ -413,10 +413,10 @@ app.post('/parse_html', async (req, res) => {
             const regex = /[^a-zA-Z0-9_=/.:-]/g;
             //付费版
             const { remaining } = await unkey.verifyKey(api_id, api_key, 1, {url:url?.replace(regex, ''), selector:selector?.replace(regex, ''), xpath:xpath?.replace(regex, '')});
-            msg = `API Key 剩余调用次数：${remaining}`;
+            msg = `API Key 剩余积分：${remaining}`;
         }else{
             await redis.incr(free_key);//每次调用增加一次
-            msg = `今日免费使用次数：${3 - await getUsage(free_key)}`;
+            msg = `今日免费剩余积分：${3 - await getUsage(free_key)}`;
         }
 
         return res.send({
@@ -562,7 +562,7 @@ app.post('/google/search/web', async (req, res) => {
     //     if (api_key) {
     //         //付费版
     //         const { remaining } = await unkey.verifyKey(api_id, api_key, 1);
-    //         msg = `API Key 剩余调用次数：${remaining}`;
+    //         msg = `API Key 剩余积分：${remaining}`;
     //     }else{
     //         msg = `今日免费使用次数用完，付费购买API KEY可解锁更多次数，请联系作者！【B站:小吴爱折腾】`;
     //     }
@@ -607,7 +607,7 @@ app.post('/google/search/web', async (req, res) => {
         if (api_key) {
             //付费版
             const { remaining } = await unkey.verifyKey(api_id, api_key, 1);
-            msg = `API Key 剩余调用次数：${remaining}`;
+            msg = `API Key 剩余积分：${remaining}`;
         }
         if (!res.headersSent) {
             await redis.incr('google_search_requests');
@@ -662,7 +662,7 @@ async function zyteExtract(req, res) {
         if (remaining == 0) {
             return res.send({
                 code: -1,
-                msg: 'API Key 使用次数已用完，请联系作者续费！'
+                msg: 'API Key 积分已用完，请联系作者续费！'
             }); 
         }
     }else{
@@ -728,10 +728,10 @@ async function zyteExtract(req, res) {
         if (api_key) {
             //付费版
             const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
-            msg += ` API Key 剩余调用次数：${remaining}`;
+            msg += ` API Key 剩余积分：${remaining}`;
         }else{
             await redis.incr(free_key);//每次调用增加一次
-            msg = `今日免费使用次数：${3 - await getUsage(free_key)}`;
+            msg = `今日免费剩余积分：${3 - await getUsage(free_key)}`;
         }
         
         return res.send({
@@ -771,7 +771,7 @@ app.post('/download_video', async (req, res) => {
             }
             if (remaining == 0) {
                 return res.send({
-                    msg: 'API Key 使用次数已用完，请联系作者续费！'
+                    msg: 'API Key 积分已用完，请联系作者续费！'
                 }); 
             }
         }else{
@@ -801,7 +801,7 @@ app.post('/download_video', async (req, res) => {
         if (api_key) {
             //付费版
             const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
-            msg = `解析成功，API Key 剩余调用次数：${remaining}`;
+            msg = `解析成功，API Key 剩余积分：${remaining}`;
         }else{
             await redis.set(free_key, Number(left_time)-1, 'EX', tool.getSecondsToMidnight()); // 每次调用减少一次
             msg = `解析成功`;
@@ -859,7 +859,7 @@ app.post('/get_sitemap', async (req, res) => {
     var msg = null
     if (api_key) {
         const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
-        msg = `API Key 剩余调用次数：${remaining}`;
+        msg = `API Key 剩余积分：${remaining}`;
     }
     return res.send({
         code: 0,
@@ -905,7 +905,7 @@ app.post('/crawl', async (req, res) => {
     var msg = null
     if (api_key) {
         const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
-        msg = `API Key 剩余调用次数：${remaining}`;
+        msg = `API Key 剩余积分：${remaining}`;
     }
     return res.send({
         code: 0,
@@ -1501,9 +1501,9 @@ app.post('/whisper/speech-to-text', async (req, res) => {
             if (!consumeValid) {
                 throw new Error(commonUtils.MESSAGE.TOKEN_EXPIRED);
             }
-            msg = `API Key 剩余调用次数：${finalRemaining}`;
+            msg = `API Key 剩余积分：${finalRemaining}`;
         } else {
-            msg = `API Key 剩余调用次数：${remaining}`;
+            msg = `API Key 剩余积分：${remaining}`;
         }
 
         return res.send({
@@ -1660,7 +1660,7 @@ app.post('/transcribe-douyin', async (req, res) => {
 
         return res.send({
             code: 0,
-            msg: `success, API Key 剩余调用次数：${keyResult.remaining}`,
+            msg: `success, API Key 剩余积分：${keyResult.remaining}`,
             data: data
         });
     } catch (error) {
@@ -1724,7 +1724,7 @@ app.post('/explorer', async (req, res) => {
         if (remaining == 0) {
             return res.send({
                 code: -1,
-                msg: 'API Key 使用次数已用完，请联系作者续费！'
+                msg: 'API Key 积分已用完，请联系作者续费！'
             }); 
         }
     }else{
@@ -1751,10 +1751,10 @@ app.post('/explorer', async (req, res) => {
             const regex = /[^a-zA-Z0-9_=/.:-]/g;
             //付费版
             const { remaining } = await unkey.verifyKey(api_id, api_key, 1, { url: url?.replace(regex, ''), selector: selector?.replace(regex, ''), xpath: xpath?.replace(regex, '')});
-            msg = `API Key 剩余调用次数：${remaining}`;
+            msg = `API Key 剩余积分：${remaining}`;
         }else{
             await redis.incr(free_key);//每次调用增加一次
-            msg = `今日免费使用次数：${3 - await getUsage(free_key)}`;
+            msg = `今日免费剩余积分：${3 - await getUsage(free_key)}`;
         }
 
         return res.send({
@@ -2043,7 +2043,7 @@ app.post("/zlcx", async (req, res) => {
         if (remaining == 0) {
             return res.send({
                 code: -1,
-                msg: 'API Key 使用次数已用完，请联系作者续费！'
+                msg: 'API Key 积分已用完，请联系作者续费！'
             }); 
         }
     }else{
@@ -2294,7 +2294,7 @@ app.post("/gzh_search", async (req, res) => {
         if (remaining == 0) {
             return res.send({
                 code: -1,
-                msg: 'API Key 使用次数已用完，请联系作者续费！'
+                msg: 'API Key 积分已用完，请联系作者续费！'
             }); 
         }
     }else{
@@ -2328,7 +2328,7 @@ app.post("/gzh_search", async (req, res) => {
         if (api_key) {
             //付费版
             const { remaining } = await unkey.verifyKey(api_id, api_key, 1);
-            msg = `API Key 剩余调用次数：${remaining}`;
+            msg = `API Key 剩余积分：${remaining}`;
         }
 
         return res.send({

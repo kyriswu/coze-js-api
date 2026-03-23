@@ -71,7 +71,7 @@ export const qweather_tool = {
             let msg = "success";
             if (api_key) {
                 const { remaining } = await unkey.verifyKey(UNKEY_API_ID, api_key, 1);
-                msg = `API Key 剩余调用次数：${remaining}`;
+                msg = `API Key 剩余积分：${remaining}`;
             }
 
             return res.send({ code: 200, msg, data: locations });
@@ -113,7 +113,7 @@ export const qweather_tool = {
             let msg = "success";
             if (api_key) {
                 const { remaining } = await unkey.verifyKey(UNKEY_API_ID, api_key, 1);
-                msg = `API Key 剩余调用次数：${remaining}`;
+                msg = `API Key 剩余积分：${remaining}`;
             }
 
             return res.send({ code: 200, msg, data: weatherDaily });

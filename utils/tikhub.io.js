@@ -122,7 +122,7 @@ export const th_bilibili = {
                 }
                 if (remaining == 0) {
                     return res.send({
-                        msg: 'API Key 使用次数已用完，请联系作者续费！'
+                        msg: 'API Key 积分已用完，请联系作者续费！'
                     });
                 }
             }
@@ -143,7 +143,7 @@ export const th_bilibili = {
             var msg = null
             if (api_key) {
                 const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
-                msg = `API Key 剩余调用次数：${remaining}`;
+                msg = `API Key 剩余积分：${remaining}`;
             }
 
             if (videoInfo.subtitle.subtitles.length == 0) {
@@ -227,7 +227,7 @@ export const th_xiaohongshu = {
             let msg = "success";
             if (api_key) {
                 const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
-                msg = `API Key 剩余调用次数：${remaining}`;
+                msg = `API Key 剩余积分：${remaining}`;
             }
 
             return res.send({ code: 200, msg, data: note });
@@ -270,7 +270,7 @@ export const th_xiaohongshu = {
             let msg = "success";
             if (api_key) {
                 const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
-                msg = `API Key 剩余调用次数：${remaining}`;
+                msg = `API Key 剩余积分：${remaining}`;
             }
 
             return res.send({ code: 200, msg, data: notes });
@@ -307,7 +307,7 @@ export const th_xiaohongshu = {
             let msg = "success";
             if (api_key) {
                 const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
-                msg = `API Key 剩余调用次数：${remaining}`;
+                msg = `API Key 剩余积分：${remaining}`;
             }
 
             return res.send({ code: 200, msg, data: notes });
@@ -355,7 +355,7 @@ export const th_wechat_media = {
             let msg = "success";
             if (api_key) {
                 const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
-                msg = `API Key 剩余调用次数：${remaining}`;
+                msg = `API Key 剩余积分：${remaining}`;
             }
             return res.send({ code: 200, msg, data });
         } catch (error) {
@@ -383,7 +383,7 @@ export const th_wechat_media = {
             let msg = "success";
             if (api_key) {
                 const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
-                msg = `API Key 剩余调用次数：${remaining}`;
+                msg = `API Key 剩余积分：${remaining}`;
             }
 
             return res.send({ code: 200, msg, data: response.data.data });
@@ -424,7 +424,7 @@ export const th_wechat_channels = {
             let msg = "success";
             if (api_key) {
                 const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
-                msg = `API Key 剩余调用次数：${remaining}`;
+                msg = `API Key 剩余积分：${remaining}`;
             }
 
             return res.send({ code: 200, msg, data: response.data.data });
@@ -452,7 +452,7 @@ export const th_wechat_channels = {
             let msg = "success";
             if (api_key) {
                 const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
-                msg = `API Key 剩余调用次数：${remaining}`;
+                msg = `API Key 剩余积分：${remaining}`;
             }
 
             return res.send({ code: 200, msg, data: response.data.data });
@@ -534,7 +534,7 @@ export const th_douyin = {
             let msg = "success";
             if (api_key) {
                 const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
-                msg = `API Key 剩余调用次数：${remaining}`;
+                msg = `API Key 剩余积分：${remaining}`;
             }
             return res.send({ code: 200, msg, data: { info: arr, max_cursor: d.max_cursor, min_cursor: d.min_cursor } });
 
@@ -645,7 +645,7 @@ export const th_douyin = {
             let msg = "success";
             if (api_key) {
                 const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
-                msg = `API Key 剩余调用次数：${remaining}`;
+                msg = `API Key 剩余积分：${remaining}`;
             }
             return res.send({ code: 200, msg, data: { info: arr, cursor: d.cursor, has_more: d.has_more } });
 
@@ -739,7 +739,7 @@ export const th_douyin = {
             let msg = "success";
             if (api_key) {
                 const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
-                msg = `API Key 剩余调用次数：${remaining}`;
+                msg = `API Key 剩余积分：${remaining}`;
             }
 
             return res.send({
@@ -808,7 +808,7 @@ export const th_douyin = {
             let msg = "success";
             if (api_key) {
                 const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
-                msg = `API Key 剩余调用次数：${remaining}`;
+                msg = `API Key 剩余积分：${remaining}`;
             }
             return res.send({ code: 200, msg, data: { info: arr, has_more: d.has_more, cursor: d.cursor } });
 
@@ -843,7 +843,7 @@ export const th_tiktok = {
             let msg = "success";
             if (api_key) {
                 const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
-                msg = `API Key 剩余调用次数：${remaining}`;
+                msg = `API Key 剩余积分：${remaining}`;
             }
 
             return res.send({ code: 200, msg, data: response.data.data || {} });

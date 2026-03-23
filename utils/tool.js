@@ -564,7 +564,10 @@ const tool = {
                 let video_name = path.basename(videos[i]);
                 let video_path = path.join(downloadDir, video_name);
                 if (!fs.existsSync(video_path)) {
-                    throw new Error(`文件不存在: ${videos[i]}`);
+                    // 文件不在本地，先下载
+                    console.log(`文件不存在，开始下载: ${videos[i]}`);
+                    const downloaded = await this.download_video(videos[i]);
+                    video_path = downloaded.filepath;
                 }
 
                 // 注意：ffmpeg concat 格式中的路径要使用绝对路径并包裹在单引号中
