@@ -36,6 +36,72 @@ export const th_youtube = {
             console.error("获取Youtube视频信息失败:", error.message);
             throw new Error("获取Youtube视频信息失败，请稍后再试");
         }
+    },
+
+    // 获取 YouTube 频道视频列表
+    get_channel_videos_v2: async function (req, res) {
+        const paramsFromReq = {
+            ...(req.query || {}),
+            ...(req.body || {})
+        };
+
+        const {
+            channel_id,
+            lang = 'en-US',
+            sortBy = 'newest',
+            contentType = 'videos',
+            nextToken,
+            api_key
+        } = paramsFromReq;
+
+        if (!channel_id) {
+            return res.send({ code: -1, msg: 'channel_id is required' });
+        }
+
+        try {
+            const isValid = await commonUtils.valid_redis_key('yt_channel_videos_v2', unkey_api_id, api_key, req, res);
+            if (!isValid) return;
+
+            const apiUrl = 'https://api.tikhub.io/api/v1/youtube/web/get_channel_videos_v2';
+            const queryParams = {
+                channel_id,
+                lang,
+                sortBy,
+                contentType
+            };
+
+            if (typeof nextToken !== 'undefined') {
+                queryParams.nextToken = nextToken;
+            }
+
+            const response = await axios.get(apiUrl, {
+                params: queryParams,
+                headers: {
+                    'Authorization': `Bearer ${tikhub_api_token}`
+                }
+            });
+
+            if (response.data?.code !== 200) {
+                return res.send({ code: -1, msg: '获取频道视频列表失败' });
+            }
+
+            let msg = 'success';
+            if (api_key) {
+                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
+                msg = `API Key 剩余积分：${remaining}`;
+            }
+
+            return res.send({
+                code: 200,
+                msg,
+                data: response.data.data || {}
+            });
+        } catch (error) {
+            console.error('YouTube Channel Videos Error:', error.response ? error.response.data : error.message);
+            if (!res.headersSent) {
+                return res.send({ code: -1, msg: commonUtils.MESSAGE.SERVER_ERROR });
+            }
+        }
     }
 
 };
@@ -359,6 +425,7 @@ export const th_wechat_media = {
             }
             return res.send({ code: 200, msg, data });
         } catch (error) {
+            console.error("Fetch WeChat MP Article List Error:", error);
             if (!res.headersSent) return res.send({ code: -1, msg: commonUtils.MESSAGE.SERVER_ERROR });
         }
     },

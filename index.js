@@ -967,6 +967,7 @@ app.post('/web/inputText', async (req, res) => {
 });
 
 app.post('/bilibili/subtitle', th_bilibili.fetch_one_video_v2);
+app.post('/youtube/get_channel_videos_v2', th_youtube.get_channel_videos_v2);
 app.post('/xiaohongshu/home_notes', th_xiaohongshu.fetch_home_notes);
 app.post('/xiaohongshu/search_notes_v2', th_xiaohongshu.search_notes_v2);
 app.post('/xiaohongshu/get_note_info_v1', th_xiaohongshu.get_note_info_v1);
