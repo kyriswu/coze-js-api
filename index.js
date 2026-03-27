@@ -1184,7 +1184,35 @@ function extract_pdf_url(url) {
         }
 }
 
+async function validateUrl(url) {
+    // 1. 基础格式校验
+    let parsed;
+    try {
+        parsed = new URL(url);
+    } catch {
+        throw new Error(`URL 格式无效: ${url}`);
+    }
+    if (!['http:', 'https:'].includes(parsed.protocol)) {
+        throw new Error(`URL 协议不支持，仅允许 http/https: ${url}`);
+    }
+    // 2. 可访问性校验（HEAD 请求，超时 10s）
+    try {
+        await axios.head(url, { timeout: 10000, maxRedirects: 5 });
+    } catch (err) {
+        const status = err.response?.status;
+        if (status) {
+            throw new Error(`URL 不可访问，HTTP 状态码: ${status}`);
+        }
+        throw new Error(`URL 不可访问: ${err.message}`);
+    }
+}
+
 async function downloadPdf(url, path) {
+    if (!url || typeof url !== 'string') {
+        throw new Error(`Invalid PDF URL: ${JSON.stringify(url)}`);
+    }
+    // 基础校验 + 可访问性检测
+    await validateUrl(url);
     // 检查是否是viewer URL
     if (url.includes('viewer.html')) {
         const pdfUrl = extract_pdf_url(url);
@@ -1213,8 +1241,8 @@ async function downloadPdf(url, path) {
 
 app.post('/pdf2img', async (req, res) => {
     const { url } = req.body;
-    if (!url) {
-        return res.status(400).send('Invalid input: "url" is required');
+    if (!url || typeof url !== 'string' || !url.startsWith('http')) {
+        return res.status(400).send('Invalid input: "url" must be a valid HTTP URL string');
     }
     const randomString = [...Array(16)].map(() => Math.random().toString(36)[2]).join('');
     await downloadPdf(url, `./downloads/${randomString}.pdf`).then(() => {

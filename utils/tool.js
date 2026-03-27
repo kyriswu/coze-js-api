@@ -1492,8 +1492,18 @@ const tool = {
      * @returns 
      */
     audio_format_convert: async function (input_file, output_type) {
-        const output_file = `${input_file}.${output_type}`
-        const command = `ffmpeg -i ${input_file} ${output_file}`;
+        // Strip existing extension and append the target format
+        const extname = path.extname(input_file);
+        const basename = extname ? input_file.slice(0, -extname.length) : input_file;
+        const output_file = `${basename}.${output_type}`;
+
+        // If input and output are the same file (same path after normalisation), skip conversion
+        if (path.resolve(input_file) === path.resolve(output_file)) {
+            return {success: true, filepath: input_file};
+        }
+
+        // Use -y to overwrite, and increase analyzeduration/probesize for files with missing headers
+        const command = `ffmpeg -y -analyzeduration 10000000 -probesize 10000000 -i ${input_file} ${output_file}`;
 
         try {
             // Execute ffmpeg command
@@ -1507,7 +1517,7 @@ const tool = {
                 if (err) throw err
             });
              fs.unlink(output_file,(err) => {
-                if (err) throw err
+                // ignore if output file doesn't exist
             });
             return {success:false, error: error.message};
         }
