@@ -1,21 +1,9 @@
 import express from 'express';
 import crypto from 'crypto';
 import redis from '../utils/redisClient.js';
+import tool from '../utils/tool.js';
 
 const router = express.Router();
-
-function getClientIp(req) {
-    const xForwardedFor = req.headers['x-forwarded-for'];
-    const firstIp = typeof xForwardedFor === 'string' ? xForwardedFor.split(',')[0].trim() : '';
-    const fallbackIp = req.ip || req.socket?.remoteAddress || 'unknown';
-    return (firstIp || fallbackIp).replace('::ffff:', '');
-}
-
-function getBaseUrl(req) {
-    const host = req.get('host');
-    const protocol = req.headers['x-forwarded-proto'] || req.protocol;
-    return `${protocol}://${host}`;
-}
 
 router.get('/', (req, res) => {
     res.send('Hello World!');
@@ -46,13 +34,13 @@ router.get('/limit', (req, res) => {
 });
 
 router.get('/robots.txt', (req, res) => {
-    const baseUrl = getBaseUrl(req);
+    const baseUrl = tool.getBaseUrl(req);
     res.type('text/plain');
     res.send(`User-agent: *\nAllow: /\nSitemap: ${baseUrl}/sitemap.xml\n`);
 });
 
 router.get('/sitemap.xml', (req, res) => {
-    const baseUrl = getBaseUrl(req);
+    const baseUrl = tool.getBaseUrl(req);
     const today = new Date().toISOString().slice(0, 10);
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -72,7 +60,7 @@ router.get('/w7k2', async (req, res) => {
     let visitorCount = Number(await redis.get(counterKey)) || 0;
 
     try {
-        const clientIp = getClientIp(req);
+        const clientIp = tool.getClientIp(req);
         const ipHash = crypto.createHash('sha256').update(clientIp).digest('hex').slice(0, 32);
         const dedupeKey = `workbuddy:landing:uv:${ipHash}`;
         const shouldCount = await redis.set(dedupeKey, '1', 'EX', 600, 'NX');
@@ -87,7 +75,7 @@ router.get('/w7k2', async (req, res) => {
         console.error('Failed to update workbuddy visitor count:', error.message);
     }
 
-    const pageUrl = `${getBaseUrl(req)}${req.originalUrl}`;
+    const pageUrl = `${tool.getBaseUrl(req)}${req.originalUrl}`;
 
     res.render('workbuddy', {
         visitorCount,

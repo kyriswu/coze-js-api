@@ -658,6 +658,17 @@ const tool = {
             return false;
         }
     },
+    getClientIp: function (req) {
+        const xForwardedFor = req.headers['x-forwarded-for'];
+        const firstIp = typeof xForwardedFor === 'string' ? xForwardedFor.split(',')[0].trim() : '';
+        const fallbackIp = req.ip || req.socket?.remoteAddress || 'unknown';
+        return (firstIp || fallbackIp).replace('::ffff:', '');
+    },
+    getBaseUrl: function (req) {
+        const host = req.get('host');
+        const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+        return `${protocol}://${host}`;
+    },
     download_image: async function (url) {
         try {
             // Create downloads directory if it doesn't exist
