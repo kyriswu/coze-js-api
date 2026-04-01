@@ -14,6 +14,7 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 import commonUtils from './utils/commonUtils.js';
 import thirdPartyUsed from "./utils/thirdPartyUsed.js";
+import navigationRoutes from './routes/navigationRoutes.js';
 
 const app = express();
 const port = 3000;
@@ -21,6 +22,7 @@ const environment = process.env.NODE_ENV || 'development';
 
 app.use(express.json())
 app.use(express.text())
+app.use(navigationRoutes)
 
 // 设置模板引擎配置 (必须在路由之前)
 app.set('view engine', 'ejs')
@@ -28,114 +30,6 @@ app.set('views', path.join(__dirname, 'views'))
 
 const proxyUrl = `http://${Webshare_PROXY_USER}:${Webshare_PROXY_PASS}@p.webshare.io:80`;
 const agent = new HttpsProxyAgent(proxyUrl);
-
-app.get('/', (req, res) => {
-    res.send('Hello World!')
-})
-app.get('/wiki', (req, res) => {
-    res.redirect(302, 'https://ccn8h804ayou.feishu.cn/wiki/RoHKwF0AbiXqxAkDJR2czoGUnMd');
-})
-app.get('/vip', (req, res) => {
-    res.redirect(302, 'https://ccn8h804ayou.feishu.cn/wiki/NJutwV9z6igh6zkbxpJc6YGqnob');
-})
-app.get('/plugin', (req, res) => {
-
-    res.redirect(302, 'https://ccn8h804ayou.feishu.cn/wiki/CI7hw3L9YimAKTkyhFGcIrcWnid');
-})
-app.get('/vip-zl', (req, res) => {
-
-    res.redirect(302, 'https://ccn8h804ayou.feishu.cn/wiki/LSN4w0H6giK7kbkalwYcW783nth');
-})
-app.get('/limit', (req, res) => {
-    res.send('达到用量限制，获取更多积分，请联系作者购买API Key，微信：xiaowu_azt')
-})
-app.get('/video', (req, res) => {
-
-    // Then in the /video route handler:
-    res.render('video', {
-        title: 'Video Page',
-        message: 'This is a simple video page template.',
-        videoUrl: "https://rr5---sn-oguesn6s.googlevideo.com/videoplayback?expire=1750889534&ei=3h9caKX5JoWtvcAPron58Ak&ip=43.163.224.99&id=o-AOc5_gHFhTV_NSZeu1ESoiaRLV6eYToR0a0wrIoUvNk3&itag=18&source=youtube&requiressl=yes&xpc=EgVo2aDSNQ%3D%3D&met=1750867934%2C&mh=Gx&mm=31%2C26&mn=sn-oguesn6s%2Csn-npoldn76&ms=au%2Conr&mv=m&mvi=5&pl=19&rms=au%2Cau&initcwndbps=823750&siu=1&bui=AY1jyLNcjqSo0Di3dmWLP4LgTPCokoRh-S_p9H71i1KoocQixuWucU0l2fJlOS0AnHWf_-dfrg&spc=l3OVKdVizwBRFpykXVrN6s6ej09s7k1yQJXB_TfOCsJ8L72MjiMIFHnbEtf0d_rw3L08-qs0xuIFZkKDmg0LdQ&vprv=1&svpuc=1&mime=video%2Fmp4&ns=eArLBwbrvTSbhx3azAiLoHQQ&rqh=1&cnr=14&ratebypass=yes&dur=56.331&lmt=1728511369250850&mt=1750867532&fvip=1&fexp=51355912&c=WEB&sefc=1&txp=1218224&n=JFmffu_x5sZiuQ&sparams=expire%2Cei%2Cip%2Cid%2Citag%2Csource%2Crequiressl%2Cxpc%2Csiu%2Cbui%2Cspc%2Cvprv%2Csvpuc%2Cmime%2Cns%2Crqh%2Ccnr%2Cratebypass%2Cdur%2Clmt&lsparams=met%2Cmh%2Cmm%2Cmn%2Cms%2Cmv%2Cmvi%2Cpl%2Crms%2Cinitcwndbps&lsig=APaTxxMwRgIhAIvNhcLbuGZg7-8s_gMuNI_ubSywGqBU5DcF8rFCADwaAiEAo134M2uWJHtLvhwgefh4T77MX3xXty4SQPF24rfmFo8%3D&sig=AJfQdSswRAIgUdh9vNxNOgVK26lXWrolrgxKicL8hhcMaLPsVtEnfx4CIEQ7UqtA8Wt-84-0m9xaGJTewgKiX6uKQopAuYeVDOP0"
-    })
-})
-
-app.get('/cozechatsdk', (req, res) => {
-
-    // Then in the /video route handler:
-    res.render('cozechatsdk', {
-        title: 'Video Page',
-        message: 'This is a simple video page template.',
-        videoUrl: "https://rr5---sn-oguesn6s.googlevideo.com/videoplayback?expire=1750889534&ei=3h9caKX5JoWtvcAPron58Ak&ip=43.163.224.99&id=o-AOc5_gHFhTV_NSZeu1ESoiaRLV6eYToR0a0wrIoUvNk3&itag=18&source=youtube&requiressl=yes&xpc=EgVo2aDSNQ%3D%3D&met=1750867934%2C&mh=Gx&mm=31%2C26&mn=sn-oguesn6s%2Csn-npoldn76&ms=au%2Conr&mv=m&mvi=5&pl=19&rms=au%2Cau&initcwndbps=823750&siu=1&bui=AY1jyLNcjqSo0Di3dmWLP4LgTPCokoRh-S_p9H71i1KoocQixuWucU0l2fJlOS0AnHWf_-dfrg&spc=l3OVKdVizwBRFpykXVrN6s6ej09s7k1yQJXB_TfOCsJ8L72MjiMIFHnbEtf0d_rw3L08-qs0xuIFZkKDmg0LdQ&vprv=1&svpuc=1&mime=video%2Fmp4&ns=eArLBwbrvTSbhx3azAiLoHQQ&rqh=1&cnr=14&ratebypass=yes&dur=56.331&lmt=1728511369250850&mt=1750867532&fvip=1&fexp=51355912&c=WEB&sefc=1&txp=1218224&n=JFmffu_x5sZiuQ&sparams=expire%2Cei%2Cip%2Cid%2Citag%2Csource%2Crequiressl%2Cxpc%2Csiu%2Cbui%2Cspc%2Cvprv%2Csvpuc%2Cmime%2Cns%2Crqh%2Ccnr%2Cratebypass%2Cdur%2Clmt&lsparams=met%2Cmh%2Cmm%2Cmn%2Cms%2Cmv%2Cmvi%2Cpl%2Crms%2Cinitcwndbps&lsig=APaTxxMwRgIhAIvNhcLbuGZg7-8s_gMuNI_ubSywGqBU5DcF8rFCADwaAiEAo134M2uWJHtLvhwgefh4T77MX3xXty4SQPF24rfmFo8%3D&sig=AJfQdSswRAIgUdh9vNxNOgVK26lXWrolrgxKicL8hhcMaLPsVtEnfx4CIEQ7UqtA8Wt-84-0m9xaGJTewgKiX6uKQopAuYeVDOP0"
-    })
-})
-
-function getClientIp(req) {
-    const xForwardedFor = req.headers['x-forwarded-for'];
-    const firstIp = typeof xForwardedFor === 'string' ? xForwardedFor.split(',')[0].trim() : '';
-    const fallbackIp = req.ip || req.socket?.remoteAddress || 'unknown';
-    return (firstIp || fallbackIp).replace('::ffff:', '');
-}
-
-function getBaseUrl(req) {
-    const host = req.get('host');
-    const protocol = req.headers['x-forwarded-proto'] || req.protocol;
-    return `${protocol}://${host}`;
-}
-
-app.get('/robots.txt', (req, res) => {
-    const baseUrl = getBaseUrl(req);
-    res.type('text/plain');
-    res.send(`User-agent: *\nAllow: /\nSitemap: ${baseUrl}/sitemap.xml\n`);
-});
-
-app.get('/sitemap.xml', (req, res) => {
-    const baseUrl = getBaseUrl(req);
-    const today = new Date().toISOString().slice(0, 10);
-    const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>${baseUrl}/w7k2</loc>
-    <lastmod>${today}</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.9</priority>
-  </url>
-</urlset>`;
-    res.type('application/xml');
-    res.send(xml);
-});
-
-app.get('/w7k2', async (req, res) => {
-    const counterKey = 'workbuddy:landing:visitors';
-    let visitorCount = Number(await redis.get(counterKey)) || 0;
-
-    try {
-        const clientIp = getClientIp(req);
-        const ipHash = crypto.createHash('sha256').update(clientIp).digest('hex').slice(0, 32);
-        const dedupeKey = `workbuddy:landing:uv:${ipHash}`;
-        const shouldCount = await redis.set(dedupeKey, '1', 'EX', 600, 'NX');
-
-        // Same IP counts at most once in 10 minutes, closer to UV than PV.
-        if (shouldCount === 'OK') {
-            visitorCount = await redis.incr(counterKey);
-        } else {
-            visitorCount = Number(await redis.get(counterKey)) || visitorCount;
-        }
-    } catch (error) {
-        console.error('Failed to update workbuddy visitor count:', error.message);
-    }
-
-    const pageUrl = `${getBaseUrl(req)}${req.originalUrl}`;
-
-    res.render('workbuddy', {
-        visitorCount,
-        seo: {
-            title: 'WorkBuddy 新手教程 - 3 步安装与 3 个可直接运行的实战场景',
-            description: 'WorkBuddy 新手落地页：快速完成注册、下载、开始使用，并获取桌面文件整理、PPT 生成、舆情监控三大场景可复制提示词。',
-            keywords: 'WorkBuddy,腾讯云,AI办公,桌面文件整理,PPT生成,舆情监控,提示词,新手教程',
-            url: pageUrl
-        }
-    })
-})
 
 import redis from './utils/redisClient.js';
 import search1api from './utils/search1api.js';
@@ -2443,38 +2337,6 @@ app.post("/gzh_search", async (req, res) => {
     }   
 })
 
-app.get('/jipiao', async (req, res) => {
-    let {from, to, date} = req.query
-
-    try {
-        const data = await browserless.jipiao_search()
-        return res.send({
-            code: 0,
-            msg: 'success',
-            data: data
-        })
-    }catch (error) {
-        console.error(`Error: ${error}`);
-        return res.send({
-            code: -1,
-            msg: error.message,
-            data: null
-        })
-    }
-})
-
-app.get('/vpn/get_proxy', async (req, res) => {
-    try {
-        const response = await axios.get('https://dl.jisusub.cc/api/v1/client/subscribe?token=9c79dac17d0e23088411f0674035798d', {
-            responseType: 'text'
-        });
-        console.log(response.data)
-        res.send(response.data);
-    } catch (error) {
-        console.error(error);
-        res.status(500).send('Failed to fetch proxy data');
-    }
-})
 
 app.post('/extract-element-from-html', async (req, res) => {
      let { htmlContent, xpath, selector } = req.body;
