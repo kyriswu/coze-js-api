@@ -939,6 +939,9 @@ app.post('/wx_gzh/get_user_articles', th_wechat_media.get_wechat_mp_article_list
 //抖音获取用户主页作品数据
 app.post('/douyin/fetch_user_post_videos', th_douyin.fetch_user_post_videos);
 
+//抖音获取用户主页作品数据（V3原始结果）
+app.post('/douyin/fetch_user_post_videos_v3', th_douyin.fetch_user_post_videos_v3);
+
 //抖音综合搜索
 app.post('/douyin/fetch_general_search_v1', th_douyin.fetch_general_search_v1);
 

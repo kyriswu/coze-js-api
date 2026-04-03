@@ -610,6 +610,64 @@ export const th_douyin = {
             return res.send({ code: -1, msg: commonUtils.MESSAGE.SERVER_ERROR });
         }
     },
+
+    // 获取用户主页作品数据（原始返回，扣费2点）
+    fetch_user_post_videos_v3: async function (req, res) {
+        const paramsFromReq = {
+            ...(req.query || {}),
+            ...(req.body || {})
+        };
+
+        let {
+            sec_user_id,
+            max_cursor = "0",
+            count = "10",
+            sort_type = "0",
+            api_key
+        } = paramsFromReq;
+
+        if (!sec_user_id) {
+            return res.send({ code: -1, msg: "抖音用户ID不能为空" });
+        }
+
+        try {
+            const isValid = await commonUtils.valid_redis_key("dy_user_post_videos_v3", unkey_api_id, api_key, req, res);
+            if (!isValid) return;
+
+            const apiUrl = "https://api.tikhub.io/api/v1/douyin/app/v3/fetch_user_post_videos";
+            const response = await axios.get(apiUrl, {
+                params: {
+                    sec_user_id,
+                    max_cursor,
+                    count,
+                    sort_type
+                },
+                headers: {
+                    "Authorization": `Bearer ${tikhub_api_token}`
+                }
+            });
+
+            if (response.data?.code !== 200) {
+                return res.send({ code: -1, msg: "获取用户主页作品失败" });
+            }
+
+            const data = response.data.data;
+            if (!data || (Array.isArray(data) && data.length === 0)) {
+                return res.send({ code: -1, msg: "没有找到相关数据" });
+            }
+
+            let msg = "success";
+            if (api_key) {
+                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 2);
+                msg = `API Key 剩余积分：${remaining}`;
+            }
+
+            return res.send({ code: 200, msg, data });
+        } catch (error) {
+            console.error("DouYin User Post Videos V3 Error:", error.message);
+            return res.send({ code: -1, msg: commonUtils.MESSAGE.SERVER_ERROR });
+        }
+    },
     //获取综合搜索
     fetch_general_search_v1: async function (req, res) {
         //keyword: 搜索关键词，如 "猫咪"
