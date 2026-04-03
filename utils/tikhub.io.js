@@ -420,7 +420,7 @@ export const th_wechat_media = {
             const data = response.data.data || [];
             let msg = "success";
             if (api_key) {
-                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
+                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 2);
                 msg = `API Key 剩余积分：${remaining}`;
             }
             return res.send({ code: 200, msg, data });
