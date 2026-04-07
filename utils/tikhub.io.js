@@ -87,7 +87,7 @@ export const th_youtube = {
 
             let msg = 'success';
             if (api_key) {
-                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
+                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1, { platform: 'youtube', action: 'channel_videos' });
                 msg = `API Key 剩余积分：${remaining}`;
             }
 
@@ -208,7 +208,7 @@ export const th_bilibili = {
             const videoInfo = response.data.data.data
             var msg = null
             if (api_key) {
-                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
+                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1, { platform: 'bilibili', action: 'video_subtitle' });
                 msg = `API Key 剩余积分：${remaining}`;
             }
 
@@ -292,7 +292,7 @@ export const th_xiaohongshu = {
             // 统一扣费与消息处理
             let msg = "success";
             if (api_key) {
-                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
+                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1, { platform: 'xiaohongshu', action: 'note_info' });
                 msg = `API Key 剩余积分：${remaining}`;
             }
 
@@ -335,7 +335,7 @@ export const th_xiaohongshu = {
 
             let msg = "success";
             if (api_key) {
-                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
+                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1, { platform: 'xiaohongshu', action: 'search_notes' });
                 msg = `API Key 剩余积分：${remaining}`;
             }
 
@@ -372,7 +372,7 @@ export const th_xiaohongshu = {
             const notes = response.data.data || [];
             let msg = "success";
             if (api_key) {
-                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
+                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1, { platform: 'xiaohongshu', action: 'home_notes' });
                 msg = `API Key 剩余积分：${remaining}`;
             }
 
@@ -420,7 +420,7 @@ export const th_wechat_media = {
             const data = response.data.data || [];
             let msg = "success";
             if (api_key) {
-                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 2);
+                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 2, { platform: 'wechat_mp', action: 'article_list' });
                 msg = `API Key 剩余积分：${remaining}`;
             }
             return res.send({ code: 200, msg, data });
@@ -449,7 +449,7 @@ export const th_wechat_media = {
 
             let msg = "success";
             if (api_key) {
-                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
+                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1, { platform: 'wechat_mp', action: `article_detail_${type}` });
                 msg = `API Key 剩余积分：${remaining}`;
             }
 
@@ -490,7 +490,7 @@ export const th_wechat_channels = {
 
             let msg = "success";
             if (api_key) {
-                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
+                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1, { platform: 'wechat_channels', action: 'search_videos' });
                 msg = `API Key 剩余积分：${remaining}`;
             }
 
@@ -518,7 +518,7 @@ export const th_wechat_channels = {
 
             let msg = "success";
             if (api_key) {
-                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
+                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1, { platform: 'wechat_channels', action: 'home_page' });
                 msg = `API Key 剩余积分：${remaining}`;
             }
 
@@ -600,7 +600,7 @@ export const th_douyin = {
             // 统一扣费与消息处理
             let msg = "success";
             if (api_key) {
-                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
+                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1, { platform: 'douyin', action: 'user_post_videos' });
                 msg = `API Key 剩余积分：${remaining}`;
             }
             return res.send({ code: 200, msg, data: { info: arr, max_cursor: d.max_cursor, min_cursor: d.min_cursor } });
@@ -658,7 +658,7 @@ export const th_douyin = {
 
             let msg = "success";
             if (api_key) {
-                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 2);
+                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 2, { platform: 'douyin', action: 'user_post_videos_v3' });
                 msg = `API Key 剩余积分：${remaining}`;
             }
 
@@ -769,7 +769,7 @@ export const th_douyin = {
             // 统一扣费与消息处理
             let msg = "success";
             if (api_key) {
-                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
+                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1, { platform: 'douyin', action: 'general_search' });
                 msg = `API Key 剩余积分：${remaining}`;
             }
             return res.send({ code: 200, msg, data: { info: arr, cursor: d.cursor, has_more: d.has_more } });
@@ -863,7 +863,7 @@ export const th_douyin = {
 
             let msg = "success";
             if (api_key) {
-                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
+                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1, { platform: 'douyin', action: 'video_search' });
                 msg = `API Key 剩余积分：${remaining}`;
             }
 
@@ -932,7 +932,7 @@ export const th_douyin = {
             });
             let msg = "success";
             if (api_key) {
-                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
+                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1, { platform: 'douyin', action: 'video_comments' });
                 msg = `API Key 剩余积分：${remaining}`;
             }
             return res.send({ code: 200, msg, data: { info: arr, has_more: d.has_more, cursor: d.cursor } });
@@ -967,8 +967,8 @@ export const th_tiktok = {
 
             let msg = "success";
             if (api_key) {
-                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
-                msg = `API Key 剩余积分：${remaining}`;
+                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1, { platform: 'tiktok', action: 'post_comment' });
+                msg = `API Key 剩余積分：${remaining}`;
             }
 
             return res.send({ code: 200, msg, data: response.data.data || {} });
