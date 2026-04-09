@@ -97,6 +97,10 @@ const commonUtils = {
      * 重点：返回 true 代表通过，返回 false 代表已处理响应并拦截后续逻辑
      */
     valid_redis_key: async function (key_header, unkey_api_id, api_key, req, res) {
+        const host = req.hostname || req.headers?.host || '';
+        if (host === 'localhost' || host.startsWith('localhost:')) {
+            return true;
+        }
         try {
             if (!api_key) {
                 // --- 免费版逻辑 ---

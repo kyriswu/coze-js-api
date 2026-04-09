@@ -135,6 +135,65 @@ export const th_bilibili = {
             resolve({ success: true, aid: aid, cid: cid, error: null })
         })
     },
+    fetch_user_post_videos: async function (req, res) {
+        const paramsFromReq = {
+            ...(req.query || {}),
+            ...(req.body || {})
+        };
+
+        const {
+            user_id,
+            post_filter = 'archive',
+            page,
+            ps,
+            api_key
+        } = paramsFromReq;
+
+        if (!user_id) {
+            return res.send({ code: -1, msg: 'user_id is required' });
+        }
+
+        try {
+            const isValid = await commonUtils.valid_redis_key('bilibili_user_post_videos', unkey_api_id, api_key, req, res);
+            if (!isValid) return;
+
+            const queryParams = { user_id, post_filter };
+            if (typeof page !== 'undefined' && page !== '') {
+                queryParams.page = page;
+            }
+            if (typeof ps !== 'undefined' && ps !== '') {
+                queryParams.ps = ps;
+            }
+
+            const response = await axios.get('https://api.tikhub.io/api/v1/bilibili/app/fetch_user_videos', {
+                params: queryParams,
+                headers: {
+                    'Authorization': `Bearer ${tikhub_api_token}`
+                }
+            });
+
+            if (response.data?.code !== 200) {
+                return res.send({ code: -1, msg: '获取用户投稿视频失败' });
+            }
+
+            let msg = 'success';
+            if (api_key) {
+                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1, { platform: 'bilibili', action: 'user_post_videos' });
+                msg = `API Key 剩余积分：${remaining}`;
+            }
+
+            return res.send({
+                code: 200,
+                msg,
+                data: response.data.data.data.item || {}
+            });
+        } catch (error) {
+            console.error('Bilibili User Post Videos Error:', error.response ? error.response.data : error.message);
+            if (!res.headersSent) {
+                return res.send({ code: -1, msg: commonUtils.MESSAGE.SERVER_ERROR });
+            }
+        }
+    },
     fetch_one_video_v2: async function (req, res) {
         var api_key = req.body.api_key
         var url = req.body.url
