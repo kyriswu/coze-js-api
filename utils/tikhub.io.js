@@ -454,6 +454,16 @@ async function tikhubRequest(url) {
     );
 }
 
+function normalizeWechatArticleDetail(data) {
+    const detail = data || {};
+
+    return {
+        content: detail.content || detail.html || detail.article_content || detail.rich_text || '',
+        link: detail.link || detail.url || detail.article_url || detail.mp_url || '',
+        title: detail.title || detail.article_title || detail.nick_name || ''
+    };
+}
+
 // 微信公众号
 export const th_wechat_media = {
     /**
@@ -508,11 +518,15 @@ export const th_wechat_media = {
 
             let msg = "success";
             if (api_key) {
-                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1, { platform: 'wechat_mp', action: `article_detail_${type}` });
+                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 2, { platform: 'wechat_mp', action: `article_detail_${type}` });
                 msg = `API Key 剩余积分：${remaining}`;
             }
 
-            return res.send({ code: 200, msg, data: response.data.data });
+            const data = ['json', 'html'].includes(type)
+                ? normalizeWechatArticleDetail(response.data.data)
+                : (response.data.data || {});
+
+            return res.send({ code: 200, msg, data });
         } catch (error) {
             if (!res.headersSent) return res.send({ code: -1, msg: commonUtils.MESSAGE.SERVER_ERROR });
         }
