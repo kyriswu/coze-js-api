@@ -518,7 +518,7 @@ export const th_wechat_media = {
 
             let msg = "success";
             if (api_key) {
-                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 2, { platform: 'wechat_mp', action: `article_detail_${type}` });
+                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1, { platform: 'wechat_mp', action: `article_detail_${type}` });
                 msg = `API Key 剩余积分：${remaining}`;
             }
 
