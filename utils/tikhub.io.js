@@ -293,6 +293,62 @@ export const th_bilibili = {
         }
     },
 
+    fetch_video_comments: async function (req, res) {
+        const paramsFromReq = {
+            ...(req.query || {}),
+            ...(req.body || {})
+        };
+
+        const {
+            av_id,
+            bv_id,
+            mode = 3,
+            next_offset = 0,
+            api_key
+        } = paramsFromReq;
+
+        if (!av_id && !bv_id) {
+            return res.send({ code: -1, msg: 'av_id 或 bv_id 不能为空' });
+        }
+
+        try {
+            const isValid = await commonUtils.valid_redis_key('bilibili_video_comments', unkey_api_id, api_key, req, res);
+            if (!isValid) return;
+
+            const queryParams = { mode, next_offset };
+            if (av_id) queryParams.av_id = av_id;
+            if (bv_id) queryParams.bv_id = bv_id;
+
+            const response = await axios.get('https://api.tikhub.io/api/v1/bilibili/app/fetch_video_comments', {
+                params: queryParams,
+                headers: {
+                    'Authorization': `Bearer ${tikhub_api_token}`
+                }
+            });
+
+            if (response.data?.code !== 200) {
+                return res.send({ code: -1, msg: '获取视频评论失败' });
+            }
+
+            let msg = 'success';
+            if (api_key) {
+                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1, { platform: 'bilibili', action: 'video_comments' });
+                msg = `API Key 剩余积分：${remaining}`;
+            }
+
+            return res.send({
+                code: 200,
+                msg,
+                data: response.data.data.data.replies || {}
+            });
+        } catch (error) {
+            console.error('Bilibili Video Comments Error:', error.response ? error.response.data : error.message);
+            if (!res.headersSent) {
+                return res.send({ code: -1, msg: commonUtils.MESSAGE.SERVER_ERROR });
+            }
+        }
+    },
+
     get_video_link: async function (url) {
         const { success, aid, cid, error } = await this.get_aid_cid(url)
         console.log(success, aid, cid, error)
