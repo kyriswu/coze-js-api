@@ -29,10 +29,18 @@ export const ve_seedream_5_0_lite = {
         if (!prompt) {
             return res.send({ code: -1, msg: 'prompt is required' });
         }
+        if (!api_key) {
+            return res.send({ code: -1, msg: commonUtils.MESSAGE.TOKEN_EMPTY });
+        }
 
         try {
-            const isValid = await commonUtils.valid_redis_key('volcengine_seedream_5_0_lite_generate_image', unkey_api_id, api_key, req, res);
-            if (!isValid) return;
+            const { valid, remaining: currentRemaining } = await unkey.verifyKey(unkey_api_id, api_key, 0, { platform: 'volcengine', action: 'seedream_5_0_lite_generate_image' });
+            if (!valid) {
+                return res.send({ code: -1, msg: commonUtils.MESSAGE.TOKEN_EXPIRED });
+            }
+            if (currentRemaining < 5) {
+                return res.send({ code: -1, msg: commonUtils.MESSAGE.TOKEN_NO_TIMES });
+            }
 
             const payload = {
                 model,
@@ -60,15 +68,14 @@ export const ve_seedream_5_0_lite = {
                 }
             );
 
-            let msg = 'success';
-            if (api_key) {
-                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 5, { platform: 'volcengine', action: 'seedream_5_0_lite_generate_image' });
-                msg = `API Key 剩余积分：${remaining}`;
-            }
+            // 根据生成的图片数量扣费，每张图片扣 5 积分
+            const generatedImages = response.data?.data || [];
+            const cost = generatedImages.length * 5;
+            const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, cost, { platform: 'volcengine', action: 'seedream_5_0_lite_generate_image' });
 
             return res.send({
                 code: 200,
-                msg,
+                msg: `生成 ${generatedImages.length} 张图片，扣费 ${cost} 积分，剩余 ${remaining} 积分`,
                 data: response.data || {}
             });
         } catch (error) {

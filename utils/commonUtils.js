@@ -11,7 +11,7 @@ const CONFIG = {
 
 const commonUtils = {
     MESSAGE: {
-        TOKEN_EMPTY: "API_KEY不能为空！相关咨询、帮助及开通方式，均在 https://devtool.uk/plugin",
+        TOKEN_EMPTY: "API_KEY不能为空、购买密钥、技术咨询，请访问 https://devtool.uk/plugin",
         TOKEN_EXPIRED: '令牌无效，续费或者购买，请访问：https://devtool.uk/plugin',
         TOKEN_NO_TIMES: '令牌无可用积分，续费或者购买，请访问：https://devtool.uk/plugin',
         FREE_KEY_EXPIRED_1: "免费版每日仅有 1 积分，付费即可获得更多积分额度！详情：https://devtool.uk/plugin",
