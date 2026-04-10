@@ -35,6 +35,7 @@ import redis from './utils/redisClient.js';
 import search1api from './utils/search1api.js';
 import zyte from './utils/zyte.js';
 import { th_bilibili, th_youtube, th_xiaohongshu,th_wechat_media,th_wechat_channels,th_douyin,th_tiktok } from './utils/tikhub.io.js';
+import { ve_seedream_5_0_lite } from './utils/volcengine.io.js';
 import {qweather_tool}  from './utils/qwether.js';
 // 从 Redis 中获取用户使用量
 async function getUsage(key) {
@@ -887,6 +888,7 @@ app.post('/web/inputText', async (req, res) => {
 app.post('/bilibili/subtitle', th_bilibili.fetch_one_video_v2);
 app.post('/bilibili/fetch_user_post_videos', th_bilibili.fetch_user_post_videos);
 app.post('/bilibili/fetch_video_comments', th_bilibili.fetch_video_comments);
+app.post('/volcengine/seedream/5.0-lite/generate-image', ve_seedream_5_0_lite.generate_image);
 app.post('/youtube/get_channel_videos_v2', th_youtube.get_channel_videos_v2);
 app.post('/xiaohongshu/home_notes', th_xiaohongshu.fetch_home_notes);
 app.post('/xiaohongshu/search_notes_v2', th_xiaohongshu.search_notes_v2);
