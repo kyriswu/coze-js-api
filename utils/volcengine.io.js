@@ -33,6 +33,20 @@ export const ve_seedream_5_0_lite = {
             return res.send({ code: -1, msg: commonUtils.MESSAGE.TOKEN_EMPTY });
         }
 
+        // 兼容 image 传 null 的场景：按未传该字段处理。
+        let normalizedImage;
+        if (image === null || image === 'null') {
+            normalizedImage = undefined;
+        } else {
+            normalizedImage = image;
+        }
+
+        if (typeof normalizedImage !== 'undefined') {
+            if (!Array.isArray(normalizedImage) || normalizedImage.some((item) => typeof item !== 'string')) {
+                return res.send({ code: -1, msg: 'image must be null or an array of string urls' });
+            }
+        }
+
         try {
             const { valid, remaining: currentRemaining } = await unkey.verifyKey(unkey_api_id, api_key, 0, { platform: 'volcengine', action: 'seedream_5_0_lite_generate_image' });
             if (!valid) {
@@ -50,8 +64,8 @@ export const ve_seedream_5_0_lite = {
                 watermark
             };
 
-            if (typeof image !== 'undefined') {
-                payload.image = image;
+            if (typeof normalizedImage !== 'undefined') {
+                payload.image = normalizedImage;
             }
             if (typeof sequential_image_generation !== 'undefined') {
                 payload.sequential_image_generation = sequential_image_generation;
