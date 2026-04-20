@@ -49,7 +49,7 @@ export const ve_seedream_5_0_lite = {
                 output_format,
                 watermark
             };
-consoloe.log("image", image);  
+
             if (typeof image !== 'undefined') {
                 payload.image = image;
             }
