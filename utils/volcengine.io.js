@@ -33,10 +33,26 @@ export const ve_seedream_5_0_lite = {
             return res.send({ code: -1, msg: commonUtils.MESSAGE.TOKEN_EMPTY });
         }
 
-        // 兼容 image 传 null 的场景：按未传该字段处理。
+        // 兼容 image 各种空值/字符串形态：按未传该字段处理。
         let normalizedImage;
-        if (image === null || image === 'null') {
+        if (image === null || typeof image === 'undefined') {
             normalizedImage = undefined;
+        } else if (typeof image === 'string') {
+            const trimmedImage = image.trim();
+            const lowerImage = trimmedImage.toLowerCase();
+
+            if (lowerImage === '' || lowerImage === 'null' || lowerImage === 'undefined') {
+                normalizedImage = undefined;
+            } else if (trimmedImage.startsWith('[') && trimmedImage.endsWith(']')) {
+                // 兼容 query/form-data 里传 JSON 字符串数组。
+                try {
+                    normalizedImage = JSON.parse(trimmedImage);
+                } catch {
+                    normalizedImage = image;
+                }
+            } else {
+                normalizedImage = image;
+            }
         } else {
             normalizedImage = image;
         }
@@ -46,6 +62,13 @@ export const ve_seedream_5_0_lite = {
                 return res.send({ code: -1, msg: 'image must be null or an array of string urls' });
             }
         }
+
+        console.log('[ve_seedream_5_0_lite.generate_image] request normalized', {
+            hasImageInReq: Object.prototype.hasOwnProperty.call(paramsFromReq, 'image'),
+            rawImageType: image === null ? 'null' : typeof image,
+            normalizedImageType: typeof normalizedImage,
+            normalizedImageCount: Array.isArray(normalizedImage) ? normalizedImage.length : 0
+        });
 
         try {
             const { valid, remaining: currentRemaining } = await unkey.verifyKey(unkey_api_id, api_key, 0, { platform: 'volcengine', action: 'seedream_5_0_lite_generate_image' });
@@ -70,6 +93,19 @@ export const ve_seedream_5_0_lite = {
             if (typeof sequential_image_generation !== 'undefined') {
                 payload.sequential_image_generation = sequential_image_generation;
             }
+
+            // 最终兜底：确保不会向上游发送 image: null。
+            if (payload.image === null || typeof payload.image === 'undefined') {
+                delete payload.image;
+            }
+
+            console.log('[ve_seedream_5_0_lite.generate_image] payload summary', {
+                hasImageInPayload: Object.prototype.hasOwnProperty.call(payload, 'image'),
+                imageCount: Array.isArray(payload.image) ? payload.image.length : 0,
+                model: payload.model,
+                size: payload.size,
+                output_format: payload.output_format
+            });
 
             const response = await axios.post(
                 `${ark_base_url}/api/v3/images/generations`,
