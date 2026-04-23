@@ -2379,14 +2379,27 @@ app.post('/mcp', async (req, res) => {
         '使用 fileId 将已上传的 Markdown 文章排版并发布到微信公众号草稿箱',
         {
             fileId: z.string().describe('上传接口返回的 fileId'),
+            wechat_app_id: z.string().optional().describe('微信公众号 AppID，必须提供'),
+            wechat_app_secret: z.string().optional().describe('微信公众号 AppSecret，必须提供'),
             theme: z.string().optional().describe('排版主题，默认 default'),
             highlight: z.string().optional().describe('代码高亮方案，默认 solarized-light'),
             macStyle: z.boolean().optional().describe('是否使用 Mac 风格代码块，默认 true'),
         },
-        async ({ fileId, theme = 'default', highlight = 'solarized-light', macStyle = true }) => {
+        async ({ fileId, wechat_app_id, wechat_app_secret, theme = 'default', highlight = 'solarized-light', macStyle = true }) => {
+            if (!wechat_app_id || !wechat_app_secret) {
+                return {
+                    content: [{
+                        type: 'text',
+                        text: '❌ 缺少微信公众号凭据，请在调用参数中传入 wechat_app_id 和 wechat_app_secret。',
+                    }],
+                    isError: true,
+                };
+            }
+            const appId = wechat_app_id;
+            const appSecret = wechat_app_secret;
             const publishRes = await axios.post(
                 `${WENYAN_BASE_URL}/publish`,
-                { fileId, theme, highlight, macStyle },
+                { fileId, theme, highlight, macStyle, wechat_app_id: appId, wechat_app_secret: appSecret },
                 {
                     headers: {
                         'Content-Type': 'application/json',
