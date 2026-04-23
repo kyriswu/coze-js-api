@@ -1112,11 +1112,24 @@ const tool = {
                 response = { headers: downloadResult.headers };
                 filepath = downloadResult.filepath;
             }
-            console.log("下载格式", response.headers['content-type']);
-            if (!filetool.is_video(response.headers['content-type'])) {
-                throw new Error('视频链接无效！请查看视频教程：【https://www.bilibili.com/video/BV169TizqE58】');
+            const contentType = response.headers['content-type'];
+            console.log("下载格式", contentType);
+
+            let mediaInfo = this.getMediaInfoFromContentType(contentType);
+            // 部分 CDN 会返回 application/octet-stream，这里回退到 ffprobe 检测实际媒体类型。
+            if (!mediaInfo.confident || !mediaInfo.is_video) {
+                const probedInfo = await this.get_media_info(filepath);
+                if (!probedInfo.success || probedInfo.type !== 'video') {
+                    throw new Error('视频链接无效！请查看视频教程：【https://www.bilibili.com/video/BV169TizqE58】');
+                }
+
+                mediaInfo = {
+                    extension: probedInfo.extension || 'mp4',
+                    is_video: true,
+                    is_audio: false,
+                    confident: true
+                };
             }
-            const mediaInfo = this.getMediaInfoFromContentType(response.headers['content-type']);
             
             const totalSize = this.getFileSizeSafe(filepath);
             console.log(`视频下载成功，视频大小：${this.bytesToMB(totalSize)}MB`)
