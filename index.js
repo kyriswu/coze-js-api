@@ -2331,6 +2331,89 @@ app.post('/extract-element-from-html', async (req, res) => {
 app.post('/thirdParty/verifyKey',thirdPartyUsed.key_used)
 
 
+// ========== 文颜 MCP Server ==========
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
+import { z } from 'zod';
+import FormData from 'form-data';
+
+const WENYAN_BASE_URL = 'https://wenyan.devtool.uk';
+const WENYAN_API_KEY = process.env.WENYAN_API_KEY || '';
+
+// 每个请求创建独立的 McpServer + Transport（stateless 模式）
+app.post('/mcp', async (req, res) => {
+    const server = new McpServer({
+        name: 'wenyan-proxy',
+        version: '1.0.0',
+    });
+
+    // 工具1：上传 Markdown 文件内容
+    server.tool(
+        'wenyan_upload',
+        '上传 Markdown 文章内容到文颜服务器，返回 fileId 供后续发布使用',
+        {
+            content: z.string().describe('Markdown 文章的完整文本内容'),
+            filename: z.string().optional().describe('文件名，默认为 article.md'),
+        },
+        async ({ content, filename = 'article.md' }) => {
+            const form = new FormData();
+            form.append('file', Buffer.from(content, 'utf-8'), {
+                filename,
+                contentType: 'text/markdown',
+            });
+            const uploadRes = await axios.post(`${WENYAN_BASE_URL}/upload`, form, {
+                headers: {
+                    ...form.getHeaders(),
+                    'x-api-key': WENYAN_API_KEY,
+                },
+            });
+            return {
+                content: [{ type: 'text', text: JSON.stringify(uploadRes.data, null, 2) }],
+            };
+        }
+    );
+
+    // 工具2：发布文章到微信公众号
+    server.tool(
+        'wenyan_publish',
+        '使用 fileId 将已上传的 Markdown 文章排版并发布到微信公众号草稿箱',
+        {
+            fileId: z.string().describe('上传接口返回的 fileId'),
+            theme: z.string().optional().describe('排版主题，默认 default'),
+            highlight: z.string().optional().describe('代码高亮方案，默认 solarized-light'),
+            macStyle: z.boolean().optional().describe('是否使用 Mac 风格代码块，默认 true'),
+        },
+        async ({ fileId, theme = 'default', highlight = 'solarized-light', macStyle = true }) => {
+            const publishRes = await axios.post(
+                `${WENYAN_BASE_URL}/publish`,
+                { fileId, theme, highlight, macStyle },
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-api-key': WENYAN_API_KEY,
+                    },
+                }
+            );
+            return {
+                content: [{ type: 'text', text: JSON.stringify(publishRes.data, null, 2) }],
+            };
+        }
+    );
+
+    const transport = new StreamableHTTPServerTransport({
+        sessionIdGenerator: undefined, // stateless
+    });
+
+    res.on('close', () => transport.close());
+    await server.connect(transport);
+    await transport.handleRequest(req, res, req.body);
+});
+
+app.get('/mcp', async (req, res) => {
+    res.status(405).json({ error: 'MCP endpoint only supports POST (Streamable HTTP)' });
+});
+// ========== 文颜 MCP Server End ==========
+
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
 })
