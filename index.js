@@ -137,12 +137,12 @@ app.post('/en_wikipedia/get_item_content', async (req, res) => {
 async function canSearchGoogle(key) {
     const value = await redis.get(key);
     if (value === null) {
-        // 不存在，创建 key 并设置初始值
+        // 不存在，创建 key 并设置初始值；限制为每天一次（次日零点重置）
         const now = new Date();
-        const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        const secondsSinceMidnight = Math.floor((now - midnight) / 1000);
-        console.log("创建key:", key, "初始值为0，过期时间为", secondsSinceMidnight);
-        await redis.set(key, 0, 'EX', 60 * 60);
+        const nextMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+        const secondsUntilMidnight = Math.floor((nextMidnight - now) / 1000);
+        console.log("创建key:", key, "初始值为0，过期时间为", secondsUntilMidnight);
+        await redis.set(key, 0, 'EX', secondsUntilMidnight);
         return true
     }else{
         return false;
@@ -548,23 +548,8 @@ app.post('/google/search/web', async (req, res) => {
         //         title: a ? a.textContent.trim() : null
         //     };
         // }).filter(item => item.link !== null); // 过滤掉不符合要求的项
-        const searchTask = browserless.google_search_new(q);
-        const timeoutTask = new Promise((_, reject) => setTimeout(() => reject(new Error('Search Service Timeout')), 130000));
-        const html = await Promise.race([searchTask, timeoutTask]);
-        if (!html) {
-            throw new Error("Empty HTML response");
-        }
-        const fragment = JSDOM.fragment(html);
-        const selector = "div.gsc-result";
-        const result_list = Array.from(fragment.querySelectorAll(selector)).map(element => {
-            const a = element.querySelector('a.gs-title');
-            const div = element.querySelector('div.gs-snippet');
-            return {
-                snippet: div ? div.textContent.trim() : null,
-                link: a ? a.href : null,
-                title: a ? a.textContent.trim() : null
-            };
-        }).filter(item => item.link !== null && item.link.startsWith('http')); // 过滤掉不符合要求的项
+        const searchData = await search1api.search(q);
+        const result_list = Array.isArray(searchData?.results) ? searchData.results : [];
 
         let msg = '';
         if (api_key) {
@@ -582,7 +567,7 @@ app.post('/google/search/web', async (req, res) => {
         }
     } catch (err) {
         console.error(`Error searching Google: ${err.message}`);
-        if(res.headersSent){
+        if(!res.headersSent){
         return res.send({
             code: -1,
             msg: 'failure',
