@@ -34,9 +34,10 @@ const agent = new HttpsProxyAgent(proxyUrl);
 import redis from './utils/redisClient.js';
 import search1api from './utils/search1api.js';
 import zyte from './utils/zyte.js';
-import { th_bilibili, th_youtube, th_xiaohongshu,th_wechat_media,th_wechat_channels,th_douyin,th_tiktok } from './utils/tikhub.io.js';
+import { th_bilibili, th_youtube, th_xiaohongshu,th_wechat_media,th_wechat_channels,th_douyin,th_tiktok,th_douyin_billboard } from './utils/tikhub.io.js';
 import { ve_seedream_5_0_lite } from './utils/volcengine.io.js';
 import {qweather_tool}  from './utils/qwether.js';
+import { tv_search } from './utils/tavily.js';
 // 从 Redis 中获取用户使用量
 async function getUsage(key) {
     let value = await redis.get(key);
@@ -581,6 +582,9 @@ app.post('/google/search/web', async (req, res) => {
     }
 })
 
+// Tavily 智能搜索 API
+app.post('/tavily/search', tv_search.search.bind(tv_search));
+
 // zyte解析网页内容
 async function zyteExtract(req, res) {
     let { url, selector, xpath, api_key, action, screenshot } = req.body;
@@ -895,6 +899,9 @@ app.post('/douyin/fetch_video_search_v2', th_douyin.fetch_video_search_v2);
 
 //抖音综合搜索
 app.post('/douyin/comments', th_douyin.fetch_video_comments);
+
+//抖音上升热点榜
+app.post('/douyin/billboard/fetch_hot_rise_list', th_douyin_billboard.fetch_hot_rise_list);
 
 //TikTok 通过作品ID获取评论
 app.post('/tiktok/fetch_post_comment', th_tiktok.fetch_post_comment);
