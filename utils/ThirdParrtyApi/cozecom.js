@@ -127,12 +127,7 @@ const cozecom = {
             // }
             // console.log("access_token", access_token)
             const access_token = "pat_wnggFUfo22rmIi5xTFGnqzDbMXUohU3RB0GxYrYBex8A0BVPPpRZVwAetCKPIOTo"
-            console.log({
-                workflow_id: "7515067322877739016",
-                parameters: {
-                    input: url
-                }
-            })
+            console.log("使用linkreader读取文件：", url)
             const response = await axios({
                 method: 'post',
                 url: 'https://api.coze.com/v1/workflow/stream_run',
