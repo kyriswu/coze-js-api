@@ -89,8 +89,26 @@ router.get('/w7k2', async (req, res) => {
     });
 });
 
-router.get('/apikey', (req, res) => {
-    res.render('apikey');
+router.get('/apikey', async (req, res) => {
+    const counterKey = 'apikey:landing:visitors';
+    let visitorCount = Number(await redis.get(counterKey)) || 0;
+
+    try {
+        const clientIp = tool.getClientIp(req);
+        const ipHash = crypto.createHash('sha256').update(clientIp).digest('hex').slice(0, 32);
+        const dedupeKey = `apikey:landing:uv:${ipHash}`;
+        const shouldCount = await redis.set(dedupeKey, '1', 'EX', 600, 'NX');
+
+        if (shouldCount === 'OK') {
+            visitorCount = await redis.incr(counterKey);
+        } else {
+            visitorCount = Number(await redis.get(counterKey)) || visitorCount;
+        }
+    } catch (error) {
+        console.error('Failed to update apikey visitor count:', error.message);
+    }
+
+    res.render('apikey', { visitorCount });
 });
 
 router.post('/apikey/query', async (req, res) => {
