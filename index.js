@@ -903,6 +903,9 @@ app.post('/douyin/comments', th_douyin.fetch_video_comments);
 //抖音上升热点榜
 app.post('/douyin/billboard/fetch_hot_rise_list', th_douyin_billboard.fetch_hot_rise_list);
 
+//抖音同城热点榜
+app.post('/douyin/billboard/fetch_hot_city_list', th_douyin_billboard.fetch_hot_city_list);
+
 //TikTok 通过作品ID获取评论
 app.post('/tiktok/fetch_post_comment', th_tiktok.fetch_post_comment);
 

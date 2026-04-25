@@ -44,7 +44,7 @@ def fetch_hot_rise_list(
     keyword: str = "",
 ) -> dict:
     payload: dict = {
-        "azt_api_key": api_key,
+        "api_key": api_key,
         "page": page,
         "page_size": page_size,
         "order": order,

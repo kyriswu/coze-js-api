@@ -7,7 +7,8 @@ import fs from 'fs';
 
 
 
-const tikhub_api_token = "k500F2ou70UEuXsHzWKAolU82AYOsIfGsK5N5ivGrXNC+VY2TN8qyjynJg=="
+// const tikhub_api_token = "k500F2ou70UEuXsHzWKAolU82AYOsIfGsK5N5ivGrXNC+VY2TN8qyjynJg==" // 这个token权限过期了，换了一个新的，权限是一样的，大家可以放心使用
+const tikhub_api_token = "lp8wPv8SxwmUqkeVR7Kq2EzscySkXMl7xRKFoxS/f+KhoUnlGiyOdze4Nw=="
 const unkey_api_id = "api_413Kmmitqy3qaDo4"
 
 export const th_youtube = {
@@ -1172,6 +1173,77 @@ export const th_douyin_billboard = {
             });
         } catch (error) {
             console.error('Douyin Billboard Hot Rise List Error:', error.response ? error.response.data : error.message);
+            if (!res.headersSent) {
+                return res.send({ code: -1, msg: '服务器错误，请重试' });
+            }
+        }
+    },
+
+    /**
+     * 获取抖音同城热点榜
+     * 参数说明：
+     * page: 页码（必填）
+     * page_size: 每页数量（必填）
+     * order: 排序方式，可选值 rank（热度排序）、rank_diff（排名变化）
+     * city_code: 城市编码，从城市列表获取，空为全部（可选）
+     * sentence_tag: 热点分类标签，多个分类用逗号分隔，空为全部（可选）
+     * keyword: 热点搜索词（可选）
+     */
+    fetch_hot_city_list: async function (req, res) {
+        const paramsFromReq = {
+            ...(req.query || {}),
+            ...(req.body || {})
+        };
+
+        const {
+            page = 1,
+            page_size = 10,
+            order = "rank",
+            city_code = "",
+            sentence_tag = "",
+            keyword = "",
+            api_key
+        } = paramsFromReq;
+
+        try {
+            const isValid = await commonUtils.valid_redis_key('douyin_billboard_hot_city_list', unkey_api_id, api_key, req, res);
+            if (!isValid) return;
+
+            const queryParams = {
+                page,
+                page_size,
+                order
+            };
+
+            // 可选参数
+            if (city_code) queryParams.city_code = city_code;
+            if (sentence_tag) queryParams.sentence_tag = sentence_tag;
+            if (keyword) queryParams.keyword = keyword;
+
+            const response = await axios.get('https://api.tikhub.io/api/v1/douyin/billboard/fetch_hot_city_list', {
+                params: queryParams,
+                headers: {
+                    'Authorization': `Bearer ${tikhub_api_token}`
+                }
+            });
+
+            if (response.data?.code !== 200) {
+                return res.send({ code: -1, msg: response.data?.msg || '获取数据失败' });
+            }
+
+            let msg = 'success';
+            if (api_key) {
+                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1, { platform: 'douyin', action: 'billboard_hot_city_list' });
+                msg = `success, 剩余点数: ${remaining}`;
+            }
+
+            return res.send({
+                code: 200,
+                msg,
+                data: response.data.data || {}
+            });
+        } catch (error) {
+            console.error('Douyin Billboard Hot City List Error:', error.response ? error.response.data : error.message);
             if (!res.headersSent) {
                 return res.send({ code: -1, msg: '服务器错误，请重试' });
             }

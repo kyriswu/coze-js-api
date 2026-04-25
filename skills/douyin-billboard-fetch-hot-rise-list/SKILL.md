@@ -39,7 +39,9 @@ user-invocable: true
 2. 用户在参数中直接传入。
 3. 如果两者均未提供，**停止执行**并提示：
 
-> 未检测到 API Key。请前往 **https://devtool.uk/wiki** 购买或查看使用说明后重试。
+说明：脚本对外输入使用 `azt_api_key`（或 `AZT_API_KEY`），实际请求接口时会映射为 payload 字段 `api_key`。
+
+> 未检测到 API Key。请前往 **https://devtool.uk/plugin** 购买或查看使用说明后重试。
 
 ## 执行方式
 
@@ -63,7 +65,7 @@ python3 scripts/fetch_hot_rise_list.py --page 1 --page_size 20 --order hot --key
 3. 如果失败，给出可能原因及修正建议。
 
 常见失败原因：
-- `azt_api_key` 无效或已过期 → 前往 https://devtool.uk/wiki 重新购买
+- `azt_api_key` 无效或已过期 → 前往 https://devtool.uk/plugin 重新购买
 - `azt_api_key` 积分已用完 → 联系作者续费
 - 网络问题或服务器错误 → 稍后重试
 
