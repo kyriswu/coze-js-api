@@ -57,6 +57,53 @@ const unkey = {
             req.end();
         });
     },
+    verifyKeyAdvanced: async function ({ key, tags, permissions, ratelimits, migrationId }) {
+        const payload = {
+            key,
+            tags: tags || [],
+            ...(permissions && { permissions }),
+            ...(ratelimits && { ratelimits }),
+            ...(migrationId && { migrationId })
+        };
+        const data = JSON.stringify(payload);
+        const options = {
+            hostname: 'api.unkey.com',
+            path: '/v2/keys.verifyKey',
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+                'Content-Length': Buffer.byteLength(data)
+            }
+        };
+
+        return new Promise((resolve, reject) => {
+            const req = https.request(options, (res) => {
+                let responseData = '';
+
+                res.on('data', (chunk) => {
+                    responseData += chunk;
+                });
+
+                res.on('end', () => {
+                    try {
+                        const parsedData = JSON.parse(responseData);
+                        console.log('verifyKeyAdvanced response:', JSON.stringify(parsedData));
+                        resolve(parsedData.data ?? parsedData);
+                    } catch (error) {
+                        reject(error);
+                    }
+                });
+            });
+
+            req.on('error', (error) => {
+                reject(error);
+            });
+
+            req.write(data);
+            req.end();
+        });
+    },
     getVerifications: async function (token) {
         const options = {
             method: 'GET',

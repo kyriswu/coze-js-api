@@ -2,6 +2,7 @@ import express from 'express';
 import crypto from 'crypto';
 import redis from '../utils/redisClient.js';
 import tool from '../utils/tool.js';
+import unkey from '../utils/unkey.js';
 
 const router = express.Router();
 
@@ -86,6 +87,27 @@ router.get('/w7k2', async (req, res) => {
             url: pageUrl
         }
     });
+});
+
+router.get('/apikey', (req, res) => {
+    res.render('apikey');
+});
+
+router.post('/apikey/query', async (req, res) => {
+    const { key } = req.body;
+    if (!key || typeof key !== 'string' || key.trim().length === 0) {
+        return res.status(400).json({ error: '缺少 key 参数' });
+    }
+    try {
+        const result = await unkey.verifyKey(null, key.trim(), 0, null);
+        if (!result) {
+            return res.status(400).json({ error: '查询失败，Key 可能无效' });
+        }
+        res.json({ data: result });
+    } catch (err) {
+        console.error('apikey query error:', err);
+        res.status(500).json({ error: '服务器内部错误' });
+    }
 });
 
 export default router;
