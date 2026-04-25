@@ -45,6 +45,55 @@ let activeRequestCount = 0; // 新增：追踪当前正在进行的请求数
 
 var browser_map = {} //浏览器map
 
+const BROWSER_SESSION_TTL_MS = Number(process.env.BROWSER_SESSION_TTL_MS || 15 * 60 * 1000);
+const BROWSER_SESSION_SWEEP_INTERVAL_MS = Number(process.env.BROWSER_SESSION_SWEEP_INTERVAL_MS || 60 * 1000);
+
+async function closeBrowserSession(browserId, reason = 'manual') {
+    const session = browser_map[browserId];
+    if (!session) {
+        return false;
+    }
+
+    delete browser_map[browserId];
+    try {
+        if (session.browser && session.browser.isConnected()) {
+            await session.browser.close();
+        }
+    } catch (err) {
+        console.warn(`关闭浏览器会话失败(${browserId}, reason=${reason}):`, err.message || err);
+    }
+    return true;
+}
+
+async function sweepStaleBrowserSessions() {
+    const now = Date.now();
+    const ids = Object.keys(browser_map);
+    if (ids.length === 0) {
+        return;
+    }
+
+    for (const browserId of ids) {
+        const session = browser_map[browserId];
+        if (!session) {
+            continue;
+        }
+
+        const lastUsedAt = session.lastUsedAt || session.createdAt || 0;
+        if (now - lastUsedAt > BROWSER_SESSION_TTL_MS) {
+            await closeBrowserSession(browserId, 'ttl_expired');
+        }
+    }
+}
+
+const browserSessionSweeper = setInterval(() => {
+    sweepStaleBrowserSessions().catch((err) => {
+        console.warn('浏览器会话清理任务异常:', err.message || err);
+    });
+}, BROWSER_SESSION_SWEEP_INTERVAL_MS);
+if (typeof browserSessionSweeper.unref === 'function') {
+    browserSessionSweeper.unref();
+}
+
 async function puppeteer_connect(chromium_endpoint, timeout, proxy){
     try {
         let b = await puppeteer.connect({
@@ -1119,7 +1168,9 @@ await page.waitForFunction(() => {
             browser:browser,
             proxy_user:proxy_user,
             proxy_pass:proxy_pass,
-            pages:{}
+            pages:{},
+            createdAt: Date.now(),
+            lastUsedAt: Date.now(),
         }
         
         return browserId
@@ -1134,6 +1185,7 @@ await page.waitForFunction(() => {
         if (!browser_map[browserId]) {
             throw new Error(`browserId无效，请重新通过browser工具重新生成`);
         }
+        browser_map[browserId].lastUsedAt = Date.now();
 
         browser  =  browser_map[browserId].browser
 
@@ -1185,6 +1237,9 @@ await page.waitForFunction(() => {
             console.error('Error in chromium_content:', error);
             return null
         } finally {
+            if (browser_map[browserId]) {
+                browser_map[browserId].lastUsedAt = Date.now();
+            }
             try {
                 if (page && !page.isClosed()) {
                     await page.close();
@@ -1575,6 +1630,36 @@ await page.waitForSelector('div.el-scrollbar', { visible : true});
                 await browser.close()
             }
         }
+    },
+    close_browser: async function (browserId) {
+        return await closeBrowserSession(browserId, 'api_close');
+    },
+    close_all_browsers: async function () {
+        const ids = Object.keys(browser_map);
+        let closed = 0;
+        for (const browserId of ids) {
+            if (await closeBrowserSession(browserId, 'api_close_all')) {
+                closed += 1;
+            }
+        }
+        return closed;
+    },
+    browser_stats: function () {
+        const now = Date.now();
+        const sessions = Object.entries(browser_map).map(([id, session]) => ({
+            id,
+            connected: !!(session.browser && session.browser.isConnected()),
+            createdAt: session.createdAt || null,
+            lastUsedAt: session.lastUsedAt || null,
+            idleMs: session.lastUsedAt ? now - session.lastUsedAt : null,
+        }));
+
+        return {
+            count: sessions.length,
+            ttlMs: BROWSER_SESSION_TTL_MS,
+            sweepIntervalMs: BROWSER_SESSION_SWEEP_INTERVAL_MS,
+            sessions,
+        };
     },
 };
 export { getQingGuoProxy, Webshare_PROXY_USER, Webshare_PROXY_PASS }

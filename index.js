@@ -1984,6 +1984,57 @@ app.post("/page", async (req, res) => {
     }
 })
 
+app.post('/browser/close', async (req, res) => {
+    const { browserId } = req.body;
+    if (!browserId) {
+        return res.status(400).send('Invalid input: "browserId" is required');
+    }
+
+    try {
+        const closed = await browserless.close_browser(browserId);
+        return res.send({
+            code: closed ? 0 : -1,
+            msg: closed ? 'success' : 'browserId not found',
+        });
+    } catch (err) {
+        return res.send({
+            code: -1,
+            msg: err.message,
+        });
+    }
+});
+
+app.post('/browser/close_all', async (req, res) => {
+    try {
+        const closed = await browserless.close_all_browsers();
+        return res.send({
+            code: 0,
+            msg: 'success',
+            data: { closed },
+        });
+    } catch (err) {
+        return res.send({
+            code: -1,
+            msg: err.message,
+        });
+    }
+});
+
+app.get('/browser/sessions', (req, res) => {
+    try {
+        return res.send({
+            code: 0,
+            msg: 'success',
+            data: browserless.browser_stats(),
+        });
+    } catch (err) {
+        return res.send({
+            code: -1,
+            msg: err.message,
+        });
+    }
+});
+
 //专利查询
 app.post("/zlcx", async (req, res) => {
     let {keyword, api_key} = req.body
