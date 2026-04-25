@@ -770,7 +770,7 @@ await page.waitForFunction(() => {
         });
     },
 
-    extract_youtube_audio_url: async function (toolurl,videourl, opt = {}) {
+    extract_youtube_audio_url: async function (toolurl, videourl, opt = {}, retryCount = 0) {
 
         let proxy_user, proxy_pass, chromium_endpoint, proxy
         let browser, page
@@ -822,7 +822,7 @@ await page.waitForFunction(() => {
             await page.authenticate({
                 username: proxy_user,
                 password: proxy_pass,
-            }); // 正式验证代理用户名密码 :contentReference[oaicite:1]{index=1}
+            });
 
             //设置cookie
             if (opt && opt.cookie) {
@@ -832,7 +832,6 @@ await page.waitForFunction(() => {
             // 禁止加载媒体资源（提高渲染速度）
             await disableLoadMedia(page);
 
-            // ...existing code...
             let getinfoResult; // 用于主流程等待 getinfo 响应
             const getinfoPromise = new Promise((resolve, reject) => {
                 getinfoResult = { resolve, reject };
@@ -854,7 +853,6 @@ await page.waitForFunction(() => {
                     }
                 }
             });
-      
 
             const response = await page.goto(toolurl, {
                 timeout: TIMEOUT,
@@ -869,43 +867,45 @@ await page.waitForFunction(() => {
 
             console.log("getinfoResult:", getinfoResult)
 
-                        // 等待 input 和 button 出现
-  await page.waitForSelector('#videoUrl');
-  await page.waitForSelector('#videoBtn');
+            // 等待 input 和 button 出现
+            await page.waitForSelector('#videoUrl');
+            await page.waitForSelector('#videoBtn');
 
-  // 在 input 中输入链接
-  const videoLink = videourl;
-  await page.click('#videoUrl', { clickCount: 3 }); // 聚焦并选中文本（如果已有）
-  await page.type('#videoUrl', videoLink); // 输入链接 :contentReference[oaicite:1]{index=1}
-    // 点击按钮提交
-  await page.click('#videoBtn');
-  await page.waitForSelector('a.js-unmask.ko-btn.btn.btn-lg.btn-primary', {timeout:120000})
+            // 在 input 中输入链接
+            const videoLink = videourl;
+            await page.click('#videoUrl', { clickCount: 3 });
+            await page.type('#videoUrl', videoLink);
 
+            // 点击按钮提交
+            await page.click('#videoBtn');
+            await page.waitForSelector('a.js-unmask.ko-btn.btn.btn-lg.btn-primary', {timeout: 120000})
 
-  // 查找 Extract Audio 对应的 <a> 标签
-  const audio_url = await page.evaluate(() => {
-    const a = Array.from(document.querySelectorAll('a.js-download.btn-success'))
-      .find(el => el.textContent.trim().includes('Extract Audio'));
+            // 查找 Extract Audio 对应的 <a> 标签
+            const audio_url = await page.evaluate(() => {
+                const a = Array.from(document.querySelectorAll('a.js-download.btn-success'))
+                    .find(el => el.textContent.trim().includes('Extract Audio'));
 
-    if (!a) return null;
-    return a.href
-  });
+                if (!a) return null;
+                return a.href
+            });
             await page.close()
 
             return audio_url
         } catch (error) {
             if (error.message && error.message.includes('net::ERR')) {
                 console.error('Extract YouTube Audio 网络连接失败:', error.message);
-                // 这里可以做额外处理，比如重试、报警等
-                return await this.extract_youtube_audio_url(toolurl,videourl) //重试
+                if (retryCount < 2) {
+                    await new Promise(resolve => setTimeout(resolve, (retryCount + 1) * 1000));
+                    return await this.extract_youtube_audio_url(toolurl, videourl, opt, retryCount + 1)
+                }
             }
             console.error('Error in chromium screen shot:', error);
             return null
         } finally {
-            if(public_browser){
+            if (public_browser) {
                 // 强制再执行一次 page.close，不考虑报错
                 try { await page.close(); } catch (e) {}
-            }else{
+            } else {
                 await browser.close()
             }
         }
@@ -1178,9 +1178,6 @@ await page.waitForFunction(() => {
 
             const html = await page.content();
 
-            const pageId = generateConnectionId()
-            browser_map[browserId].pages[pageId] = page
-
             return {
                 data: html
             }
@@ -1188,12 +1185,11 @@ await page.waitForFunction(() => {
             console.error('Error in chromium_content:', error);
             return null
         } finally {
-            // if(public_browser){
-            //     // 强制再执行一次 page.close，不考虑报错
-            //     try { await page.close(); } catch (e) {}
-            // }else{
-            //     await browser.close()
-            // }
+            try {
+                if (page && !page.isClosed()) {
+                    await page.close();
+                }
+            } catch (e) {}
         }
 
     },
@@ -1395,7 +1391,7 @@ await page.waitForFunction(() => {
   return results;
 });
 console.log(resultList)
-const pagesData = await Promise.all(resultList.map(async (item, index) => {
+await Promise.all(resultList.map(async (item, index) => {
   const subpage = await browser.newPage();
   try {
 
@@ -1432,8 +1428,13 @@ const pagesData = await Promise.all(resultList.map(async (item, index) => {
 
   } catch (err) {
     console.error(`Failed to open ${item.href}:`, err.message);
-    await subpage.close();
     return { error: err.message };
+    } finally {
+        try {
+            if (!subpage.isClosed()) {
+                await subpage.close();
+            }
+        } catch (e) {}
   }
 }));
      

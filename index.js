@@ -956,6 +956,21 @@ app.post('/bazi/points', points.calc_points)
  */
 app.post("/workflow/run",coze.workflow_run)
 
+async function scanKeysByPattern(pattern) {
+    let cursor = '0';
+    const keys = [];
+
+    do {
+        const [nextCursor, batch] = await redis.scan(cursor, 'MATCH', pattern, 'COUNT', 500);
+        cursor = nextCursor;
+        if (batch && batch.length > 0) {
+            keys.push(...batch);
+        }
+    } while (cursor !== '0');
+
+    return keys;
+}
+
 app.post('/redis/get_string', async (req, res) => {
     const { key } = req.body;
     if (!key) {
@@ -985,7 +1000,7 @@ app.post('/redis/keys', async (req, res) => {
     if (!pattern) {
         return res.status(400).send('Invalid input: "pattern" is required');
     }
-    const keys = await redis.keys(pattern);
+    const keys = await scanKeysByPattern(pattern);
     return res.send({
         code: 0,
         msg: 'Success',
@@ -998,9 +1013,11 @@ app.post('/redis/del_keys', async (req, res) => {
     if (!pattern) {
         return res.status(400).send('Invalid input: "pattern" is required');
     }
-    const keys = await redis.keys(pattern);
+    const keys = await scanKeysByPattern(pattern);
     if (keys.length > 0) {
-        await Promise.all(keys.map(key => redis.del(key)));
+        const pipeline = redis.pipeline();
+        keys.forEach(key => pipeline.del(key));
+        await pipeline.exec();
     }
 
     return res.send({
