@@ -16,6 +16,26 @@ import commonUtils from './utils/commonUtils.js';
 import thirdPartyUsed from "./utils/thirdPartyUsed.js";
 import navigationRoutes from './routes/navigationRoutes.js';
 
+// 全局 axios 拦截器：捕获 429 请求并打印详细信息
+axios.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 429) {
+      const config = error.config || {};
+      console.error('[429 Rate Limit]', {
+        url: config.url,
+        method: (config.method || 'GET').toUpperCase(),
+        baseURL: config.baseURL,
+        fullURL: config.baseURL ? `${config.baseURL}${config.url}` : config.url,
+        headers: config.headers,
+        params: config.params,
+        responseBody: error.response.data,
+      });
+    }
+    return Promise.reject(error);
+  }
+);
+
 const app = express();
 const port = 3000;
 const environment = process.env.NODE_ENV || 'development';
