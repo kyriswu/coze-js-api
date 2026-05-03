@@ -111,6 +111,18 @@ router.get('/apikey', async (req, res) => {
     res.render('apikey', { visitorCount });
 });
 
+router.get('/video-transcript', (req, res) => {
+    const pageUrl = `${tool.getBaseUrl(req)}${req.originalUrl}`;
+    res.render('video-transcript', {
+        seo: {
+            title: '视频文案提取 - 主流平台一键解析',
+            description: '输入视频链接，快速提取文本字幕。支持主流视频平台，页面直连 whisper/speech-to-text 接口。',
+            keywords: '视频文案提取,字幕提取,语音转文字,Whisper,YouTube,抖音,B站,小红书',
+            url: pageUrl
+        }
+    });
+});
+
 router.post('/apikey/query', async (req, res) => {
     const { key } = req.body;
     if (!key || typeof key !== 'string' || key.trim().length === 0) {

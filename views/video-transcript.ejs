@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <% const pageSeo = (typeof seo !== 'undefined' && seo) ? seo : {}; %>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= pageSeo.title || '视频文案提取 - 主流平台一键解析' %></title>
+  <meta name="description" content="<%= pageSeo.description || '输入链接快速提取视频文案，支持主流视频平台。' %>" />
+  <meta name="keywords" content="<%= pageSeo.keywords || '视频文案提取,字幕提取,语音转文字' %>" />
+  <meta name="robots" content="index,follow,max-image-preview:large" />
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="zh_CN" />
+  <meta property="og:title" content="<%= pageSeo.title || '视频文案提取 - 主流平台一键解析' %>" />
+  <meta property="og:description" content="<%= pageSeo.description || '输入链接快速提取视频文案，支持主流视频平台。' %>" />
+  <meta property="og:url" content="<%= pageSeo.url || '' %>" />
+
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@500;700&display=swap");
+
+    :root {
+      --paper: #f5f2ea;
+      --ink: #1f2a37;
+      --ink-soft: #4b5563;
+      --line: #d6d1c4;
+      --panel: rgba(255, 255, 255, 0.76);
+      --brand: #1f4b99;
+      --brand-strong: #12387a;
+      --ok: #14532d;
+      --error: #8f1d1d;
+      --shadow: 0 14px 40px rgba(17, 24, 39, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+      color: var(--ink);
+      font-family: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background:
+        radial-gradient(ellipse at top right, rgba(31, 75, 153, 0.1), transparent 48%),
+        radial-gradient(ellipse at bottom left, rgba(153, 107, 31, 0.08), transparent 42%),
+        linear-gradient(120deg, #f7f3eb 0%, #f2eee4 48%, #efeadf 100%);
+    }
+
+    .wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 40px 20px 64px;
+    }
+
+    .top {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 24px;
+      align-items: end;
+      margin-bottom: 34px;
+    }
+
+    .kicker {
+      margin: 0;
+      color: var(--ink-soft);
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .headline {
+      margin: 10px 0 12px;
+      font-family: "Noto Serif SC", "STSong", serif;
+      font-size: clamp(34px, 5.4vw, 58px);
+      line-height: 1.08;
+      letter-spacing: 0.01em;
+      color: #16243a;
+    }
+
+    .sub {
+      margin: 0;
+      color: var(--ink-soft);
+      max-width: 48ch;
+      line-height: 1.9;
+      font-size: 15px;
+    }
+
+    .platforms {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: flex-end;
+      align-self: center;
+    }
+
+    .pill {
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.7);
+      padding: 9px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      color: #27364d;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 20px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid rgba(214, 209, 196, 0.9);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(6px);
+      overflow: hidden;
+    }
+
+    .card-main {
+      padding: 22px;
+    }
+
+    .card-side {
+      padding: 22px;
+    }
+
+    .label {
+      display: block;
+      margin: 0 0 8px;
+      font-size: 13px;
+      color: #26364f;
+      font-weight: 600;
+    }
+
+    .input,
+    .select,
+    .textarea {
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid #cfc8b7;
+      background: rgba(255, 255, 255, 0.84);
+      color: var(--ink);
+      padding: 12px 14px;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .input:focus,
+    .select:focus,
+    .textarea:focus {
+      border-color: #6081b8;
+      box-shadow: 0 0 0 4px rgba(31, 75, 153, 0.14);
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .row-3 {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: end;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .checkbox {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #334155;
+      font-size: 13px;
+      white-space: nowrap;
+      user-select: none;
+      margin-bottom: 10px;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      background: linear-gradient(135deg, var(--brand), var(--brand-strong));
+      cursor: pointer;
+      transition: transform 0.18s ease, filter 0.18s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.05);
+    }
+
+    .btn:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .status {
+      margin-top: 14px;
+      font-size: 13px;
+      color: #334155;
+      min-height: 20px;
+    }
+
+    .status.ok {
+      color: var(--ok);
+    }
+
+    .status.error {
+      color: var(--error);
+    }
+
+    .textarea {
+      min-height: 250px;
+      line-height: 1.72;
+      resize: vertical;
+      margin-top: 10px;
+    }
+
+    .section-title {
+      margin: 0 0 10px;
+      font-size: 15px;
+      font-weight: 700;
+      color: #1f2f46;
+    }
+
+    .list {
+      margin: 0;
+      padding-left: 18px;
+      color: #475569;
+      line-height: 1.85;
+      font-size: 14px;
+    }
+
+    .hint {
+      margin: 14px 0 0;
+      font-size: 12px;
+      color: #64748b;
+      line-height: 1.7;
+    }
+
+    .hint a {
+      color: var(--brand-strong);
+      text-underline-offset: 2px;
+    }
+
+    .hint a:hover {
+      color: var(--brand);
+    }
+
+    .copy {
+      margin-top: 10px;
+      width: 100%;
+      background: transparent;
+      border: 1px solid #bac5d6;
+      color: #223756;
+      border-radius: 10px;
+      padding: 10px 12px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .copy:hover {
+      background: rgba(31, 75, 153, 0.06);
+    }
+
+    @media (max-width: 900px) {
+      .top,
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .platforms {
+        justify-content: flex-start;
+      }
+
+      .row,
+      .row-3 {
+        grid-template-columns: 1fr;
+      }
+
+      .headline {
+        max-width: 11ch;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="top">
+      <div>
+        <p class="kicker">Video Script Parser</p>
+        <h1 class="headline">主流视频平台文案解析</h1>
+        <p class="sub">输入视频链接，系统自动提取语音并转写为文本。页面直连现有接口，结果支持直接复制用于二次整理与内容再创作。</p>
+      </div>
+      <div class="platforms" aria-label="支持平台">
+        <span class="pill">YouTube</span>
+        <span class="pill">Bilibili</span>
+        <span class="pill">抖音 / TikTok</span>
+        <span class="pill">小红书</span>
+      </div>
+    </section>
+
+    <section class="grid">
+      <article class="card card-main">
+        <label class="label" for="url">视频链接</label>
+        <input id="url" class="input" type="text" placeholder="粘贴视频链接或分享文本" />
+
+        <div class="row">
+          <div>
+            <label class="label" for="apiKey">API Key</label>
+            <input id="apiKey" class="input" type="password" placeholder="输入你的 API Key" />
+            <p class="hint" style="margin-top:8px;">
+              没有密钥或需要续费？
+              <a href="https://devtool.uk/plugin" target="_blank" rel="noopener noreferrer">前往购买/续费 API Key</a>
+            </p>
+          </div>
+          <div>
+            <label class="label" for="language">转写语言</label>
+            <select id="language" class="select">
+              <option value="">自动识别</option>
+              <option value="zh">中文</option>
+              <option value="en">English</option>
+              <option value="ja">日本語</option>
+              <option value="ko">한국어</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row-3">
+          <label class="checkbox" for="cache">
+            <input id="cache" type="checkbox" checked />
+            优先读取缓存结果
+          </label>
+          <button id="submitBtn" class="btn" type="button">开始解析</button>
+        </div>
+
+        <p id="status" class="status">等待输入链接...</p>
+
+        <label class="label" for="resultText">解析结果</label>
+        <textarea id="resultText" class="textarea" readonly placeholder="解析完成后将在此显示文本"></textarea>
+        <button id="copyBtn" class="copy" type="button">复制结果文本</button>
+      </article>
+
+      <aside class="card card-side">
+        <h2 class="section-title">使用说明</h2>
+        <ol class="list">
+          <li>粘贴视频链接或分享文本。</li>
+          <li>输入 API Key，选择语言。</li>
+          <li>点击开始解析，等待文本生成。</li>
+        </ol>
+
+        <h2 class="section-title" style="margin-top:20px;">其他使用方式</h2>
+        <ul class="list">
+          <li>
+            在小龙虾中使用教程：
+            <a href="https://www.bilibili.com/video/BV1ZUQdBmEFu/" target="_blank" rel="noopener noreferrer">https://www.bilibili.com/video/BV1ZUQdBmEFu/</a>
+          </li>
+          <li>
+            在 coze 中使用教程：
+            <a href="https://www.bilibili.com/video/BV1dG78zqEzh/" target="_blank" rel="noopener noreferrer">https://www.bilibili.com/video/BV1dG78zqEzh/</a>
+          </li>
+        </ul>
+
+        <p class="hint">提示：视频越长，处理时间越长；若出现余额不足或 Key 无效，可先检查积分状态并在 <a href="https://devtool.uk/plugin" target="_blank" rel="noopener noreferrer">https://devtool.uk/plugin</a> 进行续费。</p>
+      </aside>
+    </section>
+  </main>
+
+  <script>
+    const submitBtn = document.getElementById('submitBtn');
+    const copyBtn = document.getElementById('copyBtn');
+    const statusEl = document.getElementById('status');
+    const resultText = document.getElementById('resultText');
+
+    function setStatus(text, type) {
+      statusEl.textContent = text;
+      statusEl.className = 'status' + (type ? ' ' + type : '');
+    }
+
+    async function run() {
+      const url = document.getElementById('url').value.trim();
+      const api_key = document.getElementById('apiKey').value.trim();
+      const language = document.getElementById('language').value;
+      const cache = document.getElementById('cache').checked;
+
+      if (!url) {
+        setStatus('请先输入视频链接。', 'error');
+        return;
+      }
+      if (!api_key) {
+        setStatus('请先输入 API Key。', 'error');
+        return;
+      }
+
+      submitBtn.disabled = true;
+      setStatus('正在解析，请稍候...', '');
+      resultText.value = '';
+
+      try {
+        const response = await fetch('/whisper/speech-to-text', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            url,
+            language,
+            api_key,
+            cache
+          })
+        });
+
+        const data = await response.json();
+
+        if (data && data.code === 0) {
+          const text = data?.data?.text || '';
+          resultText.value = text;
+          setStatus(data.msg || '解析成功。', 'ok');
+          return;
+        }
+
+        setStatus((data && data.msg) ? data.msg : '解析失败，请稍后重试。', 'error');
+      } catch (error) {
+        setStatus('请求失败：' + error.message, 'error');
+      } finally {
+        submitBtn.disabled = false;
+      }
+    }
+
+    async function copyResult() {
+      const text = resultText.value;
+      if (!text) {
+        setStatus('当前没有可复制的内容。', 'error');
+        return;
+      }
+      try {
+        await navigator.clipboard.writeText(text);
+        setStatus('已复制到剪贴板。', 'ok');
+      } catch (error) {
+        setStatus('复制失败，请手动复制。', 'error');
+      }
+    }
+
+    submitBtn.addEventListener('click', run);
+    copyBtn.addEventListener('click', copyResult);
+  </script>
+</body>
+</html>
