@@ -123,9 +123,9 @@ router.get('/video-transcript', async (req, res) => {
     res.render('video-transcript', {
         visitorCount,
         seo: {
-            title: '视频文案提取 - 主流平台一键解析',
-            description: '输入视频链接，快速提取文本字幕。支持主流视频平台，页面直连 whisper/speech-to-text 接口。',
-            keywords: '视频文案提取,字幕提取,语音转文字,Whisper,YouTube,抖音,B站,小红书',
+            title: '视频文案提取 - 一键提取 YouTube / 抖音 / B站 / 小红书视频文字',
+            description: '在线提取视频文案，支持 YouTube、抖音、Bilibili、小红书等主流平台。粘贴链接即可自动转写，结果可直接复制用于内容创作、二次剪辑与文案整理。',
+            keywords: '视频文案提取,视频转文字,字幕提取,语音转文字,YouTube字幕,抖音文案,B站文案,小红书文案,在线转写',
             url: pageUrl
         }
     });
