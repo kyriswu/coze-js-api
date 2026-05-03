@@ -164,21 +164,10 @@
 
     .row-3 {
       display: grid;
-      grid-template-columns: 1fr auto;
+      grid-template-columns: 1fr;
       align-items: end;
       gap: 12px;
       margin-top: 14px;
-    }
-
-    .checkbox {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      color: #334155;
-      font-size: 13px;
-      white-space: nowrap;
-      user-select: none;
-      margin-bottom: 10px;
     }
 
     .btn {
@@ -337,10 +326,6 @@
         </div>
 
         <div class="row-3">
-          <label class="checkbox" for="cache">
-            <input id="cache" type="checkbox" checked />
-            优先读取缓存结果
-          </label>
           <button id="submitBtn" class="btn" type="button">开始解析</button>
         </div>
 
@@ -391,7 +376,6 @@
       const url = document.getElementById('url').value.trim();
       const api_key = document.getElementById('apiKey').value.trim();
       const language = document.getElementById('language').value;
-      const cache = document.getElementById('cache').checked;
 
       if (!url) {
         setStatus('请先输入视频链接。', 'error');
@@ -415,8 +399,7 @@
           body: JSON.stringify({
             url,
             language,
-            api_key,
-            cache
+            api_key
           })
         });
 
