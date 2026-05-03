@@ -111,9 +111,17 @@ router.get('/apikey', async (req, res) => {
     res.render('apikey', { visitorCount });
 });
 
-router.get('/video-transcript', (req, res) => {
+router.get('/video-transcript', async (req, res) => {
     const pageUrl = `${tool.getBaseUrl(req)}${req.originalUrl}`;
+    const counterKey = 'video-transcript:landing:visitors';
+    let visitorCount = Number(await redis.get(counterKey)) || 0;
+    const clientIp = tool.getClientIp(req);
+    const ipHash = crypto.createHash('sha256').update(clientIp).digest('hex').slice(0, 32);
+    const dedupeKey = `video-transcript:landing:uv:${ipHash}`;
+    const shouldCount = await redis.set(dedupeKey, '1', 'EX', 600, 'NX');
+    if (shouldCount === 'OK') { visitorCount = await redis.incr(counterKey); }
     res.render('video-transcript', {
+        visitorCount,
         seo: {
             title: '视频文案提取 - 主流平台一键解析',
             description: '输入视频链接，快速提取文本字幕。支持主流视频平台，页面直连 whisper/speech-to-text 接口。',

@@ -78,6 +78,16 @@
       color: #16243a;
     }
 
+    .visitor-stat {
+      margin: 0 0 10px;
+      font-size: 13px;
+      color: var(--ink-soft);
+    }
+
+    .visitor-stat strong {
+      color: var(--brand);
+    }
+
     .sub {
       margin: 0;
       color: var(--ink-soft);
@@ -289,6 +299,7 @@
       <div>
         <p class="kicker">Video Script Parser</p>
         <h1 class="headline">主流视频平台文案解析</h1>
+        <p class="visitor-stat">累计访问 <strong><%= visitorCount %></strong> 次</p>
         <p class="sub">输入视频链接，系统自动提取语音并转写为文本。页面直连现有接口，结果支持直接复制用于二次整理与内容再创作。</p>
       </div>
       <div class="platforms" aria-label="支持平台">
