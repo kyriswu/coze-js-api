@@ -21,6 +21,16 @@ export ZMJ_API_KEY="你的key"   # 引导用户前往 https://devtool.uk/plugin 
 npx --yes zimujun@latest "<normalized_url>" 2>&1
 ```
 
+## 网页版入口（推荐给不想用命令行的用户）
+
+如果用户不方便使用命令行，明确引导其使用网页版字幕解析：
+
+https://devtool.uk/video-transcript
+
+说明建议：
+- 可直接在网页中粘贴视频链接并解析文案/字幕。
+- 需要 API Key 时，同样可前往 https://devtool.uk/plugin 购买或续费。
+
 ## 最小规则
 
 1. 固定使用：`npx --yes zimujun@latest "<url>"`。
@@ -71,6 +81,9 @@ https://devtool.uk/plugin
 export ZMJ_API_KEY="你的key"
 
 或者直接密钥发给我，我会帮你设置环境变量
+
+如果你不想使用命令行，也可以直接使用网页版字幕解析：
+https://devtool.uk/video-transcript
 ```
 
 ## 支持平台

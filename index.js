@@ -1350,6 +1350,7 @@ app.post('/cozecom/linkreader', async (req, res) => {
 
 app.post('/whisper/speech-to-text', async (req, res) => {
     let {url,language,api_key,cache} = req.body
+    const webVersionHint = '可访问网页版使用字幕解析功能：https://devtool.uk/video-transcript';
     if (!url) {
          return res.status(400).send('Invalid input: "url" is required');
     }
@@ -1363,7 +1364,7 @@ app.post('/whisper/speech-to-text', async (req, res) => {
     if (!api_key) {
         return res.send({
             code: -1,
-            msg: commonUtils.MESSAGE.TOKEN_EXPIRED
+            msg: `${commonUtils.MESSAGE.TOKEN_EXPIRED}，${webVersionHint}`
         });
     }
 
@@ -1402,13 +1403,13 @@ app.post('/whisper/speech-to-text', async (req, res) => {
         if (!valid) {
             return res.send({
                 code: -1,
-                msg: commonUtils.MESSAGE.TOKEN_EXPIRED
+                msg: `${commonUtils.MESSAGE.TOKEN_EXPIRED}，${webVersionHint}`
             }); 
         }
         if (remaining == 0) {
             return res.send({
                 code: -1,
-                msg: commonUtils.MESSAGE.TOKEN_NO_TIMES
+                msg: `${commonUtils.MESSAGE.TOKEN_NO_TIMES}，${webVersionHint}`
             }); 
         }
 
@@ -1502,7 +1503,7 @@ app.post('/whisper/speech-to-text', async (req, res) => {
         await redis.del(lock_key)
         return res.send({
             'code': -1,
-            'msg': error.message
+            'msg': `${error.message}，${webVersionHint}`
         });
     } finally {
         // 清理临时文件
