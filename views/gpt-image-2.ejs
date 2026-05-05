@@ -460,6 +460,8 @@
       text-align: center; font-size: 12px; color: var(--fog);
       padding-top: 8px; letter-spacing: 0.5px;
     }
+    .footer-visitors { color: var(--mist); }
+    .footer-visitors strong { color: var(--teal); }
 
     /* ── Modal ── */
     .modal {
@@ -850,7 +852,10 @@
       <div id="xGrid" class="x-grid"></div>
     </section>
 
-    <p class="footer">GPT-Image-2 Prompt Gallery &nbsp;·&nbsp; <%= new Date().toISOString().slice(0,10) %></p>
+    <p class="footer">
+      GPT-Image-2 Prompt Gallery &nbsp;·&nbsp; <%= new Date().toISOString().slice(0,10) %>
+      &nbsp;·&nbsp; <span class="footer-visitors">👁 已有 <strong><%= pageVisitorCount.toLocaleString() %></strong> 人访问</span>
+    </p>
   </div>
 
   <div id="genModal" class="gen-modal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="genTitle">
