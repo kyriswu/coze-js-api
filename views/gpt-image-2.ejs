@@ -620,6 +620,19 @@
     }
     .gen-apikey-input::placeholder { color: #7b8dab; }
 
+    .gen-api-note {
+      margin-top: 6px;
+      font-size: 12px;
+      line-height: 1.6;
+      color: #9fb1cd;
+    }
+
+    .gen-api-note a {
+      color: #ffcc66;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
     /* reference image upload zone */
     .gen-upload-zone {
       border: 1.5px dashed rgba(139,155,184,0.28); border-radius: var(--r-md);
@@ -873,6 +886,7 @@
         <div class="gen-field">
           <label class="gen-lbl" for="genApiKey">API Key（可选）— 填写后使用密钥额度生成</label>
           <input id="genApiKey" class="gen-apikey-input" type="text" placeholder="sk-…（不填也可直接生成）" autocomplete="off" spellcheck="false" />
+          <p class="gen-api-note">没有密钥仅可试用一次。购买密钥：<a href="https://devtool.uk/plugin" target="_blank" rel="noopener noreferrer">https://devtool.uk/plugin</a></p>
         </div>
         <div class="gen-actions">
           <button id="genSubmitBtn" class="gen-submit" type="button">✦ 立即生成</button>
