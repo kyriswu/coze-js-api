@@ -120,3 +120,4 @@ package-lock.json
 images/*
 downloads
 zimujun
+.vscode
