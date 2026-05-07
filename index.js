@@ -265,6 +265,8 @@ app.post('/gpt-image-2/generate', async (req, res) => {
             rawResult = await aitoken.gpt_image_2(prompt.trim());
         }
 
+        console.log('原始接口返回结果:', rawResult);
+
         const item = rawResult?.data?.[0] || {};
         const remainingPoints = await consumeApiCredits({
             apiKey: api_key,
@@ -273,12 +275,12 @@ app.post('/gpt-image-2/generate', async (req, res) => {
         });
 
         return res.json({
-            success: true,
-            imageUrl: item.url || null,
-            b64Image: item.b64_json || null,
-            remainingPoints
+            code: 0,
+            msg: "Success",
+            data: item.url || null
         });
     } catch (error) {
+        console.error('Error in /gpt-image-2/generate:', error);
         const apiMsg = error?.response?.data?.error?.message || error?.response?.data?.message || error.message;
         return res.status(500).json({ success: false, error: `生成失败: ${apiMsg}` });
     } finally {

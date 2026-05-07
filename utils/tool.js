@@ -728,6 +728,8 @@ const tool = {
             throw new Error(`第 ${index + 1} 张参考图不是有效图片资源`);
         }
 
+        console.log(`正在下载第 ${index + 1} 张图片，URL: ${imageUrl}, Content-Type: ${contentType}`);
+
         const ext = this.extFromContentType(contentType);
         const downloadDir = path.join(__dirname, '..', 'downloads');
         if (!fs.existsSync(downloadDir)) {

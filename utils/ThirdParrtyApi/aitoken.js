@@ -33,28 +33,65 @@ const aitoken = {
         try {
             if (!prompt || !prompt.trim()) throw new Error('prompt 不能为空');
 
+            console.log('Received edit request with prompt:', prompt);
             const form = new FormData();
 
             // 兼容无图、单图与多参考图：多图时按 OpenAI 规范使用 image[] 字段。
             const images = (Array.isArray(image) ? image : (image ? [image] : [])).filter(Boolean);
-            for (const img of images) {
-                form.append(images.length > 1 ? 'image[]' : 'image', img);
+            for (const [index, img] of images.entries()) {
+                let blob;
+                let fileName = `reference-${index + 1}.png`;
+
+                // 支持 fs.ReadStream / 文件路径 / Buffer / Blob 输入
+                if (img instanceof Blob) {
+                    blob = img;
+                } else if (Buffer.isBuffer(img)) {
+                    blob = new Blob([img], { type: 'image/png' });
+                } else if (typeof img === 'string') {
+                    const data = await fs.promises.readFile(img);
+                    fileName = path.basename(img) || fileName;
+                    blob = new Blob([data], { type: 'image/png' });
+                } else if (img?.path && typeof img.path === 'string') {
+                    const data = await fs.promises.readFile(img.path);
+                    fileName = path.basename(img.path) || fileName;
+                    blob = new Blob([data], { type: 'image/png' });
+                } else {
+                    throw new Error('不支持的图片输入类型');
+                }
+
+                form.append(images.length > 1 ? 'image[]' : 'image', blob, fileName);
             }
 
             if (mask) {
-                form.append('mask', mask);
+                if (mask instanceof Blob) {
+                    form.append('mask', mask, 'mask.png');
+                } else if (typeof mask === 'string') {
+                    const data = await fs.promises.readFile(mask);
+                    form.append('mask', new Blob([data], { type: 'image/png' }), path.basename(mask) || 'mask.png');
+                } else if (mask?.path && typeof mask.path === 'string') {
+                    const data = await fs.promises.readFile(mask.path);
+                    form.append('mask', new Blob([data], { type: 'image/png' }), path.basename(mask.path) || 'mask.png');
+                }
             }
             form.append("model", "gpt-image-2-convert");
             form.append("prompt", prompt.trim());
-
-            const response = await axios.post(`${OPENAI_HUB_BASE}/v1/images/edits`, form, {
+            console.log('Submitting edit request with prompt:', prompt);
+            const response = await fetch(`${OPENAI_HUB_BASE}/v1/images/edits`, {
+                method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${openaihub_api_key}`,
-                    ...form.getHeaders()
-                }
+                    Authorization: `Bearer ${openaihub_api_key}`
+                },
+                body: form
             });
-            return response.data;
+            const result = await response.json();
+            if (!response.ok) {
+                const apiMsg = result?.error?.message || result?.message || `HTTP ${response.status}`;
+                throw new Error(`编辑图像失败(${response.status}): ${apiMsg}`);
+            }
+
+            return result;
         } catch (error) {
+            console.error('Error in gpt_image_2_edit:', error);
             const apiMsg = error?.response?.data?.error?.message || error?.response?.data?.message;
             throw new Error(`编辑图像失败: ${apiMsg || error.message}`);
         }
