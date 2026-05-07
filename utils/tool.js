@@ -669,6 +669,74 @@ const tool = {
         const protocol = req.headers['x-forwarded-proto'] || req.protocol;
         return `${protocol}://${host}`;
     },
+    getUsage: async function (key) {
+        let value = await redis.get(key);
+        if (value === null) {
+            const now = new Date();
+            const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const secondsSinceMidnight = Math.floor((now - midnight) / 1000);
+            await redis.set(key, 0, 'EX', secondsSinceMidnight);
+            value = 0;
+            console.log(`键 ${key} 不存在，已创建并初始化为 0`);
+        } else {
+            console.log(`键 ${key} 已存在，当前值为 ${value}`);
+        }
+        return value;
+    },
+    sanitizeUsageMetadata: function ({ url, selector, xpath }) {
+        const regex = /[^a-zA-Z0-9_=/.:-]/g;
+        return {
+            url: url?.replace(regex, ''),
+            selector: selector?.replace(regex, ''),
+            xpath: xpath?.replace(regex, '')
+        };
+    },
+    canUseSitemapFreeOnce: async function (key) {
+        const value = await redis.get(key);
+        if (value === null) {
+            const now = new Date();
+            const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const secondsSinceMidnight = Math.floor((now - midnight) / 1000);
+            await redis.set(key, 0, 'EX', secondsSinceMidnight);
+            return true;
+        }
+        return false;
+    },
+    canUseFreeVideoDownload: async function (key) {
+        const value = await redis.get(key);
+        const left = Number(value);
+        return Number.isFinite(left) ? left > 0 : true;
+    },
+    canUseRedisPoints: async function (key, cost = 3) {
+        const value = await redis.get(key);
+        if (value === null) return false;
+        const points = Number(value);
+        return Number.isFinite(points) && points >= cost;
+    },
+    extFromContentType: function (contentType) {
+        const type = (contentType || 'image/png').split(';')[0].trim().toLowerCase();
+        if (type === 'image/jpeg') return 'jpg';
+        if (type === 'image/webp') return 'webp';
+        if (type === 'image/gif') return 'gif';
+        if (type === 'image/bmp') return 'bmp';
+        return 'png';
+    },
+    downloadImageUrlToTempFile: async function (imageUrl, index = 0) {
+        const response = await axios.get(imageUrl, { responseType: 'arraybuffer', timeout: 20000 });
+        const contentType = response.headers?.['content-type'] || 'image/png';
+        if (!String(contentType).startsWith('image/')) {
+            throw new Error(`第 ${index + 1} 张参考图不是有效图片资源`);
+        }
+
+        const ext = this.extFromContentType(contentType);
+        const downloadDir = path.join(__dirname, '..', 'downloads');
+        if (!fs.existsSync(downloadDir)) {
+            fs.mkdirSync(downloadDir, { recursive: true });
+        }
+        const tempFile = path.join(downloadDir, `gpt-image-2-${Date.now()}-${process.pid}-${index}.${ext}`);
+        await fs.promises.writeFile(tempFile, Buffer.from(response.data));
+        return tempFile;
+    },
     download_image: async function (url) {
         try {
             // Create downloads directory if it doesn't exist

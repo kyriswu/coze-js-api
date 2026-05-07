@@ -54,26 +54,11 @@ const agent = new HttpsProxyAgent(proxyUrl);
 import redis from './utils/redisClient.js';
 import search1api from './utils/search1api.js';
 import zyte from './utils/zyte.js';
+import aitoken from './utils/ThirdParrtyApi/aitoken.js';
 import { th_bilibili, th_youtube, th_xiaohongshu,th_wechat_media,th_wechat_channels,th_douyin,th_tiktok,th_douyin_billboard } from './utils/tikhub.io.js';
 import { ve_seedream_5_0_lite } from './utils/volcengine.io.js';
 import {qweather_tool}  from './utils/qwether.js';
 import { tv_search } from './utils/tavily.js';
-// 从 Redis 中获取用户使用量
-async function getUsage(key) {
-    let value = await redis.get(key);
-    if (value === null) {
-        // 不存在，创建 key 并设置初始值
-        const now = new Date();
-        const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        const secondsSinceMidnight = Math.floor((now - midnight) / 1000);
-        await redis.set(key, 0, 'EX', secondsSinceMidnight);
-        value = 0;
-        console.log(`键 ${key} 不存在，已创建并初始化为 0`);
-    } else {
-        console.log(`键 ${key} 已存在，当前值为 ${value}`);
-    }
-    return value;
-}
 
 // 从维基百科搜索条目
 app.post('/zh_wikipedia/search_item', async (req, res) => {
@@ -173,7 +158,7 @@ async function canSearchGoogle(key) {
 // 判断是否可使用 HTML解析 功能
 async function canUseHtmlParse(key) {
     if(environment === "online"){
-        const usage = await getUsage(key);
+        const usage = await tool.getUsage(key);
         if (usage >= 3) {
             return false
         }
@@ -189,6 +174,146 @@ async function dailyUse(key) {
         return false;
     }
 }
+
+async function verifyApiAccess({ apiKey, apiId, freeKey, freeCheck, freeDeniedResponse }) {
+    if (apiKey) {
+        const { valid, remaining } = await unkey.verifyKey(apiId, apiKey, 0);
+        if (!valid) {
+            return {
+                ok: false,
+                response: {
+                    code: -1,
+                    msg: 'API Key 无效或已过期，请检查后重试！'
+                }
+            };
+        }
+        if (remaining === 0) {
+            return {
+                ok: false,
+                response: {
+                    code: -1,
+                    msg: 'API Key 积分已用完，请联系作者续费！'
+                }
+            };
+        }
+        return { ok: true, paid: true };
+    }
+
+    const canUse = await freeCheck(freeKey);
+    if (!canUse) {
+        return { ok: false, response: freeDeniedResponse };
+    }
+
+    return { ok: true, paid: false };
+}
+
+async function consumeApiCredits({ apiKey, apiId, cost = 1, metadata }) {
+    if (!apiKey) return null;
+    const { remaining } = await unkey.verifyKey(apiId, apiKey, cost, metadata);
+    return remaining;
+}
+
+async function verifyAndConsumeRedisPoints({ redisKey, cost = 1, deniedMsg }) {
+    const access = await verifyApiAccess({
+        apiKey: null,
+        apiId: null,
+        freeKey: redisKey,
+        freeCheck: (key) => tool.canUseRedisPoints(key, cost),
+        freeDeniedResponse: {
+            code: -1,
+            msg: deniedMsg || `资源点不足，本接口每次调用扣费 ${cost} 点。`
+        }
+    });
+
+    if (!access.ok) {
+        return { ok: false, response: access.response };
+    }
+
+    // 校验通过后扣费；并发场景下如扣成负数，立即回滚。
+    const remainingPoints = await redis.decrby(redisKey, cost);
+    if (remainingPoints < 0) {
+        await redis.incrby(redisKey, cost);
+        return {
+            ok: false,
+            response: {
+                code: -1,
+                msg: deniedMsg || `资源点不足，本接口每次调用扣费 ${cost} 点。`
+            }
+        };
+    }
+
+    return {
+        ok: true,
+        remainingPoints,
+        rollback: async () => {
+            await redis.incrby(redisKey, cost);
+        }
+    };
+}
+
+app.post('/gpt-image-2/generate', async (req, res) => {
+    const { prompt, imageUrls } = req.body || {};
+    const userIdentity = (req.headers['user-identity'] || req.ip || '').toString().trim();
+    const cost = 3;
+
+    if (!prompt || !prompt.trim()) {
+        return res.status(400).json({ success: false, error: 'prompt 不能为空' });
+    }
+    if (!Array.isArray(imageUrls)) {
+        return res.status(400).json({ success: false, error: 'imageUrls 必须是数组（可传空数组）' });
+    }
+    if (!userIdentity) {
+        return res.status(400).json({ success: false, error: '缺少 user-identity，请在请求头中传入 user-identity' });
+    }
+
+    for (const [index, imageUrl] of imageUrls.entries()) {
+        try {
+            new URL(imageUrl);
+        } catch {
+            return res.status(400).json({ success: false, error: `第 ${index + 1} 个 imageUrls 不是合法 URL` });
+        }
+    }
+
+    const redisKey = `gpt-image-2:points:${userIdentity}`;
+    const quota = await verifyAndConsumeRedisPoints({
+        redisKey,
+        cost,
+        deniedMsg: '未开通资源点或余额不足，本接口不允许免费试用，且每次调用扣费 3 点。'
+    });
+    if (!quota.ok) {
+        return res.status(403).json({ success: false, error: quota.response?.msg || '权限不足' });
+    }
+
+    const tempFiles = [];
+    try {
+        let rawResult;
+        if (imageUrls.length > 0) {
+            const downloaded = await Promise.all(
+                imageUrls.map((imageUrl, index) => tool.downloadImageUrlToTempFile(imageUrl, index))
+            );
+            tempFiles.push(...downloaded);
+
+            const imageStreams = downloaded.map((file) => fs.createReadStream(file));
+            rawResult = await aitoken.gpt_image_2_edit(imageStreams, null, prompt.trim());
+        } else {
+            rawResult = await aitoken.gpt_image_2(prompt.trim());
+        }
+
+        const item = rawResult?.data?.[0] || {};
+        return res.json({
+            success: true,
+            imageUrl: item.url || null,
+            b64Image: item.b64_json || null,
+            remainingPoints: quota.remainingPoints
+        });
+    } catch (error) {
+        await quota.rollback();
+        const apiMsg = error?.response?.data?.error?.message || error?.response?.data?.message || error.message;
+        return res.status(500).json({ success: false, error: `生成失败: ${apiMsg}` });
+    } finally {
+        await Promise.all(tempFiles.map((file) => fs.promises.unlink(file).catch(() => null)));
+    }
+});
 
 app.post('/jina_reader', async (req, res) => {
 
@@ -357,30 +482,18 @@ app.post('/parse_html', async (req, res) => {
 
     //免费版的key
     const free_key = "html_parser_" + req.headers['user-identity']
-    if(api_key){
-        //付费版
-        const { keyId, valid, remaining, code } = await unkey.verifyKey(api_id, api_key, 0);
-        if (!valid) {
-            return res.send({
-                code: -1,
-                msg: 'API Key 无效或已过期，请检查后重试！'
-            }); 
+    const access = await verifyApiAccess({
+        apiKey: api_key,
+        apiId: api_id,
+        freeKey: free_key,
+        freeCheck: canUseHtmlParse,
+        freeDeniedResponse: {
+            code: -1,
+            msg: commonUtils.MESSAGE.FREE_KEY_EXPIRED_3
         }
-        if (remaining == 0) {
-            return res.send({
-                code: -1,
-                msg: 'API Key 积分已用完，请联系作者续费！'
-            }); 
-        }
-    }else{
-        //免费版
-        const canParse = await canUseHtmlParse(free_key);
-        if (!canParse) {
-            return res.send({
-                code: -1,
-                msg: commonUtils.MESSAGE.FREE_KEY_EXPIRED_3
-            }); 
-        }
+    });
+    if (!access.ok) {
+        return res.send(access.response);
     }
 
     try {
@@ -394,13 +507,16 @@ app.post('/parse_html', async (req, res) => {
 
         let msg = "";
         if (api_key) {
-            const regex = /[^a-zA-Z0-9_=/.:-]/g;
-            //付费版
-            const { remaining } = await unkey.verifyKey(api_id, api_key, 1, {url:url?.replace(regex, ''), selector:selector?.replace(regex, ''), xpath:xpath?.replace(regex, '')});
+            const remaining = await consumeApiCredits({
+                apiKey: api_key,
+                apiId: api_id,
+                cost: 1,
+                metadata: tool.sanitizeUsageMetadata({ url, selector, xpath })
+            });
             msg = `API Key 剩余积分：${remaining}`;
         }else{
             await redis.incr(free_key);//每次调用增加一次
-            msg = `今日免费剩余积分：${3 - await getUsage(free_key)}`;
+            msg = `今日免费剩余积分：${3 - await tool.getUsage(free_key)}`;
         }
 
         return res.send({
@@ -434,56 +550,6 @@ app.post('/wyy/hot_comment', async (req, res) => {
     }
     
 })
-
-app.post('/openai-hub/chat/completions', async (req, res) => {
-    const { model, system_prompt, user_prompt, temperature, api_key} = req.body;
-
-    if (!model) {
-        return res.status(400).send('Invalid input: "model" is required');
-    }
-
-    if (!system_prompt && !user_prompt) {
-        return res.status(400).send('Invalid input: "system_prompt" or "user_prompt" is required');
-    }
-
-    if (!api_key) {
-        return res.status(400).send('Invalid input: "api_key" is required');
-    }
-
-    const messages = [{
-        role: 'system',
-        content: system_prompt || 'You are a helpful assistant.'
-    }, {
-        role: 'user',
-        content: user_prompt || 'Hello, how can you help me?'   
-    }];
-
-    try {
-        const response = await axios.post(
-            'https://api.openai-hub.com/v1/chat/completions',
-            {
-                model,
-                messages,
-                temperature: temperature || 0.8 // 默认值为 0.8
-            },
-            {
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${api_key}` // 替换为您的 API 密钥
-                }
-            }
-        );
-
-        res.send({
-            code: 0,
-            msg: 'Success',
-            data: response.data
-        });
-    } catch (error) {
-        console.error(`Error calling OpenAI API: ${error.message}`);
-        res.status(500).send(`Error calling OpenAI API: ${error.message}`);
-    }
-});
 
 
 app.post('/google/search/web', async (req, res) => {
@@ -541,34 +607,7 @@ app.post('/google/search/web', async (req, res) => {
                 }); 
             }
         }
-    // search1api.search(q).then(async (data) => {
-    //     let msg = "";
-    //     if (api_key) {
-    //         //付费版
-    //         const { remaining } = await unkey.verifyKey(api_id, api_key, 1);
-    //         msg = `API Key 剩余积分：${remaining}`;
-    //     }else{
-    //         msg = `今日免费使用次数用完，付费购买API KEY可解锁更多次数，请联系作者！【B站:小吴爱折腾】`;
-    //     }
-    //     return res.send({
-    //         code: 0,
-    //         msg: msg,
-    //         data: data.results
-    //     });
-    // })
-        // const html = await browserless.google_search_new(q)
-        // let dom = new JSDOM(html);
-        // const { document, window } = dom.window;
-        // const selector = "div.gsc-result"
-        // const result_list = Array.from(document.querySelectorAll(selector)).map(element => {
-        //     const a = element.querySelector('a.gs-title');
-        //     const div = element.querySelector('div.gs-snippet');
-        //     return {
-        //         snippet: div ? div.textContent.trim() : null,
-        //         link: a ? a.href : null,
-        //         title: a ? a.textContent.trim() : null
-        //     };
-        // }).filter(item => item.link !== null); // 过滤掉不符合要求的项
+        
         const searchData = await search1api.search(q);
         const result_list = Array.isArray(searchData?.results) ? searchData.results : [];
 
@@ -622,31 +661,19 @@ async function zyteExtract(req, res) {
     const unkey_api_id = "api_413Kmmitqy3qaDo4";
     //免费版的redis_key，用于限制用户的使用次数
     const free_key = "html_parser_" + req.headers['user-identity']
-    if(api_key){
-        //付费版
-        const { keyId, valid, remaining, code } = await unkey.verifyKey(unkey_api_id, api_key, 0);
-        if (!valid) {
-            return res.send({
-                code: -1,
-                msg: 'API Key 无效或已过期，请检查后重试！'
-            }); 
+    const access = await verifyApiAccess({
+        apiKey: api_key,
+        apiId: unkey_api_id,
+        freeKey: free_key,
+        freeCheck: canUseHtmlParse,
+        freeDeniedResponse: {
+            code: -1,
+            msg: commonUtils.MESSAGE.FREE_KEY_EXPIRED_3,
+            data: [{ htmlContent: commonUtils.MESSAGE.FREE_KEY_EXPIRED_3 }]
         }
-        if (remaining == 0) {
-            return res.send({
-                code: -1,
-                msg: 'API Key 积分已用完，请联系作者续费！'
-            }); 
-        }
-    }else{
-        //免费版
-        const canParse = await canUseHtmlParse(free_key);
-        if (!canParse) {
-            return res.send({
-                code: -1,
-                msg: commonUtils.MESSAGE.FREE_KEY_EXPIRED_3,
-                data: [{ htmlContent: commonUtils.MESSAGE.FREE_KEY_EXPIRED_3 }]
-            }); 
-        }
+    });
+    if (!access.ok) {
+        return res.send(access.response);
     }
 
     try {
@@ -698,12 +725,16 @@ async function zyteExtract(req, res) {
         }
 
         if (api_key) {
-            //付费版
-            const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
+            const remaining = await consumeApiCredits({
+                apiKey: api_key,
+                apiId: unkey_api_id,
+                cost: 1,
+                metadata: tool.sanitizeUsageMetadata({ url, selector, xpath })
+            });
             msg += ` API Key 剩余积分：${remaining}`;
         }else{
             await redis.incr(free_key);//每次调用增加一次
-            msg = `今日免费剩余积分：${3 - await getUsage(free_key)}`;
+            msg = `今日免费剩余积分：${3 - await tool.getUsage(free_key)}`;
         }
         
         return res.send({
@@ -734,22 +765,23 @@ app.post('/download_video', async (req, res) => {
         var left_time = 0
 
         const unkey_api_id = "api_413Kmmitqy3qaDo4";
-        if (api_key) {
-            const { keyId, valid, remaining, code } = await unkey.verifyKey(unkey_api_id, api_key, 0);
-            if (!valid) {
-                return res.send({
-                    msg: 'API Key 无效或已过期，请检查后重试！'
-                }); 
+        const access = await verifyApiAccess({
+            apiKey: api_key,
+            apiId: unkey_api_id,
+            freeKey: free_key,
+            freeCheck: tool.canUseFreeVideoDownload,
+            freeDeniedResponse: {
+                code: -1,
+                msg: commonUtils.MESSAGE.FREE_KEY_EXPIRED_1
             }
-            if (remaining == 0) {
-                return res.send({
-                    msg: 'API Key 积分已用完，请联系作者续费！'
-                }); 
-            }
-        }else{
+        });
+        if (!access.ok) {
+            return res.send(access.response);
+        }
+
+        if (!api_key) {
             left_time = await redis.get(free_key)
             if (!left_time || isNaN(left_time)) left_time = 1
-            if (left_time <= 0) throw new QuotaExceededError(commonUtils.MESSAGE.FREE_KEY_EXPIRED_1)
         }
 
         //查询直链
@@ -771,8 +803,12 @@ app.post('/download_video', async (req, res) => {
         
         var msg = ""
         if (api_key) {
-            //付费版
-            const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
+            const remaining = await consumeApiCredits({
+                apiKey: api_key,
+                apiId: unkey_api_id,
+                cost: 1,
+                metadata: { action: 'download_video' }
+            });
             msg = `解析成功，API Key 剩余积分：${remaining}`;
         }else{
             await redis.set(free_key, Number(left_time)-1, 'EX', tool.getSecondsToMidnight()); // 每次调用减少一次
@@ -801,36 +837,30 @@ app.post('/get_sitemap', async (req, res) => {
         return res.status(400).send('Invalid input: "url" is required');
     }
 
-    //==验证==
     const redis_key = req.headers['user-identity'] ? 'get_sitemap_'+req.headers['user-identity'] : 'get_sitemap';
-    const value = await redis.get(redis_key);
-    if (value === null) {
-        const now = new Date();
-        const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        const secondsSinceMidnight = Math.floor((now - midnight) / 1000);
-        await redis.set(redis_key, 0, 'EX', secondsSinceMidnight);
-    }else{
-        if(!api_key){
-            return res.send({msg: commonUtils.MESSAGE.FREE_KEY_EXPIRED_1})
-        }else{
-            const { keyId, valid, remaining, code } = await unkey.verifyKey(unkey_api_id, api_key, 0);
-            if (!valid) {
-                return res.send({
-                    msg: commonUtils.MESSAGE.TOKEN_EXPIRED
-                }); 
-            }
-            if (remaining == 0) {
-                return res.send({
-                    msg: commonUtils.MESSAGE.TOKEN_NO_TIMES
-                }); 
-            }
+    const access = await verifyApiAccess({
+        apiKey: api_key,
+        apiId: unkey_api_id,
+        freeKey: redis_key,
+        freeCheck: tool.canUseSitemapFreeOnce,
+        freeDeniedResponse: {
+            code: -1,
+            msg: commonUtils.MESSAGE.FREE_KEY_EXPIRED_1
         }
+    });
+    if (!access.ok) {
+        return res.send({ msg: access.response?.msg || commonUtils.MESSAGE.FREE_KEY_EXPIRED_1 });
     }
     
     const sitemap = await search1api.sitemap(url);
     var msg = null
     if (api_key) {
-        const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
+        const remaining = await consumeApiCredits({
+            apiKey: api_key,
+            apiId: unkey_api_id,
+            cost: 1,
+            metadata: { action: 'get_sitemap' }
+        });
         msg = `API Key 剩余积分：${remaining}`;
     }
     return res.send({
@@ -1194,7 +1224,6 @@ import netdiskapi from './utils/netdiskapi.js';
 import  tool from './utils/tool.js';
 import * as aimlapi from './utils/ThirdParrtyApi/aimlapi.js';
 import * as lemonfoxai from './utils/ThirdParrtyApi/lemonfoxai.js';
-import { QuotaExceededError } from './utils/CustomError.js';
 import coze from './utils/ThirdParrtyApi/coze.js';
 import cozecom from './utils/ThirdParrtyApi/cozecom.js';
 import browserless, { getQingGuoProxy, Webshare_PROXY_PASS, Webshare_PROXY_USER } from './utils/ThirdParrtyApi/browserless.js';
@@ -1585,18 +1614,20 @@ app.post('/transcribe-douyin', async (req, res) => {
         });
     }
 
-    const { valid, remaining } = await unkey.verifyKey(unkey_api_id, api_key, 0);
-    if (!valid) {
-        return res.send({
+    const access = await verifyApiAccess({
+        apiKey: api_key,
+        apiId: unkey_api_id,
+        freeKey: null,
+        freeCheck: async () => false,
+        freeDeniedResponse: {
             code: -1,
             msg: commonUtils.MESSAGE.TOKEN_EXPIRED,
             data: null
-        });
-    }
-    if (remaining === 0) {
+        }
+    });
+    if (!access.ok) {
         return res.send({
-            code: -1,
-            msg: commonUtils.MESSAGE.TOKEN_NO_TIMES,
+            ...access.response,
             data: null
         });
     }
@@ -1643,11 +1674,16 @@ app.post('/transcribe-douyin', async (req, res) => {
 
         // 5. 语音转字幕
         const data = await CloudFlareApi.run_whisper(audioPath, language);
-        const keyResult = await unkey.verifyKey(unkey_api_id, api_key, 1);
+        const remaining = await consumeApiCredits({
+            apiKey: api_key,
+            apiId: unkey_api_id,
+            cost: 1,
+            metadata: { action: 'transcribe_douyin' }
+        });
 
         return res.send({
             code: 0,
-            msg: `success, API Key 剩余积分：${keyResult.remaining}`,
+            msg: `success, API Key 剩余积分：${remaining}`,
             data: data
         });
     } catch (error) {
@@ -1699,30 +1735,18 @@ app.post('/explorer', async (req, res) => {
 
     //免费版的key
     const free_key = "html_parser_" + req.headers['user-identity']
-    if(api_key){
-        //付费版
-        const { keyId, valid, remaining, code } = await unkey.verifyKey(api_id, api_key, 0);
-        if (!valid) {
-            return res.send({
-                code: -1,
-                msg: 'API Key 无效或已过期，请检查后重试！'
-            }); 
+    const access = await verifyApiAccess({
+        apiKey: api_key,
+        apiId: api_id,
+        freeKey: free_key,
+        freeCheck: canUseHtmlParse,
+        freeDeniedResponse: {
+            code: -1,
+            msg: commonUtils.MESSAGE.FREE_KEY_EXPIRED_3
         }
-        if (remaining == 0) {
-            return res.send({
-                code: -1,
-                msg: 'API Key 积分已用完，请联系作者续费！'
-            }); 
-        }
-    }else{
-        // 免费版
-        const canParse = await canUseHtmlParse(free_key);
-        if (!canParse) {
-            return res.send({
-                code: -1,
-                msg: commonUtils.MESSAGE.FREE_KEY_EXPIRED_3
-            }); 
-        }
+    });
+    if (!access.ok) {
+        return res.send(access.response);
     }
 
     try {
@@ -1735,13 +1759,16 @@ app.post('/explorer', async (req, res) => {
 
         let msg = "";
         if (api_key) {
-            const regex = /[^a-zA-Z0-9_=/.:-]/g;
-            //付费版
-            const { remaining } = await unkey.verifyKey(api_id, api_key, 1, { url: url?.replace(regex, ''), selector: selector?.replace(regex, ''), xpath: xpath?.replace(regex, '')});
+            const remaining = await consumeApiCredits({
+                apiKey: api_key,
+                apiId: api_id,
+                cost: 1,
+                metadata: tool.sanitizeUsageMetadata({ url, selector, xpath })
+            });
             msg = `API Key 剩余积分：${remaining}`;
         }else{
             await redis.incr(free_key);//每次调用增加一次
-            msg = `今日免费剩余积分：${3 - await getUsage(free_key)}`;
+            msg = `今日免费剩余积分：${3 - await tool.getUsage(free_key)}`;
         }
 
         return res.send({
@@ -2069,34 +2096,22 @@ app.post("/zlcx", async (req, res) => {
     const api_id = "api_413Kmmitqy3qaDo4";
     //免费版的key
     const free_key = "zlcx_" + req.headers['user-identity']
-    if(api_key){
-        //付费版
-        const { keyId, valid, remaining, code } = await unkey.verifyKey(api_id, api_key, 0);
-        if (!valid) {
-            return res.send({
-                code: -1,
-                msg: 'API Key 无效或已过期，请检查后重试！'
-            }); 
+    const access = await verifyApiAccess({
+        apiKey: api_key,
+        apiId: api_id,
+        freeKey: free_key,
+        freeCheck: dailyUse,
+        freeDeniedResponse: {
+            code: -1,
+            msg: commonUtils.MESSAGE.FREE_API_USE_LIMIT,
+            data: [{
+                "title": "API_KEY可以通用于本人开发的所有插件",
+                "link": commonUtils.MESSAGE.HELP_LINK
+            }]
         }
-        if (remaining == 0) {
-            return res.send({
-                code: -1,
-                msg: 'API Key 积分已用完，请联系作者续费！'
-            }); 
-        }
-    }else{
-        //免费版
-        const canParse = await dailyUse(free_key);
-        if (!canParse) {
-            return res.send({
-                code: -1,
-                msg: commonUtils.MESSAGE.FREE_API_USE_LIMIT,
-                data: [{
-                    "title": "API_KEY可以通用于本人开发的所有插件",
-                    "link": commonUtils.MESSAGE.HELP_LINK
-                }]
-            }); 
-        }
+    });
+    if (!access.ok) {
+        return res.send(access.response);
     }
 
     try {
@@ -2320,34 +2335,22 @@ app.post("/gzh_search", async (req, res) => {
     const api_id = "api_413Kmmitqy3qaDo4";
     //免费版的key
     const free_key = "gzh_search_" + req.headers['user-identity']
-    if(api_key){
-        //付费版
-        const { keyId, valid, remaining, code } = await unkey.verifyKey(api_id, api_key, 0);
-        if (!valid) {
-            return res.send({
-                code: -1,
-                msg: 'API Key 无效或已过期，请检查后重试！'
-            }); 
+    const access = await verifyApiAccess({
+        apiKey: api_key,
+        apiId: api_id,
+        freeKey: free_key,
+        freeCheck: dailyUse,
+        freeDeniedResponse: {
+            code: -1,
+            msg: commonUtils.MESSAGE.FREE_API_USE_LIMIT,
+            data: [{
+                "title": "为了保证付费用户的使用体验，本插件对免费用户进行了访问频率限制",
+                "href": commonUtils.MESSAGE.HELP_LINK
+            }]
         }
-        if (remaining == 0) {
-            return res.send({
-                code: -1,
-                msg: 'API Key 积分已用完，请联系作者续费！'
-            }); 
-        }
-    }else{
-        //免费版
-        const canParse = await dailyUse(free_key);
-        if (!canParse) {
-            return res.send({
-                code: -1,
-                msg: commonUtils.MESSAGE.FREE_API_USE_LIMIT,
-                data: [{
-                    "title": "为了保证付费用户的使用体验，本插件对免费用户进行了访问频率限制",
-                    "href": commonUtils.MESSAGE.HELP_LINK
-                }]
-            }); 
-        }
+    });
+    if (!access.ok) {
+        return res.send(access.response);
     }
 
     try {
@@ -2364,8 +2367,11 @@ app.post("/gzh_search", async (req, res) => {
 
         let msg = commonUtils.MESSAGE.FREE_API_USE_LIMIT;
         if (api_key) {
-            //付费版
-            const { remaining } = await unkey.verifyKey(api_id, api_key, 1);
+            const remaining = await consumeApiCredits({
+                apiKey: api_key,
+                apiId: api_id,
+                cost: 1
+            });
             msg = `API Key 剩余积分：${remaining}`;
         }
 
@@ -2414,102 +2420,6 @@ app.post('/extract-element-from-html', async (req, res) => {
 // 三方接口请求api_key验证和减扣次数
 app.post('/thirdParty/verifyKey',thirdPartyUsed.key_used)
 
-
-// ========== 文颜 MCP Server ==========
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
-import { z } from 'zod';
-import FormData from 'form-data';
-
-const WENYAN_BASE_URL = 'https://wenyan.devtool.uk';
-const WENYAN_API_KEY = process.env.WENYAN_API_KEY || '';
-
-// 每个请求创建独立的 McpServer + Transport（stateless 模式）
-app.post('/mcp', async (req, res) => {
-    const server = new McpServer({
-        name: 'wenyan-proxy',
-        version: '1.0.0',
-    });
-
-    // 工具1：上传 Markdown 文件内容
-    server.tool(
-        'wenyan_upload',
-        '上传 Markdown 文章内容到文颜服务器，返回 fileId 供后续发布使用',
-        {
-            content: z.string().describe('Markdown 文章的完整文本内容'),
-            filename: z.string().optional().describe('文件名，默认为 article.md'),
-        },
-        async ({ content, filename = 'article.md' }) => {
-            const form = new FormData();
-            form.append('file', Buffer.from(content, 'utf-8'), {
-                filename,
-                contentType: 'text/markdown',
-            });
-            const uploadRes = await axios.post(`${WENYAN_BASE_URL}/upload`, form, {
-                headers: {
-                    ...form.getHeaders(),
-                    'x-api-key': WENYAN_API_KEY,
-                },
-            });
-            return {
-                content: [{ type: 'text', text: JSON.stringify(uploadRes.data, null, 2) }],
-            };
-        }
-    );
-
-    // 工具2：发布文章到微信公众号
-    server.tool(
-        'wenyan_publish',
-        '使用 fileId 将已上传的 Markdown 文章排版并发布到微信公众号草稿箱',
-        {
-            fileId: z.string().describe('上传接口返回的 fileId'),
-            wechat_app_id: z.string().optional().describe('微信公众号 AppID，必须提供'),
-            wechat_app_secret: z.string().optional().describe('微信公众号 AppSecret，必须提供'),
-            theme: z.string().optional().describe('排版主题，默认 default'),
-            highlight: z.string().optional().describe('代码高亮方案，默认 solarized-light'),
-            macStyle: z.boolean().optional().describe('是否使用 Mac 风格代码块，默认 true'),
-        },
-        async ({ fileId, wechat_app_id, wechat_app_secret, theme = 'default', highlight = 'solarized-light', macStyle = true }) => {
-            if (!wechat_app_id || !wechat_app_secret) {
-                return {
-                    content: [{
-                        type: 'text',
-                        text: '❌ 缺少微信公众号凭据，请在调用参数中传入 wechat_app_id 和 wechat_app_secret。',
-                    }],
-                    isError: true,
-                };
-            }
-            const appId = wechat_app_id;
-            const appSecret = wechat_app_secret;
-            const publishRes = await axios.post(
-                `${WENYAN_BASE_URL}/publish`,
-                { fileId, theme, highlight, macStyle, wechat_app_id: appId, wechat_app_secret: appSecret },
-                {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'x-api-key': WENYAN_API_KEY,
-                    },
-                }
-            );
-            return {
-                content: [{ type: 'text', text: JSON.stringify(publishRes.data, null, 2) }],
-            };
-        }
-    );
-
-    const transport = new StreamableHTTPServerTransport({
-        sessionIdGenerator: undefined, // stateless
-    });
-
-    res.on('close', () => transport.close());
-    await server.connect(transport);
-    await transport.handleRequest(req, res, req.body);
-});
-
-app.get('/mcp', async (req, res) => {
-    res.status(405).json({ error: 'MCP endpoint only supports POST (Streamable HTTP)' });
-});
-// ========== 文颜 MCP Server End ==========
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)

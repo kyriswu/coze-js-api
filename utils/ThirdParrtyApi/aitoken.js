@@ -31,11 +31,21 @@ const aitoken = {
 
     gpt_image_2_edit: async function (image, mask, prompt) {
         try {
+            if (!prompt || !prompt.trim()) throw new Error('prompt 不能为空');
+
             const form = new FormData();
-            form.append("image", image);
-            form.append("mask", mask);
+
+            // 兼容无图、单图与多参考图：多图时按 OpenAI 规范使用 image[] 字段。
+            const images = (Array.isArray(image) ? image : (image ? [image] : [])).filter(Boolean);
+            for (const img of images) {
+                form.append(images.length > 1 ? 'image[]' : 'image', img);
+            }
+
+            if (mask) {
+                form.append('mask', mask);
+            }
             form.append("model", "gpt-image-2-convert");
-            form.append("prompt", prompt);
+            form.append("prompt", prompt.trim());
 
             const response = await axios.post(`${OPENAI_HUB_BASE}/v1/images/edits`, form, {
                 headers: {
@@ -45,13 +55,14 @@ const aitoken = {
             });
             return response.data;
         } catch (error) {
-            throw new Error(`编辑图像失败: ${error.message}`);
+            const apiMsg = error?.response?.data?.error?.message || error?.response?.data?.message;
+            throw new Error(`编辑图像失败: ${apiMsg || error.message}`);
         }
     },
 
     /**
      * 统一入口：鉴权 + 生图（文生图 or 参考图编辑）
-     * @param {{ prompt: string, imageBase64?: string, api_key?: string, userIdentity?: string }} opts
+      * @param {{ prompt: string, imageBase64?: string|string[], api_key?: string, userIdentity?: string }} opts
      * @returns {{ imageUrl: string|null, b64Image: string|null }}
      */
     generate: async function ({ prompt, imageBase64, api_key, userIdentity }) {
@@ -72,13 +83,20 @@ const aitoken = {
         // ── 生图 ──────────────────────────────────────────────────────────────
         let item;
         if (imageBase64) {
-            const matches = imageBase64.match(/^data:([^;]+);base64,(.+)$/);
-            const mimeType = matches ? matches[1] : 'image/png';
-            const b64data  = matches ? matches[2] : imageBase64;
-            const blob = new Blob([Buffer.from(b64data, 'base64')], { type: mimeType });
+            const imageInputs = (Array.isArray(imageBase64) ? imageBase64 : [imageBase64]).filter(Boolean);
 
             const form = new FormData();
-            form.append('image', blob, 'reference.png');
+
+            for (const [index, imageInput] of imageInputs.entries()) {
+                const matches = imageInput.match(/^data:([^;]+);base64,(.+)$/);
+                const mimeType = matches ? matches[1] : 'image/png';
+                const b64data = matches ? matches[2] : imageInput;
+                const blob = new Blob([Buffer.from(b64data, 'base64')], { type: mimeType });
+                const ext = mimeType.split('/')[1] || 'png';
+                const fileName = `reference-${index + 1}.${ext}`;
+                form.append(imageInputs.length > 1 ? 'image[]' : 'image', blob, fileName);
+            }
+
             form.append('model', 'gpt-image-2-convert');
             form.append('prompt', prompt.trim());
 
