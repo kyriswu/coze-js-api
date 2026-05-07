@@ -216,24 +216,24 @@ async function consumeApiCredits({ apiKey, cost = 1, metadata }) {
 }
 
 app.post('/gpt-image-2/generate', async (req, res) => {
-    const { prompt, imageUrls, api_key } = req.body || {};
+    const { prompt, images, api_key } = req.body || {};
     const cost = 3;
 
     if (!prompt || !prompt.trim()) {
         return res.status(400).json({ success: false, error: 'prompt 不能为空' });
     }
-    if (!Array.isArray(imageUrls)) {
-        return res.status(400).json({ success: false, error: 'imageUrls 必须是数组（可传空数组）' });
+    if (!Array.isArray(images)) {
+        return res.status(400).json({ success: false, error: 'images 必须是数组' });
     }
     if (!api_key || !api_key.toString().trim()) {
         return res.status(400).json({ success: false, error: commonUtils.MESSAGE.TOKEN_EMPTY });
     }
 
-    for (const [index, imageUrl] of imageUrls.entries()) {
+    for (const [index, imageUrl] of images.entries()) {
         try {
             new URL(imageUrl);
         } catch {
-            return res.status(400).json({ success: false, error: `第 ${index + 1} 个 imageUrls 不是合法 URL` });
+            return res.status(400).json({ success: false, error: `第 ${index + 1} 个 images 不是合法 URL` });
         }
     }
 
@@ -253,9 +253,9 @@ app.post('/gpt-image-2/generate', async (req, res) => {
     const tempFiles = [];
     try {
         let rawResult;
-        if (imageUrls.length > 0) {
+        if (images.length > 0) {
             const downloaded = await Promise.all(
-                imageUrls.map((imageUrl, index) => tool.downloadImageUrlToTempFile(imageUrl, index))
+                images.map((imageUrl, index) => tool.downloadImageUrlToTempFile(imageUrl, index))
             );
             tempFiles.push(...downloaded);
 
