@@ -1835,7 +1835,7 @@ app.post("/flfg", async (req, res) => {
         // 为每个对象的 url 字段加上域名前缀
         let law_list = []
         let doc_urls = [] //需要解析的文件url
-        if (Array.isArray(data.result.data)) {
+        if (data.result && Array.isArray(data.result.data)) {
             law_list = await Promise.all(data.result.data.map(async (item) => {
                 if (item.url) {
                     const doc_url = 'https://flk.npc.gov.cn/' + item.url.replace(/^(\.\/|\/)+/, '');
@@ -1850,9 +1850,9 @@ app.post("/flfg", async (req, res) => {
             msg: commonUtils.MESSAGE.PLUGIN_NEED_PAY,
             data: {
             'list': law_list,
-            'totalSizes': data.result.totalSizes,
-            'page': data.result.page,
-            'size': data.result.size
+            'totalSizes': data.result?.totalSizes,
+            'page': data.result?.page,
+            'size': data.result?.size
             }
         })
     } catch (error) {
