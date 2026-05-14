@@ -30,6 +30,22 @@ router.get('/vip-zl', (req, res) => {
     res.redirect(302, 'https://ccn8h804ayou.feishu.cn/wiki/LSN4w0H6giK7kbkalwYcW783nth');
 });
 
+router.get('/zong', (req, res) => {
+    res.redirect(302, 'https://my.feishu.cn/wiki/T2oMwq00EinbpRkv7GGcMV3jnTb?from=from_copylink');
+});
+
+router.get('/xyzw', (req, res) => {
+    res.redirect(302, 'https://my.feishu.cn/wiki/IL1lwsD5riia4ukVocScRSy7nNd?from=from_copylink');
+});
+
+router.get('/xyjc', (req, res) => {
+    res.redirect(302, 'https://my.feishu.cn/wiki/CZUZwffpzid15Gk1VcqcW5MrnKa?from=from_copylink');
+});
+
+router.get('/ljsj', (req, res) => {
+    res.redirect(302, 'https://my.feishu.cn/wiki/G0tJwxdSkiENLtkFB3YccVzLnHd?from=from_copylink');
+});
+
 router.get('/limit', (req, res) => {
     res.send('达到用量限制，获取更多积分，请联系作者购买API Key，微信：xiaowu_azt');
 });
