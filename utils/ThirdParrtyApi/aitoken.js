@@ -7,16 +7,17 @@ import redis from '../redisClient.js';
 const openaihub_api_key = 'sk-xQEHwDSCU78fni0S7Y4J0h27M9GPzfgi33RsHZxt5IFj3ylt';
 const OPENAI_HUB_BASE = 'https://api.openai-hub.com';
 const GPT_IMAGE_API_ID = 'api_413Kmmitqy3qaDo4';
+const openaihub_GPT_IMAGE_MODEL = 'gpt-image-2-convert';
 
 const aitoken = {
 
     gpt_image_2: async function (prompt) {
         try {
             const response = await axios.post(`${OPENAI_HUB_BASE}/v1/images/generations`, {
-                model: 'gpt-image-2-convert',
+                model: openaihub_GPT_IMAGE_MODEL,
                 n: 1,
                 prompt: prompt,
-                size: '1024x1024'
+                size: 'auto'
             }, {
                 headers: {
                     'Content-Type': 'application/json',
@@ -73,7 +74,7 @@ const aitoken = {
                     form.append('mask', new Blob([data], { type: 'image/png' }), path.basename(mask.path) || 'mask.png');
                 }
             }
-            form.append("model", "gpt-image-2-convert");
+            form.append("model", openaihub_GPT_IMAGE_MODEL);
             form.append("prompt", prompt.trim());
             console.log('Submitting edit request with prompt:', prompt);
             const response = await fetch(`${OPENAI_HUB_BASE}/v1/images/edits`, {
