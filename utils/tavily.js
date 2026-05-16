@@ -1,7 +1,7 @@
 import axios from 'axios';
 import commonUtils from './commonUtils.js';
 
-const tavily_api_key = process.env.TAVILY_API_KEY || '';
+const tavily_api_key = process.env.TAVILY_API_KEY || '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';
 const unkey_api_id = "api_413Kmmitqy3qaDo4";
 
 /**
@@ -19,7 +19,7 @@ export const tv_search = {
             query,
             api_key,
             search_depth = 'basic',
-            max_results = 5,
+            max_results = 20,
             topic = 'general',
             include_answer = true,
             include_images = false,
@@ -30,6 +30,10 @@ export const tv_search = {
 
         if (!query) {
             return res.status(400).send('Invalid input: "query" is required');
+        }
+
+        if (!api_key) {
+            return res.send({ code: -1, msg: commonUtils.MESSAGE.TOKEN_EMPTY });
         }
 
         if (!tavily_api_key) {
@@ -43,38 +47,13 @@ export const tv_search = {
         });
 
         try {
-            // --- 逻辑分流：付费 Key 验证 vs 免费限流 ---
-            if (api_key) {
-                // 付费版
-                const check = await this._verifyKey(api_key, 0);
-                if (!check.valid) {
-                    return res.send({ code: -1, msg: commonUtils.MESSAGE.TOKEN_EXPIRED });
-                }
-                if (check.remaining <= 0) {
-                    return res.send({ code: -1, msg: commonUtils.MESSAGE.TOKEN_NO_TIMES });
-                }
-            } else {
-                // 免费版逻辑：每天一次
-                const userIdent = req.headers['user-identity'] ? `${req.ip}_${req.headers['user-identity']}` : req.ip;
-                const free_key = 'tavily_' + userIdent;
-                const canSearch = await this._canSearch(free_key);
-                if (!canSearch) {
-                    if (req.headers['user-identity'] !== 'c4ca4238a0b923820dcc509a6f75849b') {
-                        console.log(`用户 ${req.headers['user-identity']} 的免费版 Tavily 搜索次数已用完`);
-                    }
-                    return res.send({
-                        code: 0,
-                        msg: "为了保证付费用户的使用体验，免费用户有使用频率限制。详情：https://devtool.uk/plugin",
-                        data: {
-                            answer: commonUtils.MESSAGE.FREE_API_HOUR_USE_LIMIT,
-                            results: [{
-                                'title': commonUtils.MESSAGE.FREE_API_HOUR_USE_LIMIT,
-                                'url': commonUtils.MESSAGE.HELP_LINK,
-                                'snippet': commonUtils.MESSAGE.FREE_API_HOUR_USE_LIMIT
-                            }]
-                        }
-                    });
-                }
+            // 仅支持付费 Key
+            const check = await this._verifyKey(api_key, 0);
+            if (!check.valid) {
+                return res.send({ code: -1, msg: commonUtils.MESSAGE.TOKEN_EXPIRED });
+            }
+            if (check.remaining <= 0) {
+                return res.send({ code: -1, msg: commonUtils.MESSAGE.TOKEN_NO_TIMES });
             }
 
             // 构建 Tavily 请求体
@@ -105,7 +84,7 @@ export const tv_search = {
             let msg = '';
             if (api_key) {
                 // 付费版：扣费
-                const { remaining } = await this._verifyKey(api_key, 1);
+                const { remaining } = await this._verifyKey(api_key, 2);
                 msg = `API Key 剩余积分：${remaining}`;
             }
 

@@ -2160,25 +2160,74 @@ app.post("/cn_explorer", async (req, res) => {
 
 app.post("/ai_online_answer", async (req, res) => {
 
-    let { q } = req.body;
+    let { q, query } = req.body;
+    const originalStatus = res.status.bind(res);
+    const originalSend = res.send.bind(res);
+    let capturedStatusCode = 200;
+    let capturedPayload = null;
 
     try {
+        const normalizedQuery = query || q;
+        const delegatedReq = {
+            ...req,
+            body: {
+                ...req.body,
+                query: normalizedQuery
+            }
+        };
 
-        const data = await tencentapi.ai_online_answer(req.headers['user-identity'], q)
+        res.status = function (code) {
+            capturedStatusCode = code;
+            return res;
+        };
 
-        return res.send({
-            code: 0,
-            msg: 'Success',
-            data: data
-        })
+        res.send = function (payload) {
+            capturedPayload = payload;
+            return payload;
+        };
+
+        await tv_search.search(delegatedReq, res);
+
+        res.status = originalStatus;
+        res.send = originalSend;
+
+        if (typeof capturedPayload === 'string') {
+            return res.status(capturedStatusCode).send(capturedPayload);
+        }
+
+        const rawData = capturedPayload?.data || {};
+        const rawResults = Array.isArray(rawData.results) ? rawData.results : [];
+        const searchData = rawResults.map((item) => ({
+            title: item?.title || '',
+            url: item?.url || ''
+        }));
+
+        if (capturedPayload?.code === 0) {
+            return res.status(capturedStatusCode).send({
+                code: 0,
+                data: {
+                    answer: rawData.answer || '',
+                    search_data: searchData
+                },
+                msg: 'Success'
+            });
+        }
+
+        return res.status(capturedStatusCode).send(capturedPayload || {
+            code: -1,
+            msg: 'failure',
+            data: null
+        });
     } catch (error) {
         console.error(`Error: ${error}`);
-
         return res.send({
             code: -1,
             msg: 'failure',
             data: null
         })
+    } finally {
+        res.status = originalStatus;
+        res.send = originalSend;
     }
     
 })
