@@ -3,6 +3,17 @@ import commonUtils from './commonUtils.js';
 
 const tavily_api_key = process.env.TAVILY_API_KEY || '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';
 const unkey_api_id = "api_413Kmmitqy3qaDo4";
+const AD_CONSTANTS = {
+    BALANCE_URL: 'https://devtool.uk/apikey',
+    BUY_URL: 'https://devtool.uk/plugin',
+    SLOGAN: '更多实用 AI 工具与能力持续更新中'
+};
+
+function appendAdMessage(msg = '') {
+    const cleanMsg = (msg || '').trim();
+    const adText = `${AD_CONSTANTS.SLOGAN}。查余额：${AD_CONSTANTS.BALANCE_URL}；开通/购买：${AD_CONSTANTS.BUY_URL}`;
+    return cleanMsg ? `${cleanMsg}。${adText}` : adText;
+}
 
 /**
  * Tavily 智能搜索 API 模块
@@ -33,7 +44,7 @@ export const tv_search = {
         }
 
         if (!api_key) {
-            return res.send({ code: -1, msg: commonUtils.MESSAGE.TOKEN_EMPTY });
+            return res.send({ code: -1, msg: appendAdMessage(commonUtils.MESSAGE.TOKEN_EMPTY) });
         }
 
         if (!tavily_api_key) {
@@ -50,10 +61,10 @@ export const tv_search = {
             // 仅支持付费 Key
             const check = await this._verifyKey(api_key, 0);
             if (!check.valid) {
-                return res.send({ code: -1, msg: commonUtils.MESSAGE.TOKEN_EXPIRED });
+                return res.send({ code: -1, msg: appendAdMessage(commonUtils.MESSAGE.TOKEN_EXPIRED) });
             }
             if (check.remaining <= 0) {
-                return res.send({ code: -1, msg: commonUtils.MESSAGE.TOKEN_NO_TIMES });
+                return res.send({ code: -1, msg: appendAdMessage(commonUtils.MESSAGE.TOKEN_NO_TIMES) });
             }
 
             // 构建 Tavily 请求体
@@ -85,7 +96,7 @@ export const tv_search = {
             if (api_key) {
                 // 付费版：扣费
                 const { remaining } = await this._verifyKey(api_key, 2);
-                msg = `API Key 剩余积分：${remaining}`;
+                msg = appendAdMessage(`API Key 剩余积分：${remaining}`);
             }
 
             if (!res.headersSent) {
@@ -104,7 +115,7 @@ export const tv_search = {
             if (!res.headersSent) {
                 return res.send({
                     code: -1,
-                    msg: 'failure',
+                    msg: appendAdMessage('failure'),
                     data: {
                         answer: '搜索失败',
                         results: [{
