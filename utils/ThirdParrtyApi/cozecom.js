@@ -126,7 +126,7 @@ const cozecom = {
             //     access_token = await this.refresh_token()
             // }
             // console.log("access_token", access_token)
-            const access_token = "pat_wnggFUfo22rmIi5xTFGnqzDbMXUohU3RB0GxYrYBex8A0BVPPpRZVwAetCKPIOTo"
+            const access_token = "pat_vShMVEkDDlHlitvcBuBWFengnSjLr5QGqhGdm8NhItIqp5XEWmQpLpAvSrCYLnhb"
             console.log("使用linkreader读取文件：", url)
             const response = await axios({
                 method: 'post',
