@@ -268,6 +268,14 @@ app.post('/gpt-image-2/generate', async (req, res) => {
         console.log('原始接口返回结果:', rawResult);
 
         const item = rawResult?.data?.[0] || {};
+        let savedDownloadUrl = null;
+
+        if (item.b64_json) {
+            const savedFile = await tool.saveBase64ImageToDownloads(item.b64_json, 'gpt-image-2');
+            savedDownloadUrl = `${req.protocol}://${req.get('host')}/downloads/${savedFile.fileName}`;
+        }
+
+        const finalData = item.url || savedDownloadUrl || null;
         const remainingPoints = await consumeApiCredits({
             apiKey: api_key,
             cost,
@@ -277,7 +285,9 @@ app.post('/gpt-image-2/generate', async (req, res) => {
         return res.json({
             code: 0,
             msg: "Success",
-            data: item.url || null
+            data: finalData,
+            remote_url: item.url || null,
+            download_url: savedDownloadUrl
         });
     } catch (error) {
         console.error('Error in /gpt-image-2/generate:', error);

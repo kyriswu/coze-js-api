@@ -721,6 +721,35 @@ const tool = {
         if (type === 'image/bmp') return 'bmp';
         return 'png';
     },
+    saveBase64ImageToDownloads: async function (base64Image, prefix = 'image') {
+        if (!base64Image || typeof base64Image !== 'string') {
+            throw new Error('base64 图片数据不能为空');
+        }
+
+        let ext = 'png';
+        let pureBase64 = base64Image.trim();
+
+        const dataUrlMatch = pureBase64.match(/^data:([^;]+);base64,(.+)$/);
+        if (dataUrlMatch) {
+            const mime = dataUrlMatch[1] || 'image/png';
+            pureBase64 = dataUrlMatch[2] || '';
+            ext = this.extFromContentType(mime);
+        }
+
+        const downloadDir = path.join(__dirname, '..', 'downloads');
+        if (!fs.existsSync(downloadDir)) {
+            fs.mkdirSync(downloadDir, { recursive: true });
+        }
+
+        const fileName = `${prefix}-${Date.now()}-${process.pid}.${ext}`;
+        const filePath = path.join(downloadDir, fileName);
+        await fs.promises.writeFile(filePath, Buffer.from(pureBase64, 'base64'));
+
+        return {
+            fileName,
+            filePath
+        };
+    },
     downloadImageUrlToTempFile: async function (imageUrl, index = 0) {
         const response = await axios.get(imageUrl, { responseType: 'arraybuffer', timeout: 20000 });
         const contentType = response.headers?.['content-type'] || 'image/png';
