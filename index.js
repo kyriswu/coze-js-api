@@ -222,18 +222,20 @@ app.post('/gpt-image-2/generate', async (req, res) => {
     if (!prompt || !prompt.trim()) {
         return res.status(400).json({ success: false, error: 'prompt 不能为空' });
     }
-    if (!Array.isArray(images)) {
+    if (images && !Array.isArray(images)) {
         return res.status(400).json({ success: false, error: 'images 必须是数组' });
     }
     if (!api_key || !api_key.toString().trim()) {
         return res.status(400).json({ success: false, error: commonUtils.MESSAGE.TOKEN_EMPTY });
     }
 
-    for (const [index, imageUrl] of images.entries()) {
-        try {
-            new URL(imageUrl);
-        } catch {
-            return res.status(400).json({ success: false, error: `第 ${index + 1} 个 images 不是合法 URL` });
+    if (images) {
+        for (const [index, imageUrl] of images.entries()) {
+            try {
+                new URL(imageUrl);
+            } catch {
+                return res.status(400).json({ success: false, error: `第 ${index + 1} 个 images 不是合法 URL` });
+            }
         }
     }
 
@@ -253,7 +255,7 @@ app.post('/gpt-image-2/generate', async (req, res) => {
     const tempFiles = [];
     try {
         let rawResult;
-        if (images.length > 0) {
+        if (images && images.length > 0) {
             const downloaded = await Promise.all(
                 images.map((imageUrl, index) => tool.downloadImageUrlToTempFile(imageUrl, index))
             );
