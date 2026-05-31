@@ -1,6 +1,60 @@
 # QA
 
 ## Iteration
+2026-05-31 / gpt-image-2-entry-vs-outbound-log
+
+## Test Matrix
+| Case ID | Step | Expected | Actual | Status |
+|---|---|---|---|---|
+| QA-01 | node --check index.js | 无语法错误 | 命令执行无输出 | pass |
+
+## Command Evidence
+```bash
+cd /root/coze-js-api && node --check index.js
+```
+
+## Manual Checks
+- 在 `/gpt-image-2/generate` 增加入口日志：`imageCount` 与 `images[{index,host,fileName}]`。
+- 可与 `gpt_image_2_edit` 的 openai-hub 发包日志对比，定位丢图发生层级。
+
+## Defects Found
+| ID | Severity | Description | Status |
+|---|---|---|---|
+| BUG-01 | - | 本轮未发现语法缺陷 | closed |
+
+## Final QA Verdict
+- [x] pass
+- [ ] conditional pass
+- [ ] fail
+
+## Iteration
+2026-05-31 / gpt-image-2-edit-payload-log
+
+## Test Matrix
+| Case ID | Step | Expected | Actual | Status |
+|---|---|---|---|---|
+| QA-01 | node --check utils/ThirdParrtyApi/aitoken.js | 无语法错误 | 命令执行无输出 | pass |
+
+## Command Evidence
+```bash
+cd /root/coze-js-api && node --check utils/ThirdParrtyApi/aitoken.js
+```
+
+## Manual Checks
+- 在 `gpt_image_2_edit` 中新增发请求前日志：输出 `imageCount`、`images[{index,field,fileName}]`、`hasMask`、`endpoint`。
+- 日志位于 `fetch(${OPENAI_HUB_BASE}/v1/images/edits)` 之前，可用于确认最终发送到 openai-hub 的图片数量。
+
+## Defects Found
+| ID | Severity | Description | Status |
+|---|---|---|---|
+| BUG-01 | - | 本轮未发现语法缺陷 | closed |
+
+## Final QA Verdict
+- [x] pass
+- [ ] conditional pass
+- [ ] fail
+
+## Iteration
 2026-05-31 / create-twitterwebapi-skill
 
 ## Test Matrix

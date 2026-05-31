@@ -36,6 +36,7 @@ const aitoken = {
 
             console.log('Received edit request with prompt:', prompt);
             const form = new FormData();
+            const payloadImageMeta = [];
 
             // 兼容无图、单图与多参考图：多图时按 OpenAI 规范使用 image[] 字段。
             const images = (Array.isArray(image) ? image : (image ? [image] : [])).filter(Boolean);
@@ -60,7 +61,9 @@ const aitoken = {
                     throw new Error('不支持的图片输入类型');
                 }
 
-                form.append(images.length > 1 ? 'image[]' : 'image', blob, fileName);
+                const imageFieldName = images.length > 1 ? 'image[]' : 'image';
+                form.append(imageFieldName, blob, fileName);
+                payloadImageMeta.push({ index: index + 1, field: imageFieldName, fileName });
             }
 
             if (mask) {
@@ -76,6 +79,12 @@ const aitoken = {
             }
             form.append("model", openaihub_GPT_IMAGE_MODEL);
             form.append("prompt", prompt.trim());
+            console.log('[gpt_image_2_edit] openai-hub payload summary:', {
+                imageCount: payloadImageMeta.length,
+                images: payloadImageMeta,
+                hasMask: Boolean(mask),
+                endpoint: `${OPENAI_HUB_BASE}/v1/images/edits`
+            });
             console.log('Submitting edit request with prompt:', prompt);
             const response = await fetch(`${OPENAI_HUB_BASE}/v1/images/edits`, {
                 method: 'POST',

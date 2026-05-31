@@ -143,6 +143,7 @@ app.post('/en_wikipedia/get_item_content', async (req, res) => {
 app.post('/gpt-image-2/generate', async (req, res) => {
     const { prompt, images, api_key } = req.body || {};
     const cost = 3;
+    let entryImageMeta = [];
 
     if (!prompt || !prompt.trim()) {
         return res.status(400).json({ success: false, error: 'prompt 不能为空' });
@@ -157,12 +158,23 @@ app.post('/gpt-image-2/generate', async (req, res) => {
     if (images) {
         for (const [index, imageUrl] of images.entries()) {
             try {
-                new URL(imageUrl);
+                const parsed = new URL(imageUrl);
+                entryImageMeta.push({
+                    index: index + 1,
+                    host: parsed.host,
+                    fileName: path.basename(parsed.pathname) || '(no-name)'
+                });
             } catch {
                 return res.status(400).json({ success: false, error: `第 ${index + 1} 个 images 不是合法 URL` });
             }
         }
     }
+
+    console.log('[gpt_image_2_generate] entry payload summary:', {
+        imageCount: entryImageMeta.length,
+        images: entryImageMeta,
+        hasPrompt: Boolean(prompt && prompt.trim())
+    });
 
     const access = await verifyApiAccess({
         apiKey: api_key,
