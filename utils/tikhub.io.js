@@ -1109,6 +1109,52 @@ export const th_tiktok = {
     }
 }
 
+export const th_twitter = {
+    fetch_tweet_detail: async function (req, res) {
+        const paramsFromReq = {
+            ...(req.query || {}),
+            ...(req.body || {})
+        };
+
+        const { tweet_id, api_key } = paramsFromReq;
+
+        if (!tweet_id) {
+            return res.send({ code: -1, msg: 'tweet_id is required' });
+        }
+
+        try {
+            const isValid = await commonUtils.valid_redis_key('twitter_fetch_tweet_detail', unkey_api_id, api_key, req, res);
+            if (!isValid) return;
+
+            const response = await axios.get('https://api.tikhub.io/api/v1/twitter/web/fetch_tweet_detail', {
+                params: { tweet_id },
+                headers: {
+                    'Authorization': `Bearer ${tikhub_api_token}`
+                }
+            });
+
+            if (response.data?.code !== 200) {
+                return res.send({ code: -1, msg: response.data?.message_zh || response.data?.message || '获取推文详情失败' });
+            }
+
+            let msg = 'success';
+            if (api_key) {
+                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1, { platform: 'twitter', action: 'fetch_tweet_detail' });
+                msg = `API Key 剩余积分：${remaining}`;
+            }
+
+            return res.send({
+                code: 200,
+                msg,
+                data: response.data.data || {}
+            });
+        } catch (error) {
+            console.error('Twitter Fetch Tweet Detail Error:', error.response ? error.response.data : error.message);
+            return res.send({ code: -1, msg: commonUtils.MESSAGE.SERVER_ERROR });
+        }
+    }
+}
+
 // 抖音billboard创作者中心
 export const th_douyin_billboard = {
     /**
@@ -1259,5 +1305,6 @@ export default {
     th_wechat_channels,
     th_douyin,
     th_tiktok,
+    th_twitter,
     th_douyin_billboard
 }

@@ -55,7 +55,7 @@ import redis from './utils/redisClient.js';
 import search1api from './utils/search1api.js';
 import zyte from './utils/zyte.js';
 import aitoken from './utils/ThirdParrtyApi/aitoken.js';
-import { th_bilibili, th_youtube, th_xiaohongshu,th_wechat_media,th_wechat_channels,th_douyin,th_tiktok,th_douyin_billboard } from './utils/tikhub.io.js';
+import { th_bilibili, th_youtube, th_xiaohongshu,th_wechat_media,th_wechat_channels,th_douyin,th_tiktok,th_twitter,th_douyin_billboard } from './utils/tikhub.io.js';
 import { ve_seedream_5_0_lite, ve_web_search } from './utils/volcengine.io.js';
 import {qweather_tool}  from './utils/qwether.js';
 import { tv_search } from './utils/tavily.js';
@@ -934,6 +934,9 @@ app.post('/douyin/billboard/fetch_hot_city_list', th_douyin_billboard.fetch_hot_
 
 //TikTok 通过作品ID获取评论
 app.post('/tiktok/fetch_post_comment', th_tiktok.fetch_post_comment);
+
+//Twitter 获取单个推文详情
+app.post('/twitter/fetch_tweet_detail', th_twitter.fetch_tweet_detail);
 
 
 // // 获取公众号文章详情JSON
