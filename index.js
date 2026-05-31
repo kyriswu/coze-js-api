@@ -197,8 +197,16 @@ app.post('/gpt-image-2/generate', async (req, res) => {
                 images.map((imageUrl, index) => tool.downloadImageUrlToTempFile(imageUrl, index))
             );
             tempFiles.push(...downloaded);
+            console.log('[gpt_image_2_generate] download summary:', {
+                downloadedCount: downloaded.length,
+                files: downloaded.map((f, i) => ({ index: i + 1, fileName: path.basename(f) }))
+            });
 
             const imageStreams = downloaded.map((file) => fs.createReadStream(file));
+            console.log('[gpt_image_2_generate] stream summary:', {
+                streamCount: imageStreams.length,
+                files: imageStreams.map((s, i) => ({ index: i + 1, path: path.basename(s.path) }))
+            });
             rawResult = await aitoken.gpt_image_2_edit(imageStreams, null, prompt.trim());
         } else {
             rawResult = await aitoken.gpt_image_2(prompt.trim());
