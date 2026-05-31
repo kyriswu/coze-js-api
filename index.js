@@ -275,10 +275,14 @@ app.post('/gpt-image-2/generate', async (req, res) => {
         if (item.b64_json) {
             const savedFile = await tool.saveBase64ImageToDownloads(item.b64_json, 'gpt-image-2');
             savedDownloadUrl = `${req.protocol}://${req.get('host')}/downloads/${savedFile.fileName}`;
+        } else if (item.url) {
+            const localFilePath = await tool.downloadImageUrlToTempFile(item.url, 0);
+            const fileName = path.basename(localFilePath);
+            savedDownloadUrl = `${req.protocol}://${req.get('host')}/downloads/${fileName}`;
         }
 
-        const finalData = item.url || savedDownloadUrl || null;
-        const remainingPoints = await consumeApiCredits({
+        const finalData = savedDownloadUrl || item.url || null;
+        await consumeApiCredits({
             apiKey: api_key,
             cost,
             metadata: { action: 'gpt_image_2_generate' }
