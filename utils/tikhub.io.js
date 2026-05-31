@@ -1152,6 +1152,57 @@ export const th_twitter = {
             console.error('Twitter Fetch Tweet Detail Error:', error.response ? error.response.data : error.message);
             return res.send({ code: -1, msg: commonUtils.MESSAGE.SERVER_ERROR });
         }
+    },
+    fetch_search_timeline: async function (req, res) {
+        const paramsFromReq = {
+            ...(req.query || {}),
+            ...(req.body || {})
+        };
+
+        const { keyword, search_type = 'Top', cursor, api_key } = paramsFromReq;
+
+        if (!keyword) {
+            return res.send({ code: -1, msg: 'keyword is required' });
+        }
+
+        try {
+            const isValid = await commonUtils.valid_redis_key('twitter_fetch_search_timeline', unkey_api_id, api_key, req, res);
+            if (!isValid) return;
+
+            const queryParams = {
+                keyword,
+                search_type
+            };
+            if (cursor) {
+                queryParams.cursor = cursor;
+            }
+
+            const response = await axios.get('https://api.tikhub.io/api/v1/twitter/web/fetch_search_timeline', {
+                params: queryParams,
+                headers: {
+                    'Authorization': `Bearer ${tikhub_api_token}`
+                }
+            });
+
+            if (response.data?.code !== 200) {
+                return res.send({ code: -1, msg: response.data?.message_zh || response.data?.message || '获取搜索结果失败' });
+            }
+
+            let msg = 'success';
+            if (api_key) {
+                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1, { platform: 'twitter', action: 'fetch_search_timeline' });
+                msg = `API Key 剩余积分：${remaining}`;
+            }
+
+            return res.send({
+                code: 200,
+                msg,
+                data: response.data.data || {}
+            });
+        } catch (error) {
+            console.error('Twitter Fetch Search Timeline Error:', error.response ? error.response.data : error.message);
+            return res.send({ code: -1, msg: commonUtils.MESSAGE.SERVER_ERROR });
+        }
     }
 }
 

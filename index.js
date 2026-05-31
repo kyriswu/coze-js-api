@@ -3,7 +3,6 @@ import axios from 'axios';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import fs from 'fs';
 import { execFile } from 'child_process';
-import { JSDOM } from 'jsdom';
 import { URL,fileURLToPath } from 'url';
 import unkey from './utils/unkey.js'
 import { dirname } from 'path';
@@ -15,26 +14,11 @@ const __dirname = dirname(__filename)
 import commonUtils from './utils/commonUtils.js';
 import thirdPartyUsed from "./utils/thirdPartyUsed.js";
 import navigationRoutes from './routes/navigationRoutes.js';
+import { attachAxiosRateLimitLogger } from './utils/axiosInterceptors.js';
+import { createApiAccessHelpers } from './utils/apiAccess.js';
+import { extract_html_conent, extract_html_conent_standard } from './utils/htmlContent.js';
 
-// 全局 axios 拦截器：捕获 429 请求并打印详细信息
-axios.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 429) {
-      const config = error.config || {};
-      console.error('[429 Rate Limit]', {
-        url: config.url,
-        method: (config.method || 'GET').toUpperCase(),
-        baseURL: config.baseURL,
-        fullURL: config.baseURL ? `${config.baseURL}${config.url}` : config.url,
-        headers: config.headers,
-        params: config.params,
-        responseBody: error.response.data,
-      });
-    }
-    return Promise.reject(error);
-  }
-);
+attachAxiosRateLimitLogger(axios);
 
 const app = express();
 const port = 3000;
@@ -59,6 +43,23 @@ import { th_bilibili, th_youtube, th_xiaohongshu,th_wechat_media,th_wechat_chann
 import { ve_seedream_5_0_lite, ve_web_search } from './utils/volcengine.io.js';
 import {qweather_tool}  from './utils/qwether.js';
 import { tv_search } from './utils/tavily.js';
+
+const unkeyApiId = "api_413Kmmitqy3qaDo4";
+
+const {
+    canSearchGoogle,
+    canUseHtmlParse,
+    dailyUse,
+    verifyApiAccess,
+    consumeApiCredits,
+} = createApiAccessHelpers({
+    redis,
+    unkey,
+    commonUtils,
+    environment,
+    tool,
+    unkeyApiId,
+});
 
 // 从维基百科搜索条目
 app.post('/zh_wikipedia/search_item', async (req, res) => {
@@ -138,82 +139,6 @@ app.post('/en_wikipedia/get_item_content', async (req, res) => {
         res.status(500).send(`Error searching Wikipedia: ${error.message}`);
     }
 })
-
-// 判断是否可使用 Google 搜索
-async function canSearchGoogle(key) {
-    const value = await redis.get(key);
-    if (value === null) {
-        // 不存在，创建 key 并设置初始值；限制为每天一次（次日零点重置）
-        const now = new Date();
-        const nextMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
-        const secondsUntilMidnight = Math.floor((nextMidnight - now) / 1000);
-        console.log("创建key:", key, "初始值为0，过期时间为", secondsUntilMidnight);
-        await redis.set(key, 0, 'EX', secondsUntilMidnight);
-        return true
-    }else{
-        return false;
-    }
-}
-
-// 判断是否可使用 HTML解析 功能
-async function canUseHtmlParse(key) {
-    if(environment === "online"){
-        const usage = await tool.getUsage(key);
-        if (usage >= 3) {
-            return false
-        }
-    }
-    return true;
-}
-async function dailyUse(key) {
-    const value = await redis.get(key);
-    if (value === null) {
-        await redis.set(key, 0, 'EX', 60 * 60);
-        return true
-    }else{
-        return false;
-    }
-}
-
-const unkeyApiId = "api_413Kmmitqy3qaDo4";
-
-async function verifyApiAccess({ apiKey, freeKey, freeCheck, freeDeniedResponse }) {
-    if (apiKey) {
-        const { valid, remaining } = await unkey.verifyKey(unkeyApiId, apiKey, 0);
-        if (!valid) {
-            return {
-                ok: false,
-                response: {
-                    code: -1,
-                    msg: commonUtils.MESSAGE.TOKEN_EXPIRED
-                }
-            };
-        }
-        if (remaining === 0) {
-            return {
-                ok: false,
-                response: {
-                    code: -1,
-                    msg: commonUtils.MESSAGE.TOKEN_NO_TIMES
-                }
-            };
-        }
-        return { ok: true, paid: true };
-    }
-
-    const canUse = await freeCheck(freeKey);
-    if (!canUse) {
-        return { ok: false, response: freeDeniedResponse };
-    }
-
-    return { ok: true, paid: false };
-}
-
-async function consumeApiCredits({ apiKey, cost = 1, metadata }) {
-    if (!apiKey) return null;
-    const { remaining } = await unkey.verifyKey(unkeyApiId, apiKey, cost, metadata);
-    return remaining;
-}
 
 app.post('/gpt-image-2/generate', async (req, res) => {
     const { prompt, images, api_key } = req.body || {};
@@ -337,111 +262,6 @@ app.post('/jina_reader', async (req, res) => {
 
 })
 
-
-function htmlToQuerySelector(htmlString) {
-    // 为了保证解析正确，我们将传入的 html 包裹在 <body> 中
-    const dom = new JSDOM(`<body>${htmlString}</body>`);
-    const body = dom.window.document.body;
-  
-    let selectorParts = [];
-    let element = body.firstElementChild;
-    
-    // 遍历嵌套的每一级标签
-    while (element) {
-      let part = element.tagName.toLowerCase();
-      
-      // 如果存在 class，则添加到选择器中
-      if (element.className) {
-        // 多个 class 按空白字符拆分
-        const classes = element.className.trim().split(/\s+/);
-        classes.forEach(cls => {
-          part += `.${cls}`;
-        });
-      }
-      
-      // 对除了 class 的其他属性，添加 [attr="value"] 形式
-      Array.from(element.attributes).forEach(attr => {
-        if (attr.name === 'class') return; // 已处理
-        part += `[${attr.name}="${attr.value}"]`;
-      });
-      
-      selectorParts.push(part);
-      // 假设输入为嵌套结构，取第一个子元素继续
-      element = element.firstElementChild;
-    }
-    
-    // 拼接成一个选择器，空格表示后代选择器
-    return selectorParts.join(' ');
-}
-
-function extract_html_conent(HtmlContent,xpath,selector){
-
-    const dom = new JSDOM(HtmlContent);
-    const { document, window } = dom.window;
-
-    let result_list = [];
-
-    if (xpath) {
-        const result = document.evaluate(
-            xpath, 
-            document, 
-            null, 
-            window.XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, // 使用 window.XPathResult
-            null
-        );
-        // Iterate over the results
-        for (let i = 0; i < result.snapshotLength; i++) {
-            const element = result.snapshotItem(i);
-            result_list.push({ htmlContent: element.outerHTML });
-        }
-    } else if (selector) {
-        const domSelector = selector;
-        const parserSelector = htmlToQuerySelector(domSelector);
-        console.log(parserSelector)
-        result_list = Array.from(document.querySelectorAll(parserSelector)).map(element => {
-            return { htmlContent: element.outerHTML };
-        }); 
-    }
-
-    console.log(`提取到的内容数量: ${result_list.length}`);
-    
-    return result_list
-}
-
-//标准版：根据selector和xpath选择元素
-function extract_html_conent_standard(HtmlContent,xpath,selector){
-
-    const dom = new JSDOM(HtmlContent);
-    const { document, window } = dom.window;
-
-    let result_list = [];
-
-    if (xpath) {
-        const result = document.evaluate(
-            xpath, 
-            document, 
-            null, 
-            window.XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, // 使用 window.XPathResult
-            null
-        );
-        // Iterate over the results
-        for (let i = 0; i < result.snapshotLength; i++) {
-            const element = result.snapshotItem(i);
-            result_list.push({ htmlContent: element.outerHTML });
-        }
-    } else if (selector) {
-        // 直接用 selector 作为 CSS 选择器，无需转换
-        result_list = Array.from(document.querySelectorAll(selector)).map(element => {
-            return { htmlContent: element.outerHTML };
-        });
-    }else{
-        result_list.push({ htmlContent: HtmlContent });
-    }
-
-    console.log(`提取到的内容数量: ${result_list.length}`);
-    
-    return result_list
-}
 
 app.post('/parse_html', async (req, res) => {
     let { url, selector, xpath, api_key, actions } = req.body;
@@ -937,6 +757,9 @@ app.post('/tiktok/fetch_post_comment', th_tiktok.fetch_post_comment);
 
 //Twitter 获取单个推文详情
 app.post('/twitter/fetch_tweet_detail', th_twitter.fetch_tweet_detail);
+
+//Twitter 搜索
+app.post('/twitter/fetch_search_timeline', th_twitter.fetch_search_timeline);
 
 
 // // 获取公众号文章详情JSON
