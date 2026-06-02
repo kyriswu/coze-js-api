@@ -1,44 +1,44 @@
 # PLAN
 
 ## Title
-Refactor index.js structure
+Fix gpt-image-2 reference image download timeout with single retry
 
 ## Approved
 yes
 
 ## Context Summary
-Shrink `index.js` so it keeps bootstrap and route mounting, while shared helper logic moves into focused utility modules.
+`POST /gpt-image-2/generate` 在下载参考图时，出现 `AxiosError: timeout of 20000ms exceeded`，导致整次生成失败。当前下载逻辑为单次请求，无自动重试。
 
 ## Assumptions
-- Keep route behavior and response shapes unchanged.
-- Prefer small extraction modules over a broad routing rewrite.
-- Preserve current startup flow and middleware order.
+- 保持现有路由、响应结构和业务语义不变。
+- 不引入新依赖。
+- 仅在可恢复错误下重试 1 次，避免对输入类错误误重试。
 
 ## Impacted Areas
-- `index.js`
-- `utils/apiAccess.js`
-- `utils/htmlContent.js`
-- `utils/axiosInterceptors.js`
+- `utils/tool.js`
+- `docs/QA.md`
+- `docs/RELEASE.md`
+- `CHANGELOG.md`
 
 ## Steps
-1. Extract API access helper logic from `index.js` into a dedicated utility module.
-2. Extract HTML parsing helpers from `index.js` into a dedicated utility module.
-3. Move the axios 429 logger into a small shared interceptor module.
-4. Keep `index.js` focused on startup, middleware, and route wiring.
-5. Run syntax checks and a lightweight startup smoke test.
+1. 在 `downloadImageUrlToTempFile` 增加可恢复错误判断函数。
+2. 将下载流程改为最多 2 次尝试（首次 + 1 次重试）。
+3. 仅对 `ECONNABORTED`/网络类错误及 `429/5xx` 执行重试，重试前短暂退避。
+4. 单次下载超时从 20s 调整到 30s。
+5. 运行 `node --check utils/tool.js` 并记录 QA。
 
 ## Verification Plan
-- 命令：`node --check index.js`，`node --check utils/apiAccess.js`，`node --check utils/htmlContent.js`，`node --check utils/axiosInterceptors.js`
-- 手工检查：启动应用并确认服务可加载
-- 手工检查：`/parse_html` 等依赖抽出的工具逻辑的路由仍可响应
+- 命令：`node --check utils/tool.js`
+- 手工检查：
+	- 构造慢链路或瞬时抖动场景，确认会自动重试 1 次。
+	- 非图片响应（非 `image/*`）保持原有失败行为。
+	- 成功下载场景返回本地临时文件路径。
 
 ## Risks & Mitigations
 | Risk | Impact | Mitigation |
 |---|---|---|
-| 抽取过度导致 import 循环 | 启动失败 | 只提取无状态 helper，不引入跨层依赖 |
-| 工具逻辑签名变化 | 路由报错 | 先保留原函数名和调用方式 |
-| 结构变化引入遗漏 | 行为回归 | 用 `node --check` 和启动烟测验证 |
+| 重试增加失败路径耗时 | 请求尾延迟上升 | 限制为仅 1 次重试且短延迟 |
+| 错误分类不当导致无意义重试 | 无效等待 | 仅允许超时/网络临时错误/429/5xx 重试 |
 
 ## Rollback Plan
-- 回滚新增的 `utils/apiAccess.js`、`utils/htmlContent.js`、`utils/axiosInterceptors.js`。
-- 回滚 `index.js` 中对应的 import 和 helper 调用替换。
+- 回滚 `utils/tool.js` 中 `downloadImageUrlToTempFile` 与新增错误判断方法。

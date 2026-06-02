@@ -557,6 +557,113 @@ export const th_wechat_media = {
     },
 
     /**
+     * 搜索微信公众号文章
+     */
+    fetch_search_article: async function (req, res) {
+        const paramsFromReq = {
+            ...(req.query || {}),
+            ...(req.body || {})
+        };
+
+        const {
+            keyword,
+            offset = 0,
+            sort_type = '_0',
+            api_key
+        } = paramsFromReq;
+
+        if (!keyword) {
+            return res.send({ code: -1, msg: 'keyword is required' });
+        }
+
+        if (!['_0', '_2', '_4'].includes(String(sort_type))) {
+            return res.send({ code: -1, msg: 'sort_type 必须是 _0 / _2 / _4' });
+        }
+
+        const maxAttempts = 3;
+        const minBackoffMs = 300;
+        const maxBackoffMs = 1200;
+        const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+        const getRandomBackoff = () => Math.floor(Math.random() * (maxBackoffMs - minBackoffMs + 1)) + minBackoffMs;
+        const isTransientHttpError = (error) => {
+            const status = error?.response?.status;
+            return !status || [429, 500, 502, 503, 504].includes(status);
+        };
+
+        try {
+            const isValid = await commonUtils.valid_redis_key('wx_mp_search_article', unkey_api_id, api_key, req, res);
+            if (!isValid) return;
+
+            let response = null;
+            let lastError = null;
+
+            for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+                try {
+                    response = await axios.get('https://api.tikhub.io/api/v1/wechat_mp/web/fetch_search_article', {
+                        params: {
+                            keyword,
+                            offset,
+                            sort_type
+                        },
+                        headers: {
+                            'Authorization': `Bearer ${tikhub_api_token}`
+                        }
+                    });
+
+                    if (response.data?.code === 200) {
+                        break;
+                    }
+
+                    if (attempt < maxAttempts) {
+                        const delayMs = getRandomBackoff();
+                        console.warn(`[wx_mp_search_article] upstream code=${response.data?.code}, retrying ${attempt + 1}/${maxAttempts} in ${delayMs}ms`);
+                        await sleep(delayMs);
+                        continue;
+                    }
+
+                    return res.send({ code: -1, msg: response.data?.message_zh || response.data?.message || '搜索公众号文章失败' });
+                } catch (error) {
+                    lastError = error;
+                    const canRetry = attempt < maxAttempts && isTransientHttpError(error);
+
+                    if (!canRetry) {
+                        throw error;
+                    }
+
+                    const delayMs = getRandomBackoff();
+                    const status = error?.response?.status || 'NETWORK';
+                    console.warn(`[wx_mp_search_article] transient error status=${status}, retrying ${attempt + 1}/${maxAttempts} in ${delayMs}ms`);
+                    await sleep(delayMs);
+                }
+            }
+
+            if (!response || response.data?.code !== 200) {
+                if (lastError) {
+                    throw lastError;
+                }
+                return res.send({ code: -1, msg: '搜索公众号文章失败' });
+            }
+
+            let msg = 'success';
+            if (api_key) {
+                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 2, { platform: 'wechat_mp', action: 'search_article' });
+                msg = `API Key 剩余积分：${remaining}`;
+            }
+
+            return res.send({
+                code: 200,
+                msg,
+                data: response.data.data || {}
+            });
+        } catch (error) {
+            console.error('Fetch WeChat MP Search Article Error:', error.response ? error.response.data : error.message);
+            if (!res.headersSent) {
+                return res.send({ code: -1, msg: commonUtils.MESSAGE.SERVER_ERROR });
+            }
+        }
+    },
+
+    /**
      * 获取文章详情（支持 JSON 和 HTML）
      * 封装通用详情获取逻辑以减少重复
      */

@@ -751,6 +751,9 @@ app.post('/xiaohongshu/get_note_info_v1', th_xiaohongshu.get_note_info_v1);
 // 通过公众号用户id获取文章
 app.post('/wx_gzh/get_user_articles', th_wechat_media.get_wechat_mp_article_list);
 
+// 搜索微信公众号文章
+app.post('/wx_gzh/fetch_search_article', th_wechat_media.fetch_search_article);
+
 //抖音获取用户主页作品数据
 app.post('/douyin/fetch_user_post_videos', th_douyin.fetch_user_post_videos);
 

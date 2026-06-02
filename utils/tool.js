@@ -750,23 +750,64 @@ const tool = {
             filePath
         };
     },
+    isRetryableImageDownloadError: function (error) {
+        const code = String(error?.code || '').toUpperCase();
+        const status = Number(error?.response?.status);
+
+        if (status === 429 || status >= 500) {
+            return true;
+        }
+
+        return [
+            'ECONNABORTED',
+            'ETIMEDOUT',
+            'ECONNRESET',
+            'EAI_AGAIN',
+            'ENOTFOUND',
+            'EPIPE',
+        ].includes(code);
+    },
     downloadImageUrlToTempFile: async function (imageUrl, index = 0) {
-        const response = await axios.get(imageUrl, { responseType: 'arraybuffer', timeout: 20000 });
-        const contentType = response.headers?.['content-type'] || 'image/png';
-        if (!String(contentType).startsWith('image/')) {
-            throw new Error(`第 ${index + 1} 张参考图不是有效图片资源`);
+        const maxAttempts = 2;
+        const retryDelayMs = 600;
+        let lastError = null;
+
+        for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+            try {
+                const response = await axios.get(imageUrl, {
+                    responseType: 'arraybuffer',
+                    timeout: 30000,
+                });
+                const contentType = response.headers?.['content-type'] || 'image/png';
+                if (!String(contentType).startsWith('image/')) {
+                    throw new Error(`第 ${index + 1} 张参考图不是有效图片资源`);
+                }
+
+                console.log(`正在下载第 ${index + 1} 张图片，URL: ${imageUrl}, Content-Type: ${contentType}`);
+
+                const ext = this.extFromContentType(contentType);
+                const downloadDir = path.join(__dirname, '..', 'downloads');
+                if (!fs.existsSync(downloadDir)) {
+                    fs.mkdirSync(downloadDir, { recursive: true });
+                }
+                const tempFile = path.join(downloadDir, `gpt-image-2-${Date.now()}-${process.pid}-${index}.${ext}`);
+                await fs.promises.writeFile(tempFile, Buffer.from(response.data));
+                return tempFile;
+            } catch (error) {
+                lastError = error;
+                const isLastAttempt = attempt >= maxAttempts;
+                const retryable = this.isRetryableImageDownloadError(error);
+
+                if (isLastAttempt || !retryable) {
+                    throw error;
+                }
+
+                console.error(`第 ${index + 1} 张图片下载失败，${retryDelayMs}ms 后重试（${attempt}/${maxAttempts - 1}）：`, error.message);
+                await this.sleep(retryDelayMs);
+            }
         }
 
-        console.log(`正在下载第 ${index + 1} 张图片，URL: ${imageUrl}, Content-Type: ${contentType}`);
-
-        const ext = this.extFromContentType(contentType);
-        const downloadDir = path.join(__dirname, '..', 'downloads');
-        if (!fs.existsSync(downloadDir)) {
-            fs.mkdirSync(downloadDir, { recursive: true });
-        }
-        const tempFile = path.join(downloadDir, `gpt-image-2-${Date.now()}-${process.pid}-${index}.${ext}`);
-        await fs.promises.writeFile(tempFile, Buffer.from(response.data));
-        return tempFile;
+        throw lastError || new Error(`第 ${index + 1} 张图片下载失败`);
     },
     download_image: async function (url) {
         try {

@@ -2,28 +2,33 @@
 
 ## Goal
 
-- 排查并确认 `/gpt-image-2/generate` 在编辑模式下最终发送到 openai-hub 的图片数量，补充可追踪日志。
+- 修复 `/gpt-image-2/generate` 下载参考图超时失败问题，并为图片下载增加 1 次重试机制。
 
 ## Context
 
-- 用户反馈前端传 3 张图时只生效后 2 张，怀疑首图未进入最终请求。
-- 代码入口在 `index.js`，实际请求构造在 `utils/ThirdParrtyApi/aitoken.js` 的 `gpt_image_2_edit`。
+- 现有 `tool.downloadImageUrlToTempFile` 对图片 URL 仅请求一次，超时时间固定 20s。
+- 线上报错为 `AxiosError: timeout of 20000ms exceeded`，属于瞬时网络抖动高发场景。
 
 ## Files In Scope
 
-- index.js
-- utils/ThirdParrtyApi/aitoken.js
+- utils/tool.js
+- docs/PLAN.md
 - docs/QA.md
+- docs/RELEASE.md
+- CHANGELOG.md
 
 ## Implementation Steps
 
-1. 确认 `gpt_image_2_edit` 中图片数组到 multipart 表单的映射逻辑。
-2. 在发起 `fetch(${OPENAI_HUB_BASE}/v1/images/edits)` 前新增日志，打印最终图片数量、字段名与文件名。
-3. 运行最小可行验证并将结果记录到 `docs/QA.md`。
+1. 在 `downloadImageUrlToTempFile` 中实现最多 2 次尝试（首次 + 1 次重试）。
+2. 仅对可恢复错误（超时、网络临时错误、429/5xx）执行重试。
+3. 增加短延迟退避，避免立即重试造成重复失败。
+4. 适度放宽单次下载超时阈值，降低慢链路误判。
+5. 运行最小可行语法校验并同步文档记录。
 
 ## Risks
 
-- 日志包含文件路径或文件名，需避免输出敏感信息（仅输出文件 basename）。
+- 重试会增加极端失败请求的等待时间。
+- 需要确保非可恢复错误不重试，避免掩盖真实输入问题。
 
 ## Validation
 
