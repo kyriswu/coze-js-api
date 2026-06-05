@@ -1,6 +1,36 @@
 # QA
 
 ## Iteration
+2026-06-05 / return-local-download-urls-for-volcengine-generated-images
+
+## Test Matrix
+| Case ID | Step | Expected | Actual | Status |
+|---|---|---|---|---|
+| QA-01 | node --check utils/tool.js | 无语法错误 | 命令执行无输出 | pass |
+| QA-02 | node --check utils/volcengine.io.js | 无语法错误 | 命令执行无输出 | pass |
+| QA-03 | 检查图片返回改写逻辑 | 成功路径将 `data.data[].url` 改为本地 `/downloads/...` 地址 | 代码路径已实现 | pass |
+| QA-04 | 检查响应兼容性 | 外层 `{code,msg,data}` 结构保持不变 | 代码路径已实现 | pass |
+
+## Command Evidence
+```bash
+cd /root/coze-js-api && node --check utils/tool.js && node --check utils/volcengine.io.js
+```
+
+## Manual Checks
+- 待联调：调用 Volcengine 图片生成接口，确认响应中的 `data.data[].url` 为当前服务的 `/downloads/...` 地址。
+- 待联调：确认本地静态链接可直接访问下载后的图片文件。
+
+## Defects Found
+| ID | Severity | Description | Status |
+|---|---|---|---|
+| BUG-01 | - | 本轮未发现语法缺陷；外部服务联调待执行 | open |
+
+## Final QA Verdict
+- [ ] pass
+- [x] conditional pass
+- [ ] fail
+
+## Iteration
 2026-06-02 / fix-gpt-image-2-image-download-timeout-retry
 
 ## Test Matrix

@@ -2,16 +2,19 @@
 
 ## Goal
 
-- 修复 `/gpt-image-2/generate` 下载参考图超时失败问题，并为图片下载增加 1 次重试机制。
+- 调整 `ve_seedream_5_0_lite.generate_image`，将上游返回的远程图片下载到本地 `downloads/`，并在响应中返回本地可访问链接。
 
 ## Context
 
-- 现有 `tool.downloadImageUrlToTempFile` 对图片 URL 仅请求一次，超时时间固定 20s。
-- 线上报错为 `AxiosError: timeout of 20000ms exceeded`，属于瞬时网络抖动高发场景。
+- 当前接口直接透传 Volcengine 返回的远程图片 URL。
+- 项目已通过 `/downloads` 静态暴露本地下载目录，适合复用。
+- `utils/tool.js` 已有保存 base64 图片到 `downloads/` 的能力，可补充 URL 图片落盘辅助方法。
 
 ## Files In Scope
 
+- utils/volcengine.io.js
 - utils/tool.js
+- harness/plans/current-plan.md
 - docs/PLAN.md
 - docs/QA.md
 - docs/RELEASE.md
@@ -19,16 +22,15 @@
 
 ## Implementation Steps
 
-1. 在 `downloadImageUrlToTempFile` 中实现最多 2 次尝试（首次 + 1 次重试）。
-2. 仅对可恢复错误（超时、网络临时错误、429/5xx）执行重试。
-3. 增加短延迟退避，避免立即重试造成重复失败。
-4. 适度放宽单次下载超时阈值，降低慢链路误判。
-5. 运行最小可行语法校验并同步文档记录。
+1. 在 `utils/tool.js` 中新增远程图片下载到 `downloads/` 的复用 helper。
+2. 在 `ve_seedream_5_0_lite.generate_image` 成功路径中逐张下载生成图。
+3. 保持原响应结构，仅将 `data.data[].url` 改写为本地 `/downloads/...` 地址。
+4. 运行最小语法校验并同步 QA / release 文档。
 
 ## Risks
 
-- 重试会增加极端失败请求的等待时间。
-- 需要确保非可恢复错误不重试，避免掩盖真实输入问题。
+- 若上游图片下载失败，生成接口成功后仍可能在本地落盘阶段报错。
+- 需要保持现有 `code/msg/data` 结构不变，避免影响调用方解析。
 
 ## Validation
 

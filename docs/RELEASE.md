@@ -1,6 +1,32 @@
 # RELEASE
 
 ## Hotfix
+2026-06-05 / return-local-download-urls-for-volcengine-generated-images
+
+### Summary
+调整 `ve_seedream_5_0_lite.generate_image` 返回结果：将上游生成图片下载到本地 `downloads/`，并返回当前服务可访问的本地图片链接。
+
+### What Changed
+- 更新 `utils/tool.js`：新增远程图片保存到 `downloads/` 的复用 helper。
+- 更新 `utils/volcengine.io.js`：在图片生成成功后逐张下载远程图片。
+- 保持外层响应结构不变，仅将 `data.data[].url` 改写为本地 `/downloads/...` 地址，并补充 `remote_url` 便于追踪原始链接。
+
+### Impact
+#### API/Behavior
+- `ve_seedream_5_0_lite.generate_image` 返回的图片地址从上游临时 URL 改为当前服务的本地静态链接。
+- 原有 `code`、`msg`、`data.model`、`data.usage` 等字段保持兼容。
+
+#### Internal Modules
+- 影响 `utils/tool.js` 与 `utils/volcengine.io.js`。
+
+### Breaking Changes
+- none
+
+### Rollback Notes
+- 回滚 `utils/tool.js` 中新增的图片落盘 helper。
+- 回滚 `utils/volcengine.io.js` 中的本地下载和 URL 改写逻辑。
+
+## Hotfix
 2026-06-02 / fix-gpt-image-2-image-download-timeout-retry
 
 ### Summary

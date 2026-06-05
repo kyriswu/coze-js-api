@@ -1,6 +1,7 @@
 import axios from 'axios';
 import unkey from './unkey.js';
 import commonUtils from './commonUtils.js';
+import tool from './tool.js';
 
 const unkey_api_id = 'api_413Kmmitqy3qaDo4';
 const ark_base_url = process.env.ARK_BASE_URL || 'https://ark.cn-beijing.volces.com';
@@ -339,11 +340,28 @@ export const ve_seedream_5_0_lite = {
             const generatedImages = response.data?.data || [];
             const cost = generatedImages.length * 5;
             const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, cost, { platform: 'volcengine', action: 'seedream_5_0_lite_generate_image' });
+            const responseData = response.data && typeof response.data === 'object' ? { ...response.data } : {};
+            const responseImages = Array.isArray(responseData.data) ? responseData.data : [];
+            const localizedImages = await Promise.all(
+                responseImages.map(async (item, index) => {
+                    if (!item || typeof item !== 'object' || !item.url) {
+                        return item;
+                    }
+
+                    const savedImage = await tool.saveImageUrlToDownloads(item.url, 've-seedream-5-0-lite', index);
+                    return {
+                        ...item,
+                        url: `${req.protocol}://${req.get('host')}/downloads/${savedImage.fileName}`,
+                        remote_url: item.url
+                    };
+                })
+            );
+            responseData.data = localizedImages;
 
             return res.send({
                 code: 200,
                 msg: `生成 ${generatedImages.length} 张图片，扣费 ${cost} 积分，剩余 ${remaining} 积分`,
-                data: response.data || {}
+                data: responseData
             });
         } catch (error) {
             const detail = error.response ? error.response.data : error.message;

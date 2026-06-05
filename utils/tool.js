@@ -750,6 +750,36 @@ const tool = {
             filePath
         };
     },
+    saveImageUrlToDownloads: async function (imageUrl, prefix = 'image', index = 0) {
+        if (!imageUrl || typeof imageUrl !== 'string') {
+            throw new Error('图片 URL 不能为空');
+        }
+
+        const response = await axios.get(imageUrl, {
+            responseType: 'arraybuffer',
+            timeout: 30000,
+        });
+        const contentType = response.headers?.['content-type'] || 'image/png';
+        if (!String(contentType).startsWith('image/')) {
+            throw new Error(`第 ${index + 1} 张图片不是有效图片资源`);
+        }
+
+        const ext = this.extFromContentType(contentType);
+        const downloadDir = path.join(__dirname, '..', 'downloads');
+        if (!fs.existsSync(downloadDir)) {
+            fs.mkdirSync(downloadDir, { recursive: true });
+        }
+
+        const fileName = `${prefix}-${Date.now()}-${process.pid}-${index}.${ext}`;
+        const filePath = path.join(downloadDir, fileName);
+        await fs.promises.writeFile(filePath, Buffer.from(response.data));
+
+        return {
+            fileName,
+            filePath,
+            contentType
+        };
+    },
     isRetryableImageDownloadError: function (error) {
         const code = String(error?.code || '').toUpperCase();
         const status = Number(error?.response?.status);

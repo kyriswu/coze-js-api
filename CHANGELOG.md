@@ -23,6 +23,7 @@ All notable changes to this project will be documented in this file.
 - Added Twitter endpoint `POST /twitter/fetch_search_timeline` backed by TikHub `fetch_search_timeline` API integration.
 
 ### Changed
+- Updated `ve_seedream_5_0_lite.generate_image` to download generated images into local `downloads/` storage and return local `/downloads/...` URLs in `data.data[].url`.
 - Updated `POST /wx_gzh/fetch_search_article` API key billing from 1 credit to 2 credits per request.
 - Added 3-attempt retry with short randomized backoff for `POST /wx_gzh/fetch_search_article` on transient upstream failures.
 - Improved `downloadImageUrlToTempFile` for `POST /gpt-image-2/generate` with a 30s timeout and one retry on transient download errors (timeout/network/429/5xx).
