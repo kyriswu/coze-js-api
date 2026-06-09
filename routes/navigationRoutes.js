@@ -6,8 +6,363 @@ import unkey from '../utils/unkey.js';
 
 const router = express.Router();
 
+const serviceCategories = [
+    { id: 'all', name: '全部', accent: '#2f5bff' },
+    { id: 'ai', name: 'AI 创作', accent: '#7c3aed' },
+    { id: 'search', name: '搜索解析', accent: '#0f7cff' },
+    { id: 'media', name: '视频音频', accent: '#f97316' },
+    { id: 'platform', name: '平台数据', accent: '#10b981' },
+    { id: 'file', name: '文件处理', accent: '#2563eb' },
+    { id: 'knowledge', name: '知识查询', accent: '#dc2626' },
+    { id: 'tool', name: '工具服务', accent: '#0891b2' }
+];
+
+const serviceCards = [
+    {
+        title: 'GPT Image 2 生图',
+        category: 'ai',
+        icon: 'GI',
+        description: '文本生图与多图参考编辑，生成结果自动转为本地下载链接。',
+        endpoint: 'POST /gpt-image-2/generate',
+        badge: 'AI 图片',
+        price: '3 点/次'
+    },
+    {
+        title: 'Seedream 图片生成',
+        category: 'ai',
+        icon: 'SD',
+        description: '火山引擎 Seedream 5.0 Lite 图片生成接口。',
+        endpoint: 'POST /volcengine/seedream/5.0-lite/generate-image',
+        badge: 'AI 图片',
+        price: '按量'
+    },
+    {
+        title: 'Coze 工作流运行',
+        category: 'ai',
+        icon: 'WF',
+        description: '通过 API 调用 Coze 工作流，适合自动化业务编排。',
+        endpoint: 'POST /workflow/run',
+        badge: '自动化',
+        price: '按量'
+    },
+    {
+        title: 'AI 在线答案',
+        category: 'search',
+        icon: 'QA',
+        description: '搜索并生成结构化回答，同时返回引用来源。',
+        endpoint: 'POST /ai_online_answer',
+        badge: '问答',
+        price: '按量'
+    },
+    {
+        title: 'Google 网页搜索',
+        category: 'search',
+        icon: 'GS',
+        description: '聚合网页搜索结果，支持免费限额与 API Key 额度。',
+        endpoint: 'POST /google/search/web',
+        badge: '搜索',
+        price: '1 点/次'
+    },
+    {
+        title: 'Tavily 智能搜索',
+        category: 'search',
+        icon: 'TV',
+        description: '面向 AI 场景的联网搜索，返回结果与摘要。',
+        endpoint: 'POST /tavily/search',
+        badge: '搜索',
+        price: '按量'
+    },
+    {
+        title: '火山网页搜索',
+        category: 'search',
+        icon: 'VS',
+        description: 'Volcengine Web Search 能力封装。',
+        endpoint: 'POST /volcengine/web-search',
+        badge: '搜索',
+        price: '按量'
+    },
+    {
+        title: '链接正文读取',
+        category: 'search',
+        icon: 'LR',
+        description: '输入网页或 PDF 链接，提取主要正文内容。',
+        endpoint: 'POST /jina_reader',
+        badge: '解析',
+        price: '按量'
+    },
+    {
+        title: 'HTML 元素提取',
+        category: 'search',
+        icon: 'HX',
+        description: '使用 CSS Selector 或 XPath 抽取网页结构化内容。',
+        endpoint: 'POST /parse_html',
+        badge: '解析',
+        price: '1 点/次'
+    },
+    {
+        title: '虚拟浏览器解析',
+        category: 'search',
+        icon: 'EX',
+        description: '支持 Cookie、Selector、XPath 的 Chromium 网页解析。',
+        endpoint: 'POST /explorer',
+        badge: '浏览器',
+        price: '1 点/次'
+    },
+    {
+        title: 'Firecrawl 抓取',
+        category: 'search',
+        icon: 'FC',
+        description: '单页或批量网页抓取，适合内容采集与知识库入库。',
+        endpoint: 'POST /firecrawl/scrape',
+        badge: '抓取',
+        price: '按量'
+    },
+    {
+        title: '视频文案提取',
+        category: 'media',
+        icon: 'ST',
+        description: '支持 YouTube、抖音、B站、小红书等视频语音转文字。',
+        endpoint: 'POST /whisper/speech-to-text',
+        badge: '转写',
+        price: '按分钟'
+    },
+    {
+        title: 'Cloudflare Whisper',
+        category: 'media',
+        icon: 'AS',
+        description: '音频链接语音识别，返回文字结果。',
+        endpoint: 'POST /cloudflare/run_whisper',
+        badge: '语音',
+        price: '按量'
+    },
+    {
+        title: '全网视频下载',
+        category: 'media',
+        icon: 'VD',
+        description: '解析多平台视频直链，支持抖音、B站、YouTube 等。',
+        endpoint: 'POST /download_video',
+        badge: '下载',
+        price: '1 点/次'
+    },
+    {
+        title: 'YouTube 音频下载',
+        category: 'media',
+        icon: 'YT',
+        description: '提取 YouTube 视频音频并返回本地下载地址。',
+        endpoint: 'POST /youtube/download_audio',
+        badge: '音频',
+        price: '按量'
+    },
+    {
+        title: '音频格式转换',
+        category: 'media',
+        icon: 'AC',
+        description: '支持 mp3、m4a、wav、ogg、aac、flac 等格式转换。',
+        endpoint: 'POST /audio-format-convert',
+        badge: '转换',
+        price: '按量'
+    },
+    {
+        title: '视频转音频',
+        category: 'media',
+        icon: 'VA',
+        description: '将视频链接提取并转换为 MP3 音频文件。',
+        endpoint: 'POST /video2audio',
+        badge: '转换',
+        price: '按量'
+    },
+    {
+        title: '视频音频合成',
+        category: 'media',
+        icon: 'MX',
+        description: '把视频与音频合成为新视频，返回下载链接。',
+        endpoint: 'POST /mix_video_and_audio',
+        badge: '剪辑',
+        price: '按量'
+    },
+    {
+        title: 'Bilibili 数据',
+        category: 'platform',
+        icon: 'BI',
+        description: '获取 B站字幕、用户投稿视频与视频评论。',
+        endpoint: 'POST /bilibili/subtitle',
+        badge: 'B站',
+        price: '按量'
+    },
+    {
+        title: '小红书数据',
+        category: 'platform',
+        icon: 'RH',
+        description: '首页笔记、搜索笔记、笔记详情等小红书数据接口。',
+        endpoint: 'POST /xiaohongshu/search_notes_v2',
+        badge: '小红书',
+        price: '按量'
+    },
+    {
+        title: '微信公众号数据',
+        category: 'platform',
+        icon: 'WX',
+        description: '公众号文章列表、文章搜索与详情抓取。',
+        endpoint: 'POST /wx_gzh/fetch_search_article',
+        badge: '微信',
+        price: '1 点/次'
+    },
+    {
+        title: '抖音数据',
+        category: 'platform',
+        icon: 'DY',
+        description: '用户作品、综合搜索、视频搜索与评论数据。',
+        endpoint: 'POST /douyin/fetch_general_search_v1',
+        badge: '抖音',
+        price: '按量'
+    },
+    {
+        title: '抖音热点榜',
+        category: 'platform',
+        icon: 'HB',
+        description: '上升热点榜和同城热点榜数据。',
+        endpoint: 'POST /douyin/billboard/fetch_hot_rise_list',
+        badge: '热榜',
+        price: '按量'
+    },
+    {
+        title: 'Twitter/X 数据',
+        category: 'platform',
+        icon: 'TX',
+        description: '推文详情与搜索时间线数据获取。',
+        endpoint: 'POST /twitter/fetch_search_timeline',
+        badge: '社媒',
+        price: '按量'
+    },
+    {
+        title: 'PDF 转图片',
+        category: 'file',
+        icon: 'PI',
+        description: '下载远程 PDF，并将每页转换为图片链接。',
+        endpoint: 'POST /pdf2img',
+        badge: 'PDF',
+        price: '按量'
+    },
+    {
+        title: 'PDF 下载',
+        category: 'file',
+        icon: 'PD',
+        description: '校验并下载远程 PDF，返回本地访问链接。',
+        endpoint: 'POST /download_pdf',
+        badge: 'PDF',
+        price: '按量'
+    },
+    {
+        title: '图片下载',
+        category: 'file',
+        icon: 'IM',
+        description: '下载远程图片到本地 downloads 目录。',
+        endpoint: 'POST /download_image',
+        badge: '图片',
+        price: '按量'
+    },
+    {
+        title: '百度网盘工具',
+        category: 'file',
+        icon: 'XP',
+        description: '网盘搜索、文件信息、直链和下载辅助接口。',
+        endpoint: 'POST /xpan/search',
+        badge: '网盘',
+        price: '按量'
+    },
+    {
+        title: '中英文 Wikipedia',
+        category: 'knowledge',
+        icon: 'WK',
+        description: '搜索中英文维基百科词条并获取正文内容。',
+        endpoint: 'POST /zh_wikipedia/search_item',
+        badge: '百科',
+        price: '免费'
+    },
+    {
+        title: '法律法规查询',
+        category: 'knowledge',
+        icon: 'LW',
+        description: '从国家法律法规库查询法规并返回文档链接。',
+        endpoint: 'POST /flfg',
+        badge: '法规',
+        price: '按量'
+    },
+    {
+        title: '专利查询',
+        category: 'knowledge',
+        icon: 'ZL',
+        description: '按关键词查询专利标题、申请人、发明人和日期。',
+        endpoint: 'POST /zlcx',
+        badge: '专利',
+        price: '1 点/次'
+    },
+    {
+        title: '天气查询',
+        category: 'knowledge',
+        icon: 'QW',
+        description: '城市天气代码和历史天气查询。',
+        endpoint: 'POST /qweather/history_weather',
+        badge: '天气',
+        price: '按量'
+    },
+    {
+        title: '八字紫微工具',
+        category: 'tool',
+        icon: 'BZ',
+        description: '八字、紫微斗数和积分计算工具。',
+        endpoint: 'POST /bazi/calc_ba_zi',
+        badge: '计算',
+        price: '按量'
+    },
+    {
+        title: '网页截图',
+        category: 'tool',
+        icon: 'SS',
+        description: '生成网页或指定元素截图，返回图片地址。',
+        endpoint: 'POST /screenshot',
+        badge: '截图',
+        price: '按量'
+    },
+    {
+        title: 'Sitemap 获取',
+        category: 'tool',
+        icon: 'SM',
+        description: '获取网站 sitemap，辅助站点分析和内容发现。',
+        endpoint: 'POST /get_sitemap',
+        badge: '站点',
+        price: '1 点/次'
+    },
+    {
+        title: 'API Key 额度查询',
+        category: 'tool',
+        icon: 'AK',
+        description: '查询 API Key 状态和剩余额度，方便接入前确认。',
+        endpoint: 'GET /apikey',
+        badge: '账号',
+        price: '工具'
+    }
+];
+
+const serviceStats = [
+    { label: '插件服务', value: `${serviceCards.length}+`, note: '持续更新中' },
+    { label: '服务分类', value: `${serviceCategories.length - 1}`, note: '覆盖常用场景' },
+    { label: '接入方式', value: 'HTTP API', note: '标准 JSON 请求' },
+    { label: '返回资源', value: '本地链接', note: '图片/音频/文件可访问' }
+];
+
 router.get('/', (req, res) => {
-    res.send('Hello World!');
+    res.render('home', {
+        categories: serviceCategories,
+        services: serviceCards,
+        stats: serviceStats,
+        seo: {
+            title: 'DevTool 插件服务 - AI、搜索、视频、平台数据 API 工具箱',
+            description: 'DevTool 插件服务中心，集中展示 AI 创作、网页搜索解析、视频音频处理、平台数据、文件处理、知识查询等插件 API 服务。',
+            keywords: 'DevTool,插件服务,API,AI图片生成,视频转文字,网页解析,抖音数据,小红书数据,B站数据',
+            url: `${tool.getBaseUrl(req)}${req.originalUrl}`
+        }
+    });
 });
 
 router.get('/wiki', (req, res) => {

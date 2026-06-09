@@ -1,5 +1,33 @@
 # RELEASE
 
+## Feature
+2026-06-09 / build-plugin-services-showcase-homepage
+
+### Summary
+新增 DevTool 插件服务首页，将原 `/` 的 `Hello World!` 替换为插件服务展示页。
+
+### What Changed
+- 新增 `views/home.ejs`：提供分类筛选、关键词搜索、服务统计、插件卡片网格和快捷入口。
+- 更新 `routes/navigationRoutes.js`：为 `/` 路由传入插件分类、服务卡片、统计和 SEO 信息。
+- 首页移除登录、注册、控制台主入口，定位为纯插件服务展示页。
+- 首页新增付费购买提示，直接展示微信 `xiaowu_azt` 和备注“购买插件额度”。
+- 新增 `/assets` 静态目录，并在付费提示中预留 `/assets/wechat-qr.png` 二维码图片位。
+
+### Impact
+#### API/Behavior
+- `GET /` 现在返回插件服务 HTML 页面。
+- 现有 API 路由和响应结构不变。
+
+#### Internal Modules
+- 影响 `index.js`、`routes/navigationRoutes.js`、`views/home.ejs` 与 `assets/`。
+
+### Breaking Changes
+- none
+
+### Rollback Notes
+- 将 `/` 路由恢复为 `res.send('Hello World!')`。
+- 删除 `views/home.ejs`。
+
 ## Hotfix
 2026-06-05 / return-local-download-urls-for-volcengine-generated-images
 

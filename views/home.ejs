@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <% const pageSeo = (typeof seo !== 'undefined' && seo) ? seo : {}; %>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= pageSeo.title || 'DevTool 插件服务' %></title>
+  <meta name="description" content="<%= pageSeo.description || 'DevTool 插件服务中心，集中展示 AI、搜索、视频、平台数据和文件处理 API。' %>" />
+  <meta name="keywords" content="<%= pageSeo.keywords || 'DevTool,插件服务,API' %>" />
+  <meta name="robots" content="index,follow,max-image-preview:large" />
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="zh_CN" />
+  <meta property="og:title" content="<%= pageSeo.title || 'DevTool 插件服务' %>" />
+  <meta property="og:description" content="<%= pageSeo.description || 'DevTool 插件服务中心。' %>" />
+  <meta property="og:url" content="<%= pageSeo.url || '' %>" />
+
+  <style>
+    :root {
+      --page: #f7f9fc;
+      --paper: #ffffff;
+      --paper-soft: #fbfcff;
+      --ink: #142033;
+      --muted: #66758a;
+      --faint: #8b98aa;
+      --line: #dce3ee;
+      --line-strong: #c7d1e0;
+      --blue: #2f5bff;
+      --blue-dark: #1e40d7;
+      --green: #17a763;
+      --orange: #f97316;
+      --red: #e11d48;
+      --shadow: 0 18px 50px rgba(36, 55, 88, 0.08);
+      --soft-shadow: 0 10px 28px rgba(33, 52, 82, 0.06);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: "HarmonyOS Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(247, 249, 252, 0.96) 24%, var(--page) 100%),
+        repeating-linear-gradient(90deg, rgba(47, 91, 255, 0.03) 0 1px, transparent 1px 72px);
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    .shell {
+      width: min(1360px, calc(100% - 48px));
+      margin: 0 auto;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: rgba(255, 255, 255, 0.86);
+      border-bottom: 1px solid rgba(210, 219, 232, 0.8);
+      backdrop-filter: blur(16px);
+    }
+
+    .nav {
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: max-content;
+    }
+
+    .brand-mark {
+      width: 32px;
+      height: 32px;
+      display: grid;
+      place-items: center;
+      border-radius: 10px;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #2452ff, #4974ff);
+      box-shadow: 0 10px 20px rgba(47, 91, 255, 0.24);
+    }
+
+    .brand-name {
+      font-size: 19px;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      flex: 1;
+    }
+
+    .nav-links a {
+      color: #344257;
+      font-size: 14px;
+      font-weight: 700;
+      padding: 12px 15px;
+      border-radius: 10px;
+      transition: color 0.18s ease, background 0.18s ease;
+    }
+
+    .nav-links a:hover,
+    .nav-links a.active {
+      color: var(--blue);
+      background: rgba(47, 91, 255, 0.08);
+    }
+
+    .nav-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-width: max-content;
+      color: #243449;
+      font-size: 14px;
+      font-weight: 700;
+      padding: 10px 14px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--paper);
+    }
+
+    .hero {
+      padding: 42px 0 20px;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(340px, 430px);
+      gap: 36px;
+      align-items: end;
+    }
+
+    .eyebrow {
+      margin: 0 0 12px;
+      color: var(--blue);
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(34px, 4.5vw, 58px);
+      line-height: 1.05;
+      letter-spacing: 0;
+    }
+
+    .lead {
+      max-width: 760px;
+      margin: 16px 0 0;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.9;
+    }
+
+    .search-panel {
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.78);
+      box-shadow: var(--soft-shadow);
+    }
+
+    .search-box {
+      position: relative;
+    }
+
+    .search-box input {
+      width: 100%;
+      height: 48px;
+      padding: 0 48px 0 16px;
+      color: var(--ink);
+      border: 1px solid var(--line-strong);
+      border-radius: 13px;
+      background: var(--paper);
+      outline: none;
+      transition: border-color 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .search-box input:focus {
+      border-color: rgba(47, 91, 255, 0.74);
+      box-shadow: 0 0 0 4px rgba(47, 91, 255, 0.1);
+    }
+
+    .search-icon {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--faint);
+      font-weight: 900;
+    }
+
+    .search-hints {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .hint {
+      color: #45566e;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 6px 9px;
+      border-radius: 999px;
+      background: #eef4ff;
+    }
+
+    .category-rail {
+      margin-top: 28px;
+      padding: 10px;
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.84);
+      box-shadow: var(--soft-shadow);
+    }
+
+    .category-btn {
+      min-width: max-content;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #344257;
+      border: 0;
+      border-radius: 12px;
+      padding: 11px 16px;
+      background: transparent;
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .category-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 99px;
+      background: var(--cat-color);
+      box-shadow: 0 0 0 4px color-mix(in srgb, var(--cat-color) 14%, transparent);
+    }
+
+    .category-btn.active {
+      color: #fff;
+      background: var(--blue);
+      box-shadow: 0 10px 22px rgba(47, 91, 255, 0.24);
+    }
+
+    .category-btn.active .category-dot {
+      background: #fff;
+      box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.22);
+    }
+
+    .stats {
+      margin-top: 10px;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .stat {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.8);
+    }
+
+    .stat-sign {
+      width: 36px;
+      height: 36px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+      border-radius: 12px;
+      color: var(--blue);
+      font-size: 13px;
+      font-weight: 900;
+      background: #edf3ff;
+    }
+
+    .stat-value {
+      display: block;
+      font-size: 18px;
+      font-weight: 900;
+    }
+
+    .stat-label {
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .pay-notice {
+      margin: 14px 0 0;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 18px;
+      align-items: center;
+      padding: 18px 20px;
+      border: 1px solid rgba(249, 115, 22, 0.28);
+      border-radius: 16px;
+      background:
+        linear-gradient(135deg, rgba(255, 247, 237, 0.94), rgba(255, 255, 255, 0.9)),
+        var(--paper);
+      box-shadow: var(--soft-shadow);
+    }
+
+    .pay-kicker {
+      display: inline-flex;
+      align-items: center;
+      width: fit-content;
+      margin: 0 0 7px;
+      color: #c2410c;
+      font-size: 12px;
+      font-weight: 900;
+      padding: 5px 8px;
+      border-radius: 999px;
+      background: rgba(249, 115, 22, 0.1);
+    }
+
+    .pay-title {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.4;
+      letter-spacing: 0;
+    }
+
+    .pay-text {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .wechat-card {
+      min-width: 260px;
+      padding: 14px;
+      border: 1px solid rgba(249, 115, 22, 0.24);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.78);
+    }
+
+    .wechat-qr {
+      display: block;
+      width: 178px;
+      aspect-ratio: 1;
+      object-fit: contain;
+      margin: 0 auto 12px;
+      border-radius: 8px;
+      background: #fff;
+      border: 1px solid rgba(124, 45, 18, 0.12);
+    }
+
+    .wechat-card.qr-missing .wechat-qr {
+      display: none;
+    }
+
+    .qr-fallback {
+      display: none;
+      margin-bottom: 12px;
+      padding: 12px;
+      color: #9a3412;
+      font-size: 12px;
+      line-height: 1.7;
+      border: 1px dashed rgba(249, 115, 22, 0.34);
+      border-radius: 8px;
+      background: rgba(255, 247, 237, 0.8);
+    }
+
+    .wechat-card.qr-missing .qr-fallback {
+      display: block;
+    }
+
+    .wechat-label {
+      display: block;
+      color: #7c2d12;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .wechat-id {
+      display: block;
+      margin-top: 4px;
+      color: #111827;
+      font-family: "SFMono-Regular", "Consolas", monospace;
+      font-size: 18px;
+      font-weight: 900;
+    }
+
+    .wechat-note {
+      display: block;
+      margin-top: 5px;
+      color: #9a3412;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .section-head {
+      margin: 28px 0 16px;
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 18px;
+    }
+
+    .section-head h2 {
+      margin: 0;
+      font-size: 22px;
+      letter-spacing: 0;
+    }
+
+    .count {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .service-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .service-card {
+      min-height: 176px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(251, 253, 255, 0.88)),
+        var(--paper);
+      box-shadow: var(--soft-shadow);
+      transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .service-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(47, 91, 255, 0.34);
+      box-shadow: 0 18px 38px rgba(33, 52, 82, 0.11);
+    }
+
+    .service-top {
+      display: grid;
+      grid-template-columns: 44px minmax(0, 1fr);
+      gap: 12px;
+      align-items: center;
+    }
+
+    .service-icon {
+      width: 44px;
+      height: 44px;
+      display: grid;
+      place-items: center;
+      border-radius: 14px;
+      color: var(--cat-color);
+      font-size: 12px;
+      font-weight: 900;
+      background: color-mix(in srgb, var(--cat-color) 13%, white);
+      border: 1px solid color-mix(in srgb, var(--cat-color) 20%, white);
+    }
+
+    .service-title {
+      margin: 0;
+      font-size: 16px;
+      line-height: 1.35;
+      letter-spacing: 0;
+    }
+
+    .service-badge {
+      display: inline-flex;
+      width: fit-content;
+      margin-top: 5px;
+      color: var(--cat-color);
+      font-size: 12px;
+      font-weight: 800;
+      line-height: 1;
+      padding: 5px 7px;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--cat-color) 10%, white);
+    }
+
+    .service-desc {
+      min-height: 43px;
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.65;
+    }
+
+    .service-meta {
+      margin-top: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .endpoint {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: #41506a;
+      font-family: "SFMono-Regular", "Consolas", monospace;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 6px 8px;
+      border: 1px solid #d8e2f0;
+      border-radius: 7px;
+      background: #f3f7fd;
+    }
+
+    .price {
+      min-width: max-content;
+      color: var(--green);
+      font-size: 12px;
+      font-weight: 900;
+      padding: 6px 8px;
+      border: 1px solid rgba(23, 167, 99, 0.28);
+      border-radius: 7px;
+      background: rgba(23, 167, 99, 0.08);
+    }
+
+    .empty {
+      display: none;
+      padding: 48px 20px;
+      text-align: center;
+      color: var(--muted);
+      border: 1px dashed var(--line-strong);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.64);
+    }
+
+    .quick-panel {
+      margin: 40px auto 52px;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .quick-link {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      min-height: 78px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.78);
+      box-shadow: var(--soft-shadow);
+      transition: transform 0.18s ease, border-color 0.18s ease;
+    }
+
+    .quick-link:hover {
+      transform: translateY(-2px);
+      border-color: rgba(47, 91, 255, 0.34);
+    }
+
+    .quick-icon {
+      width: 36px;
+      height: 36px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+      color: var(--blue);
+      font-size: 12px;
+      font-weight: 900;
+      border-radius: 12px;
+      background: #edf3ff;
+    }
+
+    .quick-title {
+      display: block;
+      font-weight: 900;
+    }
+
+    .quick-note {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    footer {
+      padding: 22px 0 34px;
+      color: var(--muted);
+      font-size: 13px;
+      text-align: center;
+      border-top: 1px solid rgba(220, 227, 238, 0.9);
+    }
+
+    @media (max-width: 1180px) {
+      .service-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 920px) {
+      .shell {
+        width: min(100% - 28px, 760px);
+      }
+
+      .nav {
+        height: auto;
+        padding: 12px 0;
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .nav-links {
+        width: 100%;
+        justify-content: flex-start;
+        overflow-x: auto;
+      }
+
+      .nav-action {
+        display: none;
+      }
+
+      .hero-grid {
+        grid-template-columns: 1fr;
+        gap: 24px;
+      }
+
+      .stats,
+      .quick-panel {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .pay-notice {
+        grid-template-columns: 1fr;
+      }
+
+      .wechat-card {
+        min-width: 0;
+      }
+
+      .service-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 620px) {
+      .shell {
+        width: min(100% - 22px, 520px);
+      }
+
+      .hero {
+        padding-top: 28px;
+      }
+
+      h1 {
+        font-size: 33px;
+      }
+
+      .lead {
+        font-size: 14px;
+      }
+
+      .stats,
+      .service-grid,
+      .quick-panel {
+        grid-template-columns: 1fr;
+      }
+
+      .section-head {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .service-desc {
+        min-height: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <nav class="shell nav" aria-label="主导航">
+      <a class="brand" href="/">
+        <span class="brand-mark">D</span>
+        <span class="brand-name">DevTool 插件服务</span>
+      </a>
+      <div class="nav-links">
+        <a class="active" href="#services">插件服务</a>
+        <a href="/plugin">文档中心</a>
+        <a href="/wiki">接入指南</a>
+        <a href="/vip">价格说明</a>
+        <a href="/apikey">额度查询</a>
+        <a href="/video-transcript">视频文案</a>
+        <a href="/gpt-image-2">图片生成</a>
+      </div>
+      <a class="nav-action" href="/plugin">查看文档</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="shell hero">
+      <div class="hero-grid">
+        <div>
+          <p class="eyebrow">PLUGIN API CATALOG</p>
+          <h1>插件服务中心</h1>
+          <p class="lead">精选高质量插件服务，覆盖 AI 创作、搜索解析、视频音频、平台数据、文件处理和知识查询。适合快速集成到 Coze、工作流、自动化脚本和业务系统。</p>
+        </div>
+
+        <div class="search-panel" aria-label="插件搜索">
+          <div class="search-box">
+            <input id="serviceSearch" type="search" placeholder="搜索插件服务，如：AI 写作、视频、抖音、PDF" autocomplete="off" />
+            <span class="search-icon">⌕</span>
+          </div>
+          <div class="search-hints" aria-label="热门搜索">
+            <span class="hint">视频转文字</span>
+            <span class="hint">网页解析</span>
+            <span class="hint">抖音数据</span>
+            <span class="hint">PDF</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="category-rail" role="tablist" aria-label="服务分类">
+        <% categories.forEach((category, index) => { %>
+          <button
+            class="category-btn <%= index === 0 ? 'active' : '' %>"
+            type="button"
+            role="tab"
+            aria-selected="<%= index === 0 ? 'true' : 'false' %>"
+            data-category="<%= category.id %>"
+            style="--cat-color: <%= category.accent %>;"
+          >
+            <span class="category-dot"></span>
+            <span><%= category.name %></span>
+          </button>
+        <% }) %>
+      </div>
+
+      <div class="stats" aria-label="服务概览">
+        <% stats.forEach((stat, index) => { %>
+          <div class="stat">
+            <span class="stat-sign"><%= ['API', 'CAT', 'JSON', 'URL'][index] || 'OK' %></span>
+            <span>
+              <strong class="stat-value"><%= stat.value %></strong>
+              <span class="stat-label"><%= stat.label %> · <%= stat.note %></span>
+            </span>
+          </div>
+        <% }) %>
+      </div>
+
+      <div class="pay-notice" aria-label="付费购买说明">
+        <div>
+          <span class="pay-kicker">免费版可直接试用，付费版请加微信购买额度</span>
+          <h2 class="pay-title">需要更多积分或稳定调用量？加工作人员微信开通付费版。</h2>
+          <p class="pay-text">购买指定点数套餐后即可用于本页插件服务。添加时请备注“购买插件额度”，方便快速处理。</p>
+        </div>
+        <div class="wechat-card">
+          <img
+            class="wechat-qr"
+            src="/assets/wechat-qr.png"
+            alt="工作人员微信二维码"
+            onerror="this.closest('.wechat-card').classList.add('qr-missing')"
+          />
+          <span class="qr-fallback">二维码图片待放入：<br />assets/wechat-qr.png</span>
+          <span class="wechat-label">工作人员联系方式 VX</span>
+          <span class="wechat-id">xiaowu_azt</span>
+          <span class="wechat-note">备注：购买插件额度</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="services" class="shell" aria-labelledby="servicesTitle">
+      <div class="section-head">
+        <div>
+          <h2 id="servicesTitle">全部插件服务</h2>
+        </div>
+        <div class="count"><span id="visibleCount"><%= services.length %></span> / <%= services.length %> 个服务</div>
+      </div>
+
+      <div class="service-grid" id="serviceGrid">
+        <% services.forEach((service) => {
+          const category = categories.find((item) => item.id === service.category) || categories[0];
+          const searchable = `${service.title} ${service.description} ${service.endpoint} ${service.badge}`;
+        %>
+          <article
+            class="service-card"
+            data-category="<%= service.category %>"
+            data-search="<%= searchable %>"
+            style="--cat-color: <%= category.accent %>;"
+          >
+            <div class="service-top">
+              <div class="service-icon"><%= service.icon %></div>
+              <div>
+                <h3 class="service-title"><%= service.title %></h3>
+                <span class="service-badge"><%= service.badge %></span>
+              </div>
+            </div>
+            <p class="service-desc"><%= service.description %></p>
+            <div class="service-meta">
+              <span class="endpoint" title="<%= service.endpoint %>"><%= service.endpoint %></span>
+              <span class="price"><%= service.price %></span>
+            </div>
+          </article>
+        <% }) %>
+      </div>
+
+      <div class="empty" id="emptyState">没有找到匹配的插件服务，可以换个关键词试试。</div>
+    </section>
+
+    <section class="shell quick-panel" aria-label="快捷入口">
+      <a class="quick-link" href="/plugin">
+        <span class="quick-icon">DOC</span>
+        <span>
+          <span class="quick-title">查看文档</span>
+          <span class="quick-note">快速接入指南</span>
+        </span>
+      </a>
+      <a class="quick-link" href="/apikey">
+        <span class="quick-icon">KEY</span>
+        <span>
+          <span class="quick-title">额度查询</span>
+          <span class="quick-note">检查 API Key 状态</span>
+        </span>
+      </a>
+      <a class="quick-link" href="/vip">
+        <span class="quick-icon">¥</span>
+        <span>
+          <span class="quick-title">加微信购买额度</span>
+          <span class="quick-note">VX：xiaowu_azt</span>
+        </span>
+      </a>
+      <a class="quick-link" href="/wiki">
+        <span class="quick-icon">?</span>
+        <span>
+          <span class="quick-title">帮助中心</span>
+          <span class="quick-note">常见问题与支持</span>
+        </span>
+      </a>
+    </section>
+  </main>
+
+  <footer>
+    DevTool 插件服务 · 面向 AI 工作流和自动化场景的 API 工具箱
+  </footer>
+
+  <script>
+    const categoryButtons = Array.from(document.querySelectorAll('.category-btn'));
+    const cards = Array.from(document.querySelectorAll('.service-card'));
+    const searchInput = document.getElementById('serviceSearch');
+    const visibleCount = document.getElementById('visibleCount');
+    const emptyState = document.getElementById('emptyState');
+    const title = document.getElementById('servicesTitle');
+    const categoryNames = <%- JSON.stringify(Object.fromEntries(categories.map((item) => [item.id, item.name]))) %>;
+    let activeCategory = 'all';
+
+    function normalize(value) {
+      return String(value || '').toLowerCase().trim();
+    }
+
+    function applyFilters() {
+      const keyword = normalize(searchInput.value);
+      let count = 0;
+
+      cards.forEach((card) => {
+        const matchesCategory = activeCategory === 'all' || card.dataset.category === activeCategory;
+        const matchesKeyword = !keyword || normalize(card.dataset.search).includes(keyword);
+        const visible = matchesCategory && matchesKeyword;
+        card.style.display = visible ? '' : 'none';
+        if (visible) count += 1;
+      });
+
+      visibleCount.textContent = count;
+      emptyState.style.display = count === 0 ? 'block' : 'none';
+      title.textContent = activeCategory === 'all' ? '全部插件服务' : categoryNames[activeCategory];
+    }
+
+    categoryButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        activeCategory = button.dataset.category;
+        categoryButtons.forEach((item) => {
+          const selected = item === button;
+          item.classList.toggle('active', selected);
+          item.setAttribute('aria-selected', selected ? 'true' : 'false');
+        });
+        applyFilters();
+      });
+    });
+
+    searchInput.addEventListener('input', applyFilters);
+  </script>
+</body>
+</html>

@@ -1059,6 +1059,7 @@ import firecrawlTool from './utils/ThirdParrtyApi/firecrawl.js';
 
 // 静态资源服务
 app.use('/images', express.static(path.join(__dirname, 'images')));
+app.use('/assets', express.static(path.join(__dirname, 'assets')));
 app.use('/audio', express.static(path.join(__dirname, 'downloads')));
 app.use('/downloads', express.static(path.join(__dirname, 'downloads')));
 

@@ -1,46 +1,49 @@
-# Current Plan
+# PLAN
 
-## Goal
+## Title
+Add WeChat QR code asset to homepage payment prompt
 
-- 调整 `ve_seedream_5_0_lite.generate_image`，将上游返回的远程图片下载到本地 `downloads/`，并在响应中返回本地可访问链接。
+## Approved
+yes
 
-## Context
+## Context Summary
+用户希望把微信二维码放到首页付费提示处，并将图片保存到项目根目录的 `assets/` 文件夹。当前会话里能看到二维码截图，但工具无法访问原始图片文件；工作区和 `/tmp` 下也未找到可复用图片文件。
 
-- 当前接口直接透传 Volcengine 返回的远程图片 URL。
-- 项目已通过 `/downloads` 静态暴露本地下载目录，适合复用。
-- `utils/tool.js` 已有保存 base64 图片到 `downloads/` 的能力，可补充 URL 图片落盘辅助方法。
+## Assumptions
+- 不重绘或伪造二维码，避免生成不可扫码或错误二维码。
+- 先接入本地静态资源路径 `/assets/wechat-qr.png`。
+- 图片文件需要用户以文件形式放到 `assets/wechat-qr.png` 或重新上传可访问文件。
 
-## Files In Scope
+## Impacted Areas
+- `index.js`
+- `views/home.ejs`
+- `assets/`
+- `docs/QA.md`
+- `docs/RELEASE.md`
+- `CHANGELOG.md`
 
-- utils/volcengine.io.js
-- utils/tool.js
-- harness/plans/current-plan.md
-- docs/PLAN.md
-- docs/QA.md
-- docs/RELEASE.md
-- CHANGELOG.md
+## Steps
+1. 新增 `assets/` 目录占位文件。
+2. 在 Express 中暴露 `/assets` 静态目录。
+3. 在首页付费提示卡片中加入二维码图片位置，引用 `/assets/wechat-qr.png`。
+4. 加入图片加载失败 fallback，避免图片未放入时页面破损。
+5. 运行语法和模板渲染检查。
+6. 同步 QA / RELEASE / CHANGELOG。
 
-## Implementation Steps
+## Verification Plan
+- 命令：`node --check index.js && node --check routes/navigationRoutes.js`
+- 命令：EJS 模板渲染检查。
+- 手工检查：
+  - 首页付费提示中存在二维码图片位。
+  - 图片地址为 `/assets/wechat-qr.png`。
+  - 未放入图片时保留文字联系方式 fallback。
 
-1. 在 `utils/tool.js` 中新增远程图片下载到 `downloads/` 的复用 helper。
-2. 在 `ve_seedream_5_0_lite.generate_image` 成功路径中逐张下载生成图。
-3. 保持原响应结构，仅将 `data.data[].url` 改写为本地 `/downloads/...` 地址。
-4. 运行最小语法校验并同步 QA / release 文档。
+## Risks & Mitigations
+| Risk | Impact | Mitigation |
+|---|---|---|
+| 无法从聊天截图提取原始二维码文件 | 二维码暂不能扫码 | 不伪造二维码，等待用户提供文件 |
+| 图片路径未暴露 | 浏览器无法加载图片 | 新增 `/assets` 静态目录 |
 
-## Risks
-
-- 若上游图片下载失败，生成接口成功后仍可能在本地落盘阶段报错。
-- 需要保持现有 `code/msg/data` 结构不变，避免影响调用方解析。
-
-## Validation
-
-- [x] Relevant checks run
-- [x] Behavior verified
-- [x] Documentation synced if needed
-
-## Status
-
-- [x] Planned
-- [x] Implementing
-- [x] Testing
-- [x] Done
+## Rollback Plan
+- 移除 `/assets` 静态目录配置。
+- 移除首页二维码图片展示块。

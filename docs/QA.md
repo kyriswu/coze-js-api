@@ -1,6 +1,44 @@
 # QA
 
 ## Iteration
+2026-06-09 / build-plugin-services-showcase-homepage
+
+## Test Matrix
+| Case ID | Step | Expected | Actual | Status |
+|---|---|---|---|---|
+| QA-01 | node --check routes/navigationRoutes.js | 无语法错误 | 命令执行无输出 | pass |
+| QA-02 | 渲染 `views/home.ejs` | 模板变量可正常渲染 | `home.ejs render ok` | pass |
+| QA-03 | 请求 `/` 首页 | 返回 HTML 页面 | `HTTP/1.1 200 OK`，`Content-Type: text/html; charset=utf-8` | pass |
+| QA-04 | 检查首页入口 | 不展示登录/注册/控制台主入口 | 页面仅保留文档、价格、额度查询、服务落地页入口 | pass |
+| QA-05 | 检查底部快捷入口布局 | 与主体内容同宽并水平居中 | `.quick-panel` 保持左右 `auto` 外边距 | pass |
+| QA-06 | 检查付费购买提示 | 用户可直接看到微信联系方式和备注要求 | 首页展示 `VX：xiaowu_azt` 与“备注：购买插件额度” | pass |
+| QA-07 | 检查二维码静态资源接入 | 首页引用本地 `/assets/wechat-qr.png`，且静态目录已暴露 | `/assets` 已配置；原图文件待用户放入 `assets/wechat-qr.png` | conditional pass |
+
+## Command Evidence
+```bash
+cd /root/coze-js-api && node --check routes/navigationRoutes.js
+cd /root/coze-js-api && node --input-type=module -e "import ejs from 'ejs'; const categories=[{id:'all',name:'全部',accent:'#2f5bff'}]; const services=[]; const stats=[]; await ejs.renderFile('views/home.ejs',{categories,services,stats,seo:{}}); console.log('home.ejs render ok');"
+cd /root/coze-js-api && curl -I http://127.0.0.1:3000/
+```
+
+## Manual Checks
+- 已确认 `/` 返回首页 HTML。
+- 已确认首页为插件展示页，包含分类、搜索、统计、卡片网格和快捷入口。
+- 已确认首页包含付费购买引导：微信 `xiaowu_azt`，备注“购买插件额度”。
+- 已确认首页二维码位引用 `/assets/wechat-qr.png`；当前会话无法访问截图原始二进制，需用户提供图片文件后才可扫码。
+- 未执行浏览器截图级视觉回归；当前以服务响应和模板渲染验证为主。
+
+## Defects Found
+| ID | Severity | Description | Status |
+|---|---|---|---|
+| BUG-01 | - | 本轮未发现语法或渲染缺陷 | closed |
+
+## Final QA Verdict
+- [x] pass
+- [ ] conditional pass
+- [ ] fail
+
+## Iteration
 2026-06-05 / return-local-download-urls-for-volcengine-generated-images
 
 ## Test Matrix
