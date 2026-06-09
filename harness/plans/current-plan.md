@@ -1,49 +1,49 @@
 # PLAN
 
 ## Title
-Add WeChat QR code asset to homepage payment prompt
+Redesign homepage with liquid ripple visual style
 
 ## Approved
 yes
 
 ## Context Summary
-用户希望把微信二维码放到首页付费提示处，并将图片保存到项目根目录的 `assets/` 文件夹。当前会话里能看到二维码截图，但工具无法访问原始图片文件；工作区和 `/tmp` 下也未找到可复用图片文件。
+用户觉得当前首页太死板，希望页面背景呈现水波纹效果，整体更时尚、前卫、潮流。当前首页为 `views/home.ejs`，已具备插件服务展示、分类筛选、搜索、付费提示和二维码位。
 
 ## Assumptions
-- 不重绘或伪造二维码，避免生成不可扫码或错误二维码。
-- 先接入本地静态资源路径 `/assets/wechat-qr.png`。
-- 图片文件需要用户以文件形式放到 `assets/wechat-qr.png` 或重新上传可访问文件。
+- 保持现有路由、服务卡片数据和筛选功能不变。
+- 不新增依赖，不引入外部图片。
+- 使用 CSS 实现水波纹与玻璃质感，避免影响 API 行为。
+- 仍需保持文字可读和移动端布局稳定。
 
 ## Impacted Areas
-- `index.js`
 - `views/home.ejs`
-- `assets/`
 - `docs/QA.md`
 - `docs/RELEASE.md`
 - `CHANGELOG.md`
 
 ## Steps
-1. 新增 `assets/` 目录占位文件。
-2. 在 Express 中暴露 `/assets` 静态目录。
-3. 在首页付费提示卡片中加入二维码图片位置，引用 `/assets/wechat-qr.png`。
-4. 加入图片加载失败 fallback，避免图片未放入时页面破损。
+1. 重设首页视觉变量，改为水波纹、玻璃质感、青蓝薄荷与珊瑚点缀。
+2. 增加纯 CSS 水波背景层和流动动画。
+3. 调整导航、搜索、分类、统计、付费提示、服务卡片、快捷入口的玻璃样式。
+4. 保持首页筛选脚本、服务数据和 API 路由不变。
 5. 运行语法和模板渲染检查。
 6. 同步 QA / RELEASE / CHANGELOG。
 
 ## Verification Plan
-- 命令：`node --check index.js && node --check routes/navigationRoutes.js`
+- 命令：`node --check routes/navigationRoutes.js`
 - 命令：EJS 模板渲染检查。
 - 手工检查：
-  - 首页付费提示中存在二维码图片位。
-  - 图片地址为 `/assets/wechat-qr.png`。
-  - 未放入图片时保留文字联系方式 fallback。
+  - 首页有水波纹背景与流动视觉。
+  - 卡片、搜索、分类、付费提示文字仍清晰。
+  - 页面不出现登录/注册/控制台入口。
+  - 移动端布局不溢出。
 
 ## Risks & Mitigations
 | Risk | Impact | Mitigation |
 |---|---|---|
-| 无法从聊天截图提取原始二维码文件 | 二维码暂不能扫码 | 不伪造二维码，等待用户提供文件 |
-| 图片路径未暴露 | 浏览器无法加载图片 | 新增 `/assets` 静态目录 |
+| 动画过多影响性能 | 页面卡顿 | 仅用 CSS transform/background-position，且动画层固定在背景 |
+| 背景过花影响阅读 | 服务信息难读 | 前景使用高透明白玻璃面板和深色文字 |
+| 浏览器不支持 `backdrop-filter` | 玻璃效果减弱 | 保留半透明背景、边框和阴影作为 fallback |
 
 ## Rollback Plan
-- 移除 `/assets` 静态目录配置。
-- 移除首页二维码图片展示块。
+- 回滚 `views/home.ejs` 中本轮样式调整。

@@ -1,6 +1,31 @@
 # RELEASE
 
 ## Feature
+2026-06-09 / redesign-homepage-liquid-ripple-style
+
+### Summary
+重设插件服务首页视觉风格，将原本偏规整的服务目录升级为水波纹背景和玻璃质感的潮流展示页。
+
+### What Changed
+- 更新 `views/home.ejs` CSS：新增水波纹背景层、流动高光动画和液态视觉变量。
+- 调整导航、搜索、分类、统计、付费提示、服务卡片和底部快捷入口为玻璃拟态样式。
+- 保持现有服务数据、筛选脚本、二维码位和 API 路由不变。
+
+### Impact
+#### UI/Behavior
+- 首页视觉更时尚、前卫、潮流。
+- 用户仍可按分类和关键词浏览插件服务。
+
+#### Internal Modules
+- 仅影响 `views/home.ejs`。
+
+### Breaking Changes
+- none
+
+### Rollback Notes
+- 回滚 `views/home.ejs` 中本轮 CSS 样式调整。
+
+## Feature
 2026-06-09 / build-plugin-services-showcase-homepage
 
 ### Summary

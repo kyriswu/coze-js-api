@@ -1,6 +1,40 @@
 # QA
 
 ## Iteration
+2026-06-09 / redesign-homepage-liquid-ripple-style
+
+## Test Matrix
+| Case ID | Step | Expected | Actual | Status |
+|---|---|---|---|---|
+| QA-01 | node --check index.js | 无语法错误 | 命令执行无输出 | pass |
+| QA-02 | node --check routes/navigationRoutes.js | 无语法错误 | 命令执行无输出 | pass |
+| QA-03 | 渲染 `views/home.ejs` | 模板变量可正常渲染 | `home.ejs render ok` | pass |
+| QA-04 | 检查视觉样式 | 首页包含水波纹背景、流动高光和玻璃质感卡片 | CSS 已新增 `rippleDrift`、`shimmerSlide`、`backdrop-filter` 等样式 | pass |
+| QA-05 | 检查行为兼容 | 服务数据、分类筛选和搜索脚本不变 | 未改动筛选脚本和路由数据结构 | pass |
+
+## Command Evidence
+```bash
+cd /root/coze-js-api && node --check index.js
+cd /root/coze-js-api && node --check routes/navigationRoutes.js
+cd /root/coze-js-api && node --input-type=module -e "import ejs from 'ejs'; const categories=[{id:'all',name:'全部',accent:'#2f5bff'}]; const services=[{title:'测试服务',category:'all',icon:'T',description:'测试',endpoint:'POST /test',badge:'测试',price:'免费'}]; const stats=[]; await ejs.renderFile('views/home.ejs',{categories,services,stats,seo:{}}); console.log('home.ejs render ok');"
+```
+
+## Manual Checks
+- 已确认首页样式改为水波纹背景和玻璃拟态卡片。
+- 已确认本轮只调整展示层，未改动 API 行为。
+- 未执行浏览器截图级视觉回归；当前以模板渲染和代码检查为主。
+
+## Defects Found
+| ID | Severity | Description | Status |
+|---|---|---|---|
+| BUG-01 | - | 本轮未发现语法或模板渲染缺陷 | closed |
+
+## Final QA Verdict
+- [x] pass
+- [ ] conditional pass
+- [ ] fail
+
+## Iteration
 2026-06-09 / build-plugin-services-showcase-homepage
 
 ## Test Matrix
