@@ -25,6 +25,7 @@ All notable changes to this project will be documented in this file.
 - Added Twitter endpoint `POST /twitter/fetch_search_timeline` backed by TikHub `fetch_search_timeline` API integration.
 
 ### Changed
+- Clarified `skills/douyin-transcribe-api` API key guidance to explicitly state that free keys are not provided, and aligned missing-key prompts in both `SKILL.md` and `scripts/transcribe_douyin.sh` to direct users to purchase/renew at `https://devtool.uk/plugin`.
 - Fixed paid API pre-check in `verifyApiAccess` to enforce endpoint-specific required credits (now blocks `POST /gpt-image-2/generate` when remaining credits are below its 3-credit cost).
 - Redesigned the plugin services homepage with a liquid ripple background, animated highlights, and glass-style service cards.
 - Added a direct paid-plan prompt on the plugin services homepage with WeChat contact `xiaowu_azt` and the required purchase note.

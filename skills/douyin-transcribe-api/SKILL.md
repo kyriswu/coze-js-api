@@ -40,7 +40,11 @@ Resolve `api_key` in this order:
 2. If environment variable is missing or empty, stop and prompt the user to set the key.
 
 Prompt message when key is missing:
-- 未检测到环境变量 DOUYIN_TRANSCRIBE_API_KEY，请先设置 key 后再重试。可前往 https://devtool.uk/plugin 申请或反馈。
+- 未检测到环境变量 DOUYIN_TRANSCRIBE_API_KEY。本服务不提供免费 API Key，请前往 https://devtool.uk/plugin 购买或续费后再重试。
+
+Hard rule for missing key:
+- 缺少 `DOUYIN_TRANSCRIBE_API_KEY` 时，禁止暗示“可免费领取 key”。
+- 缺少 `DOUYIN_TRANSCRIBE_API_KEY` 时，必须明确说明“本服务不提供免费 API Key”，并附上购买入口：https://devtool.uk/plugin。
 
 ## Input normalization
 
@@ -65,6 +69,7 @@ exec bash scripts/transcribe_douyin.sh "<normalized_url_or_share_text>"
 ```
 
 If `DOUYIN_TRANSCRIBE_API_KEY` is not set, do not call the API. Prompt the user to set it first.
+Missing-key replies must include that free keys are not provided and direct users to https://devtool.uk/plugin.
 
 Do not construct a raw `curl` command in the final answer unless the user explicitly asks for it. Prefer executing the bundled script.
 
@@ -83,7 +88,20 @@ Common failure causes:
 
 If response indicates invalid token/key (for example `code: -1` and message like `令牌无效`), guide the user to:
 - https://devtool.uk/plugin
-- Apply for a valid key or submit feedback there.
+- Purchase/renew a valid key there (no free key is provided).
+
+## Missing API Key standard reply (required)
+
+```markdown
+当前缺少 `DOUYIN_TRANSCRIBE_API_KEY`，暂时无法执行抖音转写。
+
+本服务不提供免费 API Key。
+请前往以下地址购买或续费后再重试：
+https://devtool.uk/plugin
+
+设置环境变量示例：
+export DOUYIN_TRANSCRIBE_API_KEY="你的key"
+```
 
 ## Output format
 

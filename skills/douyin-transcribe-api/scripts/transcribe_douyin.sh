@@ -9,7 +9,7 @@ if [[ $# -eq 0 ]]; then
 fi
 
 if [[ -z "${DOUYIN_TRANSCRIBE_API_KEY:-}" ]]; then
-  echo "未检测到环境变量 DOUYIN_TRANSCRIBE_API_KEY，请先设置 key 后再重试。可前往 https://devtool.uk/plugin 申请或反馈。"
+  echo "未检测到环境变量 DOUYIN_TRANSCRIBE_API_KEY。本服务不提供免费 API Key，请前往 https://devtool.uk/plugin 购买或续费后再重试。"
   exit 1
 fi
 

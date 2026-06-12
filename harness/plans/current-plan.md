@@ -1,47 +1,46 @@
 # PLAN
 
 ## Title
-Fix Unkey required credits pre-check for paid APIs
+Align douyin-transcribe-api key messaging with zimujun (no free key)
 
 ## Approved
 yes
 
 ## Context Summary
-用户反馈在 `remaining=1` 时，`/gpt-image-2/generate`（单次成本 3 积分）仍可成功调用。排查发现统一访问校验 `verifyApiAccess` 仅按 `remaining === 0` 拦截，未根据接口实际 cost 做前置积分门槛判断。
+用户反馈 `skills/douyin-transcribe-api` 对 API Key 缺失提示不够强，导致用户误以为可领取免费 key，频繁来咨询“免费 API”。需要参考 `skills/zimujun` 的表达方式，明确该能力不提供免费 key，必须自备/购买 key 后再用。
 
 ## Assumptions
-- 保持现有 API 返回结构不变。
+- 不改接口实现逻辑，只调整技能文档与脚本提示文案。
 - 不引入新依赖。
-- 最小改动：优先修复统一校验函数，并在 `gpt-image-2` 显式传入 required credits。
+- 最小改动：只改 `douyin-transcribe-api` 相关文件与交付记录。
 
 ## Impacted Areas
-- `utils/apiAccess.js`
-- `index.js`
+- `skills/douyin-transcribe-api/SKILL.md`
+- `skills/douyin-transcribe-api/scripts/transcribe_douyin.sh`
 - `docs/PLAN.md`
 - `docs/QA.md`
 - `docs/RELEASE.md`
 - `CHANGELOG.md`
 
 ## Steps
-1. 在 `verifyApiAccess` 增加可选 `requiredCredits` 入参（默认 1）。
-2. 调整付费 key 校验：当 `remaining < requiredCredits` 时直接拦截为积分不足。
-3. 在 `/gpt-image-2/generate` 的校验调用中传入 `requiredCredits: cost`。
-4. 运行最小语法校验命令。
+1. 对齐 `douyin-transcribe-api` 与 `zimujun` 的 API Key 缺失提示语气。
+2. 在 `SKILL.md` 中新增明确规则：缺 key 时必须提示“无免费 key”，并给出购买入口。
+3. 更新脚本 `transcribe_douyin.sh` 缺 key 输出，避免“申请/反馈”造成歧义。
+4. 运行最小可行验证（bash 语法检查）。
 5. 同步 `docs/PLAN.md`、`docs/QA.md`、`docs/RELEASE.md`、`CHANGELOG.md`。
 
 ## Verification Plan
-- 命令：`node --check utils/apiAccess.js`
-- 命令：`node --check index.js`
+- 命令：`bash -n skills/douyin-transcribe-api/scripts/transcribe_douyin.sh`
 - 手工检查：
-  - `remaining=1` 且调用 `gpt-image-2` 时，在外部服务调用前返回积分不足。
-  - `remaining>=3` 时行为保持不变。
+  - `skills/douyin-transcribe-api/SKILL.md` 中缺 key 指引明确包含“本服务不提供免费 API Key”。
+  - 脚本缺 key 提示与文档保持一致，不再使用“申请或反馈”表述。
 
 ## Risks & Mitigations
 | Risk | Impact | Mitigation |
 |---|---|---|
-| 修改统一校验影响其他 1 积分接口 | 潜在误拦截 | `requiredCredits` 默认值设为 1，保持现有接口行为 |
-| `remaining` 类型异常（非数字） | 校验不稳定 | 使用 `Number(remaining)` 做显式数值比较 |
+| 文案过于强硬导致体验下降 | 用户感知不友好 | 保留简洁指引与购买入口，避免情绪化措辞 |
+| 文档与脚本提示不一致 | 使用时产生困惑 | 同时更新 `SKILL.md` 与脚本并做检查 |
 
 ## Rollback Plan
-- 回滚 `utils/apiAccess.js` 的 `requiredCredits` 校验逻辑。
-- 回滚 `index.js` 中 `/gpt-image-2/generate` 传参改动。
+- 回滚 `skills/douyin-transcribe-api/SKILL.md` 的文案改动。
+- 回滚 `skills/douyin-transcribe-api/scripts/transcribe_douyin.sh` 的提示文案。

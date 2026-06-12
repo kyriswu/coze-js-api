@@ -1,6 +1,35 @@
 # RELEASE
 
 ## Hotfix
+2026-06-12 / align-douyin-transcribe-api-key-messaging
+
+### Summary
+统一 `douyin-transcribe-api` 缺少 API Key 场景提示，明确该服务不提供免费 key，避免用户误解。
+
+### What Changed
+- 更新 `skills/douyin-transcribe-api/SKILL.md`：
+	- 缺 key 提示改为“本服务不提供免费 API Key”。
+	- 新增缺 key 强制规则与标准回复模板。
+	- 无效 key 指引改为“购买/续费”语义。
+- 更新 `skills/douyin-transcribe-api/scripts/transcribe_douyin.sh`：
+	- 缺 key 输出改为购买/续费指引，不再使用“申请或反馈”。
+
+### Impact
+#### API/Behavior
+- 仅影响技能文案和脚本提示语，不影响接口调用协议与返回结构。
+- 缺少 `DOUYIN_TRANSCRIBE_API_KEY` 时，用户将明确获知“不提供免费 key”。
+
+#### Internal Modules
+- 影响 `skills/douyin-transcribe-api/SKILL.md` 与 `skills/douyin-transcribe-api/scripts/transcribe_douyin.sh`。
+
+### Breaking Changes
+- none
+
+### Rollback Notes
+- 回滚 `skills/douyin-transcribe-api/SKILL.md` 文案改动。
+- 回滚 `skills/douyin-transcribe-api/scripts/transcribe_douyin.sh` 文案改动。
+
+## Hotfix
 2026-06-12 / fix-unkey-required-credits-precheck
 
 ### Summary

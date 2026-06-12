@@ -1,6 +1,35 @@
 # QA
 
 ## Iteration
+2026-06-12 / align-douyin-transcribe-api-key-messaging
+
+## Test Matrix
+| Case ID | Step | Expected | Actual | Status |
+|---|---|---|---|---|
+| QA-01 | bash -n skills/douyin-transcribe-api/scripts/transcribe_douyin.sh | 无语法错误 | 命令执行无输出 | pass |
+| QA-02 | 检查 `SKILL.md` 缺 key 提示 | 明确“不提供免费 API Key”并给出购买入口 | 文案已更新为购买/续费指引并声明无免费 key | pass |
+| QA-03 | 检查脚本文案一致性 | 与技能文档缺 key 提示语义一致 | 脚本已改为“本服务不提供免费 API Key” | pass |
+
+## Command Evidence
+```bash
+cd /root/coze-js-api && bash -n skills/douyin-transcribe-api/scripts/transcribe_douyin.sh
+```
+
+## Manual Checks
+- 已确认本轮仅调整技能文案和脚本提示，不涉及 API 逻辑变更。
+- 已确认缺 key 场景下不再使用“申请或反馈”表述，统一为购买/续费路径。
+
+## Defects Found
+| ID | Severity | Description | Status |
+|---|---|---|---|
+| BUG-01 | - | 本轮未发现语法或文案一致性缺陷 | closed |
+
+## Final QA Verdict
+- [x] pass
+- [ ] conditional pass
+- [ ] fail
+
+## Iteration
 2026-06-12 / fix-unkey-required-credits-precheck
 
 ## Test Matrix
