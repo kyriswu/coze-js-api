@@ -1,45 +1,44 @@
 # PLAN
 
 ## Title
-Return local download URLs for Volcengine generated images
+Fix Unkey required credits pre-check for paid APIs
 
 ## Approved
 yes
 
 ## Context Summary
-`ve_seedream_5_0_lite.generate_image` 当前直接返回上游 Volcengine 图片 URL。用户需要接口在成功生成后把图片下载到本地 `downloads/`，并在响应中返回本地静态地址。
+用户反馈 `remaining=1` 时仍可调用 `POST /gpt-image-2/generate` 成功。该接口单次消耗 3 积分，说明调用前的积分校验门槛有缺陷。
 
 ## Assumptions
-- 保持现有外层响应结构 `{code,msg,data}` 不变。
+- 保持现有 API 响应结构 `{code,msg,data}` 不变。
 - 不引入新依赖。
-- 复用现有 `/downloads` 静态目录暴露方式。
+- 仅做最小修复，不调整其他业务路由。
 
 ## Impacted Areas
-- `utils/volcengine.io.js`
-- `utils/tool.js`
+- `utils/apiAccess.js`
+- `index.js`
 - `docs/QA.md`
 - `docs/RELEASE.md`
 - `CHANGELOG.md`
 
 ## Steps
-1. 为远程图片新增落盘到 `downloads/` 的通用 helper。
-2. 在图片生成成功后，遍历 `response.data.data` 中的远程 URL 并下载到本地。
-3. 将返回结果中的图片 URL 改写为 `${req.protocol}://${req.get('host')}/downloads/<file>`。
-4. 运行 `node --check utils/tool.js utils/volcengine.io.js` 并记录 QA。
+1. 在统一校验函数 `verifyApiAccess` 增加 `requiredCredits` 参数（默认 1）。
+2. 对付费 key 校验改为 `remaining < requiredCredits` 则拦截。
+3. 在 `POST /gpt-image-2/generate` 传入 `requiredCredits: 3`。
+4. 运行 `node --check utils/apiAccess.js && node --check index.js` 并记录 QA。
 
 ## Verification Plan
-- 命令：`node --check utils/tool.js && node --check utils/volcengine.io.js`
+- 命令：`node --check utils/apiAccess.js && node --check index.js`
 - 手工检查：
-	- 正常生成一张图片时，`data.data[0].url` 返回本地 `/downloads/...` 地址。
-	- 多图生成时，每张图片的 `url` 都被本地地址替换。
-	- 外层 `code`、`msg`、`data.model`、`data.usage` 结构保持不变。
+	- `remaining=1` 调用 `gpt-image-2` 会被前置拦截为积分不足。
+	- `remaining>=3` 调用路径与原行为一致。
 
 ## Risks & Mitigations
 | Risk | Impact | Mitigation |
 |---|---|---|
-| 上游生成成功但本地下载失败 | 接口返回失败 | 复用已有图片下载逻辑并保留错误透传 |
-| 直接改写响应对象导致结构偏差 | 调用方兼容性问题 | 仅替换 `data.data[].url` 字段，其他字段保持原样 |
+| 统一校验改动影响其他接口 | 潜在误拦截 | `requiredCredits` 默认值为 1，保持既有默认行为 |
+| `remaining` 返回异常值 | 误判 | 显式转为 Number 并做有限值判断 |
 
 ## Rollback Plan
-- 回滚 `utils/tool.js` 新增 helper。
-- 回滚 `utils/volcengine.io.js` 中的本地下载与 URL 改写逻辑。
+- 回滚 `utils/apiAccess.js` 中 `requiredCredits` 校验逻辑。
+- 回滚 `index.js` 中 `/gpt-image-2/generate` 的 `requiredCredits` 传参。

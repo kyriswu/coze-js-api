@@ -180,6 +180,7 @@ app.post('/gpt-image-2/generate', async (req, res) => {
         apiKey: api_key,
         freeKey: null,
         freeCheck: async () => false,
+        requiredCredits: cost,
         freeDeniedResponse: {
             code: -1,
             msg: commonUtils.MESSAGE.TOKEN_EXPIRED

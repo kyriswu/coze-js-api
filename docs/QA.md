@@ -1,6 +1,38 @@
 # QA
 
 ## Iteration
+2026-06-12 / fix-unkey-required-credits-precheck
+
+## Test Matrix
+| Case ID | Step | Expected | Actual | Status |
+|---|---|---|---|---|
+| QA-01 | node --check utils/apiAccess.js | 无语法错误 | 命令执行无输出 | pass |
+| QA-02 | node --check index.js | 无语法错误 | 命令执行无输出 | pass |
+| QA-03 | 检查 `verifyApiAccess` 付费门槛 | 当 `remaining < requiredCredits` 时拦截 | 代码路径已实现，使用 `Number(remaining) < Number(requiredCredits)` 判定 | pass |
+| QA-04 | 检查 `gpt-image-2` 接入 | 生成接口按 3 积分做前置校验 | 路由已传入 `requiredCredits: cost`，`cost=3` | pass |
+
+## Command Evidence
+```bash
+cd /root/coze-js-api && node --check utils/apiAccess.js
+cd /root/coze-js-api && node --check index.js
+```
+
+## Manual Checks
+- 已确认本轮为逻辑修复，不涉及响应结构变更。
+- 待联调：使用 `remaining=1` 的 key 调用 `POST /gpt-image-2/generate`，应返回积分不足并不进入上游生图流程。
+- 待联调：使用 `remaining>=3` 的 key 调用同接口应正常成功。
+
+## Defects Found
+| ID | Severity | Description | Status |
+|---|---|---|---|
+| BUG-01 | - | 本轮未发现语法缺陷；真实 key 联调待执行 | open |
+
+## Final QA Verdict
+- [ ] pass
+- [x] conditional pass
+- [ ] fail
+
+## Iteration
 2026-06-09 / redesign-homepage-liquid-ripple-style
 
 ## Test Matrix

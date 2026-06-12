@@ -31,7 +31,7 @@ export function createApiAccessHelpers({ redis, unkey, commonUtils, environment,
         return false;
     }
 
-    async function verifyApiAccess({ apiKey, freeKey, freeCheck, freeDeniedResponse }) {
+    async function verifyApiAccess({ apiKey, freeKey, freeCheck, freeDeniedResponse, requiredCredits = 1 }) {
         if (apiKey) {
             const { valid, remaining } = await unkey.verifyKey(unkeyApiId, apiKey, 0);
             if (!valid) {
@@ -43,7 +43,8 @@ export function createApiAccessHelpers({ redis, unkey, commonUtils, environment,
                     },
                 };
             }
-            if (remaining === 0) {
+            const remainingCredits = Number(remaining);
+            if (!Number.isFinite(remainingCredits) || remainingCredits < Number(requiredCredits)) {
                 return {
                     ok: false,
                     response: {

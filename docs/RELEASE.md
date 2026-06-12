@@ -1,5 +1,31 @@
 # RELEASE
 
+## Hotfix
+2026-06-12 / fix-unkey-required-credits-precheck
+
+### Summary
+修复付费接口积分前置校验门槛：当接口成本大于 1 时，调用前会按所需积分校验，避免 `remaining=1` 仍可调用 `gpt-image-2`（成本 3）成功。
+
+### What Changed
+- 更新 `utils/apiAccess.js`：`verifyApiAccess` 新增 `requiredCredits` 参数（默认 1）。
+- 调整付费校验逻辑：`remaining < requiredCredits` 时返回积分不足。
+- 更新 `index.js`：`POST /gpt-image-2/generate` 在校验时传入 `requiredCredits: 3`。
+
+### Impact
+#### API/Behavior
+- `POST /gpt-image-2/generate` 现在会在调用上游生图服务前拦截余额不足（<3 积分）的请求。
+- 其他基于 `verifyApiAccess` 且单次 1 积分的接口行为保持不变。
+
+#### Internal Modules
+- 影响 `utils/apiAccess.js`、`index.js`。
+
+### Breaking Changes
+- none
+
+### Rollback Notes
+- 回滚 `utils/apiAccess.js` 中 `requiredCredits` 校验改动。
+- 回滚 `index.js` 中 `gpt-image-2` 的 `requiredCredits` 传参。
+
 ## Feature
 2026-06-09 / redesign-homepage-liquid-ripple-style
 
