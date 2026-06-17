@@ -1213,6 +1213,213 @@ export const th_tiktok = {
             console.error("TikTok Comments Error:", error.message);
             return res.send({ code: -1, msg: commonUtils.MESSAGE.SERVER_ERROR });
         }
+    },
+
+    // TikTok 获取指定用户信息
+    handler_user_profile: async function (req, res) {
+        const paramsFromReq = {
+            ...(req.query || {}),
+            ...(req.body || {})
+        };
+
+        const sec_user_id = String(paramsFromReq.sec_user_id || '').trim();
+        const user_id = String(paramsFromReq.user_id || '').trim();
+        const unique_id = String(paramsFromReq.unique_id || '').trim();
+        const api_key = paramsFromReq.api_key;
+
+        let selectedType = '';
+        let selectedValue = '';
+
+        if (sec_user_id) {
+            selectedType = 'sec_user_id';
+            selectedValue = sec_user_id;
+        } else if (user_id) {
+            selectedType = 'user_id';
+            selectedValue = user_id;
+        } else if (unique_id) {
+            selectedType = 'unique_id';
+            selectedValue = unique_id;
+        }
+
+        if (!selectedType) {
+            return res.send({ code: -1, msg: 'sec_user_id、user_id、unique_id 至少填写一个' });
+        }
+
+        if (selectedType === 'user_id' && !/^\d+$/.test(selectedValue)) {
+            return res.send({ code: -1, msg: 'user_id 必须为纯数字字符串' });
+        }
+
+        try {
+            const isValid = await commonUtils.valid_redis_key('tt_handler_user_profile', unkey_api_id, api_key, req, res);
+            if (!isValid) return;
+
+            const response = await axios.get('https://api.tikhub.io/api/v1/tiktok/app/v3/handler_user_profile', {
+                params: {
+                    [selectedType]: selectedValue
+                },
+                headers: {
+                    Authorization: `Bearer ${tikhub_api_token}`
+                }
+            });
+
+            if (response.data?.code !== 200) {
+                return res.send({
+                    code: -1,
+                    msg: response.data?.message_zh || response.data?.message || '获取用户信息失败'
+                });
+            }
+
+            const rawData = response.data?.data || {};
+            const profileRoot = rawData.user || rawData.user_info || rawData.userInfo || rawData || {};
+            const statsRoot = rawData.stats || rawData.statistics || profileRoot.stats || profileRoot || {};
+            const avatarUrl =
+                profileRoot.avatar_url ||
+                profileRoot.avatar_thumb?.url_list?.[0] ||
+                profileRoot.avatar_medium?.url_list?.[0] ||
+                profileRoot.avatar_larger?.url_list?.[0] ||
+                '';
+
+            const profile = {
+                user_id: profileRoot.user_id || profileRoot.uid || '',
+                sec_user_id: profileRoot.sec_uid || profileRoot.sec_user_id || '',
+                unique_id: profileRoot.unique_id || profileRoot.username || '',
+                nickname: profileRoot.nickname || '',
+                signature: profileRoot.signature || '',
+                region: profileRoot.region || '',
+                avatar_url: avatarUrl,
+                verified: Boolean(
+                    profileRoot.verified ||
+                    profileRoot.is_verified ||
+                    Number(profileRoot.verification_type) > 0 ||
+                    Number(profileRoot.verification_badge_type) > 0
+                ),
+                follower_count: Number(statsRoot.follower_count || statsRoot.followerCount || 0),
+                following_count: Number(statsRoot.following_count || statsRoot.followingCount || 0),
+                aweme_count: Number(statsRoot.aweme_count || statsRoot.video_count || 0),
+                total_favorited: Number(statsRoot.total_favorited || statsRoot.totalLiked || 0),
+                favoriting_count: Number(statsRoot.favoriting_count || 0),
+                status_code: Number(rawData.status_code || 0)
+            };
+
+            let msg = 'success';
+            if (api_key) {
+                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1, { platform: 'tiktok', action: 'handler_user_profile' });
+                msg = `API Key 剩余积分：${remaining}`;
+            }
+
+            return res.send({
+                code: 200,
+                msg,
+                params_used: {
+                    type: selectedType,
+                    value: selectedValue
+                },
+                profile,
+                data: rawData
+            });
+        } catch (error) {
+            console.error('TikTok Handler User Profile Error:', error.response ? error.response.data : error.message);
+            return res.send({ code: -1, msg: commonUtils.MESSAGE.SERVER_ERROR });
+        }
+    },
+
+    // TikTok 获取用户主页作品数据 V3（精简数据-更快速）
+    fetch_user_post_videos_v3: async function (req, res) {
+        const paramsFromReq = {
+            ...(req.query || {}),
+            ...(req.body || {})
+        };
+
+        const sec_user_id = String(paramsFromReq.sec_user_id || '').trim();
+        const unique_id = String(paramsFromReq.unique_id || '').trim();
+        const max_cursor = Number(paramsFromReq.max_cursor) || 0;
+        const count = Number(paramsFromReq.count) || 20;
+        const sort_type = Number(paramsFromReq.sort_type) || 0;
+        const api_key = paramsFromReq.api_key;
+
+        let selectedType = '';
+        let selectedValue = '';
+
+        if (sec_user_id) {
+            selectedType = 'sec_user_id';
+            selectedValue = sec_user_id;
+        } else if (unique_id) {
+            selectedType = 'unique_id';
+            selectedValue = unique_id;
+        }
+
+        if (!selectedType) {
+            return res.send({ code: -1, msg: 'sec_user_id 和 unique_id 至少填写一个' });
+        }
+
+        try {
+            const isValid = await commonUtils.valid_redis_key('tt_fetch_user_post_videos_v3', unkey_api_id, api_key, req, res);
+            if (!isValid) return;
+
+            const queryParams = {
+                [selectedType]: selectedValue,
+                max_cursor,
+                count,
+                sort_type
+            };
+
+            const response = await axios.get('https://api.tikhub.io/api/v1/tiktok/app/v3/fetch_user_post_videos_v3', {
+                params: queryParams,
+                headers: {
+                    Authorization: `Bearer ${tikhub_api_token}`
+                }
+            });
+
+            if (response.data?.code !== 200) {
+                return res.send({
+                    code: -1,
+                    msg: response.data?.message_zh || response.data?.message || '获取用户作品失败'
+                });
+            }
+
+            const rawData = response.data?.data || {};
+            const videoList = rawData.aweme_list || rawData.videos || [];
+
+            const videoSummary = videoList.slice(0, 5).map(v => ({
+                video_id: v.aweme_id || v.id || '',
+                desc: (v.desc || v.title || '').substring(0, 100),
+                create_time: v.create_time || v.timestamp || 0,
+                statistics: {
+                    digg_count: Number(v.statistics?.digg_count || v.digg_count || 0),
+                    comment_count: Number(v.statistics?.comment_count || v.comment_count || 0),
+                    share_count: Number(v.statistics?.share_count || v.share_count || 0),
+                    play_count: Number(v.statistics?.play_count || v.play_count || 0)
+                }
+            }));
+
+            let msg = 'success';
+            if (api_key) {
+                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1, { platform: 'tiktok', action: 'fetch_user_post_videos_v3' });
+                msg = `API Key 剩余积分：${remaining}`;
+            }
+
+            return res.send({
+                code: 200,
+                msg,
+                params_used: {
+                    type: selectedType,
+                    value: selectedValue,
+                    max_cursor,
+                    count,
+                    sort_type
+                },
+                video_summary: videoSummary,
+                pagination: {
+                    max_cursor: rawData.max_cursor || 0,
+                    has_more: rawData.has_more || false,
+                    total_count: videoList.length
+                },
+                data: rawData
+            });
+        } catch (error) {
+            console.error('TikTok Fetch User Post Videos V3 Error:', error.response ? error.response.data : error.message);
+            return res.send({ code: -1, msg: commonUtils.MESSAGE.SERVER_ERROR });
+        }
     }
 }
 

@@ -1,5 +1,37 @@
 # RELEASE
 
+## Feature
+2026-06-17 / add-tiktok-handler-user-profile-api
+
+### Summary
+新增 TikTok 指定用户信息接口封装，接入 TikHub `handler_user_profile`，并基于实测优化返回摘要字段。
+
+### What Changed
+- 更新 `utils/tikhub.io.js`：在 `th_tiktok` 中新增 `handler_user_profile`。
+	- 支持 `sec_user_id > user_id > unique_id` 参数优先级。
+	- 参数至少一个必填，且 `user_id` 必须为纯数字字符串。
+	- 对接上游 `GET /api/v1/tiktok/app/v3/handler_user_profile`。
+	- 成功响应新增 `params_used` 与 `profile` 摘要字段，保留原始 `data`。
+- 更新 `index.js`：新增本地 API 路由
+	- `POST /tiktok/handler_user_profile`
+	- `GET /tiktok/handler_user_profile`
+
+### Impact
+#### API/Behavior
+- 新增可直接调用的 TikTok 用户信息接口。
+- 返回结构保持兼容：`data` 未破坏；新增 `params_used`、`profile` 提升可读性。
+- `profile` 统计字段基于实测从 `data.user` 提取，避免错误默认值。
+
+#### Internal Modules
+- 影响 `utils/tikhub.io.js`、`index.js`。
+
+### Breaking Changes
+- none
+
+### Rollback Notes
+- 回滚 `utils/tikhub.io.js` 中 `handler_user_profile` 相关改动。
+- 回滚 `index.js` 中 `/tiktok/handler_user_profile` 路由注册。
+
 ## Hotfix
 2026-06-12 / align-douyin-transcribe-api-key-messaging
 

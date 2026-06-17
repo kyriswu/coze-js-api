@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- Added TikTok user profile endpoint wrappers `POST /tiktok/handler_user_profile` and `GET /tiktok/handler_user_profile`, backed by TikHub `handler_user_profile`.
 - Added a new plugin services showcase homepage at `GET /` with category filtering, keyword search, service cards, stats, and documentation-oriented entry points.
 - Added `/assets` static hosting and a homepage WeChat QR image slot at `/assets/wechat-qr.png`.
 - Introduced project harness structure under `harness/` and Copilot entry points under `.github/`.
@@ -25,6 +26,7 @@ All notable changes to this project will be documented in this file.
 - Added Twitter endpoint `POST /twitter/fetch_search_timeline` backed by TikHub `fetch_search_timeline` API integration.
 
 ### Changed
+- Optimized TikTok profile response output by adding `params_used` and normalized `profile` summary fields while preserving upstream raw `data`; fixed profile metrics mapping to extract counts from `data.user` based on live test results.
 - Clarified `skills/douyin-transcribe-api` API key guidance to explicitly state that free keys are not provided, and aligned missing-key prompts in both `SKILL.md` and `scripts/transcribe_douyin.sh` to direct users to purchase/renew at `https://devtool.uk/plugin`.
 - Fixed paid API pre-check in `verifyApiAccess` to enforce endpoint-specific required credits (now blocks `POST /gpt-image-2/generate` when remaining credits are below its 3-credit cost).
 - Redesigned the plugin services homepage with a liquid ripple background, animated highlights, and glass-style service cards.

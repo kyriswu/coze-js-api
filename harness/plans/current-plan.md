@@ -1,46 +1,49 @@
 # PLAN
 
 ## Title
-Align douyin-transcribe-api key messaging with zimujun (no free key)
+Add TikTok handler_user_profile API
 
 ## Approved
 yes
 
 ## Context Summary
-用户反馈 `skills/douyin-transcribe-api` 对 API Key 缺失提示不够强，导致用户误以为可领取免费 key，频繁来咨询“免费 API”。需要参考 `skills/zimujun` 的表达方式，明确该能力不提供免费 key，必须自备/购买 key 后再用。
+用户要求新增 TikHub OpenAPI 接口 `/api/v1/tiktok/app/v3/handler_user_profile` 到项目中，并创建可调用的本地 API。接口需支持参数优先级 `sec_user_id > user_id > unique_id`，至少一个参数必填。实现后需要进行实际测试，并基于测试结果优化对外返回字段。
 
 ## Assumptions
-- 不改接口实现逻辑，只调整技能文档与脚本提示文案。
-- 不引入新依赖。
-- 最小改动：只改 `douyin-transcribe-api` 相关文件与交付记录。
+- 保持现有项目风格：在 `utils/tikhub.io.js` 增加能力，在 `index.js` 暴露路由。
+- 不新增依赖，沿用现有 `axios + commonUtils.valid_redis_key + unkey.verifyKey` 模式。
+- 输出字段优化以“保留兼容 + 增加可读摘要”为原则，避免破坏现有调用方。
 
 ## Impacted Areas
-- `skills/douyin-transcribe-api/SKILL.md`
-- `skills/douyin-transcribe-api/scripts/transcribe_douyin.sh`
+- `utils/tikhub.io.js`
+- `index.js`
 - `docs/PLAN.md`
 - `docs/QA.md`
 - `docs/RELEASE.md`
 - `CHANGELOG.md`
 
 ## Steps
-1. 对齐 `douyin-transcribe-api` 与 `zimujun` 的 API Key 缺失提示语气。
-2. 在 `SKILL.md` 中新增明确规则：缺 key 时必须提示“无免费 key”，并给出购买入口。
-3. 更新脚本 `transcribe_douyin.sh` 缺 key 输出，避免“申请/反馈”造成歧义。
-4. 运行最小可行验证（bash 语法检查）。
-5. 同步 `docs/PLAN.md`、`docs/QA.md`、`docs/RELEASE.md`、`CHANGELOG.md`。
+1. 在 `th_tiktok` 中新增 `handler_user_profile` 方法，兼容 body/query 取参并做优先级与必填校验。
+2. 调用 TikHub 上游 `GET /api/v1/tiktok/app/v3/handler_user_profile`，接入现有鉴权与计费流程。
+3. 在 `index.js` 新增本地路由（优先 `POST /tiktok/handler_user_profile`，补充 `GET` 兼容）。
+4. 实测接口，记录真实返回结构，补充优化字段（例如标准化输入参数回显与核心用户信息摘要）。
+5. 执行最小可行语法验证并同步文档记录。
 
 ## Verification Plan
-- 命令：`bash -n skills/douyin-transcribe-api/scripts/transcribe_douyin.sh`
-- 手工检查：
-  - `skills/douyin-transcribe-api/SKILL.md` 中缺 key 指引明确包含“本服务不提供免费 API Key”。
-  - 脚本缺 key 提示与文档保持一致，不再使用“申请或反馈”表述。
+- `node --check utils/tikhub.io.js`
+- `node --check index.js`
+- 运行本地服务并调用 `/tiktok/handler_user_profile`，验证：
+  - 参数优先级生效。
+  - 至少一个参数缺失时返回明确错误。
+  - 成功返回包含 `code/msg/data`，并具备优化后的摘要字段。
 
 ## Risks & Mitigations
 | Risk | Impact | Mitigation |
 |---|---|---|
-| 文案过于强硬导致体验下降 | 用户感知不友好 | 保留简洁指引与购买入口，避免情绪化措辞 |
-| 文档与脚本提示不一致 | 使用时产生困惑 | 同时更新 `SKILL.md` 与脚本并做检查 |
+| 上游返回结构不稳定 | 摘要字段提取失败 | 对多种路径兜底提取，失败时仍返回原始 `data` |
+| 新增字段影响旧调用方 | 兼容风险 | 保持 `data` 原样，新增独立 `profile`/`params_used` 字段 |
+| GET/POST参数来源差异 | 参数缺失误判 | 统一 `query + body` 合并取参 |
 
 ## Rollback Plan
-- 回滚 `skills/douyin-transcribe-api/SKILL.md` 的文案改动。
-- 回滚 `skills/douyin-transcribe-api/scripts/transcribe_douyin.sh` 的提示文案。
+- 回滚 `utils/tikhub.io.js` 中 `th_tiktok.handler_user_profile` 相关改动。
+- 回滚 `index.js` 中 `/tiktok/handler_user_profile` 路由注册。

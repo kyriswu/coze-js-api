@@ -779,6 +779,14 @@ app.post('/douyin/billboard/fetch_hot_city_list', th_douyin_billboard.fetch_hot_
 //TikTok 通过作品ID获取评论
 app.post('/tiktok/fetch_post_comment', th_tiktok.fetch_post_comment);
 
+//TikTok 获取指定用户信息
+app.post('/tiktok/handler_user_profile', th_tiktok.handler_user_profile);
+app.get('/tiktok/handler_user_profile', th_tiktok.handler_user_profile);
+
+//TikTok 获取用户主页作品数据 V3
+app.post('/tiktok/fetch_user_post_videos_v3', th_tiktok.fetch_user_post_videos_v3);
+app.get('/tiktok/fetch_user_post_videos_v3', th_tiktok.fetch_user_post_videos_v3);
+
 //Twitter 获取单个推文详情
 app.post('/twitter/fetch_tweet_detail', th_twitter.fetch_tweet_detail);
 

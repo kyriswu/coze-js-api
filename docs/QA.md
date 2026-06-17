@@ -1,6 +1,44 @@
 # QA
 
 ## Iteration
+2026-06-17 / add-tiktok-handler-user-profile-api
+
+## Test Matrix
+| Case ID | Step | Expected | Actual | Status |
+|---|---|---|---|---|
+| QA-01 | node --check utils/tikhub.io.js | 无语法错误 | 命令执行无输出 | pass |
+| QA-02 | node --check index.js | 无语法错误 | 命令执行无输出 | pass |
+| QA-03 | 调用 handler（sec_user_id 示例） | 返回 code=200 且包含用户信息 | 返回 code=200，`profile.user_id=107955`，`profile.unique_id=tiktok` | pass |
+| QA-04 | 参数优先级测试（sec_user_id+user_id+unique_id 同传） | 优先使用 sec_user_id | `params_used.type=sec_user_id` | pass |
+| QA-05 | 参数缺失校验 | 返回参数错误 | 返回 `sec_user_id、user_id、unique_id 至少填写一个` | pass |
+| QA-06 | user_id 非纯数字校验 | 返回参数错误 | 返回 `user_id 必须为纯数字字符串` | pass |
+| QA-07 | 输出字段优化验证 | `profile` 计数字段不为错误默认值 | `follower_count=94428589`、`aweme_count=1533`（从 `data.user` 正确提取） | pass |
+
+## Command Evidence
+```bash
+cd /root/coze-js-api && node --check utils/tikhub.io.js && node --check index.js
+
+cd /root/coze-js-api && node --input-type=module -e "import { th_tiktok } from './utils/tikhub.io.js'; const req={query:{},body:{sec_user_id:'MS4wLjABAAAAv7iSuuXDJGDvJkmH_vz1qkDZYo1apxgzaxdBSeIuPiM'},hostname:'localhost',headers:{}}; const res={send:(payload)=>{console.log(JSON.stringify({code:payload.code,params_used:payload.params_used,profile:payload.profile},null,2)); return payload;}}; await th_tiktok.handler_user_profile(req,res);"
+
+cd /root/coze-js-api && node --input-type=module -e "import { th_tiktok } from './utils/tikhub.io.js'; const cases=[{name:'priority',req:{query:{user_id:'12345',unique_id:'abc',sec_user_id:'MS4wLjABAAAAv7iSuuXDJGDvJkmH_vz1qkDZYo1apxgzaxdBSeIuPiM'},body:{},hostname:'localhost',headers:{}}},{name:'missing_all',req:{query:{},body:{},hostname:'localhost',headers:{}}},{name:'invalid_user_id',req:{query:{},body:{user_id:'abc123'},hostname:'localhost',headers:{}}}]; for(const c of cases){const res={send:(p)=>{console.log(c.name, JSON.stringify({code:p.code,msg:p.msg,params_used:p.params_used||null}));return p;}}; await th_tiktok.handler_user_profile(c.req,res);}"
+```
+
+## Manual Checks
+- 已确认新增本地 API 路由：`POST /tiktok/handler_user_profile` 与 `GET /tiktok/handler_user_profile`。
+- 已确认保持兼容返回结构：`data` 仍为上游原始结构，同时新增 `params_used` 与 `profile`。
+- 已确认根据实测将统计字段映射从 `data.stats` 修正为 `data.user`，避免粉丝数等错误为 0。
+
+## Defects Found
+| ID | Severity | Description | Status |
+|---|---|---|---|
+| BUG-01 | medium | 初版 `profile` 计数字段从 `data.stats` 读取，实测该接口统计字段在 `data.user`，导致默认值为 0 | fixed |
+
+## Final QA Verdict
+- [x] pass
+- [ ] conditional pass
+- [ ] fail
+
+## Iteration
 2026-06-12 / align-douyin-transcribe-api-key-messaging
 
 ## Test Matrix
