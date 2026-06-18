@@ -1,5 +1,30 @@
 # RELEASE
 
+## Enhancement
+2026-06-18 / append-douyin-general-search-id-to-msg
+
+### Summary
+优化抖音综合搜索接口 `fetch_general_search_v1` 的提示文案：成功响应时将可用于翻页续搜的 `search_id` 提取并追加到 `msg`。
+
+### What Changed
+- 更新 `utils/tikhub.io.js`：`th_douyin.fetch_general_search_v1`
+	- 新增 `search_id` 提取链路：`data.search_id -> data.log.search_id -> data.log_pb.impr_id -> data.extra.search_request_id -> data.extra.logid`。
+	- 在原有 `msg` 基础上追加提示：`下次搜索search_id为：[search_id]`。
+
+### Impact
+#### API/Behavior
+- 响应结构保持兼容：`code`、`data` 不变，仅增强 `msg` 文案。
+- 用户可直接从 `msg` 获取下次搜索建议使用的 `search_id`。
+
+#### Internal Modules
+- 影响 `utils/tikhub.io.js`。
+
+### Breaking Changes
+- none
+
+### Rollback Notes
+- 回滚 `utils/tikhub.io.js` 中 `fetch_general_search_v1` 的 `search_id` 提取与 `msg` 拼接逻辑。
+
 ## Feature
 2026-06-17 / add-tiktok-handler-user-profile-api
 

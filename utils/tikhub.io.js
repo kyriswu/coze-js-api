@@ -1004,12 +1004,26 @@ export const th_douyin = {
                     aweme_id: info.aweme_id || "",          // 视频ID
                 };
             });
+
+            const nextSearchId =
+                d.search_id ||
+                d.log?.search_id ||
+                d.log_pb?.impr_id ||
+                d.extra?.search_request_id ||
+                d.extra?.logid ||
+                '';
+
             // 统一扣费与消息处理
             let msg = "success";
             if (api_key) {
                 const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1, { platform: 'douyin', action: 'general_search' });
                 msg = `API Key 剩余积分：${remaining}`;
             }
+
+            if (nextSearchId) {
+                msg = `${msg}，下次搜索search_id为：${nextSearchId}`;
+            }
+
             return res.send({ code: 200, msg, data: { info: arr, cursor: d.cursor, has_more: d.has_more } });
 
         } catch (error) {

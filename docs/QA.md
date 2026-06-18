@@ -1,6 +1,36 @@
 # QA
 
 ## Iteration
+2026-06-18 / append-douyin-general-search-id-to-msg
+
+## Test Matrix
+| Case ID | Step | Expected | Actual | Status |
+|---|---|---|---|---|
+| QA-01 | node --check utils/tikhub.io.js | 无语法错误 | 命令执行无输出 | pass |
+| QA-02 | 模拟调用 `fetch_general_search_v1`（keyword=猫咪） | `msg` 包含“下次搜索search_id为：[search_id]” | 返回 `msg=success，下次搜索search_id为：20260618124430FA6C641531467C7E6D88` | pass |
+
+## Command Evidence
+```bash
+cd /root/coze-js-api && node --check utils/tikhub.io.js
+
+cd /root/coze-js-api && node --input-type=module -e "import { th_douyin } from './utils/tikhub.io.js'; const req={body:{keyword:'猫咪',cursor:0,sort_type:'0',publish_time:'0',filter_duration:'0',content_type:'0'},query:{},headers:{},hostname:'localhost'}; const res={send:(payload)=>{console.log(JSON.stringify({code:payload.code,msg:payload.msg},null,2)); return payload;}}; await th_douyin.fetch_general_search_v1(req,res);"
+```
+
+## Manual Checks
+- 已确认 `search_id` 从上游返回中按优先级提取：`data.search_id -> data.log.search_id -> data.log_pb.impr_id -> data.extra.search_request_id -> data.extra.logid`。
+- 已确认仅追加文案，不改变现有 `code` 与 `data` 返回结构。
+
+## Defects Found
+| ID | Severity | Description | Status |
+|---|---|---|---|
+| BUG-01 | - | 本轮未发现语法或功能缺陷 | closed |
+
+## Final QA Verdict
+- [x] pass
+- [ ] conditional pass
+- [ ] fail
+
+## Iteration
 2026-06-17 / add-tiktok-handler-user-profile-api
 
 ## Test Matrix
