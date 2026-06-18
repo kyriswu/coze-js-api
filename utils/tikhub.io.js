@@ -959,6 +959,7 @@ export const th_douyin = {
             "search_id": search_id,
             "backtrace": backtrace
         }
+        console.log("Received general search request with data:", data);
         try {
             // 重要：必须判断并 return。如果校验失败，commonUtils 内部会发出 res.send
             const isValid = await commonUtils.valid_redis_key("dy_general_search_v3", unkey_api_id, api_key, req, res);
@@ -1012,7 +1013,7 @@ export const th_douyin = {
             return res.send({ code: 200, msg, data: { info: arr, cursor: d.cursor, has_more: d.has_more } });
 
         } catch (error) {
-            console.error("DouYin Viedos Info Error:", error.message);
+            console.error("DouYin Viedos Info Error:", error);
             return res.send({ code: -1, msg: commonUtils.MESSAGE.SERVER_ERROR });
         }
 
