@@ -931,6 +931,7 @@ export const th_douyin = {
         // search_id: 搜索ID（首次请求传空，翻页时从上次响应获取）
         // backtrace: 翻页回溯标识（首次请求传空，翻页时从上次响应获取）
         let { keyword, cursor, publish_time, filter_duration, content_type, search_id, backtrace, sort_type, api_key } = req.body;
+        console.log("Received general search request with params:", { keyword, cursor, publish_time, filter_duration, content_type, search_id, backtrace, sort_type }); 
         if (!cursor) {
             cursor = 0
         }
@@ -943,9 +944,9 @@ export const th_douyin = {
         if (!publish_time) {
             publish_time = "0"
         }
-        if (!filter_duration) {
-            filter_duration = "0"
-        }
+        // if (!filter_duration) {
+        //     filter_duration = "0"
+        // }
         if (!content_type) {
             content_type = "0"
         }
