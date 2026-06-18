@@ -955,6 +955,7 @@ export const th_douyin = {
             "sort_type": sort_type,
             "publish_time": publish_time,
             "filter_duration": filter_duration,
+            "search_id": filter_duration,// 先临时使用filter_duraton字段传递search_id，后续如果接口更新了再调整
             "content_type": content_type,
             "search_id": search_id,
             "backtrace": backtrace
