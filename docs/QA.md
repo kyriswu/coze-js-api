@@ -1,6 +1,46 @@
 # QA
 
 ## Iteration
+2026-06-22 / add-evolink-image-generation-api
+
+## Test Matrix
+| Case ID | Step | Expected | Actual | Status |
+|---|---|---|---|---|
+| QA-01 | `node --check utils/ThirdParrtyApi/evolink.ai.js` | 无语法错误 | 命令执行无输出 | pass |
+| QA-02 | `node --check index.js` | 无语法错误 | 命令执行无输出 | pass |
+| QA-03 | 导入 `evolink.ai.js` 并枚举导出方法 | 暴露 `image_generation/get_task_detail/wait_task_result` | 输出 `["image_generation","get_task_detail","wait_task_result"]` | pass |
+
+## Command Evidence
+```bash
+cd /root/coze-js-api && node --check utils/ThirdParrtyApi/evolink.ai.js
+
+cd /root/coze-js-api && node --check index.js
+
+cd /root/coze-js-api && node --input-type=module -e "import evolink from './utils/ThirdParrtyApi/evolink.ai.js'; console.log(JSON.stringify(Object.keys(evolink)))"
+```
+
+## Manual Checks
+- 已确认新增第三方封装文件 `utils/ThirdParrtyApi/evolink.ai.js`，包含创建任务、查询任务、自动轮询三个方法。
+- 已确认新增 `utils/loadEnv.js` 与根目录 `.env.example`，Evolink API Key 统一从 `.env` 中的 `EVOLINK_API_KEY` 读取。
+- 已确认 `start.sh` 会在每次 `git pull` 后基于 `.env.example` 自动重建 `.env`，并用 `.env.local` 覆盖同名键，避免手工同步环境变量变更。
+- 已确认新增本地 API 路由：
+  - `POST /evolink/images/generations`
+  - `GET /evolink/tasks/:task_id`
+- 已确认图片生成接口默认会在服务端轮询上游 task，直到 `completed`、`failed` 或超时后返回。
+- 已确认 `POST /evolink/images/generations` 成功响应已收敛为 `image`、`credit_used`、`creditCost` 三个字段；其中 `creditCost = ceil(credit_used * 0.12) * 0.05`。
+- 未执行真实上游联调；该步骤依赖根目录 `.env` 中填写 `EVOLINK_API_KEY` 和外网访问。
+
+## Defects Found
+| ID | Severity | Description | Status |
+|---|---|---|---|
+| BUG-01 | - | 本轮未发现语法或模块装配缺陷；真实上游联调待执行 | open |
+
+## Final QA Verdict
+- [ ] pass
+- [x] conditional pass
+- [ ] fail
+
+## Iteration
 2026-06-18 / append-douyin-general-search-id-to-msg
 
 ## Test Matrix

@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- Added Evolink image generation integration with local endpoints `POST /evolink/images/generations` and `GET /evolink/tasks/:task_id`.
+- Added lightweight `.env` loading via `utils/loadEnv.js` and a root `.env.example` template for local configuration.
 - Added TikTok user profile endpoint wrappers `POST /tiktok/handler_user_profile` and `GET /tiktok/handler_user_profile`, backed by TikHub `handler_user_profile`.
 - Added a new plugin services showcase homepage at `GET /` with category filtering, keyword search, service cards, stats, and documentation-oriented entry points.
 - Added `/assets` static hosting and a homepage WeChat QR image slot at `/assets/wechat-qr.png`.
@@ -26,6 +28,9 @@ All notable changes to this project will be documented in this file.
 - Added Twitter endpoint `POST /twitter/fetch_search_timeline` backed by TikHub `fetch_search_timeline` API integration.
 
 ### Changed
+- Updated `start.sh` to regenerate `.env` from tracked `.env.example` plus optional machine-local `.env.local` after each `git pull`, so future environment key additions or default changes sync automatically on deploy.
+- `POST /evolink/images/generations` now submits the upstream Evolink async task and automatically polls until the task completes, fails, or times out before returning the final result payload.
+- Simplified successful Evolink generation responses to return only `image`, `credit_used`, and computed `creditCost` (`ceil(credit_used * 0.12) * 0.05`).
 - Enhanced `th_douyin.fetch_general_search_v1` success message to append next-search hint `下次搜索search_id为：[search_id]`, extracting `search_id` from upstream metadata with fallback paths.
 - Optimized TikTok profile response output by adding `params_used` and normalized `profile` summary fields while preserving upstream raw `data`; fixed profile metrics mapping to extract counts from `data.user` based on live test results.
 - Clarified `skills/douyin-transcribe-api` API key guidance to explicitly state that free keys are not provided, and aligned missing-key prompts in both `SKILL.md` and `scripts/transcribe_douyin.sh` to direct users to purchase/renew at `https://devtool.uk/plugin`.

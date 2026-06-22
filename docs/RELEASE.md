@@ -1,5 +1,42 @@
 # RELEASE
 
+## Feature
+2026-06-22 / add-evolink-image-generation-api
+
+### Summary
+新增 Evolink 图片生成第三方接口集成，支持提交图片生成任务、查询任务详情，并在本地图片生成接口中自动轮询上游 task 直到返回最终结果。
+
+### What Changed
+- 新增 `utils/ThirdParrtyApi/evolink.ai.js`
+	- 封装 `image_generation`：提交 `POST /v1/images/generations` 后自动轮询任务结果。
+	- 封装 `get_task_detail`：查询 `GET /v1/tasks/{task_id}`。
+	- 封装 `wait_task_result`：统一轮询 `pending/processing/completed/failed` 状态并处理超时。
+- 更新 `index.js`：新增本地 API 路由
+	- `POST /evolink/images/generations`
+	- `GET /evolink/tasks/:task_id`
+- 安全调整：Evolink API Key 不写入仓库文件，改为通过标准 `.env` 文件读取 `EVOLINK_API_KEY`。
+- 新增 `.env.example` 作为配置模板，并在启动时通过 `utils/loadEnv.js` 加载 `.env`。
+- 更新 `start.sh`：每次启动先 `git pull`，再根据 `.env.example` 自动生成 `.env`，并用 `.env.local` 里的机器私有值覆盖，保证后续环境变量项新增/修改可自动同步。
+
+### Impact
+#### API/Behavior
+- 新增可直接调用的 Evolink 图片生成接口。
+- `POST /evolink/images/generations` 不再只返回上游 task 创建结果，而是默认等待最终任务完成后一次性返回。
+- 返回结构已进一步收敛为：
+	- `image`：最终生成图片地址
+	- `credit_used`：上游实际消耗额度
+	- `creditCost`：按 `ceil(credit_used * 0.12) * 0.05` 计算后的成本字段
+
+#### Internal Modules
+- 影响 `utils/ThirdParrtyApi/evolink.ai.js`、`index.js`。
+
+### Breaking Changes
+- none
+
+### Rollback Notes
+- 删除 `utils/ThirdParrtyApi/evolink.ai.js`。
+- 回滚 `index.js` 中 `/evolink/images/generations` 与 `/evolink/tasks/:task_id` 路由。
+
 ## Enhancement
 2026-06-18 / append-douyin-general-search-id-to-msg
 

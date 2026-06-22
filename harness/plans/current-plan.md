@@ -1,49 +1,49 @@
 # PLAN
 
 ## Title
-Add TikTok handler_user_profile API
+Add Evolink image generation integration
 
 ## Approved
 yes
 
 ## Context Summary
-用户要求新增 TikHub OpenAPI 接口 `/api/v1/tiktok/app/v3/handler_user_profile` 到项目中，并创建可调用的本地 API。接口需支持参数优先级 `sec_user_id > user_id > unique_id`，至少一个参数必填。实现后需要进行实际测试，并基于测试结果优化对外返回字段。
+用户要求参考现有第三方接口集成方式，将提供的 Evolink markdown 文档中的接口封装到新的 `utils/ThirdParrtyApi/evolink.ai.js` 中，并在 `index.js` 暴露本地 API。最终选择方案一：本地使用 `/evolink/...` 路由；其中图片生成接口不直接返回异步 task 创建结果，而是在服务端自动轮询任务状态，直至完成、失败或超时后一次性返回结果。
 
 ## Assumptions
-- 保持现有项目风格：在 `utils/tikhub.io.js` 增加能力，在 `index.js` 暴露路由。
-- 不新增依赖，沿用现有 `axios + commonUtils.valid_redis_key + unkey.verifyKey` 模式。
-- 输出字段优化以“保留兼容 + 增加可读摘要”为原则，避免破坏现有调用方。
+- 文档中当前仅包含两个接口：`POST /v1/images/generations` 与 `GET /v1/tasks/{task_id}`。
+- 保持现有项目风格：第三方能力封装在 `utils/ThirdParrtyApi/`，HTTP 路由注册在 `index.js`。
+- 不新增依赖，沿用现有 `axios`。
+- 出于仓库安全规则，不将 Evolink API Key 硬编码入仓库，改为通过标准 `.env` 文件加载 `EVOLINK_API_KEY`。
 
 ## Impacted Areas
-- `utils/tikhub.io.js`
+- `utils/ThirdParrtyApi/evolink.ai.js`
 - `index.js`
-- `docs/PLAN.md`
+- `harness/plans/current-plan.md`
 - `docs/QA.md`
 - `docs/RELEASE.md`
 - `CHANGELOG.md`
 
 ## Steps
-1. 在 `th_tiktok` 中新增 `handler_user_profile` 方法，兼容 body/query 取参并做优先级与必填校验。
-2. 调用 TikHub 上游 `GET /api/v1/tiktok/app/v3/handler_user_profile`，接入现有鉴权与计费流程。
-3. 在 `index.js` 新增本地路由（优先 `POST /tiktok/handler_user_profile`，补充 `GET` 兼容）。
-4. 实测接口，记录真实返回结构，补充优化字段（例如标准化输入参数回显与核心用户信息摘要）。
-5. 执行最小可行语法验证并同步文档记录。
+1. 新增 `utils/ThirdParrtyApi/evolink.ai.js`，封装 task 创建、task 查询与自动轮询逻辑。
+2. 在 `index.js` 中引入 Evolink 模块并暴露本地路由：
+   - `POST /evolink/images/generations`
+   - `GET /evolink/tasks/:task_id`
+3. 为图片生成路由增加基础参数校验与统一错误返回，默认同步等待任务完成。
+4. 执行最小可行验证并补充 QA / Release / Changelog 记录。
 
 ## Verification Plan
-- `node --check utils/tikhub.io.js`
+- `node --check utils/ThirdParrtyApi/evolink.ai.js`
 - `node --check index.js`
-- 运行本地服务并调用 `/tiktok/handler_user_profile`，验证：
-  - 参数优先级生效。
-  - 至少一个参数缺失时返回明确错误。
-  - 成功返回包含 `code/msg/data`，并具备优化后的摘要字段。
+- `node --input-type=module -e "import evolink from './utils/ThirdParrtyApi/evolink.ai.js'; console.log(Object.keys(evolink))"`
 
 ## Risks & Mitigations
 | Risk | Impact | Mitigation |
 |---|---|---|
-| 上游返回结构不稳定 | 摘要字段提取失败 | 对多种路径兜底提取，失败时仍返回原始 `data` |
-| 新增字段影响旧调用方 | 兼容风险 | 保持 `data` 原样，新增独立 `profile`/`params_used` 字段 |
-| GET/POST参数来源差异 | 参数缺失误判 | 统一 `query + body` 合并取参 |
+| 上游为异步任务，轮询过久 | 请求挂起过长 | 增加默认超时与轮询间隔参数，超时后返回明确错误 |
+| 上游 task 返回结构变化 | 结果解析不稳定 | 保持原始创建响应与最终 task 详情一并返回 |
+| 用户未配置 API Key | 接口无法调用 | 启动调用时显式返回缺少 `EVOLINK_API_KEY`，并提供 `.env.example` 模板 |
 
 ## Rollback Plan
-- 回滚 `utils/tikhub.io.js` 中 `th_tiktok.handler_user_profile` 相关改动。
-- 回滚 `index.js` 中 `/tiktok/handler_user_profile` 路由注册。
+- 删除 `utils/ThirdParrtyApi/evolink.ai.js`。
+- 回滚 `index.js` 中 Evolink import 与 `/evolink/...` 路由注册。
+- 回滚文档记录。
