@@ -22,6 +22,7 @@
 #### API/Behavior
 - 新增可直接调用的 Evolink 图片生成接口。
 - `POST /evolink/images/generations` 不再只返回上游 task 创建结果，而是默认等待最终任务完成后一次性返回。
+- `POST /evolink/images/generations` 请求体现在要求提供项目内 `api_key`，并在成功后按 `creditCost` 扣除对应积分。
 - 返回结构已进一步收敛为：
 	- `image`：最终生成图片地址
 	- `credit_used`：上游实际消耗额度

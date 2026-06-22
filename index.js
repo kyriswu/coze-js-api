@@ -1081,65 +1081,8 @@ app.post('/xpan/refresh_token', netdiskapi.refresh_token)
 app.post('/xpan/filemetainfo', netdiskapi.filemetainfo)
 app.get('/xpan/download', netdiskapi.download)
 
-app.post('/evolink/images/generations', async (req, res) => {
-    const { prompt, ...rest } = req.body || {};
-
-    if (!prompt || !prompt.toString().trim()) {
-        return res.status(400).send({
-            code: -1,
-            msg: 'prompt 不能为空',
-            data: null
-        });
-    }
-
-    try {
-        const data = await evolink.image_generation({
-            prompt: prompt.toString().trim(),
-            ...rest
-        });
-
-        return res.send({
-            code: 0,
-            msg: `Success，本次消耗积分${data.creditCost}个`,
-            data
-        });
-    } catch (error) {
-        console.error('Error in /evolink/images/generations:', error.message);
-        return res.status(error.status || 500).send({
-            code: -1,
-            msg: error.message,
-            data: error.data || null
-        });
-    }
-});
-
-app.get('/evolink/tasks/:task_id', async (req, res) => {
-    const taskId = req.params.task_id;
-
-    if (!taskId) {
-        return res.status(400).send({
-            code: -1,
-            msg: 'task_id 不能为空',
-            data: null
-        });
-    }
-
-    try {
-        const data = await evolink.get_task_detail(taskId);
-        return res.send({
-            code: 0,
-            msg: 'Success',
-            data
-        });
-    } catch (error) {
-        console.error(`Error in /evolink/tasks/${taskId}:`, error.message);
-        return res.status(error.status || 500).send({
-            code: -1,
-            msg: error.message,
-            data: error.data || null
-        });
-    }
-});
+app.post('/evolink/images/generations', evolink.generate_image);
+app.get('/evolink/tasks/:task_id', evolink.get_task_detail_handler);
 
 //生成重定向链接
 app.post('/tts_to_mp3', async (req, res) => {
