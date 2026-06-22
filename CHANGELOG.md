@@ -28,7 +28,6 @@ All notable changes to this project will be documented in this file.
 - Added Twitter endpoint `POST /twitter/fetch_search_timeline` backed by TikHub `fetch_search_timeline` API integration.
 
 ### Changed
-- Updated `start.sh` to regenerate `.env` from tracked `.env.example` plus optional machine-local `.env.local` after each `git pull`, so future environment key additions or default changes sync automatically on deploy.
 - `POST /evolink/images/generations` now submits the upstream Evolink async task and automatically polls until the task completes, fails, or times out before returning the final result payload.
 - Simplified successful Evolink generation responses to return only `image`, `credit_used`, and computed `creditCost` (`ceil(credit_used * 0.12) * 0.05`).
 - Enhanced `th_douyin.fetch_general_search_v1` success message to append next-search hint `下次搜索search_id为：[search_id]`, extracting `search_id` from upstream metadata with fallback paths.

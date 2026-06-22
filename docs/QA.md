@@ -22,7 +22,7 @@ cd /root/coze-js-api && node --input-type=module -e "import evolink from './util
 ## Manual Checks
 - 已确认新增第三方封装文件 `utils/ThirdParrtyApi/evolink.ai.js`，包含创建任务、查询任务、自动轮询三个方法。
 - 已确认新增 `utils/loadEnv.js` 与根目录 `.env.example`，Evolink API Key 统一从 `.env` 中的 `EVOLINK_API_KEY` 读取。
-- 已确认 `start.sh` 会在每次 `git pull` 后基于 `.env.example` 自动重建 `.env`，并用 `.env.local` 覆盖同名键，避免手工同步环境变量变更。
+- 已确认使用方式为：参考根目录 `.env.example`，手动创建根目录 `.env`。
 - 已确认新增本地 API 路由：
   - `POST /evolink/images/generations`
   - `GET /evolink/tasks/:task_id`

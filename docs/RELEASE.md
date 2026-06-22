@@ -16,7 +16,7 @@
 	- `GET /evolink/tasks/:task_id`
 - 安全调整：Evolink API Key 不写入仓库文件，改为通过标准 `.env` 文件读取 `EVOLINK_API_KEY`。
 - 新增 `.env.example` 作为配置模板，并在启动时通过 `utils/loadEnv.js` 加载 `.env`。
-- 更新 `start.sh`：每次启动先 `git pull`，再根据 `.env.example` 自动生成 `.env`，并用 `.env.local` 里的机器私有值覆盖，保证后续环境变量项新增/修改可自动同步。
+- 使用方式：参考 `.env.example` 手动创建根目录 `.env`；`start.sh` 不负责生成或同步环境文件。
 
 ### Impact
 #### API/Behavior
