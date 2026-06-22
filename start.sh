@@ -49,7 +49,27 @@ sync_env_file() {
 	fi
 }
 
+bootstrap_env_file() {
+	if [ -f "$ENV_TARGET" ]; then
+		return
+	fi
+
+	if [ -f "$ENV_TEMPLATE" ]; then
+		cp "$ENV_TEMPLATE" "$ENV_TARGET"
+		echo "已初始化 $ENV_TARGET（来源：$ENV_TEMPLATE）"
+	else
+		: > "$ENV_TARGET"
+		echo "已创建空的 $ENV_TARGET"
+	fi
+}
+
+bootstrap_env_file
 git pull
+
+if [ "${START_SH_REEXEC:-0}" != "1" ]; then
+	exec env START_SH_REEXEC=1 bash "$0" "$@"
+fi
+
 sync_env_file
 if command -v podman >/dev/null 2>&1; then
 	podman compose down
