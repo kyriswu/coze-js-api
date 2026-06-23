@@ -14,6 +14,7 @@
 - 更新 `index.js`：新增本地 API 路由
 	- `POST /evolink/images/generations`
 	- `GET /evolink/tasks/:task_id`
+	- `GET /evolink/credits`
 - 安全调整：Evolink API Key 不写入仓库文件，改为通过标准 `.env` 文件读取 `EVOLINK_API_KEY`。
 - 新增 `.env.example` 作为配置模板，并在启动时通过 `utils/loadEnv.js` 加载 `.env`。
 - 使用方式：参考 `.env.example` 手动创建根目录 `.env`；`start.sh` 不负责生成或同步环境文件。
@@ -23,6 +24,7 @@
 - 新增可直接调用的 Evolink 图片生成接口。
 - `POST /evolink/images/generations` 不再只返回上游 task 创建结果，而是默认等待最终任务完成后一次性返回。
 - `POST /evolink/images/generations` 请求体现在要求提供项目内 `api_key`，并在成功后按 `creditCost` 扣除对应积分。
+- `GET /evolink/credits` 为无计费的账号额度查询接口，仅依赖服务端配置的 Evolink 上游 key。
 - 返回结构已进一步收敛为：
 	- `image`：最终生成图片地址
 	- `credit_used`：上游实际消耗额度

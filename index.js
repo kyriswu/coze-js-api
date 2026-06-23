@@ -1083,6 +1083,7 @@ app.get('/xpan/download', netdiskapi.download)
 
 app.post('/evolink/images/generations', evolink.generate_image);
 app.get('/evolink/tasks/:task_id', evolink.get_task_detail_handler);
+app.get('/evolink/credits', evolink.get_credits_handler);
 
 //生成重定向链接
 app.post('/tts_to_mp3', async (req, res) => {

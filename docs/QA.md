@@ -26,9 +26,11 @@ cd /root/coze-js-api && node --input-type=module -e "import evolink from './util
 - 已确认新增本地 API 路由：
   - `POST /evolink/images/generations`
   - `GET /evolink/tasks/:task_id`
+  - `GET /evolink/credits`
 - 已确认图片生成接口默认会在服务端轮询上游 task，直到 `completed`、`failed` 或超时后返回。
 - 已确认 `POST /evolink/images/generations` 成功响应已收敛为 `image`、`credit_used`、`creditCost` 三个字段；其中 `creditCost = ceil(credit_used * 0.12) * 0.05`。
 - 已确认 `POST /evolink/images/generations` 现已接入项目内 Unkey 计费：请求体需提供 `api_key`，成功后按 `creditCost` 扣费；上游失败不扣费。
+- 已确认 `GET /evolink/credits` 为只读查询接口，不需要传项目 `api_key`，也不接入 Unkey 扣费。
 - 未执行真实上游联调；该步骤依赖根目录 `.env` 中填写 `EVOLINK_API_KEY` 和外网访问。
 
 ## Defects Found

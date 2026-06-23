@@ -231,6 +231,18 @@ const evolink = {
         }
     },
 
+    get_credits: async function () {
+        try {
+            const response = await axios.get(
+                `${EVOLINK_BASE_URL}/v1/credits`,
+                getAxiosConfig()
+            );
+            return response.data;
+        } catch (error) {
+            throw buildRequestError(error, '查询 Evolink 额度失败');
+        }
+    },
+
     get_task_detail_handler: async function (req, res) {
         const taskId = req.params.task_id;
 
@@ -251,6 +263,24 @@ const evolink = {
             });
         } catch (error) {
             console.error(`Error in /evolink/tasks/${taskId}:`, error.message);
+            return res.send({
+                code: -1,
+                msg: error.message,
+                data: error.data || null
+            });
+        }
+    },
+
+    get_credits_handler: async function (req, res) {
+        try {
+            const data = await evolink.get_credits();
+            return res.send({
+                code: 0,
+                msg: 'Success',
+                data
+            });
+        } catch (error) {
+            console.error('Error in /evolink/credits:', error.message);
             return res.send({
                 code: -1,
                 msg: error.message,

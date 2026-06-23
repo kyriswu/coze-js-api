@@ -7,10 +7,10 @@ Add Evolink image generation integration
 yes
 
 ## Context Summary
-用户要求参考现有第三方接口集成方式，将提供的 Evolink markdown 文档中的接口封装到新的 `utils/ThirdParrtyApi/evolink.ai.js` 中，并在 `index.js` 暴露本地 API。最终选择方案一：本地使用 `/evolink/...` 路由；其中图片生成接口不直接返回异步 task 创建结果，而是在服务端自动轮询任务状态，直至完成、失败或超时后一次性返回结果。
+用户要求参考现有第三方接口集成方式，将提供的 Evolink markdown 文档中的接口封装到新的 `utils/ThirdParrtyApi/evolink.ai.js` 中，并在 `index.js` 暴露本地 API。当前已实现图片生成与任务查询；本轮补充账号额度查询接口 `GET /v1/credits`，本地暴露为 `/evolink/credits`。图片生成接口不直接返回异步 task 创建结果，而是在服务端自动轮询任务状态，直至完成、失败或超时后一次性返回结果。
 
 ## Assumptions
-- 文档中当前仅包含两个接口：`POST /v1/images/generations` 与 `GET /v1/tasks/{task_id}`。
+- 当前已知需要接入的 Evolink 接口包括：`POST /v1/images/generations`、`GET /v1/tasks/{task_id}`、`GET /v1/credits`。
 - 保持现有项目风格：第三方能力封装在 `utils/ThirdParrtyApi/`，HTTP 路由注册在 `index.js`。
 - 不新增依赖，沿用现有 `axios`。
 - 出于仓库安全规则，不将 Evolink API Key 硬编码入仓库，改为通过标准 `.env` 文件加载 `EVOLINK_API_KEY`。
@@ -28,7 +28,8 @@ yes
 2. 在 `index.js` 中引入 Evolink 模块并暴露本地路由：
    - `POST /evolink/images/generations`
    - `GET /evolink/tasks/:task_id`
-3. 为图片生成路由增加基础参数校验与统一错误返回，默认同步等待任务完成。
+   - `GET /evolink/credits`
+3. 为图片生成路由增加基础参数校验与统一错误返回，默认同步等待任务完成；为额度查询接口增加无计费的只读 handler。
 4. 执行最小可行验证并补充 QA / Release / Changelog 记录。
 
 ## Verification Plan

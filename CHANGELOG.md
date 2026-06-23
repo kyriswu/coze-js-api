@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 - Added Evolink image generation integration with local endpoints `POST /evolink/images/generations` and `GET /evolink/tasks/:task_id`.
+- Added Evolink credits query endpoint `GET /evolink/credits`.
 - Added lightweight `.env` loading via `utils/loadEnv.js` and a root `.env.example` template for local configuration.
 - Added TikTok user profile endpoint wrappers `POST /tiktok/handler_user_profile` and `GET /tiktok/handler_user_profile`, backed by TikHub `handler_user_profile`.
 - Added a new plugin services showcase homepage at `GET /` with category filtering, keyword search, service cards, stats, and documentation-oriented entry points.
