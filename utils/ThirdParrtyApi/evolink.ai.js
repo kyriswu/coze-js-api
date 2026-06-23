@@ -155,7 +155,7 @@ const evolink = {
             return res.send(payload);
         } catch (error) {
             console.error('Error in /evolink/images/generations:', error.message);
-            return res.status(error.status || 500).send({
+            return res.send({
                 code: -1,
                 msg: error.message,
                 data: error.data || null
@@ -231,7 +231,7 @@ const evolink = {
         const taskId = req.params.task_id;
 
         if (!taskId) {
-            return res.status(400).send({
+            return res.send({
                 code: -1,
                 msg: 'task_id 不能为空',
                 data: null
@@ -247,7 +247,7 @@ const evolink = {
             });
         } catch (error) {
             console.error(`Error in /evolink/tasks/${taskId}:`, error.message);
-            return res.status(error.status || 500).send({
+            return res.send({
                 code: -1,
                 msg: error.message,
                 data: error.data || null
