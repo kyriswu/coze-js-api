@@ -8,6 +8,8 @@ import { createApiAccessHelpers } from '../apiAccess.js';
 
 const EVOLINK_BASE_URL = 'https://api.evolink.ai';
 const DEFAULT_MODEL = 'gpt-image-2';
+const DEFAULT_QUALITY = 'low';
+const DEFAULT_RESOLUTION = '1K';
 const DEFAULT_POLL_INTERVAL_MS = 3000;
 const DEFAULT_TIMEOUT_MS = 120000;
 const FINAL_STATUSES = new Set(['completed', 'failed']);
@@ -170,6 +172,8 @@ const evolink = {
     } = {}) {
         const body = {
             model: payload.model || DEFAULT_MODEL,
+            quality: payload.quality || DEFAULT_QUALITY,
+            resolution: payload.resolution || DEFAULT_RESOLUTION,
             ...payload
         };
 
