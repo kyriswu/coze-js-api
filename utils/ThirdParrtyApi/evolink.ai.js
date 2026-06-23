@@ -128,7 +128,7 @@ const evolink = {
             );
         }
 
-        const data = await this.image_generation({
+        const data = await evolink.image_generation({
             prompt: prompt.toString().trim(),
             ...rest
         });
@@ -151,7 +151,7 @@ const evolink = {
 
     generate_image: async function (req, res) {
         try {
-            const payload = await this.image_generation_with_billing(req.body || {});
+            const payload = await evolink.image_generation_with_billing(req.body || {});
             return res.send(payload);
         } catch (error) {
             console.error('Error in /evolink/images/generations:', error.message);
@@ -197,7 +197,7 @@ const evolink = {
             throw error;
         }
 
-        const finalTask = await this.wait_task_result(taskId, {
+        const finalTask = await evolink.wait_task_result(taskId, {
             poll_interval_ms,
             timeout_ms
         });
@@ -239,7 +239,7 @@ const evolink = {
         }
 
         try {
-            const data = await this.get_task_detail(taskId);
+            const data = await evolink.get_task_detail(taskId);
             return res.send({
                 code: 0,
                 msg: 'Success',
@@ -267,7 +267,7 @@ const evolink = {
         const startedAt = Date.now();
 
         while (Date.now() - startedAt <= timeoutMs) {
-            const detail = await this.get_task_detail(task_id);
+            const detail = await evolink.get_task_detail(task_id);
             const status = detail?.status;
 
             if (FINAL_STATUSES.has(status)) {
