@@ -579,8 +579,9 @@ export const th_wechat_media = {
 
             if (response.data?.code !== 200) return res.send({ code: -1, msg: "获取列表失败" });
 
-            // Keep the historical response shape: local `data` remains an array list.
-            const data = response.data?.data?.articles || [];
+            // Keep the historical response shape: local `data` must always be an array.
+            const upstreamArticles = response.data?.data?.articles;
+            const data = Array.isArray(upstreamArticles) ? upstreamArticles : [];
             let msg = "success";
             if (api_key) {
                 const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 2, { platform: 'wechat_mp', action: 'article_list' });
