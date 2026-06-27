@@ -30,7 +30,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 - Migrated `th_wechat_media.get_wechat_mp_article_list` to the new upstream contract using `POST /api/v1/wechat_mp/v2/fetch_account_articles` with JSON body parameters (`username`, `page_size`, `offset`, `item_show_type`, `raw`) and a 30s timeout.
-- Preserved local response compatibility for `POST /wx_gzh/get_user_articles` by normalizing upstream payload to `data: response.data.data.articles || []`, and hardening binding to always request simplified upstream shape (`raw=false`) while keeping existing auth and billing flow unchanged.
+- Preserved local response compatibility for `POST /wx_gzh/get_user_articles` by normalizing upstream payload to legacy-compatible `data: { list, offset }` (with list item key mapping such as `ContentUrl/CoverImgUrl/...`), and hardening binding to always request simplified upstream shape (`raw=false`) while keeping existing auth and billing flow unchanged.
 - `POST /evolink/images/generations` now submits the upstream Evolink async task and automatically polls until the task completes, fails, or times out before returning the final result payload.
 - `POST /evolink/images/generations` now requires a project `api_key` and charges Unkey credits based on the computed `creditCost` only after successful completion.
 - Simplified successful Evolink generation responses to return only `image`, `credit_used`, and computed `creditCost` (`ceil(credit_used * 0.12) * 0.05`).

@@ -16,9 +16,10 @@ cd /root/coze-js-api && node --check utils/tikhub.io.js
 ## Manual Checks
 - 已确认 `th_wechat_media.get_wechat_mp_article_list` 已切换为 `POST /api/v1/wechat_mp/v2/fetch_account_articles`。
 - 已确认上游请求参数改为 body：`username/page_size/offset/item_show_type/raw`，并兼容本地历史入参 `gh_id`。
-- 已确认本地返回结构保持兼容：仍返回 `code/msg/data`，且 `data` 固定为文章数组（来自上游 `data.articles`）。
+- 已确认本地返回结构保持兼容：返回 `code/msg/data`，其中 `data` 为旧版结构 `{ list, offset }`。
+- 已确认 `data.list` 项字段已映射为旧版命名（如 `ContentUrl`、`CoverImgUrl`、`ItemShowType` 等）。
 - 已确认为保证 `data` 结构稳定，本地调用固定使用 `raw=false`（不再受外部入参 `raw` 影响）。
-- 已增加空值兜底：当上游 `data.articles` 不是数组（如 `null`）时，本地强制返回空数组 `[]`。
+- 已增加空值兜底：当上游 `data.articles` 不是数组（如 `null`）时，本地强制返回 `data.list=[]` 且保留 `data.offset`。
 - 已确认增加了 30 秒超时，贴合上游文档对慢响应的说明。
 - 未执行真实上游联调；该步骤依赖可用的上游账号与网络。
 

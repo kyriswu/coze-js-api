@@ -521,6 +521,52 @@ function normalizeWechatArticleDetail(data) {
     };
 }
 
+function normalizeWechatMpListItem(item) {
+    const article = item || {};
+    const covers = article.covers || {};
+    const cover = article.cover || '';
+    const cover16x9 = covers['16_9'] || cover;
+    const cover1x1 = covers['1_1'] || cover;
+    const cover235x1 = covers['235_1'] || cover;
+    const cover3x4 = covers['3_4'] || cover;
+
+    return {
+        CanReward: 0,
+        ContentUrl: article.url || '',
+        CoverImgUrl: cover,
+        CoverImgUrl_16_9: cover16x9,
+        CoverImgUrl_16_9_640: cover16x9,
+        CoverImgUrl_1_1: cover1x1,
+        CoverImgUrl_235_1: cover235x1,
+        Digest: article.digest || '',
+        IsOriginal: 1,
+        IsPaySubscribe: Number(article.is_pay_subscribe || 0),
+        ItemIndex: Number(article.idx || 0),
+        ItemShowType: Number(article.item_show_type || 0),
+        SourceUrl: article.source_url || '',
+        SuggestedCoverImg: {
+            height_hint: 100,
+            url: cover235x1,
+            width_hint: 235
+        },
+        Title: article.title || '',
+        comment_topic_id: 0,
+        coverimgurl_3_4: cover3x4,
+        featured_info: {
+            status: 0
+        },
+        finder_export_id: '',
+        is_modified: 0,
+        is_private: 0,
+        ori_content: '',
+        preload_picture_info: {
+            cdn_url: cover
+        },
+        send_from_wxa: 0,
+        send_time: Number(article.update_time || article.create_time || 0)
+    };
+}
+
 // 微信公众号
 export const th_wechat_media = {
     /**
@@ -579,9 +625,19 @@ export const th_wechat_media = {
 
             if (response.data?.code !== 200) return res.send({ code: -1, msg: "获取列表失败" });
 
-            // Keep the historical response shape: local `data` must always be an array.
-            const upstreamArticles = response.data?.data?.articles;
-            const data = Array.isArray(upstreamArticles) ? upstreamArticles : [];
+            const upstreamData = response.data?.data || {};
+            const upstreamArticles = upstreamData.articles;
+            const list = Array.isArray(upstreamArticles)
+                ? upstreamArticles.map(normalizeWechatMpListItem)
+                : [];
+
+            const data = {
+                list,
+                offset: {
+                    IsEnd: Number(upstreamData.is_end || 0),
+                    Offset: upstreamData.next_offset || ''
+                }
+            };
             let msg = "success";
             if (api_key) {
                 const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 2, { platform: 'wechat_mp', action: 'article_list' });

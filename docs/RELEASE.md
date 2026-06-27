@@ -13,12 +13,12 @@
 	- 本地兼容历史参数：若传入 `gh_id`，内部自动映射为 `username`。
 	- 为保持历史 `data` 数组结构一致性，内部固定使用 `raw=false` 请求上游精简结果。
 	- 增加 `timeout: 30000` 以适配上游慢响应场景。
-	- 返回结构保持兼容：`data` 固定映射为上游 `data.articles` 数组。
+	- 返回结构保持兼容：`data` 统一映射为旧版结构 `{ list, offset }`，其中 `list` 来源于上游 `data.articles`。
 
 ### Impact
 #### API/Behavior
 - 本地入口 `POST /wx_gzh/get_user_articles` 不变。
-- 成功响应仍为 `code/msg/data`，其中 `data` 保持数组结构。
+- 成功响应仍为 `code/msg/data`，其中 `data` 为 `{ list, offset }`。
 - 计费与鉴权逻辑不变（`valid_redis_key` + `unkey.verifyKey`）。
 
 #### Internal Modules
