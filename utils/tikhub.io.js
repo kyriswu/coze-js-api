@@ -527,23 +527,60 @@ export const th_wechat_media = {
      * 获取微信公众号文章列表
      */
     get_wechat_mp_article_list: async function (req, res) {
-        const { gh_id, offset, api_key } = req.body;
-        if (!gh_id) return res.send({ code: -1, msg: "公众号用户id不能为空" });
+        const paramsFromReq = {
+            ...(req.query || {}),
+            ...(req.body || {})
+        };
+
+        const {
+            gh_id,
+            username: rawUsername,
+            offset,
+            page_size,
+            item_show_type,
+            api_key
+        } = paramsFromReq;
+
+        const username = rawUsername || gh_id;
+        if (!username) return res.send({ code: -1, msg: "公众号用户id不能为空" });
+
         try {
             const isValid = await commonUtils.valid_redis_key("wx_mp_list", unkey_api_id, api_key, req, res);
             if (!isValid) return;
 
-            const apiUrl = "https://api.tikhub.io/api/v1/wechat_mp/web/fetch_mp_article_list";
+            const apiUrl = "https://api.tikhub.io/api/v1/wechat_mp/v2/fetch_account_articles";
 
-            const response = await axios.get(apiUrl, {
-                params: {
-                    ghid: gh_id,   // 这里会自动被编码，例如 '+' 变成 '%2B'
-                    offset: offset
-                },
-                headers: { "Authorization": `Bearer ${tikhub_api_token}`, "Content-Type": "application/json", }
+            const normalizedPageSize = Number(page_size);
+
+            // Keep compatibility with historical response shape by always requesting simplified payload.
+            const normalizedRaw = false;
+            const requestBody = {
+                username,
+                page_size: Number.isFinite(normalizedPageSize)
+                    ? Math.min(20, Math.max(10, normalizedPageSize))
+                    : 20,
+                raw: normalizedRaw
+            };
+
+            if (typeof offset !== 'undefined' && offset !== null && String(offset) !== '') {
+                requestBody.offset = String(offset);
+            }
+            if (typeof item_show_type !== 'undefined' && item_show_type !== null && String(item_show_type) !== '') {
+                const normalizedItemShowType = Number(item_show_type);
+                if (Number.isFinite(normalizedItemShowType)) {
+                    requestBody.item_show_type = normalizedItemShowType;
+                }
+            }
+
+            const response = await axios.post(apiUrl, requestBody, {
+                timeout: 30000,
+                headers: { "Authorization": `Bearer ${tikhub_api_token}`, "Content-Type": "application/json" }
             });
+
             if (response.data?.code !== 200) return res.send({ code: -1, msg: "获取列表失败" });
-            const data = response.data.data || [];
+
+            // Keep the historical response shape: local `data` remains an array list.
+            const data = response.data?.data?.articles || [];
             let msg = "success";
             if (api_key) {
                 const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 2, { platform: 'wechat_mp', action: 'article_list' });

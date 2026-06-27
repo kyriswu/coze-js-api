@@ -1,50 +1,43 @@
 # PLAN
 
 ## Title
-Add Evolink image generation integration
+Migrate WeChat MP article-list upstream call (keep response-compatible)
 
 ## Approved
 yes
 
 ## Context Summary
-用户要求参考现有第三方接口集成方式，将提供的 Evolink markdown 文档中的接口封装到新的 `utils/ThirdParrtyApi/evolink.ai.js` 中，并在 `index.js` 暴露本地 API。当前已实现图片生成与任务查询；本轮补充账号额度查询接口 `GET /v1/credits`，本地暴露为 `/evolink/credits`。图片生成接口不直接返回异步 task 创建结果，而是在服务端自动轮询任务状态，直至完成、失败或超时后一次性返回结果。
+用户要求修复 `th_wechat_media.get_wechat_mp_article_list`：旧的第三方调用方式已失效，需要按新版文档切换到 `POST /api/v1/wechat_mp/v2/fetch_account_articles`（body 参数 `username/page_size/offset/item_show_type/raw`）。同时必须保持本地接口现有响应结构兼容，尤其 `res.send({ code, msg, data })` 中 `data` 的结构不发生破坏性变化。
 
 ## Assumptions
-- 当前已知需要接入的 Evolink 接口包括：`POST /v1/images/generations`、`GET /v1/tasks/{task_id}`、`GET /v1/credits`。
-- 保持现有项目风格：第三方能力封装在 `utils/ThirdParrtyApi/`，HTTP 路由注册在 `index.js`。
+- 本地入口仍为 `POST /wx_gzh/get_user_articles`，请求体主要沿用历史参数 `gh_id/offset/api_key`。
+- 新上游要求 body 参数名为 `username`，且推荐 POST body 传递分页游标。
+- 为保持兼容，本地仍默认返回数组结构（历史实现 `data || []`）。
 - 不新增依赖，沿用现有 `axios`。
-- 出于仓库安全规则，不将 Evolink API Key 硬编码入仓库，改为通过标准 `.env` 文件加载 `EVOLINK_API_KEY`。
 
 ## Impacted Areas
-- `utils/ThirdParrtyApi/evolink.ai.js`
-- `index.js`
+- `utils/tikhub.io.js`
 - `harness/plans/current-plan.md`
 - `docs/QA.md`
 - `docs/RELEASE.md`
 - `CHANGELOG.md`
 
 ## Steps
-1. 新增 `utils/ThirdParrtyApi/evolink.ai.js`，封装 task 创建、task 查询与自动轮询逻辑。
-2. 在 `index.js` 中引入 Evolink 模块并暴露本地路由：
-   - `POST /evolink/images/generations`
-   - `GET /evolink/tasks/:task_id`
-   - `GET /evolink/credits`
-3. 为图片生成路由增加基础参数校验与统一错误返回，默认同步等待任务完成；为额度查询接口增加无计费的只读 handler。
-4. 执行最小可行验证并补充 QA / Release / Changelog 记录。
+1. 调整 `get_wechat_mp_article_list` 参数读取与上游请求方式：由 `axios.get + ghid` 改为 `axios.post + username`。
+2. 保持本地响应结构兼容：继续返回 `code/msg/data`，并将上游 `data.articles` 映射为本地 `data`（数组）。
+3. 保持现有鉴权与扣费逻辑不变（`valid_redis_key` + `unkey.verifyKey`）。
+4. 运行最小验证命令并记录到 `docs/QA.md`；同步 `docs/RELEASE.md` 与 `CHANGELOG.md`。
 
 ## Verification Plan
-- `node --check utils/ThirdParrtyApi/evolink.ai.js`
-- `node --check index.js`
-- `node --input-type=module -e "import evolink from './utils/ThirdParrtyApi/evolink.ai.js'; console.log(Object.keys(evolink))"`
+- `node --check utils/tikhub.io.js`
 
 ## Risks & Mitigations
 | Risk | Impact | Mitigation |
 |---|---|---|
-| 上游为异步任务，轮询过久 | 请求挂起过长 | 增加默认超时与轮询间隔参数，超时后返回明确错误 |
-| 上游 task 返回结构变化 | 结果解析不稳定 | 保持原始创建响应与最终 task 详情一并返回 |
-| 用户未配置 API Key | 接口无法调用 | 启动调用时显式返回缺少 `EVOLINK_API_KEY`，并提供 `.env.example` 模板 |
+| 上游 `raw` 返回结构与旧接口差异 | 下游依赖解析异常 | 在本地层统一提取 `response.data.data.articles` 作为 `data` 输出 |
+| 新接口响应较慢 | 客户端超时 | 在 axios 调用中配置较长超时（30s）以贴合上游文档建议 |
+| 旧参数名与新参数名不一致 | 请求失败 | 兼容读取 `gh_id`，内部映射为 `username` 后再请求上游 |
 
 ## Rollback Plan
-- 删除 `utils/ThirdParrtyApi/evolink.ai.js`。
-- 回滚 `index.js` 中 Evolink import 与 `/evolink/...` 路由注册。
-- 回滚文档记录。
+- 回滚 `utils/tikhub.io.js` 中 `get_wechat_mp_article_list` 的请求方式与参数映射。
+- 回滚本轮文档更新。

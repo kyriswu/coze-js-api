@@ -1,5 +1,35 @@
 # RELEASE
 
+## Hotfix
+2026-06-27 / migrate-wechat-mp-article-list-post-body
+
+### Summary
+修复微信公众号文章列表接口上游调用失效问题，切换到新版 body 传参调用方式，并保持本地响应结构兼容。
+
+### What Changed
+- 更新 `utils/tikhub.io.js`：`th_wechat_media.get_wechat_mp_article_list`
+	- 上游调用从 `GET` 改为 `POST /api/v1/wechat_mp/v2/fetch_account_articles`。
+	- 请求参数从 `ghid` 查询参数改为 body `username`，并支持 `page_size/offset/item_show_type/raw`。
+	- 本地兼容历史参数：若传入 `gh_id`，内部自动映射为 `username`。
+	- 为保持历史 `data` 数组结构一致性，内部固定使用 `raw=false` 请求上游精简结果。
+	- 增加 `timeout: 30000` 以适配上游慢响应场景。
+	- 返回结构保持兼容：`data` 固定映射为上游 `data.articles` 数组。
+
+### Impact
+#### API/Behavior
+- 本地入口 `POST /wx_gzh/get_user_articles` 不变。
+- 成功响应仍为 `code/msg/data`，其中 `data` 保持数组结构。
+- 计费与鉴权逻辑不变（`valid_redis_key` + `unkey.verifyKey`）。
+
+#### Internal Modules
+- 影响 `utils/tikhub.io.js`。
+
+### Breaking Changes
+- none
+
+### Rollback Notes
+- 回滚 `utils/tikhub.io.js` 中 `get_wechat_mp_article_list` 的本轮改动。
+
 ## Feature
 2026-06-22 / add-evolink-image-generation-api
 
