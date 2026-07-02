@@ -1,5 +1,32 @@
 # RELEASE
 
+## Hotfix
+2026-07-02 / set-global-request-body-limit-500mb
+
+### Summary
+将服务全局默认请求体大小限制提升为 500MB，缓解上传 zip 文件时的 413 问题。
+
+### What Changed
+- 更新 `index.js`
+	- 新增统一配置：`globalBodyLimit`，默认值为 `500mb`。
+	- `express.json` 与 `express.text` 统一使用该限制。
+	- `/file-transfer/upload` 的 `express.raw` 限制由 `100mb` 提升为统一配置值。
+	- 支持环境变量 `REQUEST_BODY_LIMIT` 覆盖默认值。
+
+### Impact
+#### API/Behavior
+- API 路径与返回结构不变。
+- 请求体上限默认提升为 500MB。
+
+#### Internal Modules
+- 影响 `index.js`。
+
+### Breaking Changes
+- none
+
+### Rollback Notes
+- 回滚 `index.js` 的 body limit 统一配置。
+
 ## Feature
 2026-07-02 / enhance-file-transfer-delete-filter-sort-dashboard
 

@@ -25,9 +25,10 @@ attachAxiosRateLimitLogger(axios);
 const app = express();
 const port = 3000;
 const environment = process.env.NODE_ENV || 'development';
+const globalBodyLimit = process.env.REQUEST_BODY_LIMIT || '500mb';
 
-app.use(express.json())
-app.use(express.text())
+app.use(express.json({ limit: globalBodyLimit }))
+app.use(express.text({ limit: globalBodyLimit }))
 
 app.use((req, res, next) => {
     const startTime = Date.now();
@@ -1319,7 +1320,7 @@ app.delete('/file-transfer/file', async (req, res) => {
     }
 });
 
-app.post('/file-transfer/upload', express.raw({ type: '*/*', limit: '100mb' }), async (req, res) => {
+app.post('/file-transfer/upload', express.raw({ type: '*/*', limit: globalBodyLimit }), async (req, res) => {
     const contentType = String(req.headers['content-type'] || '').toLowerCase();
     if (contentType.includes('application/json') || contentType.includes('text/plain')) {
         return res.status(400).send({

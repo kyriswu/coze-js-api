@@ -1,45 +1,42 @@
 # PLAN
 
 ## Title
-Enhance file-transfer with delete/filter/sort/stats/dashboard
+Set global request body limit default to 500MB
 
 ## Approved
 yes
 
 ## Context Summary
-用户希望 `/file-transfer` 支持更完整的文件管理能力：手动删除文件、按文件大小排序、按文件类型筛选、展示文件类型数量统计，并提供最近 30 天创建数量日看板（柱状图或折线图）。
+用户上传 zip 时遇到 413，希望将全局默认请求体大小提升到 500MB，避免不同解析器限制不一致导致上传失败。
 
 ## Assumptions
-- 不引入新依赖，继续使用 Node + EJS + 原生前端脚本。
-- 保持现有路由不变，在现有接口上做向后兼容扩展。
-- 图表使用轻量原生 SVG 渲染。
+- 继续使用现有 Express 解析器，不引入新依赖。
+- 默认 500MB，同时支持环境变量覆盖。
+- 保持现有 API 结构不变。
 
 ## Impact Scope
 - `index.js`
-- `views/file-transfer.ejs`
 - `docs/PLAN.md`
 - `docs/QA.md`
 - `docs/RELEASE.md`
 - `CHANGELOG.md`
 
 ## Steps
-1. 扩展 `GET /file-transfer/files`：支持 `fileType/sortBy/sortOrder`，并返回类型统计和近 30 天日统计。
-2. 新增 `DELETE /file-transfer/file`：按文件名删除文件。
-3. 更新页面：增加类型筛选、排序控件、删除按钮、类型统计展示、30 天趋势图。
-4. 运行最小验证并同步文档记录。
+1. 在 `index.js` 增加统一的全局 body limit 常量（默认 `500mb`）。
+2. 将 `express.json`、`express.text`、`/file-transfer/upload` 的 `express.raw` 统一改为该限制。
+3. 支持通过环境变量 `REQUEST_BODY_LIMIT` 覆盖默认值。
+4. 运行语法校验并同步文档。
 
 ## Risks & Mitigations
 | Risk | Impact | Mitigation |
 |---|---|---|
-| 删除误操作 | 文件丢失 | 增加前端二次确认 |
-| 查询参数组合复杂 | 结果异常 | 后端统一兜底与参数白名单 |
-| 图表渲染复杂 | 前端报错 | 使用简单 SVG，空数据兜底 |
+| 请求体过大占用内存 | 服务压力升高 | 保留环境变量可按部署环境下调 |
+| 反向代理限制未同步 | 仍返回 413 | 文档提示同时调整 Nginx `client_max_body_size` |
+| 非上传接口接收大请求 | 风险增大 | 后续可按路由细分更严格限制 |
 
 ## Validation
 - `node --check index.js`
-- `node --input-type=module -e "import ejs from 'ejs'; await ejs.renderFile('views/file-transfer.ejs',{seo:{}}); console.log('file-transfer.ejs render ok');"`
 
 ## Rollback
-- 回滚 `index.js` 的文件删除与统计扩展。
-- 回滚 `views/file-transfer.ejs` 的新交互与图表模块。
+- 回滚 `index.js` body limit 改动。
 - 回滚文档更新。

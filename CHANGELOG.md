@@ -34,6 +34,7 @@ All notable changes to this project will be documented in this file.
 - Added Twitter endpoint `POST /twitter/fetch_search_timeline` backed by TikHub `fetch_search_timeline` API integration.
 
 ### Changed
+- Set the global default request body limit to `500mb` and unified `express.json`, `express.text`, and `/file-transfer/upload` raw body parsing limits (overridable via `REQUEST_BODY_LIMIT`).
 - Enhanced file-transfer listing with file-type filtering, size/name/time sorting, file-type counts, and a recent-15-days creation dashboard dataset.
 - Added pagination support to `GET /file-transfer/files` with `page` and `pageSize`, and updated the file-transfer page with previous/next controls.
 - Moved HTTP and axios network logs out of direct business console output and routed them through the isolated network logger (default writes to `downloads/network.log`).

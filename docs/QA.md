@@ -1,6 +1,35 @@
 # QA
 
 ## Iteration
+2026-07-02 / set-global-request-body-limit-500mb
+
+## Test Matrix
+| Case ID | Step | Expected | Actual | Status |
+|---|---|---|---|---|
+| QA-01 | `node --check index.js` | 无语法错误 | 命令执行无输出 | pass |
+
+## Command Evidence
+```bash
+cd /root/coze-js-api && node --check index.js
+```
+
+## Manual Checks
+- 已确认全局默认请求体限制设置为 `500mb`。
+- 已确认 `express.json`、`express.text`、`/file-transfer/upload` 的 `express.raw` 统一使用同一限制。
+- 已确认支持环境变量 `REQUEST_BODY_LIMIT` 覆盖默认值。
+- 代理层（如 Nginx）限制未在本仓库内修改，需部署侧同步配置以避免 413。
+
+## Defects Found
+| ID | Severity | Description | Status |
+|---|---|---|---|
+| BUG-01 | - | 本轮未发现语法问题；部署侧代理配置待同步确认 | open |
+
+## Final QA Verdict
+- [ ] pass
+- [x] conditional pass
+- [ ] fail
+
+## Iteration
 2026-07-02 / enhance-file-transfer-delete-filter-sort-dashboard
 
 ## Test Matrix
