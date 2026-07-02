@@ -34,7 +34,7 @@ All notable changes to this project will be documented in this file.
 - Added Twitter endpoint `POST /twitter/fetch_search_timeline` backed by TikHub `fetch_search_timeline` API integration.
 
 ### Changed
-- Enhanced file-transfer listing with file-type filtering, size/name/time sorting, file-type counts, and a recent-30-days creation dashboard dataset.
+- Enhanced file-transfer listing with file-type filtering, size/name/time sorting, file-type counts, and a recent-15-days creation dashboard dataset.
 - Added pagination support to `GET /file-transfer/files` with `page` and `pageSize`, and updated the file-transfer page with previous/next controls.
 - Moved HTTP and axios network logs out of direct business console output and routed them through the isolated network logger (default writes to `downloads/network.log`).
 - Added a file relay service entry card on the homepage service list to expose `GET /file-transfer`.

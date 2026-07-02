@@ -228,6 +228,21 @@
       padding: 10px 0;
     }
 
+    .chart-tooltip {
+      position: fixed;
+      pointer-events: none;
+      z-index: 99;
+      background: #0f172a;
+      color: #fff;
+      font-size: 12px;
+      padding: 6px 8px;
+      border-radius: 6px;
+      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.25);
+      transform: translate(10px, -12px);
+      white-space: nowrap;
+      display: none;
+    }
+
     .danger {
       background: #fef2f2;
       color: #b42318;
@@ -306,7 +321,7 @@
         <div class="meta" id="meta">加载中...</div>
         <div class="badge-wrap" id="typeStats"></div>
         <div class="chart-box">
-          <p class="chart-title">最近 30 天文件创建数量（日）</p>
+          <p class="chart-title">最近 15 天文件创建数量（日）</p>
           <div id="recentChart"></div>
         </div>
         <div class="list">
@@ -336,6 +351,8 @@
     </section>
   </main>
 
+  <div id="chartTooltip" class="chart-tooltip"></div>
+
   <script>
     const uploadInput = document.getElementById('uploadInput');
     const uploadBtn = document.getElementById('uploadBtn');
@@ -348,6 +365,7 @@
     const sortSelectEl = document.getElementById('sortSelect');
     const typeStatsEl = document.getElementById('typeStats');
     const recentChartEl = document.getElementById('recentChart');
+    const chartTooltipEl = document.getElementById('chartTooltip');
     const prevBtn = document.getElementById('prevBtn');
     const nextBtn = document.getElementById('nextBtn');
     const pagerInfo = document.getElementById('pagerInfo');
@@ -415,17 +433,34 @@
         const h = Math.round((count / max) * 140);
         const x = index * (barWidth + gap);
         const y = 150 - h;
-        return `<rect x="${x}" y="${y}" width="${barWidth}" height="${h}" fill="#1d67ff"><title>${item.date}: ${count}</title></rect>`;
+        return `<rect class="chart-bar" data-date="${item.date}" data-count="${count}" x="${x}" y="${y}" width="${barWidth}" height="${h}" fill="#1d67ff"></rect>`;
       }).join('');
 
       recentChartEl.innerHTML = `
-        <svg viewBox="0 0 ${width} ${height}" width="100%" height="180" role="img" aria-label="最近30天创建数量图表">
+        <svg viewBox="0 0 ${width} ${height}" width="100%" height="180" role="img" aria-label="最近15天创建数量图表">
           <line x1="0" y1="150" x2="${width}" y2="150" stroke="#d9e2f4" />
           ${bars}
           <text x="0" y="170" font-size="11" fill="#58708d">${points[0]?.date || ''}</text>
           <text x="${width - 78}" y="170" font-size="11" fill="#58708d">${points[points.length - 1]?.date || ''}</text>
         </svg>
       `;
+
+      const barNodes = recentChartEl.querySelectorAll('.chart-bar');
+      barNodes.forEach((barNode) => {
+        barNode.addEventListener('mouseenter', (event) => {
+          const date = event.target?.getAttribute('data-date') || '';
+          const count = event.target?.getAttribute('data-count') || '0';
+          chartTooltipEl.textContent = `${date}：${count}`;
+          chartTooltipEl.style.display = 'block';
+        });
+        barNode.addEventListener('mousemove', (event) => {
+          chartTooltipEl.style.left = `${event.clientX}px`;
+          chartTooltipEl.style.top = `${event.clientY}px`;
+        });
+        barNode.addEventListener('mouseleave', () => {
+          chartTooltipEl.style.display = 'none';
+        });
+      });
     }
 
     async function deleteFile(encodedFileName) {
@@ -529,7 +564,7 @@
           .join('');
         typeFilterEl.value = selectedType;
 
-        renderRecentChart(payload?.data?.recent30Days || []);
+        renderRecentChart(payload?.data?.recent15Days || payload?.data?.recent30Days || []);
         updatePager();
         renderFiles(files);
       } catch (error) {

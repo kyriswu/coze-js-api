@@ -17,8 +17,8 @@ cd /root/coze-js-api && node --check index.js && node --input-type=module -e "im
 ## Manual Checks
 - 已确认新增删除接口 `DELETE /file-transfer/file`，支持按文件名删除。
 - 已确认列表接口支持 `fileType/sortBy/sortOrder`。
-- 已确认返回新增统计字段：`typeStats` 与 `recent30Days`。
-- 已确认页面新增类型筛选、排序、删除按钮、类型统计和近 30 天创建图表。
+- 已确认返回新增统计字段：`typeStats` 与 `recent15Days`（兼容保留 `recent30Days`）。
+- 已确认页面新增类型筛选、排序、删除按钮、类型统计和近 15 天创建图表。
 - 未执行真实浏览器联调删除与筛选组合场景；建议上线前执行一次端到端手测。
 
 ## Defects Found

@@ -4,20 +4,21 @@
 2026-07-02 / enhance-file-transfer-delete-filter-sort-dashboard
 
 ### Summary
-文件中转站增强为可管理视图：支持手动删除文件、按大小排序、按类型筛选、类型数量统计，以及最近 30 天创建数量日看板。
+文件中转站增强为可管理视图：支持手动删除文件、按大小排序、按类型筛选、类型数量统计，以及最近 15 天创建数量日看板。
 
 ### What Changed
 - 更新 `index.js`
 	- 扩展 `GET /file-transfer/files`：支持 `fileType/sortBy/sortOrder`。
 	- 列表返回新增：
 		- `typeStats`（文件类型计数）
-		- `recent30Days`（近 30 天每日创建数量）
+		- `recent15Days`（近 15 天每日创建数量）
+		- `recent30Days`（兼容字段，当前与 `recent15Days` 保持一致）
 	- 新增 `DELETE /file-transfer/file`，支持按文件名删除。
 - 更新 `views/file-transfer.ejs`
 	- 新增类型筛选和排序控件。
 	- 新增每行删除按钮（带确认弹窗）。
 	- 新增类型统计标签区域。
-	- 新增近 30 天日看板（SVG 柱状图）。
+	- 新增近 15 天日看板（SVG 柱状图，支持 hover 显示日期和数量）。
 
 ### Impact
 #### API/Behavior

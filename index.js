@@ -1171,12 +1171,12 @@ const listDownloadFiles = async (req, searchKeyword = '') => {
     return files;
 };
 
-const getLast30DaysCreatedStats = (files) => {
+const getLast15DaysCreatedStats = (files) => {
     const now = new Date();
     const counts = new Map();
     const dayKeys = [];
 
-    for (let i = 29; i >= 0; i -= 1) {
+    for (let i = 14; i >= 0; i -= 1) {
         const day = new Date(now);
         day.setHours(0, 0, 0, 0);
         day.setDate(day.getDate() - i);
@@ -1254,6 +1254,7 @@ app.get('/file-transfer/files', async (req, res) => {
             ? 20
             : Math.min(parsedPageSize, 100);
         const total = files.length;
+        const recent15Days = getLast15DaysCreatedStats(allFiles);
         const totalPages = Math.max(1, Math.ceil(total / pageSize));
         const safePage = Math.min(page, totalPages);
         const startIndex = (safePage - 1) * pageSize;
@@ -1272,7 +1273,8 @@ app.get('/file-transfer/files', async (req, res) => {
                 sortBy,
                 sortOrder,
                 typeStats: getTypeStats(allFiles),
-                recent30Days: getLast30DaysCreatedStats(allFiles),
+                recent15Days,
+                recent30Days: recent15Days,
             },
         });
     } catch (error) {

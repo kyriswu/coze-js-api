@@ -7,7 +7,7 @@ Enhance file-transfer with delete/filter/sort/stats/dashboard
 yes
 
 ## Context Summary
-用户希望 `/file-transfer` 提供更完整的文件管理体验：支持手动删除文件、按文件大小排序、按文件类型筛选、文件类型统计，以及最近 30 天创建数量日看板。
+用户希望 `/file-transfer` 提供更完整的文件管理体验：支持手动删除文件、按文件大小排序、按文件类型筛选、文件类型统计，以及最近 15 天创建数量日看板。
 
 ## Assumptions
 - 不引入新依赖，继续使用原生前端 + EJS。
@@ -24,13 +24,13 @@ yes
 ## Steps
 1. 扩展 `GET /file-transfer/files`：
    - 支持 `fileType/sortBy/sortOrder`。
-   - 返回 `typeStats` 与 `recent30Days`。
+   - 返回 `typeStats` 与 `recent15Days`。
 2. 新增 `DELETE /file-transfer/file` 删除接口。
 3. 更新页面控件与展示：
    - 类型筛选、排序下拉。
    - 每行删除按钮。
    - 类型统计标签。
-   - 最近 30 天创建数量图表。
+   - 最近 15 天创建数量图表。
 4. 运行最小验证并同步文档。
 
 ## Verification Plan
