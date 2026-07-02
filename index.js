@@ -1125,6 +1125,20 @@ const buildSafeUploadTarget = (fileName) => {
     };
 };
 
+const buildSafeExistingFilePath = (fileName) => {
+    const safeName = sanitizeUploadFileName(fileName);
+    const filePath = path.resolve(path.join(downloadsDir, safeName));
+
+    if (!filePath.startsWith(`${downloadsDir}${path.sep}`)) {
+        throw new Error('非法文件路径');
+    }
+
+    return {
+        fileName: safeName,
+        filePath,
+    };
+};
+
 const listDownloadFiles = async (req, searchKeyword = '') => {
     const keyword = String(searchKeyword || '').trim().toLowerCase();
     const entries = await fs.promises.readdir(downloadsDir, { withFileTypes: true });
@@ -1142,29 +1156,123 @@ const listDownloadFiles = async (req, searchKeyword = '') => {
 
         const fullPath = path.join(downloadsDir, fileName);
         const stats = await fs.promises.stat(fullPath);
+        const createdAt = stats.birthtimeMs > 0 ? stats.birthtime : stats.mtime;
 
         files.push({
             name: fileName,
             size: stats.size,
+            fileType: path.extname(fileName).replace('.', '').toLowerCase() || 'no_ext',
+            createdAt: createdAt.toISOString(),
             updatedAt: stats.mtime.toISOString(),
             url: getFilePublicUrl(req, fileName),
         });
     }
 
-    files.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
     return files;
+};
+
+const getLast30DaysCreatedStats = (files) => {
+    const now = new Date();
+    const counts = new Map();
+    const dayKeys = [];
+
+    for (let i = 29; i >= 0; i -= 1) {
+        const day = new Date(now);
+        day.setHours(0, 0, 0, 0);
+        day.setDate(day.getDate() - i);
+        const key = day.toISOString().slice(0, 10);
+        dayKeys.push(key);
+        counts.set(key, 0);
+    }
+
+    files.forEach((file) => {
+        const date = new Date(file.createdAt);
+        date.setHours(0, 0, 0, 0);
+        const key = date.toISOString().slice(0, 10);
+        if (counts.has(key)) {
+            counts.set(key, (counts.get(key) || 0) + 1);
+        }
+    });
+
+    return dayKeys.map((date) => ({
+        date,
+        count: counts.get(date) || 0,
+    }));
+};
+
+const getTypeStats = (files) => {
+    const map = new Map();
+    files.forEach((file) => {
+        const type = file.fileType || 'no_ext';
+        map.set(type, (map.get(type) || 0) + 1);
+    });
+
+    return Array.from(map.entries())
+        .map(([type, count]) => ({ type, count }))
+        .sort((a, b) => b.count - a.count);
+};
+
+const sortFiles = (files, sortBy, sortOrder) => {
+    const direction = sortOrder === 'asc' ? 1 : -1;
+    const sorted = [...files];
+
+    sorted.sort((a, b) => {
+        if (sortBy === 'size') {
+            return (a.size - b.size) * direction;
+        }
+        if (sortBy === 'name') {
+            return a.name.localeCompare(b.name, 'zh-Hans-CN') * direction;
+        }
+        if (sortBy === 'createdAt') {
+            return (new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()) * direction;
+        }
+        return (new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime()) * direction;
+    });
+
+    return sorted;
 };
 
 app.get('/file-transfer/files', async (req, res) => {
     try {
         await fs.promises.mkdir(downloadsDir, { recursive: true });
-        const files = await listDownloadFiles(req, req.query.search);
+        const allFiles = await listDownloadFiles(req, req.query.search);
+        const fileType = String(req.query.fileType || 'all').trim().toLowerCase();
+        const sortBy = ['updatedAt', 'size', 'name', 'createdAt'].includes(String(req.query.sortBy))
+            ? String(req.query.sortBy)
+            : 'updatedAt';
+        const sortOrder = String(req.query.sortOrder || 'desc').toLowerCase() === 'asc' ? 'asc' : 'desc';
+
+        const filteredFiles = fileType === 'all'
+            ? allFiles
+            : allFiles.filter((item) => item.fileType === fileType);
+
+        const files = sortFiles(filteredFiles, sortBy, sortOrder);
+        const parsedPage = Number.parseInt(String(req.query.page || '1'), 10);
+        const parsedPageSize = Number.parseInt(String(req.query.pageSize || '20'), 10);
+        const page = Number.isNaN(parsedPage) || parsedPage < 1 ? 1 : parsedPage;
+        const pageSize = Number.isNaN(parsedPageSize) || parsedPageSize < 1
+            ? 20
+            : Math.min(parsedPageSize, 100);
+        const total = files.length;
+        const totalPages = Math.max(1, Math.ceil(total / pageSize));
+        const safePage = Math.min(page, totalPages);
+        const startIndex = (safePage - 1) * pageSize;
+        const pagedFiles = files.slice(startIndex, startIndex + pageSize);
+
         return res.send({
             code: 0,
             msg: 'success',
             data: {
-                total: files.length,
-                files,
+                total,
+                page: safePage,
+                pageSize,
+                totalPages,
+                files: pagedFiles,
+                fileType,
+                sortBy,
+                sortOrder,
+                typeStats: getTypeStats(allFiles),
+                recent30Days: getLast30DaysCreatedStats(allFiles),
             },
         });
     } catch (error) {
@@ -1172,6 +1280,39 @@ app.get('/file-transfer/files', async (req, res) => {
         return res.status(500).send({
             code: -1,
             msg: '文件列表获取失败',
+        });
+    }
+});
+
+app.delete('/file-transfer/file', async (req, res) => {
+    const rawName = req.query.filename || req.body?.filename;
+    if (!rawName) {
+        return res.status(400).send({
+            code: -1,
+            msg: 'filename 不能为空',
+        });
+    }
+
+    try {
+        const { fileName, filePath } = buildSafeExistingFilePath(rawName);
+        await fs.promises.access(filePath, fs.constants.F_OK);
+        await fs.promises.unlink(filePath);
+        return res.send({
+            code: 0,
+            msg: 'success',
+            data: { name: fileName },
+        });
+    } catch (error) {
+        if (error.code === 'ENOENT') {
+            return res.status(404).send({
+                code: -1,
+                msg: '文件不存在',
+            });
+        }
+        console.error('Error deleting file in /file-transfer/file:', error.message);
+        return res.status(500).send({
+            code: -1,
+            msg: '文件删除失败',
         });
     }
 });

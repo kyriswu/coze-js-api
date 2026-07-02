@@ -1,6 +1,66 @@
 # QA
 
 ## Iteration
+2026-07-02 / enhance-file-transfer-delete-filter-sort-dashboard
+
+## Test Matrix
+| Case ID | Step | Expected | Actual | Status |
+|---|---|---|---|---|
+| QA-01 | `node --check index.js` | 无语法错误 | 命令执行无输出 | pass |
+| QA-02 | 渲染 `views/file-transfer.ejs` | 模板可正常渲染 | `file-transfer.ejs render ok` | pass |
+
+## Command Evidence
+```bash
+cd /root/coze-js-api && node --check index.js && node --input-type=module -e "import ejs from 'ejs'; await ejs.renderFile('views/file-transfer.ejs',{seo:{}}); console.log('file-transfer.ejs render ok');"
+```
+
+## Manual Checks
+- 已确认新增删除接口 `DELETE /file-transfer/file`，支持按文件名删除。
+- 已确认列表接口支持 `fileType/sortBy/sortOrder`。
+- 已确认返回新增统计字段：`typeStats` 与 `recent30Days`。
+- 已确认页面新增类型筛选、排序、删除按钮、类型统计和近 30 天创建图表。
+- 未执行真实浏览器联调删除与筛选组合场景；建议上线前执行一次端到端手测。
+
+## Defects Found
+| ID | Severity | Description | Status |
+|---|---|---|---|
+| BUG-01 | - | 本轮未发现语法问题；浏览器端端到端联调待执行 | open |
+
+## Final QA Verdict
+- [ ] pass
+- [x] conditional pass
+- [ ] fail
+
+## Iteration
+2026-07-02 / add-file-transfer-pagination
+
+## Test Matrix
+| Case ID | Step | Expected | Actual | Status |
+|---|---|---|---|---|
+| QA-01 | `node --check index.js` | 无语法错误 | 命令执行无输出 | pass |
+| QA-02 | 渲染 `views/file-transfer.ejs` | 模板可正常渲染 | `file-transfer.ejs render ok` | pass |
+
+## Command Evidence
+```bash
+cd /root/coze-js-api && node --check index.js && node --input-type=module -e "import ejs from 'ejs'; await ejs.renderFile('views/file-transfer.ejs',{seo:{}}); console.log('file-transfer.ejs render ok');"
+```
+
+## Manual Checks
+- 已确认 `GET /file-transfer/files` 支持 `page/pageSize` 参数。
+- 已确认接口返回 `total/page/pageSize/totalPages` 分页元数据。
+- 已确认页面新增上一页/下一页按钮，并在搜索时回到第 1 页。
+
+## Defects Found
+| ID | Severity | Description | Status |
+|---|---|---|---|
+| BUG-01 | - | 本轮未发现语法问题；真实页面翻页交互待浏览器端联调 | open |
+
+## Final QA Verdict
+- [ ] pass
+- [x] conditional pass
+- [ ] fail
+
+## Iteration
 2026-07-02 / isolate-network-logs-from-business-logs
 
 ## Test Matrix

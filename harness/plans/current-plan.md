@@ -1,45 +1,45 @@
 # PLAN
 
 ## Title
-Add local network log analysis tool to reduce LLM token usage
+Enhance file-transfer with delete/filter/sort/stats/dashboard
 
 ## Approved
 yes
 
 ## Context Summary
-用户担心 `downloads/network.log` 在大规模行数下会导致 LLM token 消耗过快，希望有便于长期分析的本地工具。
+用户希望 `/file-transfer` 支持更完整的文件管理能力：手动删除文件、按文件大小排序、按文件类型筛选、展示文件类型数量统计，并提供最近 30 天创建数量日看板（柱状图或折线图）。
 
 ## Assumptions
-- 不引入新依赖，使用 Node.js 标准库流式读取日志。
-- 工具优先输出摘要与 TOP 列表，避免全量打印。
-- 保持现有日志格式（JSON Lines）兼容。
+- 不引入新依赖，继续使用 Node + EJS + 原生前端脚本。
+- 保持现有路由不变，在现有接口上做向后兼容扩展。
+- 图表使用轻量原生 SVG 渲染。
 
 ## Impact Scope
-- `scripts/network-log-analyze.mjs` (new)
-- `package.json`
+- `index.js`
+- `views/file-transfer.ejs`
 - `docs/PLAN.md`
 - `docs/QA.md`
 - `docs/RELEASE.md`
 - `CHANGELOG.md`
 
 ## Steps
-1. 新增流式分析脚本，支持大文件处理。
-2. 提供摘要统计：总行数、解析成功数、level/tag 统计、状态码分布、TOP 路径、慢请求 TOP。
-3. 在 `package.json` 增加 npm 快捷命令。
-4. 运行脚本做最小可行验证并同步文档。
+1. 扩展 `GET /file-transfer/files`：支持 `fileType/sortBy/sortOrder`，并返回类型统计和近 30 天日统计。
+2. 新增 `DELETE /file-transfer/file`：按文件名删除文件。
+3. 更新页面：增加类型筛选、排序控件、删除按钮、类型统计展示、30 天趋势图。
+4. 运行最小验证并同步文档记录。
 
 ## Risks & Mitigations
 | Risk | Impact | Mitigation |
 |---|---|---|
-| 日志行格式异常 | 部分统计失真 | 统计 parseError 并跳过坏行 |
-| 超大日志 I/O 开销 | 命令执行慢 | 使用 readline 流式读取，避免整文件加载 |
-| 输出仍然过长 | 阅读成本高 | 默认限制 TOP 条数，可通过参数调节 |
+| 删除误操作 | 文件丢失 | 增加前端二次确认 |
+| 查询参数组合复杂 | 结果异常 | 后端统一兜底与参数白名单 |
+| 图表渲染复杂 | 前端报错 | 使用简单 SVG，空数据兜底 |
 
 ## Validation
-- `node --check scripts/network-log-analyze.mjs`
-- `node scripts/network-log-analyze.mjs --file downloads/network.log --limit 5`
+- `node --check index.js`
+- `node --input-type=module -e "import ejs from 'ejs'; await ejs.renderFile('views/file-transfer.ejs',{seo:{}}); console.log('file-transfer.ejs render ok');"`
 
 ## Rollback
-- 删除 `scripts/network-log-analyze.mjs`。
-- 回滚 `package.json` 新增脚本。
+- 回滚 `index.js` 的文件删除与统计扩展。
+- 回滚 `views/file-transfer.ejs` 的新交互与图表模块。
 - 回滚文档更新。

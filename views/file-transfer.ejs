@@ -85,7 +85,8 @@
     }
 
     input[type="file"],
-    input[type="search"] {
+    input[type="search"],
+    select {
       width: 100%;
       border: 1px solid var(--line);
       border-radius: 10px;
@@ -190,6 +191,68 @@
       text-align: center;
     }
 
+    .badge-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 8px 0 12px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 9px;
+      border-radius: 999px;
+      background: #eef3ff;
+      color: #355171;
+      font-size: 12px;
+    }
+
+    .chart-box {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+      padding: 10px;
+      margin-bottom: 12px;
+    }
+
+    .chart-title {
+      font-size: 13px;
+      color: var(--muted);
+      margin: 0 0 6px;
+    }
+
+    .chart-empty {
+      color: var(--muted);
+      font-size: 13px;
+      padding: 10px 0;
+    }
+
+    .danger {
+      background: #fef2f2;
+      color: #b42318;
+    }
+
+    .danger:hover {
+      background: #fee4e2;
+    }
+
+    .pager {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .pager button {
+      padding: 7px 10px;
+      border-radius: 8px;
+      font-size: 12px;
+    }
+
     @media (max-width: 920px) {
       .layout { grid-template-columns: 1fr; }
     }
@@ -223,21 +286,51 @@
           <label for="searchInput">按文件名搜索</label>
           <input id="searchInput" type="search" placeholder="输入关键字后按回车" />
         </div>
+        <div class="field">
+          <label for="typeFilter">按文件类型筛选</label>
+          <select id="typeFilter">
+            <option value="all">全部类型</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="sortSelect">排序方式</label>
+          <select id="sortSelect">
+            <option value="updatedAt:desc">按更新时间（新到旧）</option>
+            <option value="updatedAt:asc">按更新时间（旧到新）</option>
+            <option value="size:desc">按文件大小（大到小）</option>
+            <option value="size:asc">按文件大小（小到大）</option>
+            <option value="name:asc">按文件名（A-Z）</option>
+            <option value="name:desc">按文件名（Z-A）</option>
+          </select>
+        </div>
         <div class="meta" id="meta">加载中...</div>
+        <div class="badge-wrap" id="typeStats"></div>
+        <div class="chart-box">
+          <p class="chart-title">最近 30 天文件创建数量（日）</p>
+          <div id="recentChart"></div>
+        </div>
         <div class="list">
           <table>
             <thead>
               <tr>
                 <th>文件名</th>
+                <th>类型</th>
                 <th>大小</th>
+                <th>创建时间</th>
                 <th>更新时间</th>
                 <th>访问 URL</th>
+                <th>操作</th>
               </tr>
             </thead>
             <tbody id="tbody">
-              <tr><td class="empty" colspan="4">加载中...</td></tr>
+              <tr><td class="empty" colspan="7">加载中...</td></tr>
             </tbody>
           </table>
+        </div>
+        <div class="pager">
+          <span id="pagerInfo">第 1 / 1 页</span>
+          <button id="prevBtn" class="ghost" type="button">上一页</button>
+          <button id="nextBtn" class="ghost" type="button">下一页</button>
         </div>
       </div>
     </section>
@@ -251,6 +344,25 @@
     const statusEl = document.getElementById('status');
     const metaEl = document.getElementById('meta');
     const tbodyEl = document.getElementById('tbody');
+    const typeFilterEl = document.getElementById('typeFilter');
+    const sortSelectEl = document.getElementById('sortSelect');
+    const typeStatsEl = document.getElementById('typeStats');
+    const recentChartEl = document.getElementById('recentChart');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const pagerInfo = document.getElementById('pagerInfo');
+
+    const pageState = {
+      page: 1,
+      pageSize: 20,
+      totalPages: 1,
+    };
+
+    let typeStatsCache = [];
+
+    function formatTypeName(type) {
+      return type === 'no_ext' ? '无扩展名' : type;
+    }
 
     function formatBytes(bytes) {
       const size = Number(bytes || 0);
@@ -274,33 +386,124 @@
         .replace(/'/g, '&#39;');
     }
 
+    function renderTypeStats(stats) {
+      if (!Array.isArray(stats) || stats.length === 0) {
+        typeStatsEl.innerHTML = '<span class="badge">暂无类型数据</span>';
+        return;
+      }
+
+      typeStatsEl.innerHTML = stats
+        .slice(0, 12)
+        .map((item) => `<span class="badge">${escapeHtml(formatTypeName(item.type))}: ${item.count}</span>`)
+        .join('');
+    }
+
+    function renderRecentChart(points) {
+      if (!Array.isArray(points) || points.length === 0) {
+        recentChartEl.innerHTML = '<div class="chart-empty">暂无数据</div>';
+        return;
+      }
+
+      const max = Math.max(...points.map((item) => Number(item.count || 0)), 1);
+      const width = 720;
+      const height = 180;
+      const gap = 3;
+      const barWidth = Math.max(2, Math.floor((width - gap * (points.length - 1)) / points.length));
+
+      const bars = points.map((item, index) => {
+        const count = Number(item.count || 0);
+        const h = Math.round((count / max) * 140);
+        const x = index * (barWidth + gap);
+        const y = 150 - h;
+        return `<rect x="${x}" y="${y}" width="${barWidth}" height="${h}" fill="#1d67ff"><title>${item.date}: ${count}</title></rect>`;
+      }).join('');
+
+      recentChartEl.innerHTML = `
+        <svg viewBox="0 0 ${width} ${height}" width="100%" height="180" role="img" aria-label="最近30天创建数量图表">
+          <line x1="0" y1="150" x2="${width}" y2="150" stroke="#d9e2f4" />
+          ${bars}
+          <text x="0" y="170" font-size="11" fill="#58708d">${points[0]?.date || ''}</text>
+          <text x="${width - 78}" y="170" font-size="11" fill="#58708d">${points[points.length - 1]?.date || ''}</text>
+        </svg>
+      `;
+    }
+
+    async function deleteFile(encodedFileName) {
+      const fileName = decodeURIComponent(String(encodedFileName || ''));
+      const ok = window.confirm(`确认删除文件：${fileName}？`);
+      if (!ok) {
+        return;
+      }
+
+      try {
+        const res = await fetch(`/file-transfer/file?filename=${encodeURIComponent(fileName)}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        const payload = await res.json();
+        if (!res.ok || payload.code !== 0) {
+          throw new Error(payload.msg || '删除失败');
+        }
+        setStatus(`删除成功：${fileName}`, 'ok');
+        await loadFiles(pageState.page);
+      } catch (error) {
+        setStatus(error.message || '删除失败', 'error');
+      }
+    }
+
+    window.deleteTransferFile = deleteFile;
+
     function renderFiles(files) {
       if (!Array.isArray(files) || files.length === 0) {
-        tbodyEl.innerHTML = '<tr><td class="empty" colspan="4">暂无文件</td></tr>';
+        tbodyEl.innerHTML = '<tr><td class="empty" colspan="7">暂无文件</td></tr>';
         return;
       }
 
       tbodyEl.innerHTML = files.map((file) => {
         const safeName = escapeHtml(file.name || '');
         const safeUrl = escapeHtml(file.url || '#');
+        const safeType = escapeHtml(formatTypeName(file.fileType || 'no_ext'));
+        const created = file.createdAt ? new Date(file.createdAt).toLocaleString() : '-';
         const updated = file.updatedAt ? new Date(file.updatedAt).toLocaleString() : '-';
         return `
           <tr>
             <td class="file-name">${safeName}</td>
+            <td>${safeType}</td>
             <td>${formatBytes(file.size)}</td>
+            <td>${created}</td>
             <td>${updated}</td>
             <td>
               <a class="url-link" href="${safeUrl}" target="_blank" rel="noopener noreferrer">${safeUrl}</a>
+            </td>
+            <td>
+              <button type="button" class="danger" onclick="deleteTransferFile('${encodeURIComponent(file.name || '')}')">删除</button>
             </td>
           </tr>
         `;
       }).join('');
     }
 
-    async function loadFiles() {
+    function updatePager() {
+      pagerInfo.textContent = `第 ${pageState.page} / ${pageState.totalPages} 页`;
+      prevBtn.disabled = pageState.page <= 1;
+      nextBtn.disabled = pageState.page >= pageState.totalPages;
+    }
+
+    async function loadFiles(page = 1) {
+      pageState.page = page;
       const search = searchInput.value.trim();
       const params = new URLSearchParams();
       if (search) params.set('search', search);
+      const selectedType = typeFilterEl.value || 'all';
+      const sortValue = String(sortSelectEl.value || 'updatedAt:desc');
+      const [sortBy, sortOrder] = sortValue.split(':');
+      params.set('fileType', selectedType);
+      params.set('sortBy', sortBy || 'updatedAt');
+      params.set('sortOrder', sortOrder || 'desc');
+      params.set('page', String(pageState.page));
+      params.set('pageSize', String(pageState.pageSize));
 
       try {
         const res = await fetch(`/file-transfer/files?${params.toString()}`);
@@ -311,11 +514,31 @@
 
         const files = payload?.data?.files || [];
         const total = payload?.data?.total || files.length;
-        metaEl.textContent = `共 ${total} 个文件`;
+        pageState.page = payload?.data?.page || pageState.page;
+        pageState.totalPages = payload?.data?.totalPages || 1;
+        metaEl.textContent = `共 ${total} 个文件（每页 ${pageState.pageSize} 条）`;
+
+        const incomingTypeStats = payload?.data?.typeStats || [];
+        typeStatsCache = Array.isArray(incomingTypeStats) ? incomingTypeStats : [];
+        renderTypeStats(typeStatsCache);
+
+        const types = ['all', ...typeStatsCache.map((item) => item.type)];
+        const uniqueTypes = Array.from(new Set(types));
+        typeFilterEl.innerHTML = uniqueTypes
+          .map((type) => `<option value="${escapeHtml(type)}">${type === 'all' ? '全部类型' : escapeHtml(formatTypeName(type))}</option>`)
+          .join('');
+        typeFilterEl.value = selectedType;
+
+        renderRecentChart(payload?.data?.recent30Days || []);
+        updatePager();
         renderFiles(files);
       } catch (error) {
         metaEl.textContent = '加载失败';
-        tbodyEl.innerHTML = `<tr><td class="empty" colspan="4">${error.message || '加载失败'}</td></tr>`;
+        pageState.totalPages = 1;
+        updatePager();
+        typeStatsEl.innerHTML = '';
+        recentChartEl.innerHTML = '<div class="chart-empty">加载失败</div>';
+        tbodyEl.innerHTML = `<tr><td class="empty" colspan="7">${error.message || '加载失败'}</td></tr>`;
       }
     }
 
@@ -348,7 +571,7 @@
 
         const fileUrl = payload?.data?.url || '';
         setStatus(`上传成功：${fileUrl}`, 'ok');
-        await loadFiles();
+        await loadFiles(1);
       } catch (error) {
         setStatus(error.message || '上传失败', 'error');
       } finally {
@@ -357,15 +580,35 @@
     }
 
     uploadBtn.addEventListener('click', uploadCurrentFile);
-    refreshBtn.addEventListener('click', loadFiles);
+    refreshBtn.addEventListener('click', () => loadFiles(1));
     searchInput.addEventListener('keydown', (event) => {
       if (event.key === 'Enter') {
         event.preventDefault();
-        loadFiles();
+        loadFiles(1);
       }
     });
 
-    loadFiles();
+    typeFilterEl.addEventListener('change', () => {
+      loadFiles(1);
+    });
+
+    sortSelectEl.addEventListener('change', () => {
+      loadFiles(1);
+    });
+
+    prevBtn.addEventListener('click', () => {
+      if (pageState.page > 1) {
+        loadFiles(pageState.page - 1);
+      }
+    });
+
+    nextBtn.addEventListener('click', () => {
+      if (pageState.page < pageState.totalPages) {
+        loadFiles(pageState.page + 1);
+      }
+    });
+
+    loadFiles(1);
   </script>
 </body>
 </html>

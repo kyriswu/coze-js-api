@@ -1,50 +1,50 @@
 # PLAN
 
 ## Title
-Isolate network logs from business logs
+Enhance file-transfer with delete/filter/sort/stats/dashboard
 
 ## Approved
 yes
 
 ## Context Summary
-当前 HTTP/axios 日志直接输出到控制台，会干扰正常业务日志阅读。目标是将网络日志独立输出，同时保留排障信息与可配置能力。
+用户希望 `/file-transfer` 提供更完整的文件管理体验：支持手动删除文件、按文件大小排序、按文件类型筛选、文件类型统计，以及最近 30 天创建数量日看板。
 
 ## Assumptions
-- 不引入新依赖。
-- 保持日志字段基本一致，主要调整输出通道。
-- 默认写入独立日志文件，减少控制台干扰。
+- 不引入新依赖，继续使用原生前端 + EJS。
+- 保持现有接口路径，兼容历史调用。
+- 图表采用轻量 SVG 渲染。
 
 ## Impacted Areas
-- `utils/networkLogger.js` (new)
 - `index.js`
-- `utils/axiosInterceptors.js`
+- `views/file-transfer.ejs`
 - `docs/QA.md`
 - `docs/RELEASE.md`
 - `CHANGELOG.md`
 
 ## Steps
-1. 新增 `utils/networkLogger.js`，支持 `NETWORK_LOG_MODE=off|console|file|both`。
-2. 将 `index.js` 中 HTTP 请求日志接入 `logHttpRequest`。
-3. 将 `utils/axiosInterceptors.js` 中 axios 日志接入独立 logger。
-4. 提供环境变量：
-   - `NETWORK_LOG_FILE`（默认 `downloads/network.log`）
-   - `NETWORK_LOG_HTTP`（默认开启）
-   - `NETWORK_LOG_AXIOS`（默认开启）
-5. 运行语法校验并记录 QA。
+1. 扩展 `GET /file-transfer/files`：
+   - 支持 `fileType/sortBy/sortOrder`。
+   - 返回 `typeStats` 与 `recent30Days`。
+2. 新增 `DELETE /file-transfer/file` 删除接口。
+3. 更新页面控件与展示：
+   - 类型筛选、排序下拉。
+   - 每行删除按钮。
+   - 类型统计标签。
+   - 最近 30 天创建数量图表。
+4. 运行最小验证并同步文档。
 
 ## Verification Plan
-- `node --check utils/networkLogger.js`
-- `node --check utils/axiosInterceptors.js`
 - `node --check index.js`
+- `node --input-type=module -e "import ejs from 'ejs'; await ejs.renderFile('views/file-transfer.ejs',{seo:{}}); console.log('file-transfer.ejs render ok');"`
 
 ## Risks & Mitigations
 | Risk | Impact | Mitigation |
 |---|---|---|
-| 默认不再刷控制台 | 运维误判日志缺失 | 文档明确可切 `NETWORK_LOG_MODE=both` |
-| 文件写入失败 | 丢失网络日志 | logger 内部捕获写入异常并打印错误 |
-| 长期运行日志增长 | 磁盘占用 | 后续加日志轮转或定时清理 |
+| 删除误操作 | 文件丢失 | 删除前前端确认弹窗 |
+| 数据量大导致渲染慢 | 页面卡顿 | 分页 + 服务端过滤排序 |
+| 统计口径差异 | 认知偏差 | 使用创建时间（birthtime 不可用时回退 mtime） |
 
 ## Rollback Plan
-- 回滚 `index.js` 与 `utils/axiosInterceptors.js` 的 logger 接入。
-- 删除 `utils/networkLogger.js`。
+- 回滚 `index.js` 的删除、筛选排序和统计扩展。
+- 回滚 `views/file-transfer.ejs` 的新 UI 与交互。
 - 回滚文档更新。

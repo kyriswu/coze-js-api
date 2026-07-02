@@ -1,5 +1,69 @@
 # RELEASE
 
+## Feature
+2026-07-02 / enhance-file-transfer-delete-filter-sort-dashboard
+
+### Summary
+文件中转站增强为可管理视图：支持手动删除文件、按大小排序、按类型筛选、类型数量统计，以及最近 30 天创建数量日看板。
+
+### What Changed
+- 更新 `index.js`
+	- 扩展 `GET /file-transfer/files`：支持 `fileType/sortBy/sortOrder`。
+	- 列表返回新增：
+		- `typeStats`（文件类型计数）
+		- `recent30Days`（近 30 天每日创建数量）
+	- 新增 `DELETE /file-transfer/file`，支持按文件名删除。
+- 更新 `views/file-transfer.ejs`
+	- 新增类型筛选和排序控件。
+	- 新增每行删除按钮（带确认弹窗）。
+	- 新增类型统计标签区域。
+	- 新增近 30 天日看板（SVG 柱状图）。
+
+### Impact
+#### API/Behavior
+- `GET /file-transfer/files` 返回结构扩展，兼容原有分页字段。
+- 新增删除接口：`DELETE /file-transfer/file?filename=...`。
+
+#### Internal Modules
+- 影响 `index.js` 与 `views/file-transfer.ejs`。
+
+### Breaking Changes
+- none
+
+### Rollback Notes
+- 回滚 `index.js` 的删除接口与统计扩展。
+- 回滚 `views/file-transfer.ejs` 的筛选/排序/删除/图表功能。
+
+## Enhancement
+2026-07-02 / add-file-transfer-pagination
+
+### Summary
+文件中转站页面新增分页展示，避免 `downloads/` 文件过多时一次性渲染过载。
+
+### What Changed
+- 更新 `index.js`
+	- `GET /file-transfer/files` 新增查询参数 `page`、`pageSize`。
+	- 返回新增分页元数据：`total/page/pageSize/totalPages`。
+	- 默认每页 20 条，`pageSize` 最大限制 100。
+- 更新 `views/file-transfer.ejs`
+	- 新增分页控件：上一页/下一页。
+	- 搜索和刷新会自动回到第 1 页。
+	- 页面展示当前页信息。
+
+### Impact
+#### API/Behavior
+- `GET /file-transfer/files` 向后兼容（不传分页参数时默认第 1 页、20 条）。
+
+#### Internal Modules
+- 影响 `index.js` 与 `views/file-transfer.ejs`。
+
+### Breaking Changes
+- none
+
+### Rollback Notes
+- 回滚 `index.js` 的分页参数与返回字段。
+- 回滚 `views/file-transfer.ejs` 的分页控件与逻辑。
+
 ## Enhancement
 2026-07-02 / isolate-network-logs-from-business-logs
 

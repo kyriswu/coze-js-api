@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- Added `DELETE /file-transfer/file` for manual file removal in the downloads file-transfer workflow.
 - Added isolated network logging utility `utils/networkLogger.js` with configurable output modes (`off|console|file|both`).
 - Added a downloads-based file relay page at `GET /file-transfer` for browsing, searching, and URL retrieval.
 - Added file relay APIs: `GET /file-transfer/files` and `POST /file-transfer/upload`.
@@ -33,6 +34,8 @@ All notable changes to this project will be documented in this file.
 - Added Twitter endpoint `POST /twitter/fetch_search_timeline` backed by TikHub `fetch_search_timeline` API integration.
 
 ### Changed
+- Enhanced file-transfer listing with file-type filtering, size/name/time sorting, file-type counts, and a recent-30-days creation dashboard dataset.
+- Added pagination support to `GET /file-transfer/files` with `page` and `pageSize`, and updated the file-transfer page with previous/next controls.
 - Moved HTTP and axios network logs out of direct business console output and routed them through the isolated network logger (default writes to `downloads/network.log`).
 - Added a file relay service entry card on the homepage service list to expose `GET /file-transfer`.
 - Added unified incoming HTTP request logging in `index.js` (method/path/status/duration/ip) for easier network troubleshooting.
