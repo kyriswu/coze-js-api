@@ -262,6 +262,15 @@ const serviceCards = [
         price: '按量'
     },
     {
+        title: '文件中转站',
+        category: 'file',
+        icon: 'FS',
+        description: '查看、搜索和上传 downloads 目录文件，并获取可访问 URL。',
+        endpoint: 'GET /file-transfer',
+        badge: '中转',
+        price: '工具'
+    },
+    {
         title: '百度网盘工具',
         category: 'file',
         icon: 'XP',
@@ -848,6 +857,18 @@ router.get('/gpt-image-2', async (req, res) => {
             title: 'GPT-Image-2 画廊 - 科技风提示词案例库',
             description: 'GPT-Image-2 科技风画廊页，收录多场景提示词、分类筛选、搜索、标签、弹窗预览和复制功能。',
             keywords: 'GPT-Image-2,提示词,画廊,AI绘图,案例库,科技风,图像生成',
+            url: pageUrl
+        }
+    });
+});
+
+router.get('/file-transfer', async (req, res) => {
+    const pageUrl = `${tool.getBaseUrl(req)}${req.originalUrl}`;
+    res.render('file-transfer', {
+        seo: {
+            title: '文件中转站 - uploads/downloads 临时文件管理',
+            description: '基于 downloads 目录的轻量文件中转页，支持文件查看、搜索、上传与 URL 获取。',
+            keywords: '文件中转站,图床,文件上传,文件搜索,downloads',
             url: pageUrl
         }
     });

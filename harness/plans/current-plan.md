@@ -1,43 +1,45 @@
 # PLAN
 
 ## Title
-Migrate WeChat MP article-list upstream call (keep response-compatible)
+Add local network log analysis tool to reduce LLM token usage
 
 ## Approved
 yes
 
 ## Context Summary
-用户要求修复 `th_wechat_media.get_wechat_mp_article_list`：旧的第三方调用方式已失效，需要按新版文档切换到 `POST /api/v1/wechat_mp/v2/fetch_account_articles`（body 参数 `username/page_size/offset/item_show_type/raw`）。同时必须保持本地接口现有响应结构兼容，最终输出对齐旧版结构 `res.send({ code, msg, data: { list, offset } })`。
+用户担心 `downloads/network.log` 在大规模行数下会导致 LLM token 消耗过快，希望有便于长期分析的本地工具。
 
 ## Assumptions
-- 本地入口仍为 `POST /wx_gzh/get_user_articles`，请求体主要沿用历史参数 `gh_id/offset/api_key`。
-- 新上游要求 body 参数名为 `username`，且推荐 POST body 传递分页游标。
-- 为保持兼容，本地输出旧版对象结构：`data.list`（文章数组）+ `data.offset`（分页游标）。
-- 不新增依赖，沿用现有 `axios`。
+- 不引入新依赖，使用 Node.js 标准库流式读取日志。
+- 工具优先输出摘要与 TOP 列表，避免全量打印。
+- 保持现有日志格式（JSON Lines）兼容。
 
-## Impacted Areas
-- `utils/tikhub.io.js`
-- `harness/plans/current-plan.md`
+## Impact Scope
+- `scripts/network-log-analyze.mjs` (new)
+- `package.json`
+- `docs/PLAN.md`
 - `docs/QA.md`
 - `docs/RELEASE.md`
 - `CHANGELOG.md`
 
 ## Steps
-1. 调整 `get_wechat_mp_article_list` 参数读取与上游请求方式：由 `axios.get + ghid` 改为 `axios.post + username`。
-2. 保持本地响应结构兼容：继续返回 `code/msg/data`，并将上游 `data.articles` 映射为本地 `data.list`，将 `is_end/next_offset` 映射为 `data.offset`。
-3. 保持现有鉴权与扣费逻辑不变（`valid_redis_key` + `unkey.verifyKey`）。
-4. 运行最小验证命令并记录到 `docs/QA.md`；同步 `docs/RELEASE.md` 与 `CHANGELOG.md`。
-
-## Verification Plan
-- `node --check utils/tikhub.io.js`
+1. 新增流式分析脚本，支持大文件处理。
+2. 提供摘要统计：总行数、解析成功数、level/tag 统计、状态码分布、TOP 路径、慢请求 TOP。
+3. 在 `package.json` 增加 npm 快捷命令。
+4. 运行脚本做最小可行验证并同步文档。
 
 ## Risks & Mitigations
 | Risk | Impact | Mitigation |
 |---|---|---|
-| 上游 `raw` 返回结构与旧接口差异 | 下游依赖解析异常 | 在本地层统一提取 `response.data.data.articles` 作为 `data` 输出 |
-| 新接口响应较慢 | 客户端超时 | 在 axios 调用中配置较长超时（30s）以贴合上游文档建议 |
-| 旧参数名与新参数名不一致 | 请求失败 | 兼容读取 `gh_id`，内部映射为 `username` 后再请求上游 |
+| 日志行格式异常 | 部分统计失真 | 统计 parseError 并跳过坏行 |
+| 超大日志 I/O 开销 | 命令执行慢 | 使用 readline 流式读取，避免整文件加载 |
+| 输出仍然过长 | 阅读成本高 | 默认限制 TOP 条数，可通过参数调节 |
 
-## Rollback Plan
-- 回滚 `utils/tikhub.io.js` 中 `get_wechat_mp_article_list` 的请求方式与参数映射。
-- 回滚本轮文档更新。
+## Validation
+- `node --check scripts/network-log-analyze.mjs`
+- `node scripts/network-log-analyze.mjs --file downloads/network.log --limit 5`
+
+## Rollback
+- 删除 `scripts/network-log-analyze.mjs`。
+- 回滚 `package.json` 新增脚本。
+- 回滚文档更新。

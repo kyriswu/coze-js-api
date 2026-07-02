@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- Added isolated network logging utility `utils/networkLogger.js` with configurable output modes (`off|console|file|both`).
+- Added a downloads-based file relay page at `GET /file-transfer` for browsing, searching, and URL retrieval.
+- Added file relay APIs: `GET /file-transfer/files` and `POST /file-transfer/upload`.
+- Added Volcengine video generation task wrapper at `POST /volcengine/contents/generations/tasks`, backed by `POST /api/v3/contents/generations/tasks`.
 - Added Evolink image generation integration with local endpoints `POST /evolink/images/generations` and `GET /evolink/tasks/:task_id`.
 - Added Evolink credits query endpoint `GET /evolink/credits`.
 - Added lightweight `.env` loading via `utils/loadEnv.js` and a root `.env.example` template for local configuration.
@@ -29,6 +33,12 @@ All notable changes to this project will be documented in this file.
 - Added Twitter endpoint `POST /twitter/fetch_search_timeline` backed by TikHub `fetch_search_timeline` API integration.
 
 ### Changed
+- Moved HTTP and axios network logs out of direct business console output and routed them through the isolated network logger (default writes to `downloads/network.log`).
+- Added a file relay service entry card on the homepage service list to expose `GET /file-transfer`.
+- Added unified incoming HTTP request logging in `index.js` (method/path/status/duration/ip) for easier network troubleshooting.
+- Extended `utils/axiosInterceptors.js` to log axios request latency and status for both success and failure paths, while retaining detailed 429 diagnostics.
+- Extended `utils/volcengine.io.js` with a thin video generation task proxy that preserves existing `api_key` validation and `code/msg/data` response shape.
+- Routed the new Volcengine video generation task wrapper through `index.js`.
 - Migrated `th_wechat_media.get_wechat_mp_article_list` to the new upstream contract using `POST /api/v1/wechat_mp/v2/fetch_account_articles` with JSON body parameters (`username`, `page_size`, `offset`, `item_show_type`, `raw`) and a 30s timeout.
 - Preserved local response compatibility for `POST /wx_gzh/get_user_articles` by normalizing upstream payload to legacy-compatible `data: { list, offset }` (with list item key mapping such as `ContentUrl/CoverImgUrl/...`), and hardening binding to always request simplified upstream shape (`raw=false`) while keeping existing auth and billing flow unchanged.
 - `POST /evolink/images/generations` now submits the upstream Evolink async task and automatically polls until the task completes, fails, or times out before returning the final result payload.

@@ -1,6 +1,129 @@
 # QA
 
 ## Iteration
+2026-07-02 / isolate-network-logs-from-business-logs
+
+## Test Matrix
+| Case ID | Step | Expected | Actual | Status |
+|---|---|---|---|---|
+| QA-01 | `node --check utils/networkLogger.js` | 无语法错误 | 命令执行无输出 | pass |
+| QA-02 | `node --check utils/axiosInterceptors.js` | 无语法错误 | 命令执行无输出 | pass |
+| QA-03 | `node --check index.js` | 无语法错误 | 命令执行无输出 | pass |
+
+## Command Evidence
+```bash
+cd /root/coze-js-api && node --check utils/networkLogger.js && node --check utils/axiosInterceptors.js && node --check index.js
+```
+
+## Manual Checks
+- 已确认网络日志从业务 `console.log` 中抽离到 `utils/networkLogger.js`。
+- 已确认支持环境变量切换输出模式：`off/console/file/both`。
+- 已确认默认写入 `downloads/network.log`，不干扰主业务日志。
+- 未执行长时运行验证；日志文件增长和轮转策略待后续补充。
+
+## Defects Found
+| ID | Severity | Description | Status |
+|---|---|---|---|
+| BUG-01 | - | 本轮未发现语法问题；长时运行日志轮转待后续补充 | open |
+
+## Final QA Verdict
+- [ ] pass
+- [x] conditional pass
+- [ ] fail
+
+## Iteration
+2026-07-02 / add-downloads-file-transfer-page
+
+## Test Matrix
+| Case ID | Step | Expected | Actual | Status |
+|---|---|---|---|---|
+| QA-01 | `node --check routes/navigationRoutes.js` | 无语法错误 | 命令执行无输出 | pass |
+| QA-02 | `node --check index.js` | 无语法错误 | 命令执行无输出 | pass |
+| QA-03 | 渲染 `views/file-transfer.ejs` | 模板可正常渲染 | `file-transfer.ejs render ok` | pass |
+
+## Command Evidence
+```bash
+cd /root/coze-js-api && node --check routes/navigationRoutes.js && node --check index.js && node --input-type=module -e "import ejs from 'ejs'; await ejs.renderFile('views/file-transfer.ejs',{seo:{}}); console.log('file-transfer.ejs render ok');"
+```
+
+## Manual Checks
+- 已确认新增页面路由：`GET /file-transfer`。
+- 已确认新增文件列表接口：`GET /file-transfer/files?search=`，返回 `name/size/updatedAt/url`。
+- 已确认新增上传接口：`POST /file-transfer/upload`（二进制 body + 文件名），支持任意格式。
+- 已确认文件访问 URL 使用现有静态目录规则 `/downloads/<filename>`。
+- 未执行真实浏览器端上传联调；建议启动服务后用页面实际上传一次进行端到端确认。
+
+## Defects Found
+| ID | Severity | Description | Status |
+|---|---|---|---|
+| BUG-01 | - | 本轮未发现语法问题；浏览器端端到端联调待执行 | open |
+
+## Final QA Verdict
+- [ ] pass
+- [x] conditional pass
+- [ ] fail
+
+## Iteration
+2026-07-02 / add-unified-request-and-axios-latency-logging
+
+## Test Matrix
+| Case ID | Step | Expected | Actual | Status |
+|---|---|---|---|---|
+| QA-01 | `node --check utils/axiosInterceptors.js` | 无语法错误 | 命令执行无输出 | pass |
+| QA-02 | `node --check index.js` | 无语法错误 | 命令执行无输出 | pass |
+
+## Command Evidence
+```bash
+cd /root/coze-js-api && node --check utils/axiosInterceptors.js && node --check index.js
+```
+
+## Manual Checks
+- 已确认 `index.js` 新增统一入站请求日志中间件，记录 `method/path/status/durationMs/ip`。
+- 已确认 `utils/axiosInterceptors.js` 新增 axios 请求耗时日志，成功/失败均记录 `method/url/status/durationMs`。
+- 已确认保留并增强 429 日志（新增 `durationMs`），便于定位限流与慢请求。
+- 未执行真实上游联调；耗时日志准确性需在线上真实流量下进一步观察。
+
+## Defects Found
+| ID | Severity | Description | Status |
+|---|---|---|---|
+| BUG-01 | - | 本轮未发现语法问题；真实链路观测待执行 | open |
+
+## Final QA Verdict
+- [ ] pass
+- [x] conditional pass
+- [ ] fail
+
+## Iteration
+2026-07-01 / add-volcengine-video-generation-task-wrapper
+
+## Test Matrix
+| Case ID | Step | Expected | Actual | Status |
+|---|---|---|---|---|
+| QA-01 | `node --check utils/volcengine.io.js` | 无语法错误 | 命令执行无输出 | pass |
+| QA-02 | `node --check index.js` | 无语法错误 | 命令执行无输出 | pass |
+
+## Command Evidence
+```bash
+cd /root/coze-js-api && node --check utils/volcengine.io.js && node --check index.js
+```
+
+## Manual Checks
+- 已确认 `utils/volcengine.io.js` 新增 `ve_contents_generations_tasks.create_task`，直接转发到 `POST /api/v3/contents/generations/tasks`。
+- 已确认 `index.js` 新增本地路由 `POST /volcengine/contents/generations/tasks`。
+- 已确认新接口沿用 `api_key` 校验，并返回 `code/msg/data` 结构。
+- 未执行真实上游联调；该步骤依赖可用的火山账号和业务参数。
+
+## Defects Found
+| ID | Severity | Description | Status |
+|---|---|---|---|
+| BUG-01 | - | 本轮未发现语法问题；真实上游联调待执行 | open |
+
+## Final QA Verdict
+- [ ] pass
+- [x] conditional pass
+- [ ] fail
+
+## Iteration
 2026-06-27 / migrate-wechat-mp-article-list-post-body
 
 ## Test Matrix

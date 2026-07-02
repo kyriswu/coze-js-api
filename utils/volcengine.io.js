@@ -447,7 +447,71 @@ export const ve_web_search = {
     }
 };
 
+export const ve_contents_generations_tasks = {
+    // 视频生成任务创建
+    create_task: async function (req, res) {
+        const paramsFromReq = {
+            ...(req.query || {}),
+            ...(req.body || {})
+        };
+
+        const api_key = paramsFromReq.api_key;
+        if (!api_key) {
+            return res.send({ code: -1, msg: commonUtils.MESSAGE.TOKEN_EMPTY });
+        }
+
+        const payload = { ...paramsFromReq };
+        delete payload.api_key;
+
+        if (typeof payload.content === 'string') {
+            payload.content = safeJsonParse(payload.content);
+        }
+        if (typeof payload.tools === 'string') {
+            payload.tools = safeJsonParse(payload.tools);
+        }
+
+        try {
+            const { valid, remaining: currentRemaining } = await unkey.verifyKey(unkey_api_id, api_key, 0, { platform: 'volcengine', action: 'contents_generations_tasks_create' });
+            if (!valid) {
+                return res.send({ code: -1, msg: commonUtils.MESSAGE.TOKEN_EXPIRED });
+            }
+            if (currentRemaining <= 0) {
+                return res.send({ code: -1, msg: commonUtils.MESSAGE.TOKEN_NO_TIMES });
+            }
+
+            const response = await axios.post(
+                `${ark_base_url}/api/v3/contents/generations/tasks`,
+                payload,
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${ARK_API_KEY}`
+                    },
+                    timeout: 30000
+                }
+            );
+
+            return res.send({
+                code: 200,
+                msg: '创建视频生成任务成功',
+                data: response.data
+            });
+        } catch (error) {
+            const detail = error.response ? error.response.data : error.message;
+            console.error('Volcengine Contents Generations Tasks Error:', detail);
+            if (!res.headersSent) {
+                return res.send({
+                    code: -1,
+                    msg: commonUtils.MESSAGE.SERVER_ERROR,
+                    data: detail
+                });
+            }
+        }
+    }
+};
+
 export default {
     ve_seedream_5_0_lite,
-    ve_web_search
+    ve_web_search,
+    ve_contents_generations_tasks
 };

@@ -1,5 +1,257 @@
 # RELEASE
 
+## Enhancement
+2026-07-02 / isolate-network-logs-from-business-logs
+
+### Summary
+将 HTTP 与 axios 网络日志从主业务日志中独立出来，默认写入独立日志文件，减少控制台噪音并保留网络排障能力。
+
+### What Changed
+- 新增 `utils/networkLogger.js`
+	- 提供统一网络日志输出入口：`logHttpRequest`、`logAxiosRequest`、`logAxiosError`、`logRateLimit`。
+	- 支持环境变量控制输出模式：
+		- `NETWORK_LOG_MODE=off|console|file|both`（默认 `file`）
+		- `NETWORK_LOG_FILE`（默认 `downloads/network.log`）
+		- `NETWORK_LOG_HTTP`、`NETWORK_LOG_AXIOS`（默认开启）
+- 更新 `index.js`
+	- 入站请求日志改为调用 `logHttpRequest`，不再直接 `console.log`。
+- 更新 `utils/axiosInterceptors.js`
+	- axios 成功/失败/429 日志改为调用独立 logger。
+
+### Impact
+#### API/Behavior
+- API 行为与响应结构不变。
+- 网络日志默认不再占用主控制台输出（除非设置 `NETWORK_LOG_MODE=console|both`）。
+
+#### Internal Modules
+- 影响 `utils/networkLogger.js`、`index.js`、`utils/axiosInterceptors.js`。
+
+### Breaking Changes
+- none
+
+### Rollback Notes
+- 回滚 `index.js` 与 `utils/axiosInterceptors.js` 的 logger 调用。
+- 删除 `utils/networkLogger.js`。
+
+## Feature
+2026-07-02 / add-downloads-file-transfer-page
+
+### Summary
+新增基于 `downloads/` 目录的文件中转站页面，支持文件查看、搜索、上传任意格式文件，并返回可直接访问的 URL。
+
+### What Changed
+- 更新 `routes/navigationRoutes.js`
+	- 新增页面路由 `GET /file-transfer`。
+	- 首页服务列表新增“文件中转站”入口。
+- 更新 `index.js`
+	- 新增 `GET /file-transfer/files`：读取 `downloads/` 文件列表并支持 `search` 过滤。
+	- 新增 `POST /file-transfer/upload`：接收二进制上传并写入 `downloads/`。
+	- 返回统一结构 `code/msg/data`，包含文件名、大小、更新时间、访问 URL。
+- 新增 `views/file-transfer.ejs`
+	- 提供上传控件、搜索框、文件列表和 URL 展示。
+	- 上传成功后自动刷新列表。
+
+### Impact
+#### API/Behavior
+- 新增页面入口：`GET /file-transfer`。
+- 新增接口：`GET /file-transfer/files`、`POST /file-transfer/upload`。
+- 复用已有静态托管：`/downloads/<filename>` 直接访问文件。
+
+#### Internal Modules
+- 影响 `routes/navigationRoutes.js`、`index.js`、`views/file-transfer.ejs`。
+
+### Breaking Changes
+- none
+
+### Rollback Notes
+- 回滚 `routes/navigationRoutes.js` 的新页面路由与服务入口。
+- 回滚 `index.js` 的列表/上传接口。
+- 删除 `views/file-transfer.ejs`。
+
+## Enhancement
+2026-07-02 / add-unified-request-and-axios-latency-logging
+
+### Summary
+为排查网络问题，新增 Node 入站请求统一日志与 axios 出站请求耗时日志，便于快速定位慢请求和失败请求。
+
+### What Changed
+- 更新 `index.js`
+	- 新增全局请求日志中间件。
+	- 在请求完成时记录 `method/path/status/durationMs/ip`。
+- 更新 `utils/axiosInterceptors.js`
+	- 新增 axios request 拦截器，记录请求起始时间。
+	- 新增 axios response 拦截器日志：成功/失败均记录 `method/url/status/durationMs`。
+	- 保留现有 429 详细日志，并补充 `durationMs`。
+	- 增加幂等保护，避免拦截器重复挂载导致重复日志。
+
+### Impact
+#### API/Behavior
+- 不改变任何 API 路由、参数或响应结构。
+- 仅增加服务端观测日志输出。
+
+#### Internal Modules
+- 影响 `index.js` 与 `utils/axiosInterceptors.js`。
+
+### Breaking Changes
+- none
+
+### Rollback Notes
+- 回滚 `index.js` 中新增的请求日志中间件。
+- 回滚 `utils/axiosInterceptors.js` 中新增的耗时日志与幂等保护逻辑。
+
+## Hotfix
+2026-07-01 / add-volcengine-video-generation-task-wrapper
+
+### Summary
+新增火山方舟视频生成任务接口封装，并通过本地路由暴露 `POST /volcengine/contents/generations/tasks`。
+
+### What Changed
+- 更新 `utils/volcengine.io.js`
+	- 新增 `ve_contents_generations_tasks.create_task`，向上游 `POST /api/v3/contents/generations/tasks` 发起请求。
+	- 请求体默认去掉本地 `api_key`，其余业务参数按原样转发。
+	- 兼容将字符串形式的 `content` / `tools` 尝试解析为 JSON。
+	- 请求超时设置为 30 秒。
+- 更新 `index.js`
+	- 新增本地路由 `POST /volcengine/contents/generations/tasks`。
+	- 路由保持与现有 Volcengine 封装一致的挂载方式。
+
+### Reference Example
+```json
+{
+	"api_key": "your_project_api_key",
+	"model": "doubao-seedance-2-0-260128",
+	"content": [
+		{
+			"type": "text",
+			"text": "一只猫在雨夜的霓虹街道上缓慢行走，镜头轻微跟随，氛围电影感。"
+		},
+		{
+			"type": "image_url",
+			"image_url": {
+				"url": "https://example.com/reference-first-frame.png"
+			},
+			"role": "first_frame"
+		},
+		{
+			"type": "video_url",
+			"video_url": {
+				"url": "https://example.com/reference-video.mp4"
+			},
+			"role": "reference_video"
+		},
+		{
+			"type": "audio_url",
+			"audio_url": {
+				"url": "https://example.com/reference-audio.mp3"
+			},
+			"role": "reference_audio"
+		}
+	],
+	"generate_audio": true,
+	"resolution": "720p",
+	"ratio": "16:9",
+	"duration": 5,
+	"watermark": false
+}
+```
+
+```bash
+curl --request POST \
+	--url http://127.0.0.1:3000/volcengine/contents/generations/tasks \
+	--header 'Content-Type: application/json' \
+	--data '{
+		"api_key": "your_project_api_key",
+		"model": "doubao-seedance-2-0-260128",
+		"content": [
+			{
+				"type": "text",
+				"text": "一只猫在雨夜的霓虹街道上缓慢行走，镜头轻微跟随，氛围电影感。"
+			},
+			{
+				"type": "image_url",
+				"image_url": {
+					"url": "https://example.com/reference-first-frame.png"
+				},
+				"role": "first_frame"
+			},
+			{
+				"type": "video_url",
+				"video_url": {
+					"url": "https://example.com/reference-video.mp4"
+				},
+				"role": "reference_video"
+			},
+			{
+				"type": "audio_url",
+				"audio_url": {
+					"url": "https://example.com/reference-audio.mp3"
+				},
+				"role": "reference_audio"
+			}
+		],
+		"generate_audio": true,
+		"resolution": "720p",
+		"ratio": "16:9",
+		"duration": 5,
+		"watermark": false
+	}'
+```
+
+	### Multi-Reference-Image Example
+	```json
+	{
+		"api_key": "your_project_api_key",
+		"model": "doubao-seedance-2-0-260128",
+		"content": [
+			{
+				"type": "text",
+				"text": "根据多张参考图生成一段统一风格的城市漫步视频，保持人物服装和色调一致。"
+			},
+			{
+				"type": "image_url",
+				"image_url": {
+					"url": "https://example.com/reference-1.png"
+				},
+				"role": "reference_image"
+			},
+			{
+				"type": "image_url",
+				"image_url": {
+					"url": "https://example.com/reference-2.png"
+				},
+				"role": "reference_image"
+			},
+			{
+				"type": "image_url",
+				"image_url": {
+					"url": "https://example.com/reference-3.png"
+				},
+				"role": "reference_image"
+			}
+		],
+		"generate_audio": true,
+		"resolution": "720p",
+		"ratio": "adaptive",
+		"duration": 5,
+		"watermark": false
+	}
+	```
+
+### Impact
+#### API/Behavior
+- 新增本地视频生成任务创建入口。
+- 响应结构保持 `code/msg/data`，其中 `data` 直接透传上游返回。
+
+#### Internal Modules
+- 影响 `utils/volcengine.io.js` 与 `index.js`。
+
+### Breaking Changes
+- none
+
+### Rollback Notes
+- 回滚 `utils/volcengine.io.js` 中新增的视频生成任务封装。
+- 回滚 `index.js` 中新增的路由。
+
 ## Hotfix
 2026-06-27 / migrate-wechat-mp-article-list-post-body
 

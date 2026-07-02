@@ -16,6 +16,7 @@ import commonUtils from './utils/commonUtils.js';
 import thirdPartyUsed from "./utils/thirdPartyUsed.js";
 import navigationRoutes from './routes/navigationRoutes.js';
 import { attachAxiosRateLimitLogger } from './utils/axiosInterceptors.js';
+import { logHttpRequest } from './utils/networkLogger.js';
 import { createApiAccessHelpers } from './utils/apiAccess.js';
 import { extract_html_conent, extract_html_conent_standard } from './utils/htmlContent.js';
 
@@ -27,6 +28,26 @@ const environment = process.env.NODE_ENV || 'development';
 
 app.use(express.json())
 app.use(express.text())
+
+app.use((req, res, next) => {
+    const startTime = Date.now();
+    const requestPath = req.originalUrl || req.url;
+    const method = req.method;
+
+    res.on('finish', () => {
+        const durationMs = Date.now() - startTime;
+        logHttpRequest({
+            method,
+            path: requestPath,
+            status: res.statusCode,
+            durationMs,
+            ip: req.ip,
+        });
+    });
+
+    next();
+})
+
 app.use(navigationRoutes)
 
 // 设置模板引擎配置 (必须在路由之前)
@@ -41,7 +62,7 @@ import search1api from './utils/search1api.js';
 import zyte from './utils/zyte.js';
 import aitoken from './utils/ThirdParrtyApi/aitoken.js';
 import { th_bilibili, th_youtube, th_xiaohongshu,th_wechat_media,th_wechat_channels,th_douyin,th_tiktok,th_twitter,th_douyin_billboard } from './utils/tikhub.io.js';
-import { ve_seedream_5_0_lite, ve_web_search } from './utils/volcengine.io.js';
+import { ve_seedream_5_0_lite, ve_web_search, ve_contents_generations_tasks } from './utils/volcengine.io.js';
 import {qweather_tool}  from './utils/qwether.js';
 import { tv_search } from './utils/tavily.js';
 
@@ -746,6 +767,7 @@ app.post('/bilibili/fetch_user_post_videos', th_bilibili.fetch_user_post_videos)
 app.post('/bilibili/fetch_video_comments', th_bilibili.fetch_video_comments);
 app.post('/volcengine/seedream/5.0-lite/generate-image', ve_seedream_5_0_lite.generate_image);
 app.post('/volcengine/web-search', ve_web_search.web_search);
+app.post('/volcengine/contents/generations/tasks', ve_contents_generations_tasks.create_task);
 app.post('/youtube/get_channel_videos_v2', th_youtube.get_channel_videos_v2);
 app.post('/xiaohongshu/home_notes', th_xiaohongshu.fetch_home_notes);
 app.post('/xiaohongshu/search_notes_v2', th_xiaohongshu.search_notes_v2);
@@ -1067,6 +1089,135 @@ import CloudFlareApi from './utils/ThirdParrtyApi/cloudflare.js';
 import feishu from './utils/ThirdParrtyApi/feishu.js';
 import tencentapi from './utils/ThirdParrtyApi/tencentapi.js';
 import firecrawlTool from './utils/ThirdParrtyApi/firecrawl.js';
+
+const downloadsDir = path.resolve(path.join(__dirname, 'downloads'));
+
+const getFilePublicUrl = (req, fileName) => {
+    const encodedName = encodeURIComponent(fileName);
+    return `${req.protocol}://${req.get('host')}/downloads/${encodedName}`;
+};
+
+const sanitizeUploadFileName = (rawName = '') => {
+    let decodedName = String(rawName || '').trim();
+    try {
+        decodedName = decodeURIComponent(decodedName);
+    } catch (_) {
+        decodedName = String(rawName || '').trim();
+    }
+    const baseName = path.basename(decodedName);
+    const safeName = baseName.replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 160);
+    return safeName || 'upload.bin';
+};
+
+const buildSafeUploadTarget = (fileName) => {
+    const safeName = sanitizeUploadFileName(fileName);
+    const ext = path.extname(safeName).slice(0, 16);
+    const uniqueFileName = `upload-${Date.now()}-${crypto.randomBytes(4).toString('hex')}${ext}`;
+    const targetPath = path.resolve(path.join(downloadsDir, uniqueFileName));
+
+    if (!targetPath.startsWith(`${downloadsDir}${path.sep}`)) {
+        throw new Error('非法文件路径');
+    }
+
+    return {
+        fileName: uniqueFileName,
+        filePath: targetPath,
+    };
+};
+
+const listDownloadFiles = async (req, searchKeyword = '') => {
+    const keyword = String(searchKeyword || '').trim().toLowerCase();
+    const entries = await fs.promises.readdir(downloadsDir, { withFileTypes: true });
+    const files = [];
+
+    for (const entry of entries) {
+        if (!entry.isFile()) {
+            continue;
+        }
+
+        const fileName = entry.name;
+        if (keyword && !fileName.toLowerCase().includes(keyword)) {
+            continue;
+        }
+
+        const fullPath = path.join(downloadsDir, fileName);
+        const stats = await fs.promises.stat(fullPath);
+
+        files.push({
+            name: fileName,
+            size: stats.size,
+            updatedAt: stats.mtime.toISOString(),
+            url: getFilePublicUrl(req, fileName),
+        });
+    }
+
+    files.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+    return files;
+};
+
+app.get('/file-transfer/files', async (req, res) => {
+    try {
+        await fs.promises.mkdir(downloadsDir, { recursive: true });
+        const files = await listDownloadFiles(req, req.query.search);
+        return res.send({
+            code: 0,
+            msg: 'success',
+            data: {
+                total: files.length,
+                files,
+            },
+        });
+    } catch (error) {
+        console.error('Error listing files in /file-transfer/files:', error.message);
+        return res.status(500).send({
+            code: -1,
+            msg: '文件列表获取失败',
+        });
+    }
+});
+
+app.post('/file-transfer/upload', express.raw({ type: '*/*', limit: '100mb' }), async (req, res) => {
+    const contentType = String(req.headers['content-type'] || '').toLowerCase();
+    if (contentType.includes('application/json') || contentType.includes('text/plain')) {
+        return res.status(400).send({
+            code: -1,
+            msg: '请使用二进制上传方式',
+        });
+    }
+
+    if (!Buffer.isBuffer(req.body) || req.body.length === 0) {
+        return res.status(400).send({
+            code: -1,
+            msg: '文件内容不能为空',
+        });
+    }
+
+    const rawFileName = req.query.filename || req.headers['x-file-name'] || 'upload.bin';
+
+    try {
+        await fs.promises.mkdir(downloadsDir, { recursive: true });
+        const { fileName, filePath } = buildSafeUploadTarget(rawFileName);
+        await fs.promises.writeFile(filePath, req.body);
+        const stats = await fs.promises.stat(filePath);
+
+        return res.send({
+            code: 0,
+            msg: 'success',
+            data: {
+                name: fileName,
+                size: stats.size,
+                updatedAt: stats.mtime.toISOString(),
+                url: getFilePublicUrl(req, fileName),
+            },
+        });
+    } catch (error) {
+        console.error('Error uploading file in /file-transfer/upload:', error.message);
+        return res.status(500).send({
+            code: -1,
+            msg: '文件上传失败',
+        });
+    }
+});
 
 // 静态资源服务
 app.use('/images', express.static(path.join(__dirname, 'images')));

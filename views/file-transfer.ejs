@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <% const pageSeo = (typeof seo !== 'undefined' && seo) ? seo : {}; %>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= pageSeo.title || '文件中转站' %></title>
+  <meta name="description" content="<%= pageSeo.description || '基于 downloads 目录的轻量文件中转站。' %>" />
+  <meta name="keywords" content="<%= pageSeo.keywords || '文件上传,文件搜索,中转站,downloads' %>" />
+  <style>
+    :root {
+      --bg: #f3f7ff;
+      --card: #ffffff;
+      --line: #d9e2f4;
+      --text: #16314d;
+      --muted: #58708d;
+      --blue: #1d67ff;
+      --blue-dark: #0f4fd4;
+      --ok: #0f9d58;
+      --warn: #b45309;
+      --error: #b42318;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "HarmonyOS Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+      color: var(--text);
+      background: radial-gradient(circle at 0% 0%, #e8f2ff 0%, var(--bg) 52%, #f8fbff 100%);
+    }
+
+    .wrap {
+      width: min(1080px, calc(100% - 32px));
+      margin: 28px auto 56px;
+    }
+
+    .head {
+      margin-bottom: 20px;
+      padding: 22px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: linear-gradient(135deg, #ffffff, #f7faff);
+    }
+
+    .head h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+    }
+
+    .desc {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 320px minmax(0, 1fr);
+      gap: 16px;
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--card);
+      padding: 16px;
+    }
+
+    .card h2 {
+      margin: 0 0 12px;
+      font-size: 18px;
+    }
+
+    .field {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .field label {
+      font-size: 14px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    input[type="file"],
+    input[type="search"] {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 14px;
+      color: var(--text);
+      background: #fff;
+    }
+
+    .row {
+      display: flex;
+      gap: 8px;
+    }
+
+    button {
+      border: none;
+      border-radius: 10px;
+      padding: 10px 14px;
+      color: #fff;
+      background: var(--blue);
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    button:hover { background: var(--blue-dark); }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .ghost {
+      background: #eef3ff;
+      color: #26456c;
+    }
+
+    .ghost:hover { background: #e3ecff; }
+
+    .hint {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    .status {
+      min-height: 20px;
+      font-size: 13px;
+      margin-top: 6px;
+    }
+
+    .status.ok { color: var(--ok); }
+    .status.warn { color: var(--warn); }
+    .status.error { color: var(--error); }
+
+    .meta {
+      margin-bottom: 10px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .list {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    thead tr { background: #f3f7ff; }
+
+    th, td {
+      padding: 10px;
+      border-bottom: 1px solid #ecf1fb;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th { color: #3d5673; font-weight: 700; }
+
+    tr:last-child td { border-bottom: none; }
+
+    .file-name {
+      max-width: 260px;
+      word-break: break-all;
+      font-weight: 600;
+    }
+
+    .url-link {
+      display: inline-block;
+      max-width: 320px;
+      color: var(--blue);
+      word-break: break-all;
+      text-decoration: none;
+    }
+
+    .url-link:hover { text-decoration: underline; }
+
+    .empty {
+      padding: 20px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    @media (max-width: 920px) {
+      .layout { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="head">
+      <h1>文件中转站</h1>
+      <p class="desc">基于 <code>/downloads</code> 目录的最简文件中转页：上传任意格式文件，查看/搜索文件，并获取每个文件的直接访问 URL。</p>
+    </section>
+
+    <section class="layout">
+      <div class="card">
+        <h2>上传文件</h2>
+        <div class="field">
+          <label for="uploadInput">选择任意格式文件</label>
+          <input id="uploadInput" type="file" />
+        </div>
+        <div class="row">
+          <button id="uploadBtn" type="button">上传</button>
+          <button id="refreshBtn" class="ghost" type="button">刷新列表</button>
+        </div>
+        <p class="hint">上传后文件会保存到服务端 downloads 目录，URL 可直接访问。</p>
+        <div id="status" class="status"></div>
+      </div>
+
+      <div class="card">
+        <h2>文件列表</h2>
+        <div class="field">
+          <label for="searchInput">按文件名搜索</label>
+          <input id="searchInput" type="search" placeholder="输入关键字后按回车" />
+        </div>
+        <div class="meta" id="meta">加载中...</div>
+        <div class="list">
+          <table>
+            <thead>
+              <tr>
+                <th>文件名</th>
+                <th>大小</th>
+                <th>更新时间</th>
+                <th>访问 URL</th>
+              </tr>
+            </thead>
+            <tbody id="tbody">
+              <tr><td class="empty" colspan="4">加载中...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const uploadInput = document.getElementById('uploadInput');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const refreshBtn = document.getElementById('refreshBtn');
+    const searchInput = document.getElementById('searchInput');
+    const statusEl = document.getElementById('status');
+    const metaEl = document.getElementById('meta');
+    const tbodyEl = document.getElementById('tbody');
+
+    function formatBytes(bytes) {
+      const size = Number(bytes || 0);
+      if (size < 1024) return `${size} B`;
+      if (size < 1024 * 1024) return `${(size / 1024).toFixed(2)} KB`;
+      if (size < 1024 * 1024 * 1024) return `${(size / 1024 / 1024).toFixed(2)} MB`;
+      return `${(size / 1024 / 1024 / 1024).toFixed(2)} GB`;
+    }
+
+    function setStatus(message, level) {
+      statusEl.className = `status ${level || ''}`;
+      statusEl.textContent = message || '';
+    }
+
+    function escapeHtml(input) {
+      return String(input || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/\"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function renderFiles(files) {
+      if (!Array.isArray(files) || files.length === 0) {
+        tbodyEl.innerHTML = '<tr><td class="empty" colspan="4">暂无文件</td></tr>';
+        return;
+      }
+
+      tbodyEl.innerHTML = files.map((file) => {
+        const safeName = escapeHtml(file.name || '');
+        const safeUrl = escapeHtml(file.url || '#');
+        const updated = file.updatedAt ? new Date(file.updatedAt).toLocaleString() : '-';
+        return `
+          <tr>
+            <td class="file-name">${safeName}</td>
+            <td>${formatBytes(file.size)}</td>
+            <td>${updated}</td>
+            <td>
+              <a class="url-link" href="${safeUrl}" target="_blank" rel="noopener noreferrer">${safeUrl}</a>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    async function loadFiles() {
+      const search = searchInput.value.trim();
+      const params = new URLSearchParams();
+      if (search) params.set('search', search);
+
+      try {
+        const res = await fetch(`/file-transfer/files?${params.toString()}`);
+        const payload = await res.json();
+        if (!res.ok || payload.code !== 0) {
+          throw new Error(payload.msg || '文件列表获取失败');
+        }
+
+        const files = payload?.data?.files || [];
+        const total = payload?.data?.total || files.length;
+        metaEl.textContent = `共 ${total} 个文件`;
+        renderFiles(files);
+      } catch (error) {
+        metaEl.textContent = '加载失败';
+        tbodyEl.innerHTML = `<tr><td class="empty" colspan="4">${error.message || '加载失败'}</td></tr>`;
+      }
+    }
+
+    async function uploadCurrentFile() {
+      const file = uploadInput.files && uploadInput.files[0];
+      if (!file) {
+        setStatus('请先选择文件', 'warn');
+        return;
+      }
+
+      uploadBtn.disabled = true;
+      setStatus('上传中...', 'warn');
+
+      try {
+        const arrayBuffer = await file.arrayBuffer();
+        const uploadUrl = `/file-transfer/upload?filename=${encodeURIComponent(file.name)}`;
+        const res = await fetch(uploadUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/octet-stream',
+            'X-File-Name': encodeURIComponent(file.name),
+          },
+          body: arrayBuffer,
+        });
+
+        const payload = await res.json();
+        if (!res.ok || payload.code !== 0) {
+          throw new Error(payload.msg || '上传失败');
+        }
+
+        const fileUrl = payload?.data?.url || '';
+        setStatus(`上传成功：${fileUrl}`, 'ok');
+        await loadFiles();
+      } catch (error) {
+        setStatus(error.message || '上传失败', 'error');
+      } finally {
+        uploadBtn.disabled = false;
+      }
+    }
+
+    uploadBtn.addEventListener('click', uploadCurrentFile);
+    refreshBtn.addEventListener('click', loadFiles);
+    searchInput.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        loadFiles();
+      }
+    });
+
+    loadFiles();
+  </script>
+</body>
+</html>
