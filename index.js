@@ -1093,6 +1093,7 @@ import tencentapi from './utils/ThirdParrtyApi/tencentapi.js';
 import firecrawlTool from './utils/ThirdParrtyApi/firecrawl.js';
 
 const downloadsDir = path.resolve(path.join(__dirname, 'downloads'));
+const uploadChunksDir = path.resolve(path.join(downloadsDir, '.upload_chunks'));
 
 const getFilePublicUrl = (req, fileName) => {
     const encodedName = encodeURIComponent(fileName);
@@ -1124,6 +1125,27 @@ const buildSafeUploadTarget = (fileName) => {
     return {
         fileName: uniqueFileName,
         filePath: targetPath,
+    };
+};
+
+const sanitizeUploadSessionId = (rawId = '') => {
+    const safeId = String(rawId || '').replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 96);
+    return safeId || '';
+};
+
+const buildChunkSessionDir = (uploadId) => {
+    const safeUploadId = sanitizeUploadSessionId(uploadId);
+    if (!safeUploadId) {
+        throw new Error('非法 uploadId');
+    }
+
+    const sessionDir = path.resolve(path.join(uploadChunksDir, safeUploadId));
+    if (!sessionDir.startsWith(`${uploadChunksDir}${path.sep}`)) {
+        throw new Error('非法分片路径');
+    }
+    return {
+        safeUploadId,
+        sessionDir,
     };
 };
 
@@ -1360,6 +1382,117 @@ app.post('/file-transfer/upload', express.raw({ type: '*/*', limit: globalBodyLi
         return res.status(500).send({
             code: -1,
             msg: '文件上传失败',
+        });
+    }
+});
+
+app.post('/file-transfer/upload/chunk', express.raw({ type: '*/*', limit: globalBodyLimit }), async (req, res) => {
+    const uploadId = req.query.uploadId;
+    const rawFileName = req.query.filename || req.headers['x-file-name'] || 'upload.bin';
+    const rawIndex = Number.parseInt(String(req.query.index || '0'), 10);
+    const rawTotalChunks = Number.parseInt(String(req.query.totalChunks || '0'), 10);
+
+    if (!Buffer.isBuffer(req.body) || req.body.length === 0) {
+        return res.status(400).send({
+            code: -1,
+            msg: '分片内容不能为空',
+        });
+    }
+
+    if (Number.isNaN(rawIndex) || rawIndex < 0 || Number.isNaN(rawTotalChunks) || rawTotalChunks < 1) {
+        return res.status(400).send({
+            code: -1,
+            msg: '分片参数不合法',
+        });
+    }
+
+    try {
+        await fs.promises.mkdir(uploadChunksDir, { recursive: true });
+        const { safeUploadId, sessionDir } = buildChunkSessionDir(uploadId);
+        await fs.promises.mkdir(sessionDir, { recursive: true });
+
+        const safeName = sanitizeUploadFileName(rawFileName);
+        const metaPath = path.join(sessionDir, 'meta.json');
+        const partPath = path.join(sessionDir, `${rawIndex}.part`);
+
+        await fs.promises.writeFile(
+            metaPath,
+            JSON.stringify({
+                uploadId: safeUploadId,
+                fileName: safeName,
+                totalChunks: rawTotalChunks,
+                updatedAt: new Date().toISOString(),
+            }),
+            'utf8',
+        );
+        await fs.promises.writeFile(partPath, req.body);
+
+        return res.send({
+            code: 0,
+            msg: 'success',
+            data: {
+                uploadId: safeUploadId,
+                index: rawIndex,
+                totalChunks: rawTotalChunks,
+                size: req.body.length,
+            },
+        });
+    } catch (error) {
+        console.error('Error uploading chunk in /file-transfer/upload/chunk:', error.message);
+        return res.status(500).send({
+            code: -1,
+            msg: '分片上传失败',
+        });
+    }
+});
+
+app.post('/file-transfer/upload/complete', async (req, res) => {
+    const uploadId = req.body?.uploadId || req.query.uploadId;
+    const rawFileName = req.body?.filename || req.query.filename || 'upload.bin';
+    const parsedTotalChunks = Number.parseInt(String(req.body?.totalChunks || req.query.totalChunks || '0'), 10);
+
+    if (Number.isNaN(parsedTotalChunks) || parsedTotalChunks < 1) {
+        return res.status(400).send({
+            code: -1,
+            msg: 'totalChunks 不合法',
+        });
+    }
+
+    try {
+        await fs.promises.mkdir(downloadsDir, { recursive: true });
+        const { sessionDir } = buildChunkSessionDir(uploadId);
+        const { fileName, filePath } = buildSafeUploadTarget(rawFileName);
+
+        for (let i = 0; i < parsedTotalChunks; i += 1) {
+            const partPath = path.join(sessionDir, `${i}.part`);
+            await fs.promises.access(partPath, fs.constants.F_OK);
+        }
+
+        await fs.promises.writeFile(filePath, Buffer.alloc(0));
+        for (let i = 0; i < parsedTotalChunks; i += 1) {
+            const partPath = path.join(sessionDir, `${i}.part`);
+            const partBuffer = await fs.promises.readFile(partPath);
+            await fs.promises.appendFile(filePath, partBuffer);
+        }
+
+        await fs.promises.rm(sessionDir, { recursive: true, force: true });
+        const stats = await fs.promises.stat(filePath);
+
+        return res.send({
+            code: 0,
+            msg: 'success',
+            data: {
+                name: fileName,
+                size: stats.size,
+                updatedAt: stats.mtime.toISOString(),
+                url: getFilePublicUrl(req, fileName),
+            },
+        });
+    } catch (error) {
+        console.error('Error completing upload in /file-transfer/upload/complete:', error.message);
+        return res.status(500).send({
+            code: -1,
+            msg: '分片合并失败',
         });
     }
 });

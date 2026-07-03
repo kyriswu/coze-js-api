@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- Added chunked upload support for file transfer via `POST /file-transfer/upload/chunk` and `POST /file-transfer/upload/complete` to improve large-file upload reliability behind unstable HTTP/2 gateways.
 - Added Volcengine task query endpoint `GET /volcengine/contents/generations/tasks/:task_id` for convenient local task status checks without project `api_key`.
 - Added `DELETE /file-transfer/file` for manual file removal in the downloads file-transfer workflow.
 - Added isolated network logging utility `utils/networkLogger.js` with configurable output modes (`off|console|file|both`).
@@ -35,6 +36,7 @@ All notable changes to this project will be documented in this file.
 - Added Twitter endpoint `POST /twitter/fetch_search_timeline` backed by TikHub `fetch_search_timeline` API integration.
 
 ### Changed
+- Updated the file-transfer frontend uploader to automatically switch large files to chunked upload (with staged progress) while keeping small-file single-request uploads for compatibility.
 - Enhanced `GET /file-transfer` with a slide-in detail drawer that provides richer single-file metadata and quick actions (open/copy/delete) without changing backend APIs.
 - Revamped `GET /file-transfer` page into a modern file-manager panel with drag-and-drop multi-file queue upload, per-file progress, chip-based filtering, action buttons (open/copy/delete), and preserved pagination/statistics/chart behavior.
 - Extended `ve_contents_generations_tasks` with a query wrapper that proxies upstream `GET /api/v3/contents/generations/tasks/{task_id}` using server-side Ark credentials.

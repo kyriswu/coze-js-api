@@ -1,6 +1,37 @@
 # QA
 
 ## Iteration
+2026-07-03 / fix-file-transfer-upload-http2-interruption-with-chunking
+
+## Test Matrix
+| Case ID | Step | Expected | Actual | Status |
+|---|---|---|---|---|
+| QA-01 | `node --check index.js` | 无语法错误 | 命令执行无输出 | pass |
+| QA-02 | 渲染 `views/file-transfer.ejs` | 模板可正常渲染 | `file-transfer.ejs render ok` | pass |
+
+## Command Evidence
+```bash
+cd /root/coze-js-api && node --check index.js && node --input-type=module -e "import ejs from 'ejs'; await ejs.renderFile('views/file-transfer.ejs',{seo:{}}); console.log('file-transfer.ejs render ok');"
+```
+
+## Manual Checks
+- 已确认新增分片上传接口：`POST /file-transfer/upload/chunk` 与 `POST /file-transfer/upload/complete`。
+- 已确认前端对大文件自动走分片上传（默认阈值 16MB，分片大小 8MB）。
+- 已确认小文件仍沿用原 `POST /file-transfer/upload`，兼容现有行为。
+- 已确认上传进度在分片模式下按分片阶段推进。
+- 未执行真实线上链路复测（HTTP/2 网关环境）；建议使用同一 124MB+ 文件在生产入口做一次回归。
+
+## Defects Found
+| ID | Severity | Description | Status |
+|---|---|---|---|
+| BUG-01 | - | 本轮未发现语法或模板问题；线上网关链路回归验证待执行 | open |
+
+## Final QA Verdict
+- [ ] pass
+- [x] conditional pass
+- [ ] fail
+
+## Iteration
 2026-07-03 / add-file-transfer-detail-drawer
 
 ## Test Matrix

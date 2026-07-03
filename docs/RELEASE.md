@@ -1,5 +1,36 @@
 # RELEASE
 
+## Hotfix
+2026-07-03 / fix-file-transfer-upload-http2-interruption-with-chunking
+
+### Summary
+针对大文件上传过程中出现的 `ERR_HTTP2_PING_FAILED` / 网络异常，文件中转站新增分片上传与服务端合并机制，降低单请求链路中断风险。
+
+### What Changed
+- 更新 `index.js`
+	- 新增分片上传接口：`POST /file-transfer/upload/chunk`。
+	- 新增合并接口：`POST /file-transfer/upload/complete`。
+	- 新增分片会话目录安全处理与路径校验。
+- 更新 `views/file-transfer.ejs`
+	- 新增大文件自动分片上传策略（阈值 16MB，分片 8MB）。
+	- 小文件继续走原单请求上传，保持兼容。
+	- 分片上传时队列状态显示当前分片进度。
+
+### Impact
+#### API/Behavior
+- 保留原接口：`POST /file-transfer/upload`。
+- 新增接口：`POST /file-transfer/upload/chunk`、`POST /file-transfer/upload/complete`。
+
+#### Internal Modules
+- 影响 `index.js` 与 `views/file-transfer.ejs`。
+
+### Breaking Changes
+- none
+
+### Rollback Notes
+- 回滚 `index.js` 分片上传与合并接口。
+- 回滚 `views/file-transfer.ejs` 分片上传调用逻辑。
+
 ## Enhancement
 2026-07-03 / add-file-transfer-detail-drawer
 

@@ -863,6 +863,8 @@
     let typeStatsCache = [];
     let currentFiles = [];
     let selectedFile = null;
+    const CHUNK_SIZE = 8 * 1024 * 1024;
+    const CHUNK_UPLOAD_THRESHOLD = 16 * 1024 * 1024;
 
     function escapeHtml(input) {
       return String(input || '')
@@ -1193,6 +1195,80 @@
       setStatus(`已加入 ${files.length} 个文件到上传队列`, 'ok');
     }
 
+    function buildUploadSessionId(file) {
+      const rand = Math.random().toString(36).slice(2, 10);
+      return `u_${Date.now()}_${rand}_${String(file.size || 0)}`;
+    }
+
+    async function uploadFileInChunks(queueItem) {
+      const file = queueItem.file;
+      const uploadId = buildUploadSessionId(file);
+      const totalChunks = Math.max(1, Math.ceil(file.size / CHUNK_SIZE));
+
+      for (let index = 0; index < totalChunks; index += 1) {
+        const start = index * CHUNK_SIZE;
+        const end = Math.min(file.size, start + CHUNK_SIZE);
+        const chunk = file.slice(start, end);
+        const chunkBuffer = await chunk.arrayBuffer();
+
+        const params = new URLSearchParams({
+          uploadId,
+          filename: file.name,
+          index: String(index),
+          totalChunks: String(totalChunks),
+        });
+
+        const chunkRes = await fetch(`/file-transfer/upload/chunk?${params.toString()}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/octet-stream',
+            'X-File-Name': encodeURIComponent(file.name),
+          },
+          body: chunkBuffer,
+        });
+
+        let chunkPayload = {};
+        try {
+          chunkPayload = await chunkRes.json();
+        } catch (_) {
+          chunkPayload = {};
+        }
+        if (!chunkRes.ok || chunkPayload.code !== 0) {
+          throw new Error(chunkPayload.msg || `分片上传失败（第 ${index + 1} 片）`);
+        }
+
+        queueItem.progress = ((index + 1) / totalChunks) * 100;
+        queueItem.status = 'uploading';
+        queueItem.message = `上传中（${index + 1}/${totalChunks}）`;
+        renderQueue();
+      }
+
+      const completeRes = await fetch('/file-transfer/upload/complete', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          uploadId,
+          filename: file.name,
+          totalChunks,
+        }),
+      });
+
+      let completePayload = {};
+      try {
+        completePayload = await completeRes.json();
+      } catch (_) {
+        completePayload = {};
+      }
+
+      if (!completeRes.ok || completePayload.code !== 0) {
+        throw new Error(completePayload.msg || '分片合并失败');
+      }
+
+      return completePayload;
+    }
+
     function uploadSingleFile(queueItem) {
       return new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest();
@@ -1260,7 +1336,11 @@
           item.status = 'uploading';
           item.message = '上传中';
           renderQueue();
-          await uploadSingleFile(item);
+          if (Number(item.file?.size || 0) >= CHUNK_UPLOAD_THRESHOLD) {
+            await uploadFileInChunks(item);
+          } else {
+            await uploadSingleFile(item);
+          }
           successCount += 1;
         } catch (error) {
           item.status = 'error';
