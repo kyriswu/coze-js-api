@@ -1,5 +1,31 @@
 # RELEASE
 
+## Hotfix
+2026-07-04 / broaden-file-access-tracking-beyond-download-route
+
+### Summary
+文件访问统计从“下载路由计数”升级为“静态资源访问行为计数”，覆盖直链与命令行访问。
+
+### What Changed
+- 更新 `index.js`
+	- 移除仅针对 `GET /downloads/:filename` 的计数路由。
+	- 新增静态资源前置计数中间件。
+	- 在 `/downloads/*` 与 `/audio/*` 的成功响应后统一写入 Redis 访问计数。
+
+### Impact
+#### API/Behavior
+- 统计语义从“下载”扩大为“访问行为”。
+- 支持统计浏览器直链、`wget/curl`、`HEAD`、分段请求等访问。
+
+#### Internal Modules
+- 影响 `index.js`。
+
+### Breaking Changes
+- none
+
+### Rollback Notes
+- 回滚 `index.js` 静态前置计数中间件，恢复到原 `GET /downloads/:filename` 计数方式。
+
 ## Enhancement
 2026-07-04 / compact-overview-to-prioritize-file-list
 

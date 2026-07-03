@@ -1588,9 +1588,21 @@ app.post('/file-transfer/upload/complete', async (req, res) => {
     }
 });
 
-app.get('/downloads/:filename', (req, res, next) => {
-    const rawName = req.params.filename;
-    const safeName = sanitizeUploadFileName(rawName);
+const createFileAccessTrackMiddleware = () => (req, res, next) => {
+    const decodedPath = (() => {
+        try {
+            return decodeURIComponent(String(req.path || ''));
+        } catch (_) {
+            return String(req.path || '');
+        }
+    })();
+
+    const fileName = path.basename(decodedPath || '').trim();
+    if (!fileName || fileName === '/' || fileName === '.') {
+        return next();
+    }
+
+    const safeName = sanitizeUploadFileName(fileName);
     const accessKey = buildFileAccessCountKey(safeName);
     const hourKey = buildFileAccessHourKey(safeName, formatHourId(new Date()));
 
@@ -1602,19 +1614,19 @@ app.get('/downloads/:filename', (req, res, next) => {
                 .expire(hourKey, 60 * 60 * 48)
                 .exec()
                 .catch((error) => {
-                console.error('Error incrementing file access count:', error.message);
-            });
+                    console.error('Error incrementing file access count:', error.message);
+                });
         }
     });
 
     next();
-});
+};
 
 // 静态资源服务
 app.use('/images', express.static(path.join(__dirname, 'images')));
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
-app.use('/audio', express.static(path.join(__dirname, 'downloads')));
-app.use('/downloads', express.static(path.join(__dirname, 'downloads')));
+app.use('/audio', createFileAccessTrackMiddleware(), express.static(path.join(__dirname, 'downloads')));
+app.use('/downloads', createFileAccessTrackMiddleware(), express.static(path.join(__dirname, 'downloads')));
 
 app.post('/xpan/search', netdiskapi.search)
 app.post('/xpan/get_dlink', netdiskapi.get_dlink)

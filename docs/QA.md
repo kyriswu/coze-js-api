@@ -1,6 +1,34 @@
 # QA
 
 ## Iteration
+2026-07-04 / broaden-file-access-tracking-beyond-download-route
+
+## Test Matrix
+| Case ID | Step | Expected | Actual | Status |
+|---|---|---|---|---|
+| QA-01 | `node --check index.js` | 无语法错误 | 命令执行无输出 | pass |
+
+## Command Evidence
+```bash
+cd /root/coze-js-api && node --check index.js
+```
+
+## Manual Checks
+- 已确认访问计数从单一 `GET /downloads/:filename` 改为静态服务前置中间件。
+- 已确认 `/downloads/*` 与 `/audio/*` 的成功响应均会计入访问行为。
+- 已确认该逻辑可覆盖浏览器直链、命令行 `wget/curl`、`HEAD` 和分段请求等访问场景。
+
+## Defects Found
+| ID | Severity | Description | Status |
+|---|---|---|---|
+| BUG-01 | - | 本轮未发现语法问题；建议在线上抽样验证 `curl -I` 与 Range 请求计数 | open |
+
+## Final QA Verdict
+- [ ] pass
+- [x] conditional pass
+- [ ] fail
+
+## Iteration
 2026-07-04 / compact-overview-to-prioritize-file-list
 
 ## Test Matrix
