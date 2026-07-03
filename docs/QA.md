@@ -1,6 +1,68 @@
 # QA
 
 ## Iteration
+2026-07-03 / add-file-transfer-detail-drawer
+
+## Test Matrix
+| Case ID | Step | Expected | Actual | Status |
+|---|---|---|---|---|
+| QA-01 | 渲染 `views/file-transfer.ejs` | 模板可正常渲染 | `file-transfer.ejs render ok` | pass |
+| QA-02 | `node --check index.js` | 无语法错误 | 命令执行无输出 | pass |
+
+## Command Evidence
+```bash
+cd /root/coze-js-api && node --input-type=module -e "import ejs from 'ejs'; await ejs.renderFile('views/file-transfer.ejs',{seo:{}}); console.log('file-transfer.ejs render ok');" && node --check index.js
+```
+
+## Manual Checks
+- 已确认文件列表新增“查看详情”动作，点击后打开右侧详情抽屉。
+- 已确认抽屉展示 richer metadata（类型、体积、创建/更新时间、访问链接、相对路径）和预览区域。
+- 已确认抽屉底部提供快捷操作：打开、复制链接、删除。
+- 已确认支持遮罩点击与 `Esc` 关闭抽屉。
+- 未执行真实浏览器端交互联调；建议上线前补充一次端到端手测。
+
+## Defects Found
+| ID | Severity | Description | Status |
+|---|---|---|---|
+| BUG-01 | - | 本轮未发现模板或语法问题；浏览器端详情抽屉交互联调待执行 | open |
+
+## Final QA Verdict
+- [ ] pass
+- [x] conditional pass
+- [ ] fail
+
+## Iteration
+2026-07-03 / revamp-file-transfer-core-panel-multi-upload
+
+## Test Matrix
+| Case ID | Step | Expected | Actual | Status |
+|---|---|---|---|---|
+| QA-01 | 渲染 `views/file-transfer.ejs` | 模板可正常渲染 | `file-transfer.ejs render ok` | pass |
+| QA-02 | `node --check index.js` | 无语法错误 | 命令执行无输出 | pass |
+
+## Command Evidence
+```bash
+cd /root/coze-js-api && node --input-type=module -e "import ejs from 'ejs'; await ejs.renderFile('views/file-transfer.ejs',{seo:{}}); console.log('file-transfer.ejs render ok');" && node --check index.js
+```
+
+## Manual Checks
+- 已确认文件中转页改为现代化管理面板布局（上传侧栏 + 文件管理主区）。
+- 已确认支持拖拽与多文件队列上传，并显示逐文件上传进度。
+- 已确认文件列表改为动作式操作（打开/复制链接/删除），默认不直接展示原始 URL 文本。
+- 已确认原有搜索、类型筛选、排序、分页、统计和 15 天图表能力保留。
+- 未执行真实浏览器端拖拽与大文件并发联调；上线前建议补充端到端手测。
+
+## Defects Found
+| ID | Severity | Description | Status |
+|---|---|---|---|
+| BUG-01 | - | 本轮未发现模板或语法问题；浏览器端端到端上传联调待执行 | open |
+
+## Final QA Verdict
+- [ ] pass
+- [x] conditional pass
+- [ ] fail
+
+## Iteration
 2026-07-02 / add-volcengine-task-query-endpoint-without-local-apikey
 
 ## Test Matrix

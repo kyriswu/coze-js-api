@@ -1,6 +1,61 @@
 # RELEASE
 
 ## Enhancement
+2026-07-03 / add-file-transfer-detail-drawer
+
+### Summary
+文件中转站新增详情抽屉，支持在列表页内查看单文件丰富元信息与快捷操作。
+
+### What Changed
+- 更新 `views/file-transfer.ejs`
+	- 文件卡片新增“查看详情”操作按钮。
+	- 新增右侧详情抽屉，展示：类型、体积、创建/更新时间、访问链接、相对路径。
+	- 抽屉内保留文件预览并新增快捷操作：打开、复制链接、删除。
+	- 新增遮罩点击关闭和 `Esc` 快捷关闭交互。
+
+### Impact
+#### API/Behavior
+- 不新增 API，不修改后端响应结构。
+- 页面交互能力增强。
+
+#### Internal Modules
+- 影响 `views/file-transfer.ejs`。
+
+### Breaking Changes
+- none
+
+### Rollback Notes
+- 回滚 `views/file-transfer.ejs` 中详情抽屉相关结构、样式和脚本逻辑。
+
+## Enhancement
+2026-07-03 / revamp-file-transfer-core-panel-multi-upload
+
+### Summary
+文件中转站完成核心面板改版，升级为更现代的文件管理体验，支持拖拽与多文件队列上传。
+
+### What Changed
+- 更新 `views/file-transfer.ejs`
+	- 重构页面信息架构：上传侧栏 + 管理主区。
+	- 新增拖拽上传与多文件队列上传，显示逐文件进度与状态。
+	- 文件列表改为卡片式管理视图，保留行内媒体预览能力。
+	- 将文件操作改为按钮式：打开文件、复制链接、删除文件。
+	- 保留并重排搜索、排序、类型筛选、分页、统计卡片与近 15 天图表。
+
+### Impact
+#### API/Behavior
+- 不新增后端 API，沿用现有 `/file-transfer/files`、`/file-transfer/upload`、`/file-transfer/file`。
+- 页面交互升级，不改变服务端返回结构。
+
+#### Internal Modules
+- 影响 `views/file-transfer.ejs`。
+
+### Breaking Changes
+- none
+
+### Rollback Notes
+- 回滚 `views/file-transfer.ejs` 到改版前版本。
+
+## Enhancement
 2026-07-03 / add-file-transfer-inline-rich-media-preview
 
 ### Summary

@@ -35,6 +35,8 @@ All notable changes to this project will be documented in this file.
 - Added Twitter endpoint `POST /twitter/fetch_search_timeline` backed by TikHub `fetch_search_timeline` API integration.
 
 ### Changed
+- Enhanced `GET /file-transfer` with a slide-in detail drawer that provides richer single-file metadata and quick actions (open/copy/delete) without changing backend APIs.
+- Revamped `GET /file-transfer` page into a modern file-manager panel with drag-and-drop multi-file queue upload, per-file progress, chip-based filtering, action buttons (open/copy/delete), and preserved pagination/statistics/chart behavior.
 - Extended `ve_contents_generations_tasks` with a query wrapper that proxies upstream `GET /api/v3/contents/generations/tasks/{task_id}` using server-side Ark credentials.
 - Enhanced the file-transfer page with inline preview support for common rich media files (images, audio, video, PDF).
 - Set the global default request body limit to `500mb` and unified `express.json`, `express.text`, and `/file-transfer/upload` raw body parsing limits (overridable via `REQUEST_BODY_LIMIT`).
