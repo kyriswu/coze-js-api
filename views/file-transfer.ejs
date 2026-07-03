@@ -389,6 +389,53 @@
       padding: 8px 0;
     }
 
+    .hot-box {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+      padding: 10px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .hot-list {
+      display: grid;
+      gap: 6px;
+    }
+
+    .hot-item {
+      border: 1px solid #e8ede5;
+      border-radius: 10px;
+      padding: 8px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: center;
+      background: #fbfef8;
+    }
+
+    .hot-name {
+      font-size: 13px;
+      font-weight: 700;
+      word-break: break-all;
+    }
+
+    .hot-meta {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .hot-rank {
+      font-size: 12px;
+      color: #2f6f49;
+      font-weight: 700;
+      border-radius: 999px;
+      border: 1px solid #cfe2d2;
+      padding: 3px 8px;
+      white-space: nowrap;
+    }
+
     .chart-tooltip {
       position: fixed;
       pointer-events: none;
@@ -780,11 +827,23 @@
             <div id="statTopType" class="stat-value">-</div>
             <div id="statTopTypeCount" class="stat-sub">暂无数据</div>
           </article>
+          <article class="stat-card">
+            <div class="stat-label">最近 24h 访问量</div>
+            <div id="statAccess24h" class="stat-value">0</div>
+            <div class="stat-sub">基于 Redis 实时聚合</div>
+          </article>
         </div>
 
         <div class="chart-box">
           <p class="chart-title">最近 15 天文件创建数量（日）</p>
           <div id="recentChart"></div>
+        </div>
+
+        <div class="hot-box">
+          <p class="chart-title">Top N 热门文件（按访问数）</p>
+          <div id="hotList" class="hot-list">
+            <div class="chart-empty">暂无数据</div>
+          </div>
         </div>
 
         <div id="fileList" class="file-list">
@@ -837,7 +896,9 @@
     const statPageSizeEl = document.getElementById('statPageSize');
     const statTopTypeEl = document.getElementById('statTopType');
     const statTopTypeCountEl = document.getElementById('statTopTypeCount');
+    const statAccess24hEl = document.getElementById('statAccess24h');
     const recentChartEl = document.getElementById('recentChart');
+    const hotListEl = document.getElementById('hotList');
     const chartTooltipEl = document.getElementById('chartTooltip');
     const drawerMaskEl = document.getElementById('drawerMask');
     const detailDrawerEl = document.getElementById('detailDrawer');
@@ -1025,6 +1086,10 @@
             <span class="drawer-value">${formatBytes(selectedFile.size)}</span>
           </div>
           <div class="drawer-row">
+            <span class="drawer-label">访问次数</span>
+            <span class="drawer-value">${Number(selectedFile.accessCount || 0)}</span>
+          </div>
+          <div class="drawer-row">
             <span class="drawer-label">创建时间</span>
             <span class="drawer-value">${escapeHtml(created)}</span>
           </div>
@@ -1080,6 +1145,29 @@
       }
     }
 
+    function renderHotTopN(items) {
+      if (!Array.isArray(items) || items.length === 0) {
+        hotListEl.innerHTML = '<div class="chart-empty">暂无数据</div>';
+        return;
+      }
+
+      hotListEl.innerHTML = items.map((item, index) => {
+        const safeName = escapeHtml(item.name || '');
+        const typeText = escapeHtml(formatTypeName(item.fileType || 'no_ext'));
+        const total = Number(item.accessCount || 0);
+        const day = Number(item.access24h || 0);
+        return `
+          <article class="hot-item">
+            <div>
+              <div class="hot-name">${safeName}</div>
+              <div class="hot-meta">类型 ${typeText} · 访问 ${total} · 24h ${day}</div>
+            </div>
+            <span class="hot-rank">TOP ${index + 1}</span>
+          </article>
+        `;
+      }).join('');
+    }
+
     function renderFiles(files) {
       if (!Array.isArray(files) || files.length === 0) {
         fileListEl.innerHTML = '<div class="empty">暂无文件，先拖拽一个文件试试。</div>';
@@ -1100,6 +1188,7 @@
               <div class="tag-row">
                 <span class="tag">类型 ${safeType}</span>
                 <span class="tag">大小 ${formatBytes(file.size)}</span>
+                <span class="tag">访问 ${Number(file.accessCount || 0)}</span>
               </div>
               <div class="time">
                 <span>创建：${escapeHtml(created)}</span>
@@ -1441,6 +1530,7 @@
       params.set('sortOrder', sortOrder || 'desc');
       params.set('page', String(pageState.page));
       params.set('pageSize', String(pageState.pageSize));
+      params.set('topN', '8');
 
       try {
         const res = await fetch(`/file-transfer/files?${params.toString()}`);
@@ -1458,9 +1548,12 @@
         typeStatsCache = Array.isArray(payload?.data?.typeStats) ? payload.data.typeStats : [];
         renderTypeChips();
         renderRecentChart(payload?.data?.recent15Days || payload?.data?.recent30Days || []);
+        renderHotTopN(payload?.data?.hotTopN || []);
         renderFiles(files);
         updateStats(files, total);
         updatePager();
+
+        statAccess24hEl.textContent = String(payload?.data?.accessStats?.totalAccess24h || 0);
 
         metaEl.textContent = `共 ${total} 个文件（每页 ${pageState.pageSize} 条）`;
         activeMetaEl.textContent = pageState.selectedType === 'all'
@@ -1473,6 +1566,8 @@
         updatePager();
         fileListEl.innerHTML = `<div class="empty">${escapeHtml(error.message || '加载失败')}</div>`;
         recentChartEl.innerHTML = '<div class="chart-empty">加载失败</div>';
+        hotListEl.innerHTML = '<div class="chart-empty">加载失败</div>';
+        statAccess24hEl.textContent = '0';
       }
     }
 

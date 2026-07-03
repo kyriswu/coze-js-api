@@ -1100,6 +1100,28 @@ const getFilePublicUrl = (req, fileName) => {
     return `${req.protocol}://${req.get('host')}/downloads/${encodedName}`;
 };
 
+const buildFileAccessCountKey = (fileName) => `file_transfer:access_count:${sanitizeUploadFileName(fileName)}`;
+const buildFileAccessHourKey = (fileName, hourId) => `file_transfer:access_hour:${sanitizeUploadFileName(fileName)}:${hourId}`;
+
+const formatHourId = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hour = String(date.getHours()).padStart(2, '0');
+    return `${year}${month}${day}${hour}`;
+};
+
+const getLast24HourIds = () => {
+    const result = [];
+    const now = new Date();
+    now.setMinutes(0, 0, 0);
+    for (let i = 23; i >= 0; i -= 1) {
+        const point = new Date(now.getTime() - i * 60 * 60 * 1000);
+        result.push(formatHourId(point));
+    }
+    return result;
+};
+
 const sanitizeUploadFileName = (rawName = '') => {
     let decodedName = String(rawName || '').trim();
     try {
@@ -1194,6 +1216,47 @@ const listDownloadFiles = async (req, searchKeyword = '') => {
         });
     }
 
+    if (files.length === 0) {
+        return files;
+    }
+
+    const hourIds = getLast24HourIds();
+    const hourKeyCountPerFile = hourIds.length;
+
+    try {
+        const accessKeys = files.map((item) => buildFileAccessCountKey(item.name));
+        const rawCounts = await redis.mget(accessKeys);
+
+        const flat24hKeys = [];
+        files.forEach((item) => {
+            hourIds.forEach((hourId) => {
+                flat24hKeys.push(buildFileAccessHourKey(item.name, hourId));
+            });
+        });
+
+        const raw24hCounts = flat24hKeys.length > 0 ? await redis.mget(flat24hKeys) : [];
+
+        files.forEach((item, index) => {
+            const totalCount = Number.parseInt(String(rawCounts?.[index] || '0'), 10);
+            item.accessCount = Number.isNaN(totalCount) ? 0 : totalCount;
+
+            const start = index * hourKeyCountPerFile;
+            const end = start + hourKeyCountPerFile;
+            const hourlyCounts = raw24hCounts.slice(start, end);
+            const access24h = hourlyCounts.reduce((sum, value) => {
+                const n = Number.parseInt(String(value || '0'), 10);
+                return sum + (Number.isNaN(n) ? 0 : n);
+            }, 0);
+            item.access24h = access24h;
+        });
+    } catch (error) {
+        files.forEach((item) => {
+            item.accessCount = 0;
+            item.access24h = 0;
+        });
+        console.error('Error reading file access counts:', error.message);
+    }
+
     return files;
 };
 
@@ -1280,6 +1343,27 @@ app.get('/file-transfer/files', async (req, res) => {
             ? 20
             : Math.min(parsedPageSize, 100);
         const total = files.length;
+        const topNParsed = Number.parseInt(String(req.query.topN || '8'), 10);
+        const topN = Number.isNaN(topNParsed) || topNParsed < 1 ? 8 : Math.min(topNParsed, 20);
+        const totalAccess24h = allFiles.reduce((sum, item) => sum + Number(item.access24h || 0), 0);
+        const hotTopN = [...allFiles]
+            .sort((a, b) => {
+                const byTotal = Number(b.accessCount || 0) - Number(a.accessCount || 0);
+                if (byTotal !== 0) {
+                    return byTotal;
+                }
+                return Number(b.access24h || 0) - Number(a.access24h || 0);
+            })
+            .slice(0, topN)
+            .map((item) => ({
+                name: item.name,
+                fileType: item.fileType,
+                size: item.size,
+                accessCount: item.accessCount || 0,
+                access24h: item.access24h || 0,
+                url: item.url,
+                updatedAt: item.updatedAt,
+            }));
         const recent15Days = getLast15DaysCreatedStats(allFiles);
         const totalPages = Math.max(1, Math.ceil(total / pageSize));
         const safePage = Math.min(page, totalPages);
@@ -1301,6 +1385,10 @@ app.get('/file-transfer/files', async (req, res) => {
                 typeStats: getTypeStats(allFiles),
                 recent15Days,
                 recent30Days: recent15Days,
+                accessStats: {
+                    totalAccess24h,
+                },
+                hotTopN,
             },
         });
     } catch (error) {
@@ -1498,6 +1586,28 @@ app.post('/file-transfer/upload/complete', async (req, res) => {
             msg: '分片合并失败',
         });
     }
+});
+
+app.get('/downloads/:filename', (req, res, next) => {
+    const rawName = req.params.filename;
+    const safeName = sanitizeUploadFileName(rawName);
+    const accessKey = buildFileAccessCountKey(safeName);
+    const hourKey = buildFileAccessHourKey(safeName, formatHourId(new Date()));
+
+    res.on('finish', () => {
+        if (res.statusCode >= 200 && res.statusCode < 400) {
+            redis.multi()
+                .incr(accessKey)
+                .incr(hourKey)
+                .expire(hourKey, 60 * 60 * 48)
+                .exec()
+                .catch((error) => {
+                console.error('Error incrementing file access count:', error.message);
+            });
+        }
+    });
+
+    next();
 });
 
 // 静态资源服务

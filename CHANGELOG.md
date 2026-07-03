@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- Added 24-hour access aggregation and `hotTopN` ranking in `GET /file-transfer/files`, powered by Redis hourly buckets.
+- Added Redis-backed per-file access counting for `/downloads/:filename` and exposed `accessCount` in file-transfer listing data.
 - Added chunked upload support for file transfer via `POST /file-transfer/upload/chunk` and `POST /file-transfer/upload/complete` to improve large-file upload reliability behind unstable HTTP/2 gateways.
 - Added Volcengine task query endpoint `GET /volcengine/contents/generations/tasks/:task_id` for convenient local task status checks without project `api_key`.
 - Added `DELETE /file-transfer/file` for manual file removal in the downloads file-transfer workflow.
@@ -36,6 +38,8 @@ All notable changes to this project will be documented in this file.
 - Added Twitter endpoint `POST /twitter/fetch_search_timeline` backed by TikHub `fetch_search_timeline` API integration.
 
 ### Changed
+- Updated file-transfer dashboard UI to include a 24h access stat card and Top N hot-file leaderboard.
+- Updated file-transfer UI cards and detail drawer to display per-file access counts.
 - Hardened chunk-upload completion by switching frontend complete calls to query-based POST with timeout/retry and explicit queue success state updates.
 - Adjusted server-side uploaded file naming to preserve original filename prefix (plus timestamp/random suffix) for easier post-upload search.
 - Updated the file-transfer frontend uploader to automatically switch large files to chunked upload (with staged progress) while keeping small-file single-request uploads for compatibility.

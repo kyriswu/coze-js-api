@@ -1,6 +1,69 @@
 # QA
 
 ## Iteration
+2026-07-04 / add-24h-access-stats-and-topn-hot-files
+
+## Test Matrix
+| Case ID | Step | Expected | Actual | Status |
+|---|---|---|---|---|
+| QA-01 | `node --check index.js` | 无语法错误 | 命令执行无输出 | pass |
+| QA-02 | 渲染 `views/file-transfer.ejs` | 模板可正常渲染 | `file-transfer.ejs render ok` | pass |
+
+## Command Evidence
+```bash
+cd /root/coze-js-api && node --check index.js && node --input-type=module -e "import ejs from 'ejs'; await ejs.renderFile('views/file-transfer.ejs',{seo:{}}); console.log('file-transfer.ejs render ok');"
+```
+
+## Manual Checks
+- 已确认 `GET /file-transfer/files` 返回新增：
+  - `accessStats.totalAccess24h`
+  - `hotTopN`（按访问总数排序，包含 `accessCount/access24h`）
+- 已确认页面新增“最近 24h 访问量”统计卡片。
+- 已确认页面新增“Top N 热门文件”榜单。
+- 已确认下载计数逻辑补充了小时维度键（48h 过期）用于 24h 聚合。
+- 未执行真实下载流量回放；建议上线后抽样核对 Redis 聚合值。
+
+## Defects Found
+| ID | Severity | Description | Status |
+|---|---|---|---|
+| BUG-01 | - | 本轮未发现语法或模板问题；线上访问流量聚合值待抽样验证 | open |
+
+## Final QA Verdict
+- [ ] pass
+- [x] conditional pass
+- [ ] fail
+
+## Iteration
+2026-07-04 / add-file-access-count-with-redis
+
+## Test Matrix
+| Case ID | Step | Expected | Actual | Status |
+|---|---|---|---|---|
+| QA-01 | `node --check index.js` | 无语法错误 | 命令执行无输出 | pass |
+| QA-02 | 渲染 `views/file-transfer.ejs` | 模板可正常渲染 | `file-transfer.ejs render ok` | pass |
+
+## Command Evidence
+```bash
+cd /root/coze-js-api && node --check index.js && node --input-type=module -e "import ejs from 'ejs'; await ejs.renderFile('views/file-transfer.ejs',{seo:{}}); console.log('file-transfer.ejs render ok');"
+```
+
+## Manual Checks
+- 已确认新增下载访问埋点：`GET /downloads/:filename` 成功响应后 Redis 自增。
+- 已确认 `/file-transfer/files` 返回项新增 `accessCount` 字段。
+- 已确认文件卡片与详情抽屉展示访问次数。
+- 未执行真实下载链路压测；建议上线前做一次高并发访问计数抽样校验。
+
+## Defects Found
+| ID | Severity | Description | Status |
+|---|---|---|---|
+| BUG-01 | - | 本轮未发现语法或模板问题；下载高并发计数一致性待线上抽样验证 | open |
+
+## Final QA Verdict
+- [ ] pass
+- [x] conditional pass
+- [ ] fail
+
+## Iteration
 2026-07-04 / harden-chunk-complete-and-searchable-filename
 
 ## Test Matrix

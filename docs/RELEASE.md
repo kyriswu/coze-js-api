@@ -1,5 +1,65 @@
 # RELEASE
 
+## Enhancement
+2026-07-04 / add-24h-access-stats-and-topn-hot-files
+
+### Summary
+文件中转站新增“最近 24h 访问量”和“Top N 热门文件”榜单，并接入 Redis 小时级聚合。
+
+### What Changed
+- 更新 `index.js`
+	- 下载访问埋点新增小时桶计数键（按小时聚合，48h 过期）。
+	- `GET /file-transfer/files` 返回新增：
+		- `accessStats.totalAccess24h`
+		- `hotTopN`（可通过 `topN` 参数控制，默认 8）
+- 更新 `views/file-transfer.ejs`
+	- 新增“最近 24h 访问量”统计卡片。
+	- 新增“Top N 热门文件”展示区（按访问总数排序）。
+
+### Impact
+#### API/Behavior
+- `GET /file-transfer/files` 返回结构扩展（向后兼容）：`accessStats` 与 `hotTopN`。
+
+#### Internal Modules
+- 影响 `index.js` 与 `views/file-transfer.ejs`。
+
+### Breaking Changes
+- none
+
+### Rollback Notes
+- 回滚 `index.js` 小时聚合与 `hotTopN/accessStats` 返回。
+- 回滚 `views/file-transfer.ejs` 新增统计卡片和热门榜单区域。
+
+## Enhancement
+2026-07-04 / add-file-access-count-with-redis
+
+### Summary
+文件中转站接入 Redis 访问计数，支持按文件查看累计访问次数。
+
+### What Changed
+- 更新 `index.js`
+	- 新增访问计数键生成逻辑。
+	- 为 `GET /downloads/:filename` 增加访问埋点（成功响应后 `INCR`）。
+	- `GET /file-transfer/files` 回填每个文件的 `accessCount`。
+- 更新 `views/file-transfer.ejs`
+	- 文件卡片新增“访问 N”标签。
+	- 详情抽屉新增“访问次数”字段。
+
+### Impact
+#### API/Behavior
+- `GET /file-transfer/files` 返回新增 `accessCount`（向后兼容扩展字段）。
+- 文件访问路径不变：`/downloads/<filename>`。
+
+#### Internal Modules
+- 影响 `index.js` 与 `views/file-transfer.ejs`。
+
+### Breaking Changes
+- none
+
+### Rollback Notes
+- 回滚 `index.js` 访问埋点与 `accessCount` 回填逻辑。
+- 回滚 `views/file-transfer.ejs` 访问次数展示。
+
 ## Hotfix
 2026-07-04 / harden-chunk-complete-and-searchable-filename
 
