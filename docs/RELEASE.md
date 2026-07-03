@@ -1,6 +1,37 @@
 # RELEASE
 
 ## Hotfix
+2026-07-04 / harden-chunk-complete-and-searchable-filename
+
+### Summary
+继续修复大文件分片上传最后一步卡住的问题：增强合并请求稳定性，并优化保存文件名可搜索性。
+
+### What Changed
+- 更新 `views/file-transfer.ejs`
+	- 分片合并请求改为 query 参数提交，避免依赖 JSON body。
+	- 合并请求增加超时与重试机制。
+	- 分片成功后队列状态明确更新为“上传成功”。
+	- 上传会话 ID 改为稳定可复用形式（基于文件名/大小/修改时间）。
+- 更新 `index.js`
+	- 合并成功返回增加 `uploadId`。
+	- 文件落盘命名策略改为“原文件名前缀 + 时间戳 + 随机后缀”，便于搜索。
+
+### Impact
+#### API/Behavior
+- `POST /file-transfer/upload/complete` 仍兼容 body/query，前端默认使用 query。
+- 上传成功文件在列表中更易按原名关键字搜索。
+
+#### Internal Modules
+- 影响 `views/file-transfer.ejs` 与 `index.js`。
+
+### Breaking Changes
+- none
+
+### Rollback Notes
+- 回滚 `views/file-transfer.ejs` 合并请求重试与会话 ID 逻辑。
+- 回滚 `index.js` 文件命名策略和合并响应字段变更。
+
+## Hotfix
 2026-07-03 / fix-file-transfer-upload-http2-interruption-with-chunking
 
 ### Summary

@@ -1196,13 +1196,63 @@
     }
 
     function buildUploadSessionId(file) {
-      const rand = Math.random().toString(36).slice(2, 10);
-      return `u_${Date.now()}_${rand}_${String(file.size || 0)}`;
+      const safeName = String(file?.name || 'upload').replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 64) || 'upload';
+      const sizePart = String(file?.size || 0);
+      const mtimePart = String(file?.lastModified || 0);
+      return `u_${safeName}_${sizePart}_${mtimePart}`;
+    }
+
+    async function fetchWithTimeout(url, options = {}, timeoutMs = 45000) {
+      const controller = new AbortController();
+      const timer = window.setTimeout(() => controller.abort(), timeoutMs);
+      try {
+        return await fetch(url, {
+          ...options,
+          signal: controller.signal,
+        });
+      } finally {
+        window.clearTimeout(timer);
+      }
+    }
+
+    async function completeChunkUploadWithRetry(uploadId, fileName, totalChunks, maxRetries = 2) {
+      const params = new URLSearchParams({
+        uploadId,
+        filename: fileName,
+        totalChunks: String(totalChunks),
+      });
+
+      let lastError = null;
+      for (let attempt = 0; attempt <= maxRetries; attempt += 1) {
+        try {
+          const res = await fetchWithTimeout(`/file-transfer/upload/complete?${params.toString()}`, {
+            method: 'POST',
+          }, 60000);
+          let payload = {};
+          try {
+            payload = await res.json();
+          } catch (_) {
+            payload = {};
+          }
+          if (!res.ok || payload.code !== 0) {
+            throw new Error(payload.msg || '分片合并失败');
+          }
+          return payload;
+        } catch (error) {
+          lastError = error;
+          if (attempt < maxRetries) {
+            await new Promise((resolve) => window.setTimeout(resolve, (attempt + 1) * 900));
+          }
+        }
+      }
+
+      throw lastError || new Error('分片合并失败');
     }
 
     async function uploadFileInChunks(queueItem) {
       const file = queueItem.file;
-      const uploadId = buildUploadSessionId(file);
+      const uploadId = queueItem.uploadId || buildUploadSessionId(file);
+      queueItem.uploadId = uploadId;
       const totalChunks = Math.max(1, Math.ceil(file.size / CHUNK_SIZE));
 
       for (let index = 0; index < totalChunks; index += 1) {
@@ -1243,30 +1293,7 @@
         renderQueue();
       }
 
-      const completeRes = await fetch('/file-transfer/upload/complete', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          uploadId,
-          filename: file.name,
-          totalChunks,
-        }),
-      });
-
-      let completePayload = {};
-      try {
-        completePayload = await completeRes.json();
-      } catch (_) {
-        completePayload = {};
-      }
-
-      if (!completeRes.ok || completePayload.code !== 0) {
-        throw new Error(completePayload.msg || '分片合并失败');
-      }
-
-      return completePayload;
+      return completeChunkUploadWithRetry(uploadId, file.name, totalChunks, 2);
     }
 
     function uploadSingleFile(queueItem) {
@@ -1338,6 +1365,10 @@
           renderQueue();
           if (Number(item.file?.size || 0) >= CHUNK_UPLOAD_THRESHOLD) {
             await uploadFileInChunks(item);
+            item.progress = 100;
+            item.status = 'success';
+            item.message = '上传成功';
+            renderQueue();
           } else {
             await uploadSingleFile(item);
           }

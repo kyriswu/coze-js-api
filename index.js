@@ -1114,8 +1114,10 @@ const sanitizeUploadFileName = (rawName = '') => {
 
 const buildSafeUploadTarget = (fileName) => {
     const safeName = sanitizeUploadFileName(fileName);
+    const parsedExt = path.extname(safeName).slice(0, 16);
+    const baseName = path.basename(safeName, parsedExt).replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 80) || 'upload';
     const ext = path.extname(safeName).slice(0, 16);
-    const uniqueFileName = `upload-${Date.now()}-${crypto.randomBytes(4).toString('hex')}${ext}`;
+    const uniqueFileName = `${baseName}-${Date.now()}-${crypto.randomBytes(4).toString('hex')}${ext || parsedExt}`;
     const targetPath = path.resolve(path.join(downloadsDir, uniqueFileName));
 
     if (!targetPath.startsWith(`${downloadsDir}${path.sep}`)) {
@@ -1482,6 +1484,7 @@ app.post('/file-transfer/upload/complete', async (req, res) => {
             code: 0,
             msg: 'success',
             data: {
+            uploadId: sanitizeUploadSessionId(uploadId),
                 name: fileName,
                 size: stats.size,
                 updatedAt: stats.mtime.toISOString(),

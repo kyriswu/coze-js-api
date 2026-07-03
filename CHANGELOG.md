@@ -36,6 +36,8 @@ All notable changes to this project will be documented in this file.
 - Added Twitter endpoint `POST /twitter/fetch_search_timeline` backed by TikHub `fetch_search_timeline` API integration.
 
 ### Changed
+- Hardened chunk-upload completion by switching frontend complete calls to query-based POST with timeout/retry and explicit queue success state updates.
+- Adjusted server-side uploaded file naming to preserve original filename prefix (plus timestamp/random suffix) for easier post-upload search.
 - Updated the file-transfer frontend uploader to automatically switch large files to chunked upload (with staged progress) while keeping small-file single-request uploads for compatibility.
 - Enhanced `GET /file-transfer` with a slide-in detail drawer that provides richer single-file metadata and quick actions (open/copy/delete) without changing backend APIs.
 - Revamped `GET /file-transfer` page into a modern file-manager panel with drag-and-drop multi-file queue upload, per-file progress, chip-based filtering, action buttons (open/copy/delete), and preserved pagination/statistics/chart behavior.

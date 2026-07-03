@@ -1,6 +1,37 @@
 # QA
 
 ## Iteration
+2026-07-04 / harden-chunk-complete-and-searchable-filename
+
+## Test Matrix
+| Case ID | Step | Expected | Actual | Status |
+|---|---|---|---|---|
+| QA-01 | `node --check index.js` | 无语法错误 | 命令执行无输出 | pass |
+| QA-02 | 渲染 `views/file-transfer.ejs` | 模板可正常渲染 | `file-transfer.ejs render ok` | pass |
+
+## Command Evidence
+```bash
+cd /root/coze-js-api && node --check index.js && node --input-type=module -e "import ejs from 'ejs'; await ejs.renderFile('views/file-transfer.ejs',{seo:{}}); console.log('file-transfer.ejs render ok');"
+```
+
+## Manual Checks
+- 已确认分片合并请求改为 query 参数方式，减少 body 解析依赖。
+- 已确认分片合并增加超时与重试逻辑（前端）。
+- 已确认大文件分片成功后队列状态会正确标记“上传成功”。
+- 已确认服务端落盘文件名改为“原文件名前缀 + 时间戳 + 随机后缀”，便于搜索定位。
+- 未执行线上网关链路实测；建议使用同一失败样本再次回归。
+
+## Defects Found
+| ID | Severity | Description | Status |
+|---|---|---|---|
+| BUG-01 | - | 本轮未发现语法或模板问题；线上链路需再次回归确认 | open |
+
+## Final QA Verdict
+- [ ] pass
+- [x] conditional pass
+- [ ] fail
+
+## Iteration
 2026-07-03 / fix-file-transfer-upload-http2-interruption-with-chunking
 
 ## Test Matrix
