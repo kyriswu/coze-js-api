@@ -1,5 +1,69 @@
 # RELEASE
 
+## Enhancement
+2026-07-03 / add-file-transfer-inline-rich-media-preview
+
+### Summary
+文件中转站页面新增行内富媒体预览，便于直接查看常见媒体文件而无需跳转打开。
+
+### What Changed
+- 更新 `views/file-transfer.ejs`
+	- 文件列表新增“预览”列。
+	- 图片文件支持缩略图预览。
+	- 音频文件支持行内播放器预览。
+	- 视频文件支持行内播放器预览。
+	- PDF 文件支持行内 iframe 预览。
+	- 其他类型显示“不可预览”，仍保留原始 URL 访问方式。
+
+### Impact
+#### API/Behavior
+- 不新增 API，不修改后端返回结构。
+- 页面展示层增强。
+
+#### Internal Modules
+- 影响 `views/file-transfer.ejs`。
+
+### Breaking Changes
+- none
+
+### Rollback Notes
+- 回滚 `views/file-transfer.ejs` 的预览列与媒体组件渲染逻辑。
+
+## Hotfix
+2026-07-02 / add-volcengine-task-query-endpoint-without-local-apikey
+
+### Summary
+新增 Volcengine 视频任务查询接口封装，并在本地提供无需项目 `api_key` 的查询路由。
+
+### What Changed
+- 更新 `utils/volcengine.io.js`
+	- 在 `ve_contents_generations_tasks` 中新增 `get_task` 方法。
+	- 转发上游 `GET /api/v3/contents/generations/tasks/{task_id}`。
+	- 查询流程不再校验本地项目 `api_key`。
+- 更新 `index.js`
+	- 新增路由 `GET /volcengine/contents/generations/tasks/:task_id`。
+
+### Query Example
+```bash
+curl --request GET \
+  --url http://127.0.0.1:3000/volcengine/contents/generations/tasks/cgt-20260702191225-gvkdq
+```
+
+### Impact
+#### API/Behavior
+- 新增本地任务查询入口，返回结构保持 `code/msg/data`。
+- 查询接口无需本地 `api_key`。
+
+#### Internal Modules
+- 影响 `utils/volcengine.io.js` 与 `index.js`。
+
+### Breaking Changes
+- none
+
+### Rollback Notes
+- 回滚 `utils/volcengine.io.js` 中 `get_task` 相关改动。
+- 回滚 `index.js` 中新增查询路由。
+
 ## Hotfix
 2026-07-02 / set-global-request-body-limit-500mb
 

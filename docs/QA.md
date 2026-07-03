@@ -1,6 +1,36 @@
 # QA
 
 ## Iteration
+2026-07-02 / add-volcengine-task-query-endpoint-without-local-apikey
+
+## Test Matrix
+| Case ID | Step | Expected | Actual | Status |
+|---|---|---|---|---|
+| QA-01 | `node --check utils/volcengine.io.js` | 无语法错误 | 命令执行无输出 | pass |
+| QA-02 | `node --check index.js` | 无语法错误 | 命令执行无输出 | pass |
+
+## Command Evidence
+```bash
+cd /root/coze-js-api && node --check utils/volcengine.io.js && node --check index.js
+```
+
+## Manual Checks
+- 已确认新增 `ve_contents_generations_tasks.get_task`，调用上游任务查询接口。
+- 已确认新增本地路由 `GET /volcengine/contents/generations/tasks/:task_id`。
+- 已确认查询接口不依赖本地 `api_key`。
+- 未执行真实上游联调；需在可用方舟环境下验证运行态和终态响应。
+
+## Defects Found
+| ID | Severity | Description | Status |
+|---|---|---|---|
+| BUG-01 | - | 本轮未发现语法问题；上游联调待执行 | open |
+
+## Final QA Verdict
+- [ ] pass
+- [x] conditional pass
+- [ ] fail
+
+## Iteration
 2026-07-02 / set-global-request-body-limit-500mb
 
 ## Test Matrix
@@ -23,6 +53,34 @@ cd /root/coze-js-api && node --check index.js
 | ID | Severity | Description | Status |
 |---|---|---|---|
 | BUG-01 | - | 本轮未发现语法问题；部署侧代理配置待同步确认 | open |
+
+## Final QA Verdict
+- [ ] pass
+- [x] conditional pass
+- [ ] fail
+
+## Iteration
+2026-07-03 / add-file-transfer-inline-rich-media-preview
+
+## Test Matrix
+| Case ID | Step | Expected | Actual | Status |
+|---|---|---|---|---|
+| QA-01 | 渲染 `views/file-transfer.ejs` | 模板可正常渲染 | `file-transfer.ejs render ok` | pass |
+
+## Command Evidence
+```bash
+cd /root/coze-js-api && node --input-type=module -e "import ejs from 'ejs'; await ejs.renderFile('views/file-transfer.ejs',{seo:{}}); console.log('file-transfer.ejs render ok');"
+```
+
+## Manual Checks
+- 已确认文件列表新增“预览”列。
+- 已确认图片、音频、视频、PDF 支持行内预览。
+- 已确认其他类型保持原有 URL 链接并显示“不可预览”。
+
+## Defects Found
+| ID | Severity | Description | Status |
+|---|---|---|---|
+| BUG-01 | - | 本轮未发现模板问题；浏览器端多媒体格式兼容性待实际文件联调 | open |
 
 ## Final QA Verdict
 - [ ] pass

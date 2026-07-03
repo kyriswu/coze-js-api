@@ -507,6 +507,43 @@ export const ve_contents_generations_tasks = {
                 });
             }
         }
+    },
+
+    // 视频生成任务查询（无本地 api_key 校验）
+    get_task: async function (req, res) {
+        const taskId = (req.params && req.params.task_id) || (req.query && req.query.task_id) || (req.body && req.body.task_id);
+        if (!taskId) {
+            return res.send({ code: -1, msg: 'task_id is required' });
+        }
+
+        try {
+            const response = await axios.get(
+                `${ark_base_url}/api/v3/contents/generations/tasks/${encodeURIComponent(taskId)}`,
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${ARK_API_KEY}`
+                    },
+                    timeout: 30000
+                }
+            );
+
+            return res.send({
+                code: 200,
+                msg: '查询视频生成任务成功',
+                data: response.data
+            });
+        } catch (error) {
+            const detail = error.response ? error.response.data : error.message;
+            console.error('Volcengine Contents Generations Task Query Error:', detail);
+            if (!res.headersSent) {
+                return res.send({
+                    code: -1,
+                    msg: commonUtils.MESSAGE.SERVER_ERROR,
+                    data: detail
+                });
+            }
+        }
     }
 };
 

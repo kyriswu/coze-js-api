@@ -769,6 +769,7 @@ app.post('/bilibili/fetch_video_comments', th_bilibili.fetch_video_comments);
 app.post('/volcengine/seedream/5.0-lite/generate-image', ve_seedream_5_0_lite.generate_image);
 app.post('/volcengine/web-search', ve_web_search.web_search);
 app.post('/volcengine/contents/generations/tasks', ve_contents_generations_tasks.create_task);
+app.get('/volcengine/contents/generations/tasks/:task_id', ve_contents_generations_tasks.get_task);
 app.post('/youtube/get_channel_videos_v2', th_youtube.get_channel_videos_v2);
 app.post('/xiaohongshu/home_notes', th_xiaohongshu.fetch_home_notes);
 app.post('/xiaohongshu/search_notes_v2', th_xiaohongshu.search_notes_v2);

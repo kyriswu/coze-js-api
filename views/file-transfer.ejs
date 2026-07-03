@@ -185,6 +185,52 @@
 
     .url-link:hover { text-decoration: underline; }
 
+    .preview-cell {
+      min-width: 170px;
+    }
+
+    .preview-box {
+      width: 150px;
+      max-width: 100%;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #f8fbff;
+    }
+
+    .preview-image,
+    .preview-video,
+    .preview-pdf {
+      display: block;
+      width: 100%;
+      background: #eef3ff;
+    }
+
+    .preview-image {
+      height: 96px;
+      object-fit: cover;
+    }
+
+    .preview-video {
+      height: 96px;
+    }
+
+    .preview-audio {
+      width: 150px;
+      max-width: 100%;
+      height: 34px;
+    }
+
+    .preview-pdf {
+      height: 120px;
+      border: 0;
+    }
+
+    .preview-empty {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
     .empty {
       padding: 20px;
       color: var(--muted);
@@ -333,12 +379,13 @@
                 <th>大小</th>
                 <th>创建时间</th>
                 <th>更新时间</th>
+                <th>预览</th>
                 <th>访问 URL</th>
                 <th>操作</th>
               </tr>
             </thead>
             <tbody id="tbody">
-              <tr><td class="empty" colspan="7">加载中...</td></tr>
+              <tr><td class="empty" colspan="8">加载中...</td></tr>
             </tbody>
           </table>
         </div>
@@ -492,7 +539,7 @@
 
     function renderFiles(files) {
       if (!Array.isArray(files) || files.length === 0) {
-        tbodyEl.innerHTML = '<tr><td class="empty" colspan="7">暂无文件</td></tr>';
+        tbodyEl.innerHTML = '<tr><td class="empty" colspan="8">暂无文件</td></tr>';
         return;
       }
 
@@ -502,6 +549,19 @@
         const safeType = escapeHtml(formatTypeName(file.fileType || 'no_ext'));
         const created = file.createdAt ? new Date(file.createdAt).toLocaleString() : '-';
         const updated = file.updatedAt ? new Date(file.updatedAt).toLocaleString() : '-';
+        const rawType = String(file.fileType || 'no_ext').toLowerCase();
+        let previewHtml = '<span class="preview-empty">不可预览</span>';
+
+        if (['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'svg', 'avif'].includes(rawType)) {
+          previewHtml = `<div class="preview-box"><img class="preview-image" src="${safeUrl}" alt="${safeName}" loading="lazy" /></div>`;
+        } else if (['mp4', 'webm', 'ogg', 'mov', 'm4v'].includes(rawType)) {
+          previewHtml = `<div class="preview-box"><video class="preview-video" src="${safeUrl}" controls preload="metadata" muted playsinline></video></div>`;
+        } else if (['mp3', 'wav', 'ogg', 'm4a', 'aac', 'flac'].includes(rawType)) {
+          previewHtml = `<audio class="preview-audio" src="${safeUrl}" controls preload="none"></audio>`;
+        } else if (rawType === 'pdf') {
+          previewHtml = `<div class="preview-box"><iframe class="preview-pdf" src="${safeUrl}" loading="lazy" title="${safeName}"></iframe></div>`;
+        }
+
         return `
           <tr>
             <td class="file-name">${safeName}</td>
@@ -509,6 +569,7 @@
             <td>${formatBytes(file.size)}</td>
             <td>${created}</td>
             <td>${updated}</td>
+            <td class="preview-cell">${previewHtml}</td>
             <td>
               <a class="url-link" href="${safeUrl}" target="_blank" rel="noopener noreferrer">${safeUrl}</a>
             </td>
@@ -573,7 +634,7 @@
         updatePager();
         typeStatsEl.innerHTML = '';
         recentChartEl.innerHTML = '<div class="chart-empty">加载失败</div>';
-        tbodyEl.innerHTML = `<tr><td class="empty" colspan="7">${error.message || '加载失败'}</td></tr>`;
+        tbodyEl.innerHTML = `<tr><td class="empty" colspan="8">${error.message || '加载失败'}</td></tr>`;
       }
     }
 

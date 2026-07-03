@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- Added Volcengine task query endpoint `GET /volcengine/contents/generations/tasks/:task_id` for convenient local task status checks without project `api_key`.
 - Added `DELETE /file-transfer/file` for manual file removal in the downloads file-transfer workflow.
 - Added isolated network logging utility `utils/networkLogger.js` with configurable output modes (`off|console|file|both`).
 - Added a downloads-based file relay page at `GET /file-transfer` for browsing, searching, and URL retrieval.
@@ -34,10 +35,11 @@ All notable changes to this project will be documented in this file.
 - Added Twitter endpoint `POST /twitter/fetch_search_timeline` backed by TikHub `fetch_search_timeline` API integration.
 
 ### Changed
+- Extended `ve_contents_generations_tasks` with a query wrapper that proxies upstream `GET /api/v3/contents/generations/tasks/{task_id}` using server-side Ark credentials.
+- Enhanced the file-transfer page with inline preview support for common rich media files (images, audio, video, PDF).
 - Set the global default request body limit to `500mb` and unified `express.json`, `express.text`, and `/file-transfer/upload` raw body parsing limits (overridable via `REQUEST_BODY_LIMIT`).
 - Enhanced file-transfer listing with file-type filtering, size/name/time sorting, file-type counts, and a recent-15-days creation dashboard dataset.
 - Added pagination support to `GET /file-transfer/files` with `page` and `pageSize`, and updated the file-transfer page with previous/next controls.
-- Moved HTTP and axios network logs out of direct business console output and routed them through the isolated network logger (default writes to `downloads/network.log`).
 - Added a file relay service entry card on the homepage service list to expose `GET /file-transfer`.
 - Added unified incoming HTTP request logging in `index.js` (method/path/status/duration/ip) for easier network troubleshooting.
 - Extended `utils/axiosInterceptors.js` to log axios request latency and status for both success and failure paths, while retaining detailed 429 diagnostics.
