@@ -338,9 +338,49 @@
       flex-wrap: wrap;
     }
 
+    .overview {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+      overflow: hidden;
+    }
+
+    .overview-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 8px 10px;
+      background: #f7fcf8;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .overview-title {
+      margin: 0;
+      font-size: 13px;
+      color: #2f5f45;
+      font-weight: 700;
+    }
+
+    .overview-body {
+      padding: 10px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .overview.collapsed .overview-body {
+      display: none;
+    }
+
+    .toggle-btn {
+      padding: 6px 10px;
+      font-size: 12px;
+      border-radius: 8px;
+    }
+
     .stats-grid {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 8px;
     }
 
@@ -811,40 +851,48 @@
           <span id="activeMeta"></span>
         </div>
 
-        <div class="stats-grid">
-          <article class="stat-card">
-            <div class="stat-label">当前总文件数</div>
-            <div id="statTotal" class="stat-value">0</div>
-            <div class="stat-sub">来自 downloads 目录</div>
-          </article>
-          <article class="stat-card">
-            <div class="stat-label">本页聚合体积</div>
-            <div id="statPageSize" class="stat-value">0 B</div>
-            <div class="stat-sub">用于快速体量感知</div>
-          </article>
-          <article class="stat-card">
-            <div class="stat-label">主力文件类型</div>
-            <div id="statTopType" class="stat-value">-</div>
-            <div id="statTopTypeCount" class="stat-sub">暂无数据</div>
-          </article>
-          <article class="stat-card">
-            <div class="stat-label">最近 24h 访问量</div>
-            <div id="statAccess24h" class="stat-value">0</div>
-            <div class="stat-sub">基于 Redis 实时聚合</div>
-          </article>
-        </div>
-
-        <div class="chart-box">
-          <p class="chart-title">最近 15 天文件创建数量（日）</p>
-          <div id="recentChart"></div>
-        </div>
-
-        <div class="hot-box">
-          <p class="chart-title">Top N 热门文件（按访问数）</p>
-          <div id="hotList" class="hot-list">
-            <div class="chart-empty">暂无数据</div>
+        <section id="overviewSection" class="overview collapsed">
+          <div class="overview-head">
+            <p class="overview-title">数据概览（可展开）</p>
+            <button id="overviewToggleBtn" type="button" class="ghost toggle-btn">展开</button>
           </div>
-        </div>
+          <div class="overview-body">
+            <div class="stats-grid">
+              <article class="stat-card">
+                <div class="stat-label">当前总文件数</div>
+                <div id="statTotal" class="stat-value">0</div>
+                <div class="stat-sub">来自 downloads 目录</div>
+              </article>
+              <article class="stat-card">
+                <div class="stat-label">本页聚合体积</div>
+                <div id="statPageSize" class="stat-value">0 B</div>
+                <div class="stat-sub">用于快速体量感知</div>
+              </article>
+              <article class="stat-card">
+                <div class="stat-label">主力文件类型</div>
+                <div id="statTopType" class="stat-value">-</div>
+                <div id="statTopTypeCount" class="stat-sub">暂无数据</div>
+              </article>
+              <article class="stat-card">
+                <div class="stat-label">最近 24h 访问量</div>
+                <div id="statAccess24h" class="stat-value">0</div>
+                <div class="stat-sub">基于 Redis 实时聚合</div>
+              </article>
+            </div>
+
+            <div class="chart-box">
+              <p class="chart-title">最近 15 天文件创建数量（日）</p>
+              <div id="recentChart"></div>
+            </div>
+
+            <div class="hot-box">
+              <p class="chart-title">Top N 热门文件（按访问数）</p>
+              <div id="hotList" class="hot-list">
+                <div class="chart-empty">暂无数据</div>
+              </div>
+            </div>
+          </div>
+        </section>
 
         <div id="fileList" class="file-list">
           <div class="empty">加载中...</div>
@@ -897,6 +945,8 @@
     const statTopTypeEl = document.getElementById('statTopType');
     const statTopTypeCountEl = document.getElementById('statTopTypeCount');
     const statAccess24hEl = document.getElementById('statAccess24h');
+    const overviewSectionEl = document.getElementById('overviewSection');
+    const overviewToggleBtn = document.getElementById('overviewToggleBtn');
     const recentChartEl = document.getElementById('recentChart');
     const hotListEl = document.getElementById('hotList');
     const chartTooltipEl = document.getElementById('chartTooltip');
@@ -1166,6 +1216,11 @@
           </article>
         `;
       }).join('');
+    }
+
+    function toggleOverviewSection() {
+      const collapsed = overviewSectionEl.classList.toggle('collapsed');
+      overviewToggleBtn.textContent = collapsed ? '展开' : '收起';
     }
 
     function renderFiles(files) {
@@ -1647,6 +1702,8 @@
         closeDrawer();
       }
     });
+
+    overviewToggleBtn.addEventListener('click', toggleOverviewSection);
 
     setupDropzone();
     renderQueue();

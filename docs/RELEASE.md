@@ -1,6 +1,32 @@
 # RELEASE
 
 ## Enhancement
+2026-07-04 / compact-overview-to-prioritize-file-list
+
+### Summary
+优化文件中转站信息层级：将统计展示区默认折叠，优先保证文件列表首屏可见。
+
+### What Changed
+- 更新 `views/file-transfer.ejs`
+	- 新增“数据概览（可展开）”容器。
+	- 将统计卡片、趋势图与热门榜单收纳到概览区。
+	- 概览区默认折叠，支持展开/收起切换。
+
+### Impact
+#### API/Behavior
+- 不涉及 API 变更。
+- 页面信息展示顺序优化，文件列表更靠前。
+
+#### Internal Modules
+- 影响 `views/file-transfer.ejs`。
+
+### Breaking Changes
+- none
+
+### Rollback Notes
+- 回滚 `views/file-transfer.ejs` 的概览折叠容器与切换逻辑。
+
+## Enhancement
 2026-07-04 / add-24h-access-stats-and-topn-hot-files
 
 ### Summary

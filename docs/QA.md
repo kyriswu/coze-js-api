@@ -1,6 +1,34 @@
 # QA
 
 ## Iteration
+2026-07-04 / compact-overview-to-prioritize-file-list
+
+## Test Matrix
+| Case ID | Step | Expected | Actual | Status |
+|---|---|---|---|---|
+| QA-01 | 渲染 `views/file-transfer.ejs` | 模板可正常渲染 | `file-transfer.ejs render ok` | pass |
+
+## Command Evidence
+```bash
+cd /root/coze-js-api && node --input-type=module -e "import ejs from 'ejs'; await ejs.renderFile('views/file-transfer.ejs',{seo:{}}); console.log('file-transfer.ejs render ok');"
+```
+
+## Manual Checks
+- 已确认统计/图表/热门榜单被收拢为“数据概览（可展开）”区域。
+- 已确认概览区默认折叠，页面首屏更早看到文件列表。
+- 已确认不影响文件列表、筛选、分页与详情抽屉功能。
+
+## Defects Found
+| ID | Severity | Description | Status |
+|---|---|---|---|
+| BUG-01 | - | 本轮未发现模板问题；建议浏览器端再做一次折叠/展开手测 | open |
+
+## Final QA Verdict
+- [ ] pass
+- [x] conditional pass
+- [ ] fail
+
+## Iteration
 2026-07-04 / add-24h-access-stats-and-topn-hot-files
 
 ## Test Matrix

@@ -38,6 +38,7 @@ All notable changes to this project will be documented in this file.
 - Added Twitter endpoint `POST /twitter/fetch_search_timeline` backed by TikHub `fetch_search_timeline` API integration.
 
 ### Changed
+- Reorganized file-transfer dashboard blocks into a collapsible overview section (collapsed by default) so the file list appears earlier on the page.
 - Updated file-transfer dashboard UI to include a 24h access stat card and Top N hot-file leaderboard.
 - Updated file-transfer UI cards and detail drawer to display per-file access counts.
 - Hardened chunk-upload completion by switching frontend complete calls to query-based POST with timeout/retry and explicit queue success state updates.
