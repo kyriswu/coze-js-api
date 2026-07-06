@@ -1,5 +1,32 @@
 # RELEASE
 
+## Enhancement
+2026-07-06 / support-file-transfer-clipboard-paste-upload
+
+### Summary
+文件中转站新增页面内 `Ctrl+V` 粘贴上传入队能力，支持直接粘贴剪贴板中的图片或文件。
+
+### What Changed
+- 更新 `views/file-transfer.ejs`
+	- 新增剪贴板文件提取逻辑（`clipboardData.items`/`clipboardData.files`）。
+	- 新增全局 `paste` 监听：检测到文件时直接加入上传队列。
+	- 保持上传节奏不变：粘贴后仅入队，用户手动点击“开始上传”。
+	- 更新上传区提示文案，明确支持拖拽/选择/粘贴（Ctrl+V）。
+
+### Impact
+#### API/Behavior
+- 不涉及后端 API 变更。
+- 前端上传交互新增“粘贴即入队”路径，减少中间步骤。
+
+#### Internal Modules
+- 影响 `views/file-transfer.ejs`。
+
+### Breaking Changes
+- none
+
+### Rollback Notes
+- 回滚 `views/file-transfer.ejs` 中粘贴事件监听与剪贴板文件解析逻辑。
+
 ## Hotfix
 2026-07-04 / broaden-file-access-tracking-beyond-download-route
 

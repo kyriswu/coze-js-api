@@ -38,6 +38,7 @@ All notable changes to this project will be documented in this file.
 - Added Twitter endpoint `POST /twitter/fetch_search_timeline` backed by TikHub `fetch_search_timeline` API integration.
 
 ### Changed
+- Added clipboard paste support on the `GET /file-transfer` page so users can press `Ctrl+V` to enqueue clipboard image/files into the existing upload queue flow (manual upload trigger remains unchanged).
 - Switched file access counting from a narrow `GET /downloads/:filename` hook to static-prefixed middleware on `/downloads/*` and `/audio/*`, so direct links, curl/wget, HEAD, and range access are all counted as access behavior.
 - Reorganized file-transfer dashboard blocks into a collapsible overview section (collapsed by default) so the file list appears earlier on the page.
 - Updated file-transfer dashboard UI to include a 24h access stat card and Top N hot-file leaderboard.

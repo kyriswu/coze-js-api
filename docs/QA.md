@@ -1,6 +1,35 @@
 # QA
 
 ## Iteration
+2026-07-06 / support-file-transfer-clipboard-paste-upload
+
+## Test Matrix
+| Case ID | Step | Expected | Actual | Status |
+|---|---|---|---|---|
+| QA-01 | 渲染 `views/file-transfer.ejs` | 模板可正常渲染 | `file-transfer.ejs render ok` | pass |
+| QA-02 | `node --check index.js` | 无语法错误 | 命令执行无输出 | pass |
+
+## Command Evidence
+```bash
+cd /root/coze-js-api && node --input-type=module -e "import ejs from 'ejs'; await ejs.renderFile('views/file-transfer.ejs',{seo:{}}); console.log('file-transfer.ejs render ok');" && node --check index.js
+```
+
+## Manual Checks
+- 已确认页面文案提示支持拖拽/选择/粘贴（Ctrl+V）三种入队方式。
+- 已确认新增全局 `paste` 监听仅在剪贴板包含文件时触发入队。
+- 已确认粘贴后保持既有上传策略：仅加入队列，不自动上传。
+
+## Defects Found
+| ID | Severity | Description | Status |
+|---|---|---|---|
+| BUG-01 | - | 本轮未发现语法问题；浏览器端粘贴文件兼容性建议在 Chrome/Safari 各抽样一次 | open |
+
+## Final QA Verdict
+- [ ] pass
+- [x] conditional pass
+- [ ] fail
+
+## Iteration
 2026-07-04 / broaden-file-access-tracking-beyond-download-route
 
 ## Test Matrix

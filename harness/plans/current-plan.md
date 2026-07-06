@@ -14,11 +14,12 @@ The current file-transfer feature already supports upload, listing, search, pagi
 ## Implementation Steps
 1. Refactor `views/file-transfer.ejs` layout into a modern two-zone manager panel (controls + content area).
 2. Add drag-and-drop and multi-file upload flow with per-file progress and result feedback.
-3. Replace raw URL-heavy presentation with action buttons (copy/open/delete) and readable metadata chips.
-4. Keep existing search/filter/sort/pagination behavior, but present controls as clearer chips/segmented actions.
-5. If frontend needs extra metadata, add minimal non-breaking fields in `/file-transfer/files` response in `index.js`.
-6. Validate EJS render and Node syntax checks.
-7. Sync `docs/QA.md`, `docs/RELEASE.md`, `CHANGELOG.md`, and `docs/PLAN.md` with this implementation batch.
+3. Add clipboard paste enqueue support (Ctrl+V) for image/file upload workflows while keeping manual upload trigger.
+4. Replace raw URL-heavy presentation with action buttons (copy/open/delete) and readable metadata chips.
+5. Keep existing search/filter/sort/pagination behavior, but present controls as clearer chips/segmented actions.
+6. If frontend needs extra metadata, add minimal non-breaking fields in `/file-transfer/files` response in `index.js`.
+7. Validate EJS render and Node syntax checks.
+8. Sync `docs/QA.md`, `docs/RELEASE.md`, `CHANGELOG.md`, and `docs/PLAN.md` with this implementation batch.
 
 ## Risks
 - Regressing existing upload/list query semantics.
