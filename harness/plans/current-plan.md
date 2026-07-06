@@ -1,6 +1,33 @@
 # Current Plan
 
 ## Goal
+Reduce restart interruption by replacing full compose teardown with app-only rolling recreation in `start.sh`.
+
+## Context
+Current restart flow executes `compose down` and image removal before startup, which guarantees full service interruption and also restarts Redis unnecessarily.
+
+## Scope / Impact
+- Primary script: `start.sh`
+- Deployment behavior: compose lifecycle for `app` service only
+- No API or route behavior changes
+
+## Implementation Steps
+1. Keep repository update step, but harden it to fast-forward pull (`git pull --ff-only`).
+2. Detect container engine (`podman` preferred, fallback `docker`) and unify compose invocation.
+3. Replace `compose down` + `rmi` with:
+	- `compose build app`
+	- `compose up -d --no-deps app`
+4. Add optional dangling image cleanup to prevent disk growth.
+5. Run minimal script syntax validation and record QA notes.
+
+## Risks
+- Single-instance compose still has a short switch gap during container replacement; true zero-downtime requires blue/green + reverse proxy.
+- If local branch cannot fast-forward, `git pull --ff-only` will stop and require manual conflict handling.
+
+## Validation
+- `bash -n start.sh`
+
+## Goal
 Implement the core file-transfer panel revamp (modernized UI and upload experience) while keeping existing API behavior backward compatible and deferring the detail drawer to a later iteration.
 
 ## Context

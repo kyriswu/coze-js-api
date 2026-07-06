@@ -1,6 +1,34 @@
 # QA
 
 ## Iteration
+2026-07-06 / reduce-restart-downtime-in-start-script
+
+## Test Matrix
+| Case ID | Step | Expected | Actual | Status |
+|---|---|---|---|---|
+| QA-01 | `bash -n start.sh` | 脚本语法合法 | 本轮命令执行被用户跳过 | blocked |
+
+## Command Evidence
+```bash
+cd /root/coze-js-api && bash -n start.sh
+```
+
+## Manual Checks
+- 已确认脚本不再执行 `compose down`，避免全量停机。
+- 已确认脚本改为先 `compose build app` 再 `compose up -d --no-deps app`。
+- 已确认脚本保留 Podman 优先、Docker 回退的兼容逻辑。
+
+## Defects Found
+| ID | Severity | Description | Status |
+|---|---|---|---|
+| BUG-01 | low | 最小语法验证命令本轮被用户跳过，建议在目标机器执行一次 `bash -n start.sh` | open |
+
+## Final QA Verdict
+- [ ] pass
+- [x] conditional pass
+- [ ] fail
+
+## Iteration
 2026-07-06 / support-file-transfer-clipboard-paste-upload
 
 ## Test Matrix

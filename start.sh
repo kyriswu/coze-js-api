@@ -1,10 +1,21 @@
-git pull
+#!/usr/bin/env bash
+set -euo pipefail
+
+git pull --ff-only
+
 if command -v podman >/dev/null 2>&1; then
-	podman compose down
-	podman rmi my-custom-node-python-app
-	podman compose up --build -d
+	ENGINE="podman"
 else
-	docker compose down
-	docker rmi my-custom-node-python-app
-	docker compose up --build -d
+	ENGINE="docker"
 fi
+
+compose() {
+	"$ENGINE" compose "$@"
+}
+
+# Build new app image first, then recreate only the app service to reduce interruption.
+compose build app
+compose up -d --no-deps app
+
+# Clean dangling layers generated during rebuilds.
+"$ENGINE" image prune -f >/dev/null 2>&1 || true

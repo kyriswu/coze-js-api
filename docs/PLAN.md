@@ -1,5 +1,31 @@
 # PLAN
 
+## 2026-07-06 / reduce-restart-downtime-in-start-script
+
+### Objective
+将部署重启从“全量停机再拉起”改为“仅重建并重启 app 服务”，尽量缩短中断窗口。
+
+### Context
+旧脚本使用 `compose down` 会先停掉全部容器，再重新启动，导致服务与 Redis 均出现可感知中断。
+
+### Scope
+- `start.sh`：重启流程改造。
+- 不修改 API、路由和业务逻辑。
+
+### Plan
+1. 使用 `git pull --ff-only` 保证部署拉取行为可预测。
+2. 统一抽象 `podman/docker compose` 调用。
+3. 先 `compose build app`，再 `compose up -d --no-deps app`。
+4. 删除强制 `compose down` 与 `rmi` 操作，避免全局停机。
+5. 增加悬空镜像清理，控制磁盘增长。
+
+### Risks
+- 单实例 compose 仍会在容器切换时产生短暂抖动，不是严格零停机。
+- `--ff-only` 在存在分叉提交时会失败并中断部署。
+
+### Validation
+- `bash -n start.sh`
+
 ## 2026-07-06 / support-file-transfer-clipboard-paste-upload
 
 ### Objective

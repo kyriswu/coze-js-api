@@ -38,6 +38,7 @@ All notable changes to this project will be documented in this file.
 - Added Twitter endpoint `POST /twitter/fetch_search_timeline` backed by TikHub `fetch_search_timeline` API integration.
 
 ### Changed
+- Updated `start.sh` deployment flow to reduce restart downtime by replacing full `compose down` teardown with `compose build app` + `compose up -d --no-deps app` (Podman-first, Docker fallback), plus safe dangling-image cleanup.
 - Added clipboard paste support on the `GET /file-transfer` page so users can press `Ctrl+V` to enqueue clipboard image/files into the existing upload queue flow (manual upload trigger remains unchanged).
 - Switched file access counting from a narrow `GET /downloads/:filename` hook to static-prefixed middleware on `/downloads/*` and `/audio/*`, so direct links, curl/wget, HEAD, and range access are all counted as access behavior.
 - Reorganized file-transfer dashboard blocks into a collapsible overview section (collapsed by default) so the file list appears earlier on the page.

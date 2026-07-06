@@ -1,5 +1,34 @@
 # RELEASE
 
+## Hotfix
+2026-07-06 / reduce-restart-downtime-in-start-script
+
+### Summary
+优化部署脚本重启流程，避免每次更新时先停掉整套容器，降低服务中断时长。
+
+### What Changed
+- 更新 `start.sh`
+	- 新增 `#!/usr/bin/env bash` 与 `set -euo pipefail` 提升脚本健壮性。
+	- `git pull` 调整为 `git pull --ff-only`，避免隐式 merge。
+	- 保持 Podman 优先、Docker 回退，并统一为单一 compose 调用函数。
+	- 移除 `compose down` 与强制 `rmi`。
+	- 改为先 `compose build app`，再 `compose up -d --no-deps app`。
+	- 增加悬空镜像清理（失败不阻断发布）。
+
+### Impact
+#### API/Behavior
+- 不影响 API 行为。
+- 部署时从“全量停机重启”改为“仅 app 服务重建切换”，中断窗口显著缩短。
+
+#### Internal Modules
+- 影响 `start.sh`。
+
+### Breaking Changes
+- none
+
+### Rollback Notes
+- 回滚 `start.sh` 到旧版 `compose down` 流程（不推荐）。
+
 ## Enhancement
 2026-07-06 / support-file-transfer-clipboard-paste-upload
 
