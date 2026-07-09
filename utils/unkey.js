@@ -41,7 +41,7 @@ const unkey = {
                                 remaining: credits // 将 credits 转化为 remaining
                             };
                         }
-                        console.log('Formatted data:', JSON.stringify(result));
+                        console.log(JSON.stringify(result));
                         resolve(result);
                     } catch (error) {
                         reject(error);

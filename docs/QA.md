@@ -1,6 +1,37 @@
 # QA
 
 ## Iteration
+2026-07-07 / build-google-friendly-sitemap-for-service-crawling
+
+## Test Matrix
+| Case ID | Step | Expected | Actual | Status |
+|---|---|---|---|---|
+| QA-01 | `node --check routes/navigationRoutes.js` | sitemap 与新路由语法正确 | 命令执行无输出 | pass |
+| QA-02 | `node --check index.js` | 主服务入口语法不受影响 | 命令执行无输出 | pass |
+
+## Command Evidence
+```bash
+cd /root/coze-js-api && node --check routes/navigationRoutes.js
+cd /root/coze-js-api && node --check index.js
+```
+
+## Manual Checks
+- 已确认 `GET /sitemap.xml` 输出 sitemap index，并指向 `GET /sitemap-pages.xml` 与 `GET /sitemap-services.xml`。
+- 已确认 `GET /services/catalog.json` 返回机器可读服务清单，支持按 `category` 过滤。
+- 已确认 `GET /services/catalog.txt` 可用于轻量文本采集。
+- 已确认 `GET /robots.txt` 继续声明 sitemap 入口。
+
+## Defects Found
+| ID | Severity | Description | Status |
+|---|---|---|---|
+| BUG-01 | - | 本轮未发现语法问题；建议上线后用 Search Console 复核 sitemap 抓取状态 | open |
+
+## Final QA Verdict
+- [ ] pass
+- [x] conditional pass
+- [ ] fail
+
+## Iteration
 2026-07-06 / reduce-restart-downtime-in-start-script
 
 ## Test Matrix

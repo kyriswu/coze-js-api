@@ -360,6 +360,46 @@ const serviceStats = [
     { label: '返回资源', value: '本地链接', note: '图片/音频/文件可访问' }
 ];
 
+const xmlEscape = (value = '') => value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+
+const parseEndpoint = (endpoint = '') => {
+    const [method = '', ...rest] = endpoint.trim().split(/\s+/);
+    return {
+        method: method.toUpperCase(),
+        path: rest.join(' ') || endpoint,
+    };
+};
+
+const sitemapPageItems = [
+    { path: '/', changefreq: 'daily', priority: '1.0' },
+    { path: '/gpt-image-2', changefreq: 'daily', priority: '0.9' },
+    { path: '/video-transcript', changefreq: 'daily', priority: '0.9' },
+    { path: '/file-transfer', changefreq: 'hourly', priority: '0.9' },
+    { path: '/apikey', changefreq: 'daily', priority: '0.8' },
+    { path: '/w7k2', changefreq: 'weekly', priority: '0.7' },
+    { path: '/plugin', changefreq: 'weekly', priority: '0.6' },
+    { path: '/wiki', changefreq: 'weekly', priority: '0.6' },
+    { path: '/vip', changefreq: 'weekly', priority: '0.5' },
+    { path: '/vip-zl', changefreq: 'weekly', priority: '0.5' },
+    { path: '/zong', changefreq: 'weekly', priority: '0.5' },
+    { path: '/xyzw', changefreq: 'weekly', priority: '0.5' },
+    { path: '/xyjc', changefreq: 'weekly', priority: '0.5' },
+    { path: '/ljsj', changefreq: 'weekly', priority: '0.5' },
+];
+
+const sitemapCategoryItems = serviceCategories
+    .filter((item) => item.id !== 'all')
+    .map((item) => ({
+        path: `/?category=${encodeURIComponent(item.id)}`,
+        changefreq: 'daily',
+        priority: '0.7',
+    }));
+
 router.get('/', (req, res) => {
     res.render('home', {
         categories: serviceCategories,
@@ -424,22 +464,105 @@ router.get('/sitemap.xml', (req, res) => {
     const baseUrl = tool.getBaseUrl(req);
     const today = new Date().toISOString().slice(0, 10);
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>${baseUrl}/w7k2</loc>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <sitemap>
+    <loc>${baseUrl}/sitemap-pages.xml</loc>
     <lastmod>${today}</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.9</priority>
-    </url>
-    <url>
-        <loc>${baseUrl}/gpt-image-2</loc>
-        <lastmod>${today}</lastmod>
-        <changefreq>daily</changefreq>
-        <priority>0.8</priority>
-  </url>
-</urlset>`;
+  </sitemap>
+  <sitemap>
+    <loc>${baseUrl}/sitemap-services.xml</loc>
+    <lastmod>${today}</lastmod>
+  </sitemap>
+</sitemapindex>`;
     res.type('application/xml');
     res.send(xml);
+});
+
+router.get('/sitemap-pages.xml', (req, res) => {
+    const baseUrl = tool.getBaseUrl(req);
+    const today = new Date().toISOString().slice(0, 10);
+    const items = [...sitemapPageItems, ...sitemapCategoryItems]
+        .map((item) => `  <url>\n    <loc>${xmlEscape(baseUrl + item.path)}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>${item.changefreq}</changefreq>\n    <priority>${item.priority}</priority>\n  </url>`)
+        .join('\n');
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${items}
+</urlset>`;
+
+    res.type('application/xml');
+    res.send(xml);
+});
+
+router.get('/sitemap-services.xml', (req, res) => {
+    const baseUrl = tool.getBaseUrl(req);
+    const today = new Date().toISOString().slice(0, 10);
+    const serviceCatalogUrls = [
+        { path: '/services/catalog.json', changefreq: 'hourly', priority: '1.0' },
+        { path: '/services/catalog.txt', changefreq: 'daily', priority: '0.8' },
+        ...serviceCategories
+            .filter((item) => item.id !== 'all')
+            .map((item) => ({
+                path: `/services/catalog.json?category=${encodeURIComponent(item.id)}`,
+                changefreq: 'daily',
+                priority: '0.7',
+            })),
+    ];
+
+    const items = serviceCatalogUrls
+        .map((item) => `  <url>\n    <loc>${xmlEscape(baseUrl + item.path)}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>${item.changefreq}</changefreq>\n    <priority>${item.priority}</priority>\n  </url>`)
+        .join('\n');
+
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${items}
+</urlset>`;
+
+    res.type('application/xml');
+    res.send(xml);
+});
+
+router.get('/services/catalog.json', (req, res) => {
+    const baseUrl = tool.getBaseUrl(req);
+    const { category } = req.query;
+    const normalizedCategory = typeof category === 'string' ? category.trim() : '';
+
+    const services = serviceCards
+        .filter((item) => !normalizedCategory || item.category === normalizedCategory)
+        .map((item) => {
+            const endpoint = parseEndpoint(item.endpoint);
+            return {
+                title: item.title,
+                category: item.category,
+                description: item.description,
+                endpoint: item.endpoint,
+                method: endpoint.method,
+                path: endpoint.path,
+                badge: item.badge,
+                price: item.price,
+            };
+        });
+
+    res.json({
+        updatedAt: new Date().toISOString(),
+        site: baseUrl,
+        total: services.length,
+        categories: serviceCategories,
+        filters: {
+            category: normalizedCategory || null,
+        },
+        services,
+    });
+});
+
+router.get('/services/catalog.txt', (req, res) => {
+    const lines = [
+        '# DevTool service catalog',
+        '# title\tcategory\tendpoint\tdescription',
+        ...serviceCards.map((item) => `${item.title}\t${item.category}\t${item.endpoint}\t${item.description}`),
+    ];
+
+    res.type('text/plain; charset=utf-8');
+    res.send(lines.join('\n'));
 });
 
 router.get('/w7k2', async (req, res) => {

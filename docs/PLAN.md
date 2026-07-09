@@ -1,5 +1,33 @@
 # PLAN
 
+## 2026-07-07 / build-google-friendly-sitemap-for-service-crawling
+
+### Objective
+建立适合 Google 收录与后续爬虫采集的站点地图体系，覆盖核心页面、服务分类入口和机器可读服务目录。
+
+### Context
+现有 `GET /sitemap.xml` 仅包含极少量 URL，无法有效表达站点可抓取范围，也不利于服务目录自动化采集。
+
+### Scope
+- `routes/navigationRoutes.js`：重构 sitemap 输出并新增服务目录路由。
+- `robots.txt` 保持通过 `Sitemap: /sitemap.xml` 暴露入口。
+- 不改动现有业务 API 返回结构。
+
+### Plan
+1. 将 `GET /sitemap.xml` 升级为 sitemap index。
+2. 新增 `GET /sitemap-pages.xml`，收录核心页面与分类查询入口。
+3. 新增 `GET /sitemap-services.xml`，收录服务目录采集入口。
+4. 新增 `GET /services/catalog.json`（机器可读）与 `GET /services/catalog.txt`（纯文本）供爬虫直接采集。
+5. 执行最小语法验证并同步 QA/RELEASE/CHANGELOG。
+
+### Risks
+- 若后续新增页面未同步到 sitemap 生成列表，可能导致收录滞后。
+- 第三方跳转页（如 `/plugin`）可收录但不承载站内正文，需与内容页搭配使用。
+
+### Validation
+- `node --check routes/navigationRoutes.js`
+- `node --check index.js`
+
 ## 2026-07-06 / reduce-restart-downtime-in-start-script
 
 ### Objective

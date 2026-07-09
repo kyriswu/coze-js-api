@@ -1,5 +1,35 @@
 # RELEASE
 
+## Enhancement
+2026-07-07 / build-google-friendly-sitemap-for-service-crawling
+
+### Summary
+升级站点地图为 Google 友好的分表结构，并新增机器可读服务目录接口，便于后续爬虫按分类稳定采集服务清单。
+
+### What Changed
+- 更新 `routes/navigationRoutes.js`
+	- 将 `GET /sitemap.xml` 从单一 `urlset` 升级为 `sitemapindex`。
+	- 新增 `GET /sitemap-pages.xml`：聚合核心页面与分类入口 URL。
+	- 新增 `GET /sitemap-services.xml`：聚合服务采集入口 URL。
+	- 新增 `GET /services/catalog.json`：返回结构化服务目录（支持 `category` 过滤）。
+	- 新增 `GET /services/catalog.txt`：返回纯文本服务目录（TSV 风格）。
+- `GET /robots.txt` 继续通过 `Sitemap: /sitemap.xml` 提供统一发现入口。
+
+### Impact
+#### API/Behavior
+- 搜索引擎与爬虫可通过统一 sitemap index 发现更多可采集入口。
+- 新增两个只读服务目录接口，不影响既有业务接口协议。
+
+#### Internal Modules
+- 仅影响 `routes/navigationRoutes.js`。
+
+### Breaking Changes
+- none
+
+### Rollback Notes
+- 回滚 `routes/navigationRoutes.js` 中 sitemap 与服务目录相关路由。
+- 将 `GET /sitemap.xml` 恢复为旧版单文件输出。
+
 ## Hotfix
 2026-07-06 / reduce-restart-downtime-in-start-script
 

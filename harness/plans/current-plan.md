@@ -57,3 +57,30 @@ The current file-transfer feature already supports upload, listing, search, pagi
 - `node --check index.js`
 - `node --input-type=module -e "import ejs from 'ejs'; await ejs.renderFile('views/file-transfer.ejs',{seo:{}}); console.log('file-transfer.ejs render ok');"`
 - Manual quick smoke via API response shape consistency for `/file-transfer/files`.
+
+## Goal
+Build a Google-friendly sitemap structure for service discovery and future crawler collection.
+
+## Context
+The current `GET /sitemap.xml` only contains a tiny subset of pages, which is insufficient for indexing service pages and structured crawling of available capabilities.
+
+## Scope / Impact
+- Primary module: `routes/navigationRoutes.js`
+- Documentation sync: `docs/PLAN.md`, `docs/QA.md`, `docs/RELEASE.md`, `CHANGELOG.md`
+- No breaking API behavior changes.
+
+## Implementation Steps
+1. Replace the minimal sitemap implementation with a sitemap index design.
+2. Add `GET /sitemap-pages.xml` for key landing/tool pages and category entry URLs.
+3. Add `GET /sitemap-services.xml` for service collection URLs.
+4. Add a machine-readable catalog endpoint for crawlers (`GET /services/catalog.json`) and include it in sitemap entries.
+5. Keep `robots.txt` pointing to `GET /sitemap.xml`.
+6. Run minimal syntax validation and sync docs.
+
+## Risks
+- Over-including redirect/helper routes may reduce sitemap quality; prioritize stable content-bearing URLs.
+- Category query URLs should remain valid even if frontend filtering logic changes.
+
+## Validation
+- `node --check routes/navigationRoutes.js`
+- `node --check index.js`

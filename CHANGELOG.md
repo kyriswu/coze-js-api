@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- Added crawler-friendly service catalog endpoints `GET /services/catalog.json` (supports `category` filter) and `GET /services/catalog.txt`.
 - Added 24-hour access aggregation and `hotTopN` ranking in `GET /file-transfer/files`, powered by Redis hourly buckets.
 - Added Redis-backed per-file access counting for `/downloads/:filename` and exposed `accessCount` in file-transfer listing data.
 - Added chunked upload support for file transfer via `POST /file-transfer/upload/chunk` and `POST /file-transfer/upload/complete` to improve large-file upload reliability behind unstable HTTP/2 gateways.
@@ -38,6 +39,7 @@ All notable changes to this project will be documented in this file.
 - Added Twitter endpoint `POST /twitter/fetch_search_timeline` backed by TikHub `fetch_search_timeline` API integration.
 
 ### Changed
+- Reworked sitemap output: `GET /sitemap.xml` is now a sitemap index that points to `GET /sitemap-pages.xml` and `GET /sitemap-services.xml` for broader Google indexing and service crawling coverage.
 - Updated `start.sh` deployment flow to reduce restart downtime by replacing full `compose down` teardown with `compose build app` + `compose up -d --no-deps app` (Podman-first, Docker fallback), plus safe dangling-image cleanup.
 - Added clipboard paste support on the `GET /file-transfer` page so users can press `Ctrl+V` to enqueue clipboard image/files into the existing upload queue flow (manual upload trigger remains unchanged).
 - Switched file access counting from a narrow `GET /downloads/:filename` hook to static-prefixed middleware on `/downloads/*` and `/audio/*`, so direct links, curl/wget, HEAD, and range access are all counted as access behavior.
