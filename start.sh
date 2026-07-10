@@ -15,7 +15,7 @@ compose() {
 
 # Build new app image first, then recreate only the app service to reduce interruption.
 compose build app
-compose up -d --no-deps app
+compose up -d --force-recreate --no-deps app
 
 # Clean dangling layers generated during rebuilds.
 "$ENGINE" image prune -f >/dev/null 2>&1 || true
