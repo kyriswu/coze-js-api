@@ -1,5 +1,39 @@
 # PLAN
 
+## 2026-07-10 / implement-network-log-dashboard-mvp
+
+### Objective
+开发一个专用单页看板，用于分析 `downloads/network.log`，并以可视化方式展示核心请求指标。
+
+### Context
+当前日志以 JSONL 写入本地文件，直接在浏览器解析大日志会造成性能负担。已确认采用“写日志时同步入 Redis + 看板读 Redis 聚合结果”的架构。
+
+### Scope
+- `utils/networkLogger.js`：日志双写（文件 + Redis），并限制 Redis 事件列表长度。
+- `utils/networkAnalytics.js`（新增）：统一计算 MVP 指标（状态分布、Top 路径、慢请求、时间趋势）。
+- `index.js`：新增 `GET /network-dashboard/metrics` 数据接口。
+- `routes/navigationRoutes.js`：新增 `GET /network-dashboard` 页面路由与服务卡片入口。
+- `views/network-dashboard.ejs`（新增）：单页可视化看板。
+
+### Plan
+1. 在日志写入路径上增加 Redis 持久化，失败不影响原有日志行为。
+2. 提供后端分析层，统一对外输出看板所需数据结构。
+3. 新增看板 metrics 接口，保持 `code/msg/data` 返回风格。
+4. 新增可视化单页（卡片 + 图表 + 慢请求表）。
+5. 增加“Redis 为空时从 `network.log` 自动回填”的首启兜底策略。
+6. 完成最小语法和渲染验证并同步 QA/RELEASE/CHANGELOG。
+
+### Risks
+- Redis 不可用时看板数据会降级为空，但不能影响主流程日志记录。
+- 回填读取大日志会增加首次分析耗时，需要控制扫描上限。
+
+### Validation
+- `node --check utils/networkLogger.js`
+- `node --check utils/networkAnalytics.js`
+- `node --check index.js`
+- `node --check routes/navigationRoutes.js`
+- `node --input-type=module -e "import ejs from 'ejs'; await ejs.renderFile('views/network-dashboard.ejs',{seo:{}}); console.log('network-dashboard.ejs render ok');"`
+
 ## 2026-07-10 / retry-gpt-image-2-edit-on-transient-fetch-timeout
 
 ### Objective

@@ -17,6 +17,7 @@ import thirdPartyUsed from "./utils/thirdPartyUsed.js";
 import navigationRoutes from './routes/navigationRoutes.js';
 import { attachAxiosRateLimitLogger } from './utils/axiosInterceptors.js';
 import { logHttpRequest } from './utils/networkLogger.js';
+import { getNetworkDashboardMetrics } from './utils/networkAnalytics.js';
 import { createApiAccessHelpers } from './utils/apiAccess.js';
 import { extract_html_conent, extract_html_conent_standard } from './utils/htmlContent.js';
 
@@ -1320,6 +1321,38 @@ const sortFiles = (files, sortBy, sortOrder) => {
 
     return sorted;
 };
+
+app.get('/network-dashboard/metrics', async (req, res) => {
+    try {
+        const windowMinutes = Number.parseInt(String(req.query.windowMinutes || '1440'), 10);
+        const topN = Number.parseInt(String(req.query.topN || '8'), 10);
+        const slowN = Number.parseInt(String(req.query.slowN || '10'), 10);
+        const scanLimit = Number.parseInt(String(req.query.scanLimit || '5000'), 10);
+
+        const data = await getNetworkDashboardMetrics({
+            windowMinutes,
+            topN,
+            slowN,
+            scanLimit,
+            tag: String(req.query.tag || ''),
+            level: String(req.query.level || ''),
+            method: String(req.query.method || ''),
+            pathContains: String(req.query.pathContains || ''),
+        });
+
+        return res.send({
+            code: 0,
+            msg: 'success',
+            data,
+        });
+    } catch (error) {
+        console.error('Error in /network-dashboard/metrics:', error.message);
+        return res.status(500).send({
+            code: -1,
+            msg: '网络日志分析失败',
+        });
+    }
+});
 
 app.get('/file-transfer/files', async (req, res) => {
     try {

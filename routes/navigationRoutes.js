@@ -271,6 +271,15 @@ const serviceCards = [
         price: '工具'
     },
     {
+        title: '网络日志看板',
+        category: 'tool',
+        icon: 'NL',
+        description: '分析 network.log 日志，查看状态分布、慢请求与趋势图。',
+        endpoint: 'GET /network-dashboard',
+        badge: '监控',
+        price: '工具'
+    },
+    {
         title: '百度网盘工具',
         category: 'file',
         icon: 'XP',
@@ -380,6 +389,7 @@ const sitemapPageItems = [
     { path: '/gpt-image-2', changefreq: 'daily', priority: '0.9' },
     { path: '/video-transcript', changefreq: 'daily', priority: '0.9' },
     { path: '/file-transfer', changefreq: 'hourly', priority: '0.9' },
+    { path: '/network-dashboard', changefreq: 'hourly', priority: '0.9' },
     { path: '/apikey', changefreq: 'daily', priority: '0.8' },
     { path: '/w7k2', changefreq: 'weekly', priority: '0.7' },
     { path: '/plugin', changefreq: 'weekly', priority: '0.6' },
@@ -994,6 +1004,18 @@ router.get('/file-transfer', async (req, res) => {
             keywords: '文件中转站,图床,文件上传,文件搜索,downloads',
             url: pageUrl
         }
+    });
+});
+
+router.get('/network-dashboard', async (req, res) => {
+    const pageUrl = `${tool.getBaseUrl(req)}${req.originalUrl}`;
+    res.render('network-dashboard', {
+        seo: {
+            title: '网络日志分析看板 - network.log 可视化监控',
+            description: '实时分析 network.log 的请求状态、接口热点、慢请求与时序趋势。',
+            keywords: 'network.log,日志分析,可视化看板,请求状态,慢请求,接口监控',
+            url: pageUrl,
+        },
     });
 });
 

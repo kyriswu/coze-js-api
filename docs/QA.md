@@ -1,6 +1,73 @@
 # QA
 
 ## Iteration
+2026-07-10 / enhance-network-dashboard-visual-and-auto-refresh
+
+## Test Matrix
+| Case ID | Step | Expected | Actual | Status |
+|---|---|---|---|---|
+| QA-01 | 渲染 `views/network-dashboard.ejs` | 新增交互不影响模板渲染 | `network-dashboard.ejs render ok` | pass |
+| QA-02 | 查看看板脚本逻辑 | 自动刷新开关可配置且默认开启 | 已实现 `autoBtn + autoSeconds`，默认 30s 自动刷新 | pass |
+| QA-03 | 查看状态分布渲染逻辑 | 状态码按类别颜色映射并有图例 | 已实现 `STATUS_CLASS_COLOR` 与 `statusLegend` | pass |
+| QA-04 | 查看 Top 路径渲染逻辑 | 显示占比与进度条 | 已实现 `pathShareList` 百分比条形展示 | pass |
+
+## Command Evidence
+```bash
+cd /root/coze-js-api && node --input-type=module -e "import ejs from 'ejs'; await ejs.renderFile('views/network-dashboard.ejs',{seo:{}}); console.log('network-dashboard.ejs render ok');"
+```
+
+## Manual Checks
+- 已确认工具栏新增自动刷新周期选择（10/20/30/60 秒）与开关按钮。
+- 已确认状态码分布图采用 1xx-5xx/unknown 分色展示，并在图下方显示占比图例。
+- 已确认 Top 路径面板新增“占比进度条 + 百分比”展示，便于识别热点集中度。
+- 已确认窗口 resize 时图表会重绘，保持响应式布局。
+
+## Defects Found
+| ID | Severity | Description | Status |
+|---|---|---|---|
+| BUG-01 | low | 本轮未执行真实浏览器点击回归（仅模板渲染与代码路径核查） | open |
+
+## Final QA Verdict
+- [ ] pass
+- [x] conditional pass
+- [ ] fail
+
+## Iteration
+2026-07-10 / implement-network-log-dashboard-mvp
+
+## Test Matrix
+| Case ID | Step | Expected | Actual | Status |
+|---|---|---|---|---|
+| QA-01 | `node --check utils/networkLogger.js` | 日志双写模块语法正确 | 命令执行无输出 | pass |
+| QA-02 | `node --check utils/networkAnalytics.js` | 分析模块语法正确 | 命令执行无输出 | pass |
+| QA-03 | `node --check index.js` | 主入口语法不受影响 | 命令执行无输出 | pass |
+| QA-04 | `node --check routes/navigationRoutes.js` | 路由模块语法正确 | 命令执行无输出 | pass |
+| QA-05 | 渲染 `views/network-dashboard.ejs` | 模板可渲染 | `network-dashboard.ejs render ok` | pass |
+| QA-06 | 运行 `getNetworkDashboardMetrics` 冒烟 | 能返回聚合结果 | 首次空 Redis 返回 0；回填后 `parsed=10, raw=20, slow=5` | pass |
+
+## Command Evidence
+```bash
+cd /root/coze-js-api && node --check utils/networkLogger.js && node --check utils/networkAnalytics.js && node --check index.js && node --check routes/navigationRoutes.js && node --input-type=module -e "import ejs from 'ejs'; await ejs.renderFile('views/network-dashboard.ejs',{seo:{}}); console.log('network-dashboard.ejs render ok');"
+cd /root/coze-js-api && node --input-type=module -e "import { getNetworkDashboardMetrics } from './utils/networkAnalytics.js'; const data = await getNetworkDashboardMetrics({ windowMinutes: 7*24*60, topN: 5, slowN: 5, scanLimit: 5000 }); console.log(JSON.stringify({parsed:data.summary.parsedLines, raw:data.summary.totalRawLines, slow:data.stats.slowRequests.length, topPath:data.stats.topPaths[0]?.key||null}, null, 2));"
+```
+
+## Manual Checks
+- 已确认新增页面路由 `GET /network-dashboard` 可作为日志看板入口。
+- 已确认新增接口 `GET /network-dashboard/metrics` 返回结构为 `code/msg/data`。
+- 已确认 Redis 为空时可从 `downloads/network.log` 自动回填最近日志用于首屏展示。
+- 已确认 `utils/networkLogger.js` 在写日志时会尝试同步写入 Redis，且异常仅记录错误不阻断主流程。
+
+## Defects Found
+| ID | Severity | Description | Status |
+|---|---|---|---|
+| BUG-01 | low | 本轮未做浏览器端视觉交互全量手测（仅模板渲染与后端冒烟） | open |
+
+## Final QA Verdict
+- [ ] pass
+- [x] conditional pass
+- [ ] fail
+
+## Iteration
 2026-07-10 / retry-gpt-image-2-edit-on-transient-fetch-timeout
 
 ## Test Matrix

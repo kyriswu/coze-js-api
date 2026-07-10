@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <% const pageSeo = (typeof seo !== 'undefined' && seo) ? seo : {}; %>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= pageSeo.title || '网络日志分析看板' %></title>
+  <meta name="description" content="<%= pageSeo.description || '分析 network.log 的请求状态、路径热点与慢请求趋势。' %>" />
+  <meta name="keywords" content="<%= pageSeo.keywords || 'network.log,日志分析,可视化看板,慢请求' %>" />
+  <style>
+    :root {
+      --bg: #f4f6f8;
+      --ink: #132132;
+      --muted: #5d6c7b;
+      --line: #d4dde5;
+      --panel: #ffffff;
+      --brand: #0066ff;
+      --brand-2: #00a7a0;
+      --warn: #d97706;
+      --error: #d92d20;
+      --ok: #15803d;
+      --radius: 16px;
+      --shadow: 0 12px 28px rgba(17, 34, 51, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: "Source Han Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background:
+        radial-gradient(circle at 10% -10%, rgba(0, 102, 255, 0.14), transparent 34%),
+        radial-gradient(circle at 90% 0%, rgba(0, 167, 160, 0.12), transparent 26%),
+        var(--bg);
+    }
+
+    .wrap {
+      width: min(1240px, calc(100% - 28px));
+      margin: 16px auto 24px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .hero,
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .hero {
+      padding: 16px 18px;
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(135deg, #ffffff 0%, #f5f9ff 62%, #eefbfb 100%);
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      right: -50px;
+      top: -50px;
+      width: 220px;
+      height: 220px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0, 102, 255, 0.2), transparent 64%);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 30px;
+      line-height: 1.1;
+      letter-spacing: 0.3px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .desc {
+      margin: 8px 0 0;
+      color: var(--muted);
+      line-height: 1.6;
+      position: relative;
+      z-index: 1;
+    }
+
+    .toolbar {
+      padding: 12px;
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      align-items: end;
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .field label {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 700;
+      letter-spacing: 0.2px;
+    }
+
+    .field input,
+    .field select,
+    .field button {
+      width: 100%;
+      height: 38px;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      padding: 0 10px;
+      font-size: 13px;
+      background: #fff;
+      color: var(--ink);
+    }
+
+    .field button {
+      border: 0;
+      background: linear-gradient(90deg, var(--brand), #2e8cff);
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .field button.secondary {
+      background: #edf5ff;
+      color: #12417f;
+      border: 1px solid #c9dcff;
+    }
+
+    .field button.auto-on {
+      background: linear-gradient(90deg, #0f9f88, #32b8a1);
+      color: #fff;
+      border: 0;
+    }
+
+    .status {
+      margin: 0;
+      padding: 0 12px 12px;
+      font-size: 13px;
+      color: var(--muted);
+      min-height: 18px;
+    }
+
+    .status.error { color: var(--error); }
+    .status.ok { color: var(--ok); }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .card {
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: linear-gradient(180deg, #ffffff, #f8fbff);
+    }
+
+    .card .label {
+      font-size: 12px;
+      color: var(--muted);
+      margin: 0;
+    }
+
+    .card .value {
+      margin: 6px 0 0;
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: 0.2px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .panel {
+      padding: 12px;
+    }
+
+    .panel h3 {
+      margin: 0 0 10px;
+      font-size: 16px;
+    }
+
+    .chart {
+      height: 240px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fbfdff;
+      padding: 8px;
+      overflow: hidden;
+    }
+
+    .legend {
+      margin-top: 8px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .chip {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      font-size: 12px;
+      padding: 4px 10px;
+      background: #f7fbff;
+      color: #28445d;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .chip-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .share-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 8px;
+      max-height: 240px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .share-item {
+      display: grid;
+      gap: 5px;
+    }
+
+    .share-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: #35516b;
+    }
+
+    .share-label {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      max-width: 75%;
+    }
+
+    .share-bar {
+      height: 7px;
+      border-radius: 999px;
+      background: #e0e8f1;
+      overflow: hidden;
+    }
+
+    .share-bar > span {
+      display: block;
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #0066ff, #00a7a0);
+      width: 0;
+      transition: width 0.2s ease;
+    }
+
+    .table-wrap {
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      min-width: 680px;
+    }
+
+    th, td {
+      border-bottom: 1px solid #e9eef3;
+      padding: 8px 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      color: #1f3b56;
+      background: #f3f8ff;
+      font-size: 12px;
+      letter-spacing: 0.2px;
+    }
+
+    td.path {
+      word-break: break-all;
+      max-width: 360px;
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 8px;
+    }
+
+    @media (max-width: 980px) {
+      .toolbar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 640px) {
+      .wrap { width: calc(100% - 16px); }
+      h1 { font-size: 24px; }
+      .cards { grid-template-columns: 1fr; }
+      .toolbar { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <h1>Network Log Dashboard</h1>
+      <p class="desc">围绕 network.log 的 MVP 可视化分析：请求总量、状态码分布、路径热点、慢请求和分钟级趋势。</p>
+    </section>
+
+    <section class="panel">
+      <div class="toolbar">
+        <div class="field">
+          <label for="windowMinutes">时间窗口（分钟）</label>
+          <select id="windowMinutes">
+            <option value="60">最近 1 小时</option>
+            <option value="360">最近 6 小时</option>
+            <option value="1440" selected>最近 24 小时</option>
+            <option value="10080">最近 7 天</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="method">Method</label>
+          <select id="method">
+            <option value="">全部</option>
+            <option value="GET">GET</option>
+            <option value="POST">POST</option>
+            <option value="PUT">PUT</option>
+            <option value="DELETE">DELETE</option>
+            <option value="PATCH">PATCH</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="level">Level</label>
+          <select id="level">
+            <option value="">全部</option>
+            <option value="info">info</option>
+            <option value="error">error</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="tag">Tag</label>
+          <input id="tag" placeholder="例如 HTTP Request" />
+        </div>
+        <div class="field">
+          <label for="pathContains">Path 包含</label>
+          <input id="pathContains" placeholder="例如 /file-transfer" />
+        </div>
+        <div class="field">
+          <label for="autoSeconds">自动刷新</label>
+          <select id="autoSeconds">
+            <option value="10">10 秒</option>
+            <option value="20">20 秒</option>
+            <option value="30" selected>30 秒</option>
+            <option value="60">60 秒</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>&nbsp;</label>
+          <button id="autoBtn" type="button" class="secondary">自动刷新：关</button>
+        </div>
+        <div class="field">
+          <label>&nbsp;</label>
+          <button id="applyBtn" type="button">刷新看板</button>
+        </div>
+      </div>
+      <p id="status" class="status">准备就绪</p>
+    </section>
+
+    <section class="cards">
+      <article class="card">
+        <p class="label">窗口内请求数</p>
+        <p class="value" id="cardParsedLines">-</p>
+      </article>
+      <article class="card">
+        <p class="label">Redis 样本行数</p>
+        <p class="value" id="cardRawLines">-</p>
+      </article>
+      <article class="card">
+        <p class="label">解析异常行数</p>
+        <p class="value" id="cardParseErrors">-</p>
+      </article>
+      <article class="card">
+        <p class="label">窗口跨度</p>
+        <p class="value" id="cardWindow">-</p>
+      </article>
+    </section>
+
+    <section class="grid">
+      <article class="panel">
+        <h3>状态码分布</h3>
+        <div id="statusChart" class="chart"></div>
+        <div id="statusLegend" class="legend"></div>
+      </article>
+      <article class="panel">
+        <h3>Top 路径占比</h3>
+        <div id="pathChart" class="chart"></div>
+        <div id="pathShareList" class="share-list"></div>
+      </article>
+      <article class="panel" style="grid-column: 1 / -1;">
+        <h3>请求趋势（分钟）</h3>
+        <div id="timelineChart" class="chart"></div>
+      </article>
+    </section>
+
+    <section class="panel">
+      <h3>慢请求 Top 10</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>时间</th>
+              <th>Method</th>
+              <th>Status</th>
+              <th>耗时(ms)</th>
+              <th>Tag</th>
+              <th>Path</th>
+            </tr>
+          </thead>
+          <tbody id="slowTableBody">
+            <tr><td colspan="6">暂无数据</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="hint">建议先在业务页面触发一些请求，再回到此页刷新。</p>
+    </section>
+  </div>
+
+  <script>
+    const state = {
+      loading: false,
+      data: null,
+    };
+
+    const els = {
+      windowMinutes: document.getElementById('windowMinutes'),
+      method: document.getElementById('method'),
+      level: document.getElementById('level'),
+      tag: document.getElementById('tag'),
+      pathContains: document.getElementById('pathContains'),
+      autoSeconds: document.getElementById('autoSeconds'),
+      autoBtn: document.getElementById('autoBtn'),
+      applyBtn: document.getElementById('applyBtn'),
+      status: document.getElementById('status'),
+      cardParsedLines: document.getElementById('cardParsedLines'),
+      cardRawLines: document.getElementById('cardRawLines'),
+      cardParseErrors: document.getElementById('cardParseErrors'),
+      cardWindow: document.getElementById('cardWindow'),
+      statusChart: document.getElementById('statusChart'),
+      statusLegend: document.getElementById('statusLegend'),
+      pathChart: document.getElementById('pathChart'),
+      pathShareList: document.getElementById('pathShareList'),
+      timelineChart: document.getElementById('timelineChart'),
+      slowTableBody: document.getElementById('slowTableBody'),
+    };
+
+    const STATUS_CLASS_COLOR = {
+      '1xx': '#4f46e5',
+      '2xx': '#15803d',
+      '3xx': '#0369a1',
+      '4xx': '#d97706',
+      '5xx': '#d92d20',
+      unknown: '#475467',
+      other: '#6b7280',
+    };
+
+    state.autoRefreshTimer = null;
+    state.autoRefreshOn = false;
+
+    const setStatus = (text, kind) => {
+      els.status.textContent = text;
+      els.status.className = 'status' + (kind ? (' ' + kind) : '');
+    };
+
+    const toNum = (value, fallback = 0) => {
+      const n = Number(value);
+      return Number.isFinite(n) ? n : fallback;
+    };
+
+    const fmtNumber = (value) => new Intl.NumberFormat('zh-CN').format(toNum(value));
+
+    const esc = (value) => String(value || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+
+    const getQuery = () => {
+      const params = new URLSearchParams();
+      params.set('windowMinutes', els.windowMinutes.value || '1440');
+      params.set('slowN', '10');
+      params.set('topN', '8');
+      params.set('scanLimit', '5000');
+
+      const optional = {
+        method: els.method.value,
+        level: els.level.value,
+        tag: els.tag.value.trim(),
+        pathContains: els.pathContains.value.trim(),
+      };
+
+      Object.entries(optional).forEach(([key, val]) => {
+        if (val) params.set(key, val);
+      });
+
+      return params.toString();
+    };
+
+    const drawBarChart = (target, rows, options = {}) => {
+      const width = target.clientWidth - 16;
+      const height = 220;
+      const padX = 8;
+      const padY = 8;
+      const innerW = Math.max(40, width - padX * 2);
+      const innerH = Math.max(40, height - padY * 2);
+
+      if (!rows || rows.length === 0) {
+        target.innerHTML = '<div class="hint">暂无数据</div>';
+        return;
+      }
+
+      const max = Math.max(1, ...rows.map((r) => toNum(r.value)));
+      const barGap = 8;
+      const barCount = rows.length;
+      const barW = Math.max(12, (innerW - barGap * (barCount - 1)) / barCount);
+
+      const gradId = `grad-bar-${target.id || 'chart'}`;
+      const bars = rows.map((row, i) => {
+        const value = toNum(row.value);
+        const h = Math.max(2, (value / max) * (innerH - 30));
+        const x = padX + i * (barW + barGap);
+        const y = padY + innerH - h - 20;
+        const label = esc(row.key);
+        const color = typeof options.colorResolver === 'function' ? options.colorResolver(row, i) : null;
+        const fill = color || `url(#${gradId})`;
+        return `
+          <rect x="${x}" y="${y}" width="${barW}" height="${h}" rx="4" fill="${fill}" />
+          <text x="${x + barW / 2}" y="${padY + innerH - 6}" text-anchor="middle" font-size="10" fill="#506173">${label.slice(0, 10)}</text>
+          <text x="${x + barW / 2}" y="${Math.max(14, y - 4)}" text-anchor="middle" font-size="10" fill="#2f4d6a">${value}</text>
+        `;
+      }).join('');
+
+      target.innerHTML = `
+        <svg width="100%" height="${height}" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" role="img" aria-label="bar chart">
+          <defs>
+            <linearGradient id="${gradId}" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#0066ff" />
+              <stop offset="100%" stop-color="#00a7a0" />
+            </linearGradient>
+          </defs>
+          ${bars}
+        </svg>
+      `;
+    };
+
+    const renderStatusLegend = (rows) => {
+      const total = rows.reduce((sum, row) => sum + toNum(row.value), 0) || 1;
+      if (!rows || rows.length === 0) {
+        els.statusLegend.innerHTML = '<span class="chip">暂无状态码数据</span>';
+        return;
+      }
+
+      els.statusLegend.innerHTML = rows.map((row) => {
+        const color = STATUS_CLASS_COLOR[row.key] || STATUS_CLASS_COLOR.other;
+        const pct = ((toNum(row.value) / total) * 100).toFixed(1);
+        return `<span class="chip"><span class="chip-dot" style="background:${color}"></span>${esc(row.key)} · ${pct}%</span>`;
+      }).join('');
+    };
+
+    const renderPathShareList = (rows) => {
+      if (!rows || rows.length === 0) {
+        els.pathShareList.innerHTML = '<div class="hint">暂无路径占比数据</div>';
+        return;
+      }
+
+      const total = rows.reduce((sum, row) => sum + toNum(row.value), 0) || 1;
+      els.pathShareList.innerHTML = rows.map((row) => {
+        const value = toNum(row.value);
+        const pct = Math.max(0, Math.min(100, (value / total) * 100));
+        return `
+          <div class="share-item">
+            <div class="share-head">
+              <span class="share-label" title="${esc(row.key)}">${esc(row.key)}</span>
+              <span>${fmtNumber(value)} (${pct.toFixed(1)}%)</span>
+            </div>
+            <div class="share-bar"><span style="width:${pct.toFixed(2)}%"></span></div>
+          </div>
+        `;
+      }).join('');
+    };
+
+    const drawLineChart = (target, points) => {
+      const width = target.clientWidth - 16;
+      const height = 220;
+      const pad = { top: 16, right: 16, bottom: 24, left: 18 };
+      const innerW = Math.max(40, width - pad.left - pad.right);
+      const innerH = Math.max(40, height - pad.top - pad.bottom);
+
+      if (!points || points.length === 0) {
+        target.innerHTML = '<div class="hint">暂无数据</div>';
+        return;
+      }
+
+      const maxY = Math.max(1, ...points.map((p) => toNum(p.count)));
+      const minX = 0;
+      const maxX = Math.max(1, points.length - 1);
+
+      const mapped = points.map((point, idx) => {
+        const x = pad.left + ((idx - minX) / (maxX - minX)) * innerW;
+        const y = pad.top + (1 - toNum(point.count) / maxY) * innerH;
+        return { x, y, point };
+      });
+
+      const d = mapped.map((m, i) => `${i === 0 ? 'M' : 'L'} ${m.x.toFixed(2)} ${m.y.toFixed(2)}`).join(' ');
+      const circles = mapped.filter((_, idx) => idx % Math.max(1, Math.floor(points.length / 24)) === 0)
+        .map((m) => `<circle cx="${m.x}" cy="${m.y}" r="2.5" fill="#0066ff" />`)
+        .join('');
+
+      target.innerHTML = `
+        <svg width="100%" height="${height}" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" role="img" aria-label="line chart">
+          <line x1="${pad.left}" y1="${pad.top + innerH}" x2="${pad.left + innerW}" y2="${pad.top + innerH}" stroke="#d5dde6" />
+          <line x1="${pad.left}" y1="${pad.top}" x2="${pad.left}" y2="${pad.top + innerH}" stroke="#d5dde6" />
+          <path d="${d}" fill="none" stroke="#0066ff" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" />
+          ${circles}
+        </svg>
+      `;
+    };
+
+    const renderSlowTable = (rows) => {
+      if (!rows || rows.length === 0) {
+        els.slowTableBody.innerHTML = '<tr><td colspan="6">暂无数据</td></tr>';
+        return;
+      }
+
+      els.slowTableBody.innerHTML = rows.map((row) => {
+        return `
+          <tr>
+            <td>${esc(row.ts || '-')}</td>
+            <td>${esc(row.method || '-')}</td>
+            <td>${esc(row.status || '-')}</td>
+            <td>${fmtNumber(row.durationMs)}</td>
+            <td>${esc(row.tag || '-')}</td>
+            <td class="path">${esc(row.path || '-')}</td>
+          </tr>
+        `;
+      }).join('');
+    };
+
+    const render = () => {
+      const payload = state.data || {};
+      const summary = payload.summary || {};
+      const stats = payload.stats || {};
+      const statusClasses = stats.statusClasses || [];
+      const topPaths = stats.topPaths || [];
+
+      els.cardParsedLines.textContent = fmtNumber(summary.parsedLines || 0);
+      els.cardRawLines.textContent = fmtNumber(summary.totalRawLines || 0);
+      els.cardParseErrors.textContent = fmtNumber(summary.parseErrors || 0);
+      els.cardWindow.textContent = `${fmtNumber(summary.windowMinutes || 0)} 分钟`;
+
+      drawBarChart(els.statusChart, statusClasses, {
+        colorResolver: (row) => STATUS_CLASS_COLOR[row.key] || STATUS_CLASS_COLOR.other,
+      });
+      renderStatusLegend(statusClasses);
+
+      drawBarChart(els.pathChart, topPaths);
+      renderPathShareList(topPaths);
+
+      drawLineChart(els.timelineChart, stats.timeline || []);
+      renderSlowTable(stats.slowRequests || []);
+    };
+
+    const syncAutoRefreshButton = () => {
+      els.autoBtn.textContent = `自动刷新：${state.autoRefreshOn ? '开' : '关'}`;
+      els.autoBtn.classList.toggle('auto-on', state.autoRefreshOn);
+      els.autoBtn.classList.toggle('secondary', !state.autoRefreshOn);
+    };
+
+    const clearAutoRefresh = () => {
+      if (state.autoRefreshTimer) {
+        clearInterval(state.autoRefreshTimer);
+        state.autoRefreshTimer = null;
+      }
+    };
+
+    const setAutoRefresh = (enabled) => {
+      state.autoRefreshOn = Boolean(enabled);
+      clearAutoRefresh();
+
+      if (state.autoRefreshOn) {
+        const seconds = Math.min(Math.max(toNum(els.autoSeconds.value, 30), 5), 300);
+        state.autoRefreshTimer = setInterval(() => {
+          loadMetrics();
+        }, seconds * 1000);
+      }
+
+      syncAutoRefreshButton();
+    };
+
+    const loadMetrics = async () => {
+      if (state.loading) return;
+      state.loading = true;
+      els.applyBtn.disabled = true;
+      setStatus('正在加载分析数据...', '');
+
+      try {
+        const query = getQuery();
+        const resp = await fetch(`/network-dashboard/metrics?${query}`);
+        const json = await resp.json();
+
+        if (!resp.ok || json.code !== 0) {
+          throw new Error(json.msg || '接口返回异常');
+        }
+
+        state.data = json.data || {};
+        render();
+
+        const range = state.data?.summary?.timeRange || {};
+        const end = range.end || '-';
+        setStatus(`更新完成，数据截止 ${end}`, 'ok');
+      } catch (error) {
+        setStatus(`加载失败：${error.message}`, 'error');
+      } finally {
+        state.loading = false;
+        els.applyBtn.disabled = false;
+      }
+    };
+
+    els.applyBtn.addEventListener('click', loadMetrics);
+    els.autoBtn.addEventListener('click', () => {
+      setAutoRefresh(!state.autoRefreshOn);
+    });
+    els.autoSeconds.addEventListener('change', () => {
+      if (state.autoRefreshOn) {
+        setAutoRefresh(true);
+      }
+    });
+    window.addEventListener('resize', () => {
+      if (!state.data) return;
+      render();
+    });
+
+    setAutoRefresh(true);
+    loadMetrics();
+  </script>
+</body>
+</html>

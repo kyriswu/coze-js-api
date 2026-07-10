@@ -1,11 +1,19 @@
 import fs from 'fs';
 import path from 'path';
+import redis from './redisClient.js';
 
 const LOG_MODE = (process.env.NETWORK_LOG_MODE || 'file').toLowerCase();
 const LOG_FILE = process.env.NETWORK_LOG_FILE || path.resolve(process.cwd(), 'downloads/network.log');
 
 const ENABLE_HTTP_LOG = String(process.env.NETWORK_LOG_HTTP || 'true').toLowerCase() !== 'false';
 const ENABLE_AXIOS_LOG = String(process.env.NETWORK_LOG_AXIOS || 'true').toLowerCase() !== 'false';
+const ENABLE_REDIS_LOG = String(process.env.NETWORK_LOG_REDIS || 'true').toLowerCase() !== 'false';
+
+const REDIS_EVENTS_KEY = process.env.NETWORK_LOG_REDIS_EVENTS_KEY || 'network_log:events';
+const REDIS_EVENTS_MAX = Math.min(
+    Math.max(Number.parseInt(process.env.NETWORK_LOG_REDIS_MAX_EVENTS || '20000', 10) || 20000, 1000),
+    200000,
+);
 
 let fileLoggerReady = false;
 
@@ -31,6 +39,21 @@ const writeToFile = async (line) => {
     }
 };
 
+const writeToRedis = async (line) => {
+    if (!ENABLE_REDIS_LOG) {
+        return;
+    }
+
+    try {
+        await redis.multi()
+            .lpush(REDIS_EVENTS_KEY, line)
+            .ltrim(REDIS_EVENTS_KEY, 0, REDIS_EVENTS_MAX - 1)
+            .exec();
+    } catch (error) {
+        console.error('[Network Logger Redis Error]', error.message);
+    }
+};
+
 const emit = async (level, tag, payload) => {
     if (LOG_MODE === 'off') {
         return;
@@ -51,8 +74,18 @@ const emit = async (level, tag, payload) => {
         }
     }
 
+    const tasks = [];
+
     if (LOG_MODE === 'file' || LOG_MODE === 'both') {
-        await writeToFile(line);
+        tasks.push(writeToFile(line));
+    }
+
+    if (ENABLE_REDIS_LOG) {
+        tasks.push(writeToRedis(line));
+    }
+
+    if (tasks.length > 0) {
+        await Promise.allSettled(tasks);
     }
 };
 

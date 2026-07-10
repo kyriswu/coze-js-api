@@ -1,6 +1,37 @@
 # Current Plan
 
 ## Goal
+Implement a dedicated single-page network log analytics dashboard backed by Redis ingestion on write-path.
+
+## Context
+`downloads/network.log` already captures HTTP/Axios request telemetry in JSONL format. The new dashboard should avoid heavy browser-side log parsing by ingesting log events into Redis during logging and reading analytics from Redis-backed APIs.
+
+## Scope / Impact
+- Primary modules: `utils/networkLogger.js`, `index.js`, `routes/navigationRoutes.js`, new `utils/networkAnalytics.js`, new `views/network-dashboard.ejs`
+- Documentation sync: `docs/PLAN.md`, `docs/QA.md`, `docs/RELEASE.md`, `CHANGELOG.md`
+- Backward compatibility: keep existing routes and response shape conventions unchanged.
+
+## Implementation Steps
+1. Extend network logger to dual-write telemetry into Redis with bounded retention and failure-safe behavior.
+2. Add a small analytics utility that loads recent events from Redis and computes MVP metrics (summary, status distribution, top paths, slow requests, minute trend).
+3. Add JSON API endpoint(s) in `index.js` for dashboard metrics with optional filters.
+4. Add a dedicated dashboard page route in `routes/navigationRoutes.js`.
+5. Create `views/network-dashboard.ejs` single-page dashboard with cards/charts/table fed by the new API.
+6. Run minimal syntax/render validation and sync docs.
+
+## Risks
+- Redis write failures should not block existing log output.
+- Timeline/query cost must stay bounded by limiting scanned event count.
+- UI must handle empty dataset and partial parse issues gracefully.
+
+## Validation
+- `node --check utils/networkLogger.js`
+- `node --check utils/networkAnalytics.js`
+- `node --check index.js`
+- `node --check routes/navigationRoutes.js`
+- `node --input-type=module -e "import ejs from 'ejs'; await ejs.renderFile('views/network-dashboard.ejs',{seo:{}}); console.log('network-dashboard.ejs render ok');"`
+
+## Goal
 Harden `gpt_image_2_edit` against transient OpenAI-Hub edit timeouts by adding bounded retry on network/header-timeout failures.
 
 ## Context

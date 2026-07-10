@@ -1,5 +1,73 @@
 # RELEASE
 
+## Enhancement
+2026-07-10 / enhance-network-dashboard-visual-and-auto-refresh
+
+### Summary
+网络日志看板第二轮增强：新增自动刷新控制、状态码分色图例、Top 路径占比展示，提升监控可读性和连续观察体验。
+
+### What Changed
+- 更新 `views/network-dashboard.ejs`
+	- 新增自动刷新开关与周期选择（10/20/30/60 秒）。
+	- 状态码分布图新增类别颜色映射（1xx~5xx/unknown）与占比图例。
+	- Top 路径面板新增占比进度条列表，展示请求占比与数量。
+	- 保持响应式布局与窗口 resize 重绘行为。
+
+### Impact
+#### API/Behavior
+- 不新增后端接口，不改变 `GET /network-dashboard/metrics` 返回结构。
+- 页面默认开启自动刷新（30 秒），可手动关闭。
+
+#### Internal Modules
+- 仅影响 `views/network-dashboard.ejs`。
+
+### Breaking Changes
+- none
+
+### Rollback Notes
+- 回滚 `views/network-dashboard.ejs` 中自动刷新控件、状态图例与路径占比区域相关代码。
+
+## Enhancement
+2026-07-10 / implement-network-log-dashboard-mvp
+
+### Summary
+新增 `network.log` 专用可视化单页看板，并接入 Redis 写入与后端聚合分析能力，用于快速定位状态分布、热点路径和慢请求。
+
+### What Changed
+- 新增 `utils/networkAnalytics.js`
+	- 提供统一聚合能力：状态码分布、Top 路径、慢请求、分钟趋势。
+	- 支持过滤参数（窗口、method、level、tag、pathContains）。
+	- Redis 为空时自动回填 `downloads/network.log` 最近日志。
+- 更新 `utils/networkLogger.js`
+	- 日志写入路径新增 Redis 双写（列表保留上限可配置）。
+	- Redis 异常降级为错误日志，不中断原有写日志流程。
+- 更新 `index.js`
+	- 新增 `GET /network-dashboard/metrics`。
+- 更新 `routes/navigationRoutes.js`
+	- 新增 `GET /network-dashboard` 页面路由。
+	- 首页服务卡片新增“网络日志看板”入口。
+	- sitemap 增加 `/network-dashboard` 页面条目。
+- 新增 `views/network-dashboard.ejs`
+	- 单页看板包含统计卡片、状态分布图、Top 路径图、趋势图、慢请求表。
+
+### Impact
+#### API/Behavior
+- 新增只读接口：`GET /network-dashboard/metrics`。
+- 不影响既有业务接口与响应结构。
+
+#### Internal Modules
+- 影响 `utils/networkLogger.js`、`index.js`、`routes/navigationRoutes.js`。
+- 新增 `utils/networkAnalytics.js`、`views/network-dashboard.ejs`。
+
+### Breaking Changes
+- none
+
+### Rollback Notes
+- 回滚新增文件 `utils/networkAnalytics.js`、`views/network-dashboard.ejs`。
+- 回滚 `index.js` 的 `/network-dashboard/metrics` 路由。
+- 回滚 `routes/navigationRoutes.js` 的看板页面/服务入口/sitemap 条目。
+- 回滚 `utils/networkLogger.js` Redis 双写逻辑。
+
 ## Hotfix
 2026-07-10 / retry-gpt-image-2-edit-on-transient-fetch-timeout
 
