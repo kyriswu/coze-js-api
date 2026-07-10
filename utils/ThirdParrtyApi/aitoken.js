@@ -8,6 +8,8 @@ const openaihub_api_key = 'sk-xQEHwDSCU78fni0S7Y4J0h27M9GPzfgi33RsHZxt5IFj3ylt';
 const OPENAI_HUB_BASE = 'https://api.openai-hub.com';
 const GPT_IMAGE_API_ID = 'api_413Kmmitqy3qaDo4';
 const openaihub_GPT_IMAGE_MODEL = 'gpt-image-2';
+const GPT_IMAGE_EDIT_MAX_RETRIES = Number.parseInt(process.env.GPT_IMAGE_EDIT_MAX_RETRIES || '2', 10);
+const GPT_IMAGE_EDIT_RETRY_BASE_DELAY_MS = Number.parseInt(process.env.GPT_IMAGE_EDIT_RETRY_BASE_DELAY_MS || '800', 10);
 
 const aitoken = {
 
@@ -33,10 +35,14 @@ const aitoken = {
     gpt_image_2_edit: async function (image, mask, prompt) {
         try {
             if (!prompt || !prompt.trim()) throw new Error('prompt 不能为空');
+            const normalizedPrompt = prompt.trim();
+            const maxRetries = Number.isFinite(GPT_IMAGE_EDIT_MAX_RETRIES) ? Math.max(0, GPT_IMAGE_EDIT_MAX_RETRIES) : 2;
+            const retryBaseDelayMs = Number.isFinite(GPT_IMAGE_EDIT_RETRY_BASE_DELAY_MS) ? Math.max(100, GPT_IMAGE_EDIT_RETRY_BASE_DELAY_MS) : 800;
 
-            console.log('Received edit request with prompt:', prompt);
-            const form = new FormData();
+            console.log('Received edit request with prompt:', normalizedPrompt);
             const payloadImageMeta = [];
+            const preparedImages = [];
+            let preparedMask = null;
 
             // 兼容无图、单图与多参考图：多图时按 OpenAI 规范使用 image[] 字段。
             const images = (Array.isArray(image) ? image : (image ? [image] : [])).filter(Boolean);
@@ -62,44 +68,115 @@ const aitoken = {
                 }
 
                 const imageFieldName = images.length > 1 ? 'image[]' : 'image';
-                form.append(imageFieldName, blob, fileName);
+                preparedImages.push({ fieldName: imageFieldName, blob, fileName });
                 payloadImageMeta.push({ index: index + 1, field: imageFieldName, fileName });
             }
 
             if (mask) {
                 if (mask instanceof Blob) {
-                    form.append('mask', mask, 'mask.png');
+                    preparedMask = { blob: mask, fileName: 'mask.png' };
                 } else if (typeof mask === 'string') {
                     const data = await fs.promises.readFile(mask);
-                    form.append('mask', new Blob([data], { type: 'image/png' }), path.basename(mask) || 'mask.png');
+                    preparedMask = {
+                        blob: new Blob([data], { type: 'image/png' }),
+                        fileName: path.basename(mask) || 'mask.png'
+                    };
                 } else if (mask?.path && typeof mask.path === 'string') {
                     const data = await fs.promises.readFile(mask.path);
-                    form.append('mask', new Blob([data], { type: 'image/png' }), path.basename(mask.path) || 'mask.png');
+                    preparedMask = {
+                        blob: new Blob([data], { type: 'image/png' }),
+                        fileName: path.basename(mask.path) || 'mask.png'
+                    };
                 }
             }
-            form.append("model", openaihub_GPT_IMAGE_MODEL);
-            form.append("prompt", prompt.trim());
+
+            const buildEditForm = () => {
+                const form = new FormData();
+                for (const item of preparedImages) {
+                    form.append(item.fieldName, item.blob, item.fileName);
+                }
+                if (preparedMask) {
+                    form.append('mask', preparedMask.blob, preparedMask.fileName);
+                }
+                form.append('model', openaihub_GPT_IMAGE_MODEL);
+                form.append('prompt', normalizedPrompt);
+                return form;
+            };
+
+            const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+            const isRetryableStatus = (status) => status === 408 || status === 429 || status >= 500;
+            const isRetryableError = (error) => {
+                const message = String(error?.message || '').toLowerCase();
+                const code = error?.code || error?.cause?.code;
+                return (
+                    code === 'UND_ERR_HEADERS_TIMEOUT'
+                    || code === 'UND_ERR_CONNECT_TIMEOUT'
+                    || code === 'UND_ERR_SOCKET'
+                    || code === 'ETIMEDOUT'
+                    || code === 'ECONNRESET'
+                    || message.includes('fetch failed')
+                    || message.includes('headers timeout')
+                    || message.includes('network')
+                    || message.includes('timeout')
+                );
+            };
+
             console.log('[gpt_image_2_edit] openai-hub payload summary:', {
                 imageCount: payloadImageMeta.length,
                 images: payloadImageMeta,
                 hasMask: Boolean(mask),
                 endpoint: `${OPENAI_HUB_BASE}/v1/images/edits`
             });
-            console.log('Submitting edit request with prompt:', prompt);
-            const response = await fetch(`${OPENAI_HUB_BASE}/v1/images/edits`, {
-                method: 'POST',
-                headers: {
-                    Authorization: `Bearer ${openaihub_api_key}`
-                },
-                body: form
-            });
-            const result = await response.json();
-            if (!response.ok) {
-                const apiMsg = result?.error?.message || result?.message || `HTTP ${response.status}`;
-                throw new Error(`编辑图像失败(${response.status}): ${apiMsg}`);
+
+            for (let attempt = 0; attempt <= maxRetries; attempt++) {
+                try {
+                    console.log('Submitting edit request with prompt:', normalizedPrompt, `(attempt ${attempt + 1}/${maxRetries + 1})`);
+                    const response = await fetch(`${OPENAI_HUB_BASE}/v1/images/edits`, {
+                        method: 'POST',
+                        headers: {
+                            Authorization: `Bearer ${openaihub_api_key}`
+                        },
+                        body: buildEditForm()
+                    });
+
+                    const contentType = (response.headers.get('content-type') || '').toLowerCase();
+                    const rawBody = await response.text();
+                    let result;
+                    try {
+                        result = rawBody ? JSON.parse(rawBody) : {};
+                    } catch {
+                        result = { message: rawBody };
+                    }
+
+                    if (!response.ok) {
+                        const apiMsg = result?.error?.message || result?.message || `HTTP ${response.status}`;
+                        const isLastAttempt = attempt >= maxRetries;
+                        if (!isLastAttempt && isRetryableStatus(response.status)) {
+                            const delay = retryBaseDelayMs * (2 ** attempt);
+                            console.warn(`[gpt_image_2_edit] transient status ${response.status}, retrying in ${delay}ms (${attempt + 1}/${maxRetries})`);
+                            await sleep(delay);
+                            continue;
+                        }
+                        throw new Error(`编辑图像失败(${response.status}): ${apiMsg}`);
+                    }
+
+                    if (!contentType.includes('application/json')) {
+                        console.warn('[gpt_image_2_edit] response is not JSON content-type, parsed as text fallback');
+                    }
+                    return result;
+                } catch (error) {
+                    const isLastAttempt = attempt >= maxRetries;
+                    if (!isLastAttempt && isRetryableError(error)) {
+                        const delay = retryBaseDelayMs * (2 ** attempt);
+                        console.warn(`[gpt_image_2_edit] transient fetch error (${error.message}), retrying in ${delay}ms (${attempt + 1}/${maxRetries})`);
+                        await sleep(delay);
+                        continue;
+                    }
+                    throw error;
+                }
             }
 
-            return result;
+            throw new Error('编辑图像失败: 未知重试状态');
         } catch (error) {
             console.error('Error in gpt_image_2_edit:', error);
             const apiMsg = error?.response?.data?.error?.message || error?.response?.data?.message;

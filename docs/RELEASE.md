@@ -1,5 +1,32 @@
 # RELEASE
 
+## Hotfix
+2026-07-10 / retry-gpt-image-2-edit-on-transient-fetch-timeout
+
+### Summary
+为 `gpt-image-2` 编辑流程增加瞬时故障重试，缓解第三方 `fetch failed`/`UND_ERR_HEADERS_TIMEOUT` 导致的偶发失败。
+
+### What Changed
+- 更新 `utils/ThirdParrtyApi/aitoken.js`
+	- `gpt_image_2_edit` 改为每次尝试重建 `FormData` 请求体。
+	- 新增有限重试与指数退避（默认 2 次重试）。
+	- 仅在瞬时错误场景重试：网络/超时类异常与 HTTP 408/429/5xx。
+	- 保持既有错误包装格式 `编辑图像失败: ...`。
+
+### Impact
+#### API/Behavior
+- 不改变 `POST /gpt-image-2/generate` 的入参和返回结构。
+- 在第三方编辑接口偶发超时场景下，成功率提升，失败更可恢复。
+
+#### Internal Modules
+- 仅影响 `utils/ThirdParrtyApi/aitoken.js`。
+
+### Breaking Changes
+- none
+
+### Rollback Notes
+- 回滚 `utils/ThirdParrtyApi/aitoken.js` 中 `gpt_image_2_edit` 的重试循环与重建请求体逻辑。
+
 ## Enhancement
 2026-07-07 / build-google-friendly-sitemap-for-service-crawling
 

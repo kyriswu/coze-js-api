@@ -1,6 +1,35 @@
 # QA
 
 ## Iteration
+2026-07-10 / retry-gpt-image-2-edit-on-transient-fetch-timeout
+
+## Test Matrix
+| Case ID | Step | Expected | Actual | Status |
+|---|---|---|---|---|
+| QA-01 | `node --check utils/ThirdParrtyApi/aitoken.js` | 编辑接口模块语法正确 | 命令执行无输出 | pass |
+| QA-02 | `node --check index.js` | 主入口语法不受影响 | 命令执行无输出 | pass |
+
+## Command Evidence
+```bash
+cd /root/coze-js-api && node --check utils/ThirdParrtyApi/aitoken.js && node --check index.js
+```
+
+## Manual Checks
+- 已确认 `gpt_image_2_edit` 在每次尝试时重建 `FormData`，避免请求体被消费后无法重发。
+- 已确认仅对瞬时错误启用重试（`UND_ERR_HEADERS_TIMEOUT`、超时/网络类、408/429/5xx）。
+- 已确认最终错误输出仍保持 `编辑图像失败: ...` 风格，兼容现有上层错误处理。
+
+## Defects Found
+| ID | Severity | Description | Status |
+|---|---|---|---|
+| BUG-01 | - | 本轮仅做语法与代码路径核查，未在真实第三方超时场景做端到端回放 | open |
+
+## Final QA Verdict
+- [ ] pass
+- [x] conditional pass
+- [ ] fail
+
+## Iteration
 2026-07-07 / build-google-friendly-sitemap-for-service-crawling
 
 ## Test Matrix

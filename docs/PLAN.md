@@ -1,5 +1,32 @@
 # PLAN
 
+## 2026-07-10 / retry-gpt-image-2-edit-on-transient-fetch-timeout
+
+### Objective
+在 `gpt_image_2_edit` 遇到瞬时网络抖动或 undici 头超时时自动进行有限重试，降低用户侧 `fetch failed` 失败率。
+
+### Context
+线上出现 `UND_ERR_HEADERS_TIMEOUT` 导致 `Error in /gpt-image-2/generate: 编辑图像失败: fetch failed`，当前逻辑在首次失败时直接返回错误。
+
+### Scope
+- `utils/ThirdParrtyApi/aitoken.js`：仅调整编辑图请求发送逻辑。
+- 不改动接口入参、路由路径、响应结构。
+
+### Plan
+1. 将编辑请求改为“每次尝试重建 FormData”，避免请求体复用问题。
+2. 新增有限重试（默认 2 次重试，共最多 3 次尝试）与指数退避。
+3. 仅在可恢复错误上重试：`fetch failed`、`UND_ERR_HEADERS_TIMEOUT`、超时/网络类错误，及 408/429/5xx。
+4. 保持最终错误包装风格不变：`编辑图像失败: ...`。
+5. 执行最小语法校验并记录到 QA/RELEASE/CHANGELOG。
+
+### Risks
+- 重试会增加单次请求最长耗时。
+- 第三方服务持续故障时仍会失败，但能减少瞬时故障误伤。
+
+### Validation
+- `node --check utils/ThirdParrtyApi/aitoken.js`
+- `node --check index.js`
+
 ## 2026-07-07 / build-google-friendly-sitemap-for-service-crawling
 
 ### Objective

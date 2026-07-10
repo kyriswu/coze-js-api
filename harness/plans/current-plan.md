@@ -1,6 +1,31 @@
 # Current Plan
 
 ## Goal
+Harden `gpt_image_2_edit` against transient OpenAI-Hub edit timeouts by adding bounded retry on network/header-timeout failures.
+
+## Context
+`POST /gpt-image-2/generate` can fail when `utils/ThirdParrtyApi/aitoken.js` calls `fetch` for image edits and hits undici header timeout (`UND_ERR_HEADERS_TIMEOUT`), resulting in user-visible `编辑图像失败: fetch failed`.
+
+## Scope / Impact
+- Primary module: `utils/ThirdParrtyApi/aitoken.js`
+- No route contract changes; keep existing response shape and Chinese error style.
+
+## Implementation Steps
+1. Keep current input normalization logic, but split request-body assembly from send logic so retries can rebuild `FormData` safely.
+2. Add small bounded retry loop with exponential backoff for transient fetch failures (`fetch failed`, `UND_ERR_HEADERS_TIMEOUT`, timeout/network classes).
+3. Optionally retry on transient HTTP statuses (408/429/5xx) without changing non-transient error semantics.
+4. Preserve existing final error wrapping (`编辑图像失败: ...`).
+5. Run minimal syntax validation and sync QA/RELEASE/CHANGELOG/PLAN notes.
+
+## Risks
+- Excessive retry may increase latency; keep retry count low and backoff short.
+- Reusing consumed request body across retries would fail; must rebuild `FormData` per attempt.
+
+## Validation
+- `node --check utils/ThirdParrtyApi/aitoken.js`
+- `node --check index.js`
+
+## Goal
 Reduce restart interruption by replacing full compose teardown with app-only rolling recreation in `start.sh`.
 
 ## Context
