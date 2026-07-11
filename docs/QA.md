@@ -1,6 +1,35 @@
 # QA
 
 ## Iteration
+2026-07-11 / simplify-api-doc-template-display-for-xiaohongshu-page
+
+## Test Matrix
+| Case ID | Step | Expected | Actual | Status |
+|---|---|---|---|---|
+| QA-01 | `node --check routes/navigationRoutes.js` | 文档路由模块语法正确 | 命令执行无输出 | pass |
+| QA-02 | 渲染 `views/api-doc-template.ejs` | 模板可渲染且不再显示“上游信息/模板说明”区块 | `api-doc-template.ejs render ok` | pass |
+
+## Command Evidence
+```bash
+cd /root/coze-js-api && node --check routes/navigationRoutes.js
+cd /root/coze-js-api && node --input-type=module -e "import ejs from 'ejs'; await ejs.renderFile('views/api-doc-template.ejs',{doc:{name:'demo',method:'POST',path:'/x',requestParams:[],examples:[],responseFields:[]}}); console.log('api-doc-template.ejs render ok');"
+```
+
+## Manual Checks
+- 已确认模板 Hero 区域不再渲染 `doc.upstream`。
+- 已确认页面底部不再显示“模板说明”文案区块。
+
+## Defects Found
+| ID | Severity | Description | Status |
+|---|---|---|---|
+| BUG-01 | low | 本轮未执行浏览器端视觉手测，仅完成语法与模板渲染验证 | open |
+
+## Final QA Verdict
+- [ ] pass
+- [x] conditional pass
+- [ ] fail
+
+## Iteration
 2026-07-11 / add-reusable-api-doc-page-for-xiaohongshu-search-notes-v2
 
 ## Test Matrix

@@ -1,6 +1,29 @@
 # Current Plan
 
 ## Goal
+Simplify the `/docs/xiaohongshu/search_notes_v2` template presentation by removing upstream source display and footer template note.
+
+## Context
+The user requested a cleaner API doc page that keeps only practical integration information and removes non-essential explanatory metadata.
+
+## Scope / Impact
+- Primary file: `views/api-doc-template.ejs`
+- Docs sync: `docs/PLAN.md`, `docs/QA.md`, `docs/RELEASE.md`, `CHANGELOG.md`
+
+## Implementation Steps
+1. Remove upstream chip rendering from the template hero metadata area.
+2. Remove footer template note block at the bottom of the page.
+3. Run minimal syntax/render validation.
+4. Record validation and release note updates.
+
+## Risks
+- Existing route data may still include `upstream`, but it will no longer be visible in rendered docs.
+
+## Validation
+- `node --check routes/navigationRoutes.js`
+- `node --input-type=module -e "import ejs from 'ejs'; await ejs.renderFile('views/api-doc-template.ejs',{doc:{name:'demo',method:'POST',path:'/x',requestParams:[],examples:[],responseFields:[]}}); console.log('api-doc-template.ejs render ok');"`
+
+## Goal
 Create a reusable API documentation HTML template page and publish one endpoint doc page for `/xiaohongshu/search_notes_v2` with polished call examples and response parameter descriptions.
 
 ## Context

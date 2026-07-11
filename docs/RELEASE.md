@@ -1,5 +1,29 @@
 # RELEASE
 
+## Improvement
+2026-07-11 / simplify-api-doc-template-display-for-xiaohongshu-page
+
+### Summary
+精简接口模板页展示，移除“上游信息”与底部“模板说明”，提升对外阅读聚焦度。
+
+### What Changed
+- 更新 `views/api-doc-template.ejs`
+	- 删除 Hero 区域的“上游”信息 chip。
+	- 删除页面底部模板说明区块。
+
+### Impact
+#### API/Behavior
+- 不影响任何接口行为，仅影响文档页面展示内容。
+
+#### Internal Modules
+- 仅影响 `views/api-doc-template.ejs`。
+
+### Breaking Changes
+- none
+
+### Rollback Notes
+- 回滚 `views/api-doc-template.ejs` 对上游 chip 与 footer 区块的移除改动。
+
 ## Enhancement
 2026-07-11 / add-reusable-api-doc-page-for-xiaohongshu-search-notes-v2
 

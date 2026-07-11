@@ -1,5 +1,29 @@
 # PLAN
 
+## 2026-07-11 / simplify-api-doc-template-display-for-xiaohongshu-page
+
+### Objective
+精简接口模板页展示，移除“上游信息”与页面底部“模板说明”文案。
+
+### Context
+当前小红书文档页用于对外展示，用户要求减少非必要信息，保留核心调用与字段说明。
+
+### Scope
+- `views/api-doc-template.ejs`
+
+### Plan
+1. 删除 Hero 区域中的上游信息 chip 渲染。
+2. 删除页面底部模板说明区块。
+3. 执行最小语法与模板渲染校验。
+4. 同步 QA/RELEASE/CHANGELOG。
+
+### Risks
+- 路由侧 `doc.upstream` 仍可传入，但不会再显示在页面中。
+
+### Validation
+- `node --check routes/navigationRoutes.js`
+- `node --input-type=module -e "import ejs from 'ejs'; await ejs.renderFile('views/api-doc-template.ejs',{doc:{name:'demo',method:'POST',path:'/x',requestParams:[],examples:[],responseFields:[]}}); console.log('api-doc-template.ejs render ok');"`
+
 ## 2026-07-11 / add-reusable-api-doc-page-for-xiaohongshu-search-notes-v2
 
 ### Objective

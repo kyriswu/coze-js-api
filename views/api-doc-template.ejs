@@ -211,9 +211,6 @@
       <div class="meta">
         <span class="chip">方法: <%= doc?.method || 'POST' %></span>
         <span class="chip">路径: <%= doc?.path || '/' %></span>
-        <% if (doc?.upstream) { %>
-          <span class="chip">上游: <%= doc.upstream %></span>
-        <% } %>
         <% if (doc?.cost) { %>
           <span class="chip">扣费: <%= doc.cost %></span>
         <% } %>
@@ -314,9 +311,6 @@
       <% } %>
     </section>
 
-    <div class="footer">
-      模板说明: 本页面由 <code>api-doc-template.ejs</code> 渲染，可复用于其他接口，仅需更换路由中的 <code>doc</code> 数据对象。
-    </div>
   </main>
 </body>
 </html>

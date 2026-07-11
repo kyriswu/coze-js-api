@@ -2,6 +2,11 @@
 
 ## 2026-07-11
 
+### Changed
+- 精简 `views/api-doc-template.ejs` 展示：移除“上游信息”chip 与底部“模板说明”区块。
+
+## 2026-07-11
+
 ### Added
 - 新增可复用接口文档模板页面 `views/api-doc-template.ejs`。
 - 新增小红书搜索文档实例页 `views/api-doc-xiaohongshu-search-notes-v2.ejs`。
