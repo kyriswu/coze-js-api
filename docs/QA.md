@@ -1,6 +1,74 @@
 # QA
 
 ## Iteration
+2026-07-11 / add-reusable-api-doc-page-for-xiaohongshu-search-notes-v2
+
+## Test Matrix
+| Case ID | Step | Expected | Actual | Status |
+|---|---|---|---|---|
+| QA-01 | `node --check routes/navigationRoutes.js` | 新增文档路由后语法正确 | 命令执行无输出 | pass |
+| QA-02 | 渲染 `views/api-doc-template.ejs` | 通用模板可渲染 | `api-doc-template.ejs render ok` | pass |
+| QA-03 | 渲染 `views/api-doc-xiaohongshu-search-notes-v2.ejs` | 接口实例页可渲染 | `api-doc-xiaohongshu-search-notes-v2.ejs render ok` | pass |
+
+## Command Evidence
+```bash
+cd /root/coze-js-api && node --check routes/navigationRoutes.js
+cd /root/coze-js-api && node --input-type=module -e "import ejs from 'ejs'; await ejs.renderFile('views/api-doc-template.ejs',{doc:{name:'demo',method:'POST',path:'/x',requestParams:[],examples:[],responseFields:[]}}); console.log('api-doc-template.ejs render ok');"
+cd /root/coze-js-api && node --input-type=module -e "import ejs from 'ejs'; await ejs.renderFile('views/api-doc-xiaohongshu-search-notes-v2.ejs',{doc:{name:'demo',method:'POST',path:'/x',requestParams:[],examples:[],responseFields:[]}}); console.log('api-doc-xiaohongshu-search-notes-v2.ejs render ok');"
+```
+
+## Manual Checks
+- 已确认新增独立文档页 `GET /docs/xiaohongshu/search_notes_v2`。
+- 已确认页面包含调用示例、请求参数、返回参数、返回示例与翻页说明。
+- 已确认模板说明可复用于后续其他接口，仅需替换路由中的 `doc` 数据对象。
+
+## Defects Found
+| ID | Severity | Description | Status |
+|---|---|---|---|
+| BUG-01 | low | 本轮未执行浏览器可视化手测，仅完成语法与模板渲染验证 | open |
+
+## Final QA Verdict
+- [ ] pass
+- [x] conditional pass
+- [ ] fail
+
+## Iteration
+2026-07-11 / migrate-xiaohongshu-search-notes-v2-upstream
+
+## Test Matrix
+| Case ID | Step | Expected | Actual | Status |
+|---|---|---|---|---|
+| QA-01 | `node --check utils/tikhub.io.js` | 迁移后语法正确 | 命令执行无输出 | pass |
+| QA-02 | 代码核查参数映射 | 旧参数可兼容映射到新上游参数 | 已实现 `sort/type/publish_time` 到 `sort_type/note_type/time_filter` 的兼容映射 | pass |
+| QA-03 | 上游真实调用结构核查 | 确认帖子与分页关键字段路径 | 已确认帖子在 `data.data.items[*].note`，分页在 `data.search_id/search_session_id/page/next_page` | pass |
+| QA-04 | 代码核查扣费与返回规整 | 扣费 2 分，返回聚焦帖子与分页 | 已改为 `verifyKey(..., 2, ...)`，返回 `data.posts + data.pagination` | pass |
+| QA-05 | 图片字段映射核查 | 每篇帖子 `images` 不漏图 | 已确认上游图片主要字段为 `url/url_size_large`，修复后 `empty_posts=0` | pass |
+
+## Command Evidence
+```bash
+cd /root/coze-js-api && node --check utils/tikhub.io.js
+cd /root/coze-js-api && TOKEN=$(grep -m1 '^const tikhub_api_token' utils/tikhub.io.js | sed -E 's/.*"([^"]+)".*/\1/') && TOKEN="$TOKEN" node --input-type=module -e "import axios from 'axios'; const r=await axios.get('https://api.tikhub.io/api/v1/xiaohongshu/app_v2/search_notes',{params:{keyword:'美食推荐',page:1,sort_type:'general',note_type:'不限',time_filter:'不限',source:'explore_feed',ai_mode:0},headers:{Authorization:'Bearer '+process.env.TOKEN}}); console.log(JSON.stringify({code:r.data?.code,data_keys:Object.keys(r.data?.data||{})},null,2));"
+cd /root/coze-js-api && TOKEN=$(grep -m1 '^const tikhub_api_token' utils/tikhub.io.js | sed -E 's/.*"([^"]+)".*/\1/') && TOKEN="$TOKEN" node --input-type=module -e "import axios from 'axios'; const r=await axios.get('https://api.tikhub.io/api/v1/xiaohongshu/app_v2/search_notes',{params:{keyword:'美食推荐',page:1,sort_type:'general',note_type:'不限',time_filter:'不限',source:'explore_feed',ai_mode:0},headers:{Authorization:'Bearer '+process.env.TOKEN}}); const d=r.data?.data||{}; const b=d?.data||d||{}; const items=Array.isArray(b?.items)?b.items:[]; const posts=items.map(i=>i?.note||i).map(n=>({images:(Array.isArray(n?.images_list)?n.images_list:[]).map(img=>img?.url||img?.url_size_large||img?.url_default||img?.url_pre||img?.original||'').filter(Boolean)})); console.log(JSON.stringify({post_count:posts.length,empty_posts:posts.filter(p=>p.images.length===0).length},null,2));"
+```
+
+## Manual Checks
+- 已确认上游地址切换为 `https://api.tikhub.io/api/v1/xiaohongshu/app_v2/search_notes`。
+- 已确认兼容接收 `sort_type/note_type/time_filter` 以及历史字段 `sort/type/publish_time`。
+- 已确认扣费从 1 分调整为 2 分。
+- 已确认返回从原始列表规整为 `posts`（帖子核心信息）和 `pagination`（翻页关键参数）。
+- 已确认图片数组映射补齐 `url/url_size_large`，解决原先 `images` 漏图问题。
+
+## Defects Found
+| ID | Severity | Description | Status |
+|---|---|---|---|
+| BUG-01 | low | 本轮未做真实上游联调，仅完成语法与映射逻辑核查 | open |
+
+## Final QA Verdict
+- [ ] pass
+- [x] conditional pass
+- [ ] fail
+
+## Iteration
 2026-07-10 / enhance-network-dashboard-visual-and-auto-refresh
 
 ## Test Matrix

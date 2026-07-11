@@ -199,6 +199,15 @@ const serviceCards = [
         price: '按量'
     },
     {
+        title: '小红书搜索文档',
+        category: 'tool',
+        icon: 'DC',
+        description: '查看 /xiaohongshu/search_notes_v2 的调用示例与返回参数说明。',
+        endpoint: 'GET /docs/xiaohongshu/search_notes_v2',
+        badge: '文档',
+        price: '工具'
+    },
+    {
         title: '微信公众号数据',
         category: 'platform',
         icon: 'WX',
@@ -420,6 +429,134 @@ router.get('/', (req, res) => {
             description: 'DevTool 插件服务中心，集中展示 AI 创作、网页搜索解析、视频音频处理、平台数据、文件处理、知识查询等插件 API 服务。',
             keywords: 'DevTool,插件服务,API,AI图片生成,视频转文字,网页解析,抖音数据,小红书数据,B站数据',
             url: `${tool.getBaseUrl(req)}${req.originalUrl}`
+        }
+    });
+});
+
+router.get('/docs/xiaohongshu/search_notes_v2', (req, res) => {
+    const pageUrl = `${tool.getBaseUrl(req)}${req.originalUrl}`;
+
+    const doc = {
+        title: '小红书搜索笔记 API 文档',
+        name: '/xiaohongshu/search_notes_v2',
+        summary: '小红书关键词搜索接口，返回规整后的帖子信息与分页信息，适合直接接入业务端渲染列表。',
+        method: 'POST',
+        path: '/xiaohongshu/search_notes_v2',
+        upstream: '/api/v1/xiaohongshu/app_v2/search_notes',
+        cost: '2 点/次（传 api_key 时）',
+        description: '本接口对上游返回做了规整，重点保留帖子核心字段与翻页参数。支持历史参数与新参数混传，便于平滑升级。',
+        requestParams: [
+            { name: 'keyword', type: 'string', required: true, desc: '搜索关键词', example: '美食推荐' },
+            { name: 'page', type: 'number', required: false, desc: '页码，默认 1', example: '1' },
+            { name: 'sort / sort_type', type: 'string', required: false, desc: '排序。可传中文或英文枚举', example: '综合排序 或 general' },
+            { name: 'type / note_type', type: 'string', required: false, desc: '笔记类型。兼容 _0/_1/_2/_3 与中文', example: '综合笔记 或 不限' },
+            { name: 'publish_time / time_filter', type: 'string', required: false, desc: '发布时间筛选。兼容 0/1/7/180 与中文', example: '不限 或 7' },
+            { name: 'search_id', type: 'string', required: false, desc: '翻页搜索标识，下一页可透传', example: 'a296ca55360c4681' },
+            { name: 'search_session_id', type: 'string', required: false, desc: '翻页会话标识，下一页可透传', example: 'db2184ed4fbf48aa95a5b787a2f8fafe' },
+            { name: 'source', type: 'string', required: false, desc: '来源，默认 explore_feed', example: 'explore_feed' },
+            { name: 'ai_mode', type: 'number', required: false, desc: 'AI 模式，默认 0', example: '0' },
+            { name: 'api_key', type: 'string', required: false, desc: '可选，传入后按 2 点扣费并返回剩余积分文案', example: 'uk_live_xxx' },
+        ],
+        examples: [
+            {
+                title: '基础搜索',
+                code: `curl -X POST "${tool.getBaseUrl(req)}/xiaohongshu/search_notes_v2" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "keyword": "美食推荐",
+    "page": 1
+  }'`,
+            },
+            {
+                title: '带筛选与翻页参数',
+                code: `curl -X POST "${tool.getBaseUrl(req)}/xiaohongshu/search_notes_v2" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "keyword": "美食推荐",
+    "page": 2,
+    "sort_type": "general",
+    "note_type": "不限",
+    "time_filter": "不限",
+    "search_id": "a296ca55360c4681",
+    "search_session_id": "db2184ed4fbf48aa95a5b787a2f8fafe",
+    "api_key": "uk_live_xxx"
+  }'`,
+            },
+        ],
+        responseFields: [
+            { path: 'code', type: 'number', desc: '业务状态码，200 表示成功' },
+            { path: 'msg', type: 'string', desc: '返回消息，传 api_key 时包含剩余积分提示' },
+            { path: 'data.posts[]', type: 'array', desc: '帖子列表（核心业务字段）' },
+            { path: 'data.posts[].note_id', type: 'string', desc: '帖子 ID' },
+            { path: 'data.posts[].title', type: 'string', desc: '帖子标题' },
+            { path: 'data.posts[].desc', type: 'string', desc: '帖子正文摘要' },
+            { path: 'data.posts[].type', type: 'string', desc: '帖子类型' },
+            { path: 'data.posts[].xsec_token', type: 'string', desc: '帖子访问 token' },
+            { path: 'data.posts[].user', type: 'object', desc: '作者信息（user_id / nickname / avatar）' },
+            { path: 'data.posts[].interact', type: 'object', desc: '互动信息（点赞/收藏/评论/分享）' },
+            { path: 'data.posts[].cover', type: 'string', desc: '封面图 URL' },
+            { path: 'data.posts[].images[]', type: 'array', desc: '图片 URL 数组，已补齐 url/url_size_large 等字段映射' },
+            { path: 'data.pagination', type: 'object', desc: '分页信息' },
+            { path: 'data.pagination.search_id', type: 'string', desc: '下一页搜索标识' },
+            { path: 'data.pagination.search_session_id', type: 'string', desc: '下一页会话标识' },
+            { path: 'data.pagination.page', type: 'number', desc: '当前页码' },
+            { path: 'data.pagination.next_page', type: 'number', desc: '下一页页码（上游返回）' },
+            { path: 'data.pagination.has_more', type: 'boolean', desc: '是否还有下一页' },
+            { path: 'data.pagination.item_count', type: 'number', desc: '当前返回帖子数量' },
+        ],
+        responseSample: JSON.stringify({
+            code: 200,
+            msg: 'success',
+            data: {
+                posts: [
+                    {
+                        note_id: '6a2ff39b0000000021009dc2',
+                        title: '哥斯达黎加圣何塞美食全攻略',
+                        desc: '美食路线和酒店建议整理',
+                        type: 'normal',
+                        xsec_token: 'xsec-xxxx',
+                        timestamp: 1783769000,
+                        update_time: 1783769050,
+                        user: {
+                            user_id: '5fxxxx',
+                            nickname: '旅行吃货',
+                            avatar: 'https://xxx/avatar.jpg'
+                        },
+                        interact: {
+                            liked_count: 123,
+                            collected_count: 45,
+                            comments_count: 18,
+                            shared_count: 9
+                        },
+                        cover: 'https://xxx/cover.jpg',
+                        images: ['https://xxx/1.jpg', 'https://xxx/2.jpg']
+                    }
+                ],
+                pagination: {
+                    search_id: 'a296ca55360c4681',
+                    search_session_id: 'db2184ed4fbf48aa95a5b787a2f8fafe',
+                    page: 1,
+                    next_page: 2,
+                    has_more: true,
+                    item_count: 20
+                }
+            }
+        }, null, 2),
+        paginationHints: {
+            search_id: '用于下一页请求透传',
+            search_session_id: '用于下一页请求透传',
+            next_page: '下一页页码（若为 0 代表没有下一页）',
+            has_more: 'true 表示可继续请求下一页',
+        }
+    };
+
+    res.render('api-doc-xiaohongshu-search-notes-v2', {
+        doc,
+        seo: {
+            title: '小红书搜索笔记接口文档 /xiaohongshu/search_notes_v2',
+            description: '小红书搜索笔记接口调用示例与返回参数说明，包含 posts 与 pagination 字段解释。',
+            keywords: 'xiaohongshu,search_notes_v2,API文档,curl,分页参数',
+            url: pageUrl,
         }
     });
 });

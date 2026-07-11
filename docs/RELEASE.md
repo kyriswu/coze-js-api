@@ -1,6 +1,64 @@
 # RELEASE
 
 ## Enhancement
+2026-07-11 / add-reusable-api-doc-page-for-xiaohongshu-search-notes-v2
+
+### Summary
+新增可复用的接口文档模板页，并落地 `/xiaohongshu/search_notes_v2` 的独立文档页面，集中展示调用示例与返回参数。
+
+### What Changed
+- 新增 `views/api-doc-template.ejs`
+	- 提供统一文档结构：接口概览、请求参数表、curl 示例、返回参数、返回示例、翻页说明。
+- 新增 `views/api-doc-xiaohongshu-search-notes-v2.ejs`
+	- 作为模板实例页，当前只覆盖一个接口。
+- 更新 `routes/navigationRoutes.js`
+	- 新增路由：`GET /docs/xiaohongshu/search_notes_v2`。
+	- 首页服务卡片新增“`GET /docs/xiaohongshu/search_notes_v2`”文档入口。
+
+### Impact
+#### API/Behavior
+- 不影响业务接口行为，仅新增文档展示页面路由。
+
+#### Internal Modules
+- 影响 `routes/navigationRoutes.js`。
+- 新增 `views/api-doc-template.ejs` 和 `views/api-doc-xiaohongshu-search-notes-v2.ejs`。
+
+### Breaking Changes
+- none
+
+### Rollback Notes
+- 删除文档路由与首页文档入口卡片。
+- 删除两个新增视图文件。
+
+## Enhancement
+2026-07-11 / migrate-xiaohongshu-search-notes-v2-upstream
+
+### Summary
+小红书搜索接口上游切换至 TikHub App V2，兼容历史调用参数并保持现有返回结构不变。
+
+### What Changed
+- 更新 `utils/tikhub.io.js`
+	- `th_xiaohongshu.search_notes_v2` 上游地址由 `/app/search_notes_v2` 调整为 `/app_v2/search_notes`。
+	- 增加兼容映射：`sort/type/publish_time` 与 `sort_type/note_type/time_filter` 双写法均可使用。
+	- 新增透传参数支持：`search_id`、`search_session_id`、`source`、`ai_mode`。
+	- `api_key` 场景扣费由 1 分调整为 2 分。
+	- 响应数据规整为 `data.posts` 与 `data.pagination`，聚焦帖子与翻页关键信息，移除无用透传字段。
+
+### Impact
+#### API/Behavior
+- 不变更本地路由 `POST /xiaohongshu/search_notes_v2`。
+- 不变更外层响应结构：`{ code, msg, data }`。
+
+#### Internal Modules
+- 仅影响 `utils/tikhub.io.js`。
+
+### Breaking Changes
+- none
+
+### Rollback Notes
+- 回滚 `utils/tikhub.io.js` 中 `search_notes_v2` 的上游 URL 与参数映射改动。
+
+## Enhancement
 2026-07-10 / enhance-network-dashboard-visual-and-auto-refresh
 
 ### Summary

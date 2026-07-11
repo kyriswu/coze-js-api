@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= doc?.title || 'API 文档' %></title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --bg-soft: #111936;
+      --panel: #121b3f;
+      --panel-2: #0f1735;
+      --text: #e7ecff;
+      --muted: #9aa8d8;
+      --line: #253364;
+      --accent: #58c4ff;
+      --good: #3ddc97;
+      --warn: #ffcc66;
+      --code: #0a122a;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(1200px 600px at 0% -20%, #1b2b67 0%, transparent 55%),
+        radial-gradient(900px 500px at 100% 0%, #20306f 0%, transparent 45%),
+        var(--bg);
+      line-height: 1.6;
+    }
+
+    .page {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 36px 20px 64px;
+    }
+
+    .hero {
+      background: linear-gradient(140deg, rgba(88, 196, 255, 0.14), rgba(61, 220, 151, 0.08));
+      border: 1px solid rgba(88, 196, 255, 0.25);
+      border-radius: 18px;
+      padding: 22px 22px 18px;
+      margin-bottom: 18px;
+    }
+
+    .hero h1 {
+      margin: 0;
+      font-size: 32px;
+      line-height: 1.2;
+      letter-spacing: 0.2px;
+    }
+
+    .hero p {
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .chip {
+      border: 1px solid var(--line);
+      background: rgba(17, 25, 54, 0.72);
+      border-radius: 999px;
+      padding: 5px 10px;
+      font-size: 12px;
+      color: #c8d4ff;
+      white-space: nowrap;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, var(--panel), var(--panel-2));
+      border-radius: 14px;
+      padding: 16px;
+    }
+
+    .card h2 {
+      margin: 0 0 10px;
+      font-size: 18px;
+    }
+
+    .card h3 {
+      margin: 14px 0 8px;
+      font-size: 14px;
+      color: #c9d4ff;
+    }
+
+    .desc {
+      margin: 0;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+      font-size: 13px;
+    }
+
+    th, td {
+      border-bottom: 1px solid var(--line);
+      padding: 9px 8px;
+      vertical-align: top;
+      text-align: left;
+    }
+
+    th {
+      color: #c9d4ff;
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .req {
+      color: #ffe6a8;
+    }
+
+    pre {
+      margin: 8px 0 0;
+      background: var(--code);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 12px;
+      overflow-x: auto;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    code {
+      color: #dce6ff;
+      font-family: "JetBrains Mono", "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
+    }
+
+    .kpi {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .kpi .item {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.02);
+      padding: 10px;
+      min-height: 74px;
+    }
+
+    .kpi .label {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .kpi .value {
+      margin-top: 6px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--good);
+      word-break: break-all;
+    }
+
+    .footer {
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    @media (max-width: 900px) {
+      .kpi {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 640px) {
+      .hero h1 {
+        font-size: 26px;
+      }
+
+      .card {
+        padding: 14px;
+      }
+
+      .kpi {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="hero">
+      <h1><%= doc?.name || 'API 文档' %></h1>
+      <p><%= doc?.summary || '' %></p>
+      <div class="meta">
+        <span class="chip">方法: <%= doc?.method || 'POST' %></span>
+        <span class="chip">路径: <%= doc?.path || '/' %></span>
+        <% if (doc?.upstream) { %>
+          <span class="chip">上游: <%= doc.upstream %></span>
+        <% } %>
+        <% if (doc?.cost) { %>
+          <span class="chip">扣费: <%= doc.cost %></span>
+        <% } %>
+      </div>
+    </section>
+
+    <section class="layout">
+      <article class="card">
+        <h2>接口说明</h2>
+        <p class="desc"><%= doc?.description || '' %></p>
+      </article>
+
+      <article class="card">
+        <h2>请求参数</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>字段</th>
+              <th>类型</th>
+              <th>必填</th>
+              <th>说明</th>
+              <th>示例</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% (doc?.requestParams || []).forEach((item) => { %>
+              <tr>
+                <td><code><%= item.name %></code></td>
+                <td><%= item.type %></td>
+                <td class="req"><%= item.required ? '是' : '否' %></td>
+                <td><%= item.desc %></td>
+                <td><code><%= item.example %></code></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </article>
+
+      <article class="card">
+        <h2>调用示例</h2>
+        <% (doc?.examples || []).forEach((example) => { %>
+          <h3><%= example.title %></h3>
+          <pre><code><%= example.code %></code></pre>
+        <% }) %>
+      </article>
+
+      <article class="card">
+        <h2>返回参数</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>字段路径</th>
+              <th>类型</th>
+              <th>说明</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% (doc?.responseFields || []).forEach((item) => { %>
+              <tr>
+                <td><code><%= item.path %></code></td>
+                <td><%= item.type %></td>
+                <td><%= item.desc %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </article>
+
+      <% if (doc?.responseSample) { %>
+        <article class="card">
+          <h2>返回示例</h2>
+          <pre><code><%= doc.responseSample %></code></pre>
+        </article>
+      <% } %>
+
+      <% if (doc?.paginationHints) { %>
+        <article class="card">
+          <h2>翻页说明</h2>
+          <div class="kpi">
+            <div class="item">
+              <div class="label">search_id</div>
+              <div class="value"><%= doc.paginationHints.search_id %></div>
+            </div>
+            <div class="item">
+              <div class="label">search_session_id</div>
+              <div class="value"><%= doc.paginationHints.search_session_id %></div>
+            </div>
+            <div class="item">
+              <div class="label">next_page</div>
+              <div class="value"><%= doc.paginationHints.next_page %></div>
+            </div>
+            <div class="item">
+              <div class="label">has_more</div>
+              <div class="value"><%= doc.paginationHints.has_more %></div>
+            </div>
+          </div>
+        </article>
+      <% } %>
+    </section>
+
+    <div class="footer">
+      模板说明: 本页面由 <code>api-doc-template.ejs</code> 渲染，可复用于其他接口，仅需更换路由中的 <code>doc</code> 数据对象。
+    </div>
+  </main>
+</body>
+</html>

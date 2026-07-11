@@ -1,6 +1,63 @@
 # Current Plan
 
 ## Goal
+Create a reusable API documentation HTML template page and publish one endpoint doc page for `/xiaohongshu/search_notes_v2` with polished call examples and response parameter descriptions.
+
+## Context
+User requested a standalone HTML page for this endpoint and asked to make it templated for future endpoint docs reuse.
+
+## Scope / Impact
+- Primary module: `routes/navigationRoutes.js`
+- New view templates: `views/api-doc-template.ejs`, `views/api-doc-xiaohongshu-search-notes-v2.ejs`
+- Optional discovery entry in home service cards for doc page access.
+- Docs sync: `docs/PLAN.md`, `docs/QA.md`, `docs/RELEASE.md`, `CHANGELOG.md`
+
+## Implementation Steps
+1. Add a generic EJS API-doc template with reusable sections (overview, endpoint, params, request examples, response schema).
+2. Add one dedicated page wrapper for `/xiaohongshu/search_notes_v2` using the template and concrete data.
+3. Wire a route in `routes/navigationRoutes.js` for this doc page.
+4. Keep page content focused on current implemented response (`data.posts` + `data.pagination`) and practical curl examples.
+5. Run minimal syntax/render validation and sync docs.
+
+## Risks
+- Doc examples may diverge from implementation if endpoint fields change later.
+- Too much hardcoded text could reduce reuse value; keep structure templated.
+
+## Validation
+- `node --check routes/navigationRoutes.js`
+- `node --input-type=module -e "import ejs from 'ejs'; await ejs.renderFile('views/api-doc-template.ejs',{doc:{}}); console.log('api-doc-template.ejs render ok');"`
+- `node --input-type=module -e "import ejs from 'ejs'; await ejs.renderFile('views/api-doc-xiaohongshu-search-notes-v2.ejs',{seo:{}}); console.log('api-doc-xiaohongshu-search-notes-v2.ejs render ok');"`
+
+## Goal
+Migrate `/xiaohongshu/search_notes_v2` to TikHub App V2 search endpoint while preserving existing API response contract and caller-visible field behavior.
+
+## Context
+Current implementation calls `https://api.tikhub.io/api/v1/xiaohongshu/app/search_notes_v2` using legacy query params (`sort`, `type`, `publish_time`). Upstream now provides `https://api.tikhub.io/api/v1/xiaohongshu/app_v2/search_notes` with updated params (`sort_type`, `note_type`, `time_filter`, pagination context fields).
+
+## Scope / Impact
+- Primary module: `utils/tikhub.io.js` (`th_xiaohongshu.search_notes_v2`)
+- Backward compatibility: keep route path and response envelope unchanged (`{ code, msg, data }`)
+- Docs sync: `docs/PLAN.md`, `docs/QA.md`, `docs/RELEASE.md`, `CHANGELOG.md`
+
+## Implementation Steps
+1. Switch upstream URL from `/app/search_notes_v2` to `/app_v2/search_notes`.
+2. Add compatibility mapping from legacy request fields to new upstream fields:
+	- `sort`/`sort_type` -> `sort_type`
+	- `type`/`note_type` -> `note_type`
+	- `publish_time`/`time_filter` -> `time_filter`
+3. Pass-through pagination/context fields (`search_id`, `search_session_id`, `source`, `ai_mode`) when provided.
+4. Increase API key credit deduction from 1 to 2 for this endpoint.
+5. Keep response envelope stable while normalizing payload to `data.posts` + `data.pagination`.
+6. Run minimal syntax validation and sync QA/release/changelog notes.
+
+## Risks
+- Upstream V2 response shape may differ (list key name differences); normalization must preserve current `data` field expectation.
+- Legacy caller values may mix Chinese labels and new enum values; mapping must be tolerant.
+
+## Validation
+- `node --check utils/tikhub.io.js`
+
+## Goal
 Implement a dedicated single-page network log analytics dashboard backed by Redis ingestion on write-path.
 
 ## Context

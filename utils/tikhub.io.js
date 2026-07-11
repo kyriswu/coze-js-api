@@ -424,38 +424,169 @@ export const th_xiaohongshu = {
      * 关键词搜索笔记
      */
     search_notes_v2: async function (req, res) {
-        const { keyword, api_key, page = 1, sort: rawSort, publish_time: rawTime, type: rawType } = req.body;
+        const {
+            keyword,
+            api_key,
+            page = 1,
+            sort: rawSort,
+            sort_type: rawSortType,
+            publish_time: rawTime,
+            time_filter: rawTimeFilter,
+            type: rawType,
+            note_type: rawNoteType,
+            search_id = "",
+            search_session_id = "",
+            source = "explore_feed",
+            ai_mode = 0
+        } = req.body;
 
         if (!keyword) return res.send({ code: -1, msg: "keyword is required" });
 
-        // 统一映射逻辑
-        const sortMap = { "综合排序": "general", "最热排序": "popularity_descending", "最新排序": "time_descending", "最多评论": "comment_descending", "最多收藏": "collect_descending" };
-        const typeMap = { "综合笔记": "_0", "图文笔记": "_2", "视频笔记": "_1", "直播": "_3" };
+        const allowedSortSet = new Set([
+            "general",
+            "time_descending",
+            "popularity_descending",
+            "comment_descending",
+            "collect_descending",
+            "english_preferred"
+        ]);
+        const sortMap = {
+            "综合排序": "general",
+            "最热排序": "popularity_descending",
+            "最新排序": "time_descending",
+            "最多评论": "comment_descending",
+            "最多收藏": "collect_descending"
+        };
 
-        const sort = sortMap[rawSort] || "general";
-        const type = typeMap[rawType] || "_0";
-        const publish_time = rawTime === "不限" ? "" : (rawTime || "");
+        const noteTypeMap = {
+            "综合笔记": "不限",
+            "图文笔记": "普通笔记",
+            "视频笔记": "视频笔记",
+            "直播": "直播笔记",
+            "_0": "不限",
+            "_1": "视频笔记",
+            "_2": "普通笔记",
+            "_3": "直播笔记",
+            "不限": "不限",
+            "普通笔记": "普通笔记",
+            "直播笔记": "直播笔记"
+        };
+
+        const timeFilterSet = new Set(["不限", "一天内", "一周内", "半年内"]);
+        const timeFilterMap = {
+            "": "不限",
+            "0": "不限",
+            "1": "一天内",
+            "7": "一周内",
+            "180": "半年内"
+        };
+        const sortCandidate = rawSortType || rawSort;
+        const sort_type = allowedSortSet.has(sortCandidate) ? sortCandidate : (sortMap[sortCandidate] || "general");
+
+        const noteTypeCandidate = rawNoteType || rawType;
+        const note_type = noteTypeMap[noteTypeCandidate] || "不限";
+
+        const timeCandidate = (typeof rawTimeFilter !== 'undefined')
+            ? rawTimeFilter
+            : (rawTime === "" ? "不限" : (rawTime || "不限"));
+        const mappedTime = timeFilterMap[String(timeCandidate)] || timeCandidate;
+        const time_filter = timeFilterSet.has(mappedTime) ? mappedTime : "不限";
+
+        const queryParams = {
+            keyword,
+            page,
+            sort_type,
+            note_type,
+            time_filter,
+            source,
+            ai_mode
+        };
+
+        if (search_id) queryParams.search_id = search_id;
+        if (search_session_id) queryParams.search_session_id = search_session_id;
 
         try {
             const isValid = await commonUtils.valid_redis_key("xhs_search", unkey_api_id, api_key, req, res);
             if (!isValid) return;
 
-            const url = `https://api.tikhub.io/api/v1/xiaohongshu/app/search_notes_v2?keyword=${encodeURIComponent(keyword)}&page=${page}&sort=${sort}&type=${type}&publish_time=${publish_time}`;
-            const response = await axios.get(url, {
+            const response = await axios.get("https://api.tikhub.io/api/v1/xiaohongshu/app_v2/search_notes", {
+                params: queryParams,
                 headers: { "Authorization": `Bearer ${tikhub_api_token}` }
             });
 
-            if (response.data.code !== 200) return res.send({ code: -1, msg: "搜索失败" });
+            if (response.data?.code !== 200) return res.send({ code: -1, msg: "搜索失败" });
 
-            const notes = response.data.data || [];
+            const upstreamData = response.data?.data || {};
+            const dataBucket = upstreamData?.data || upstreamData || {};
+            const rawItems = Array.isArray(dataBucket?.items)
+                ? dataBucket.items
+                : (Array.isArray(upstreamData?.items)
+                    ? upstreamData.items
+                    : []);
+
+            const posts = rawItems
+                .map(item => item?.note || item)
+                .filter(Boolean)
+                .map(note => {
+                    const user = note?.user || {};
+                    const imageList = Array.isArray(note?.images_list) ? note.images_list : [];
+                    const getImageUrl = (img) => (
+                        img?.url ||
+                        img?.url_size_large ||
+                        img?.url_default ||
+                        img?.url_pre ||
+                        img?.original ||
+                        ""
+                    );
+                    const cover = imageList[Number(note?.cover_image_index) || 0] || imageList[0] || {};
+
+                    return {
+                        note_id: note?.id || "",
+                        title: note?.title || "",
+                        desc: note?.desc || "",
+                        type: note?.type || "",
+                        xsec_token: note?.xsec_token || "",
+                        timestamp: note?.timestamp || 0,
+                        update_time: note?.update_time || 0,
+                        user: {
+                            user_id: user?.user_id || user?.id || "",
+                            nickname: user?.nickname || "",
+                            avatar: user?.avatar || ""
+                        },
+                        interact: {
+                            liked_count: Number(note?.liked_count || note?.nice_count || 0),
+                            collected_count: Number(note?.collected_count || 0),
+                            comments_count: Number(note?.comments_count || 0),
+                            shared_count: Number(note?.shared_count || 0)
+                        },
+                        cover: getImageUrl(cover),
+                        images: imageList
+                            .map(getImageUrl)
+                            .filter(Boolean)
+                    };
+                });
+
+            const pagination = {
+                search_id: upstreamData?.search_id || "",
+                search_session_id: upstreamData?.search_session_id || "",
+                page: Number(upstreamData?.page || page || 1),
+                next_page: Number(upstreamData?.next_page || 0),
+                has_more: Number(upstreamData?.next_page || 0) > Number(upstreamData?.page || page || 1),
+                item_count: posts.length
+            };
+
+            const data = {
+                posts,
+                pagination
+            };
 
             let msg = "success";
             if (api_key) {
-                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1, { platform: 'xiaohongshu', action: 'search_notes' });
+                const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 2, { platform: 'xiaohongshu', action: 'search_notes' });
                 msg = `API Key 剩余积分：${remaining}`;
             }
 
-            return res.send({ code: 200, msg, data: notes });
+            return res.send({ code: 200, msg, data });
         } catch (error) {
             return res.send({ code: -1, msg: commonUtils.MESSAGE.SERVER_ERROR });
         }

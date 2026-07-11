@@ -1,5 +1,28 @@
 # CHANGELOG
 
+## 2026-07-11
+
+### Added
+- 新增可复用接口文档模板页面 `views/api-doc-template.ejs`。
+- 新增小红书搜索文档实例页 `views/api-doc-xiaohongshu-search-notes-v2.ejs`。
+- 新增文档路由 `GET /docs/xiaohongshu/search_notes_v2`。
+
+### Changed
+- 首页服务卡片新增“小红书搜索文档”入口（`GET /docs/xiaohongshu/search_notes_v2`）。
+
+## 2026-07-11
+
+### Changed
+- `th_xiaohongshu.search_notes_v2` 上游接口由 `xiaohongshu/app/search_notes_v2` 切换为 `xiaohongshu/app_v2/search_notes`。
+- `search_notes_v2` 增加参数兼容映射，支持旧字段（`sort/type/publish_time`）与新字段（`sort_type/note_type/time_filter`）并存。
+- `search_notes_v2` 新增透传分页上下文参数：`search_id`、`search_session_id`，并支持 `source`、`ai_mode`。
+- `search_notes_v2` 的 `api_key` 扣费从 1 分调整为 2 分。
+- `search_notes_v2` 返回结构规整为 `data.posts`（帖子核心字段）与 `data.pagination`（翻页关键字段）。
+- 修复 `search_notes_v2` 的图片映射：补齐 `images_list` 的 `url/url_size_large` 提取，避免 `posts[].images` 漏图。
+
+### Notes
+- 本地路由路径与返回外层结构保持不变，仍为 `POST /xiaohongshu/search_notes_v2` + `{ code, msg, data }`。
+
 ## 2026-07-10
 
 ### Added

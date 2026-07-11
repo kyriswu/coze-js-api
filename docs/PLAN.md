@@ -1,5 +1,63 @@
 # PLAN
 
+## 2026-07-11 / add-reusable-api-doc-page-for-xiaohongshu-search-notes-v2
+
+### Objective
+新增一个可复用的接口文档 HTML 模板页，并先落地 `/xiaohongshu/search_notes_v2` 的调用示例和返回参数说明页面。
+
+### Context
+需要把接口使用说明以独立页面展示，且页面结构应可复用于后续其他接口文档。
+
+### Scope
+- `views/api-doc-template.ejs`：通用文档模板。
+- `views/api-doc-xiaohongshu-search-notes-v2.ejs`：当前接口实例页。
+- `routes/navigationRoutes.js`：新增文档路由与首页入口卡片。
+
+### Plan
+1. 设计可复用的文档模板结构（概览、参数表、curl、返回参数、返回示例、翻页说明）。
+2. 为 `/xiaohongshu/search_notes_v2` 提供实例化文档数据并渲染独立页面。
+3. 在路由中新增 `GET /docs/xiaohongshu/search_notes_v2`。
+4. 在首页服务卡片新增该文档入口，便于发现。
+5. 执行语法与模板渲染校验并同步 QA/RELEASE/CHANGELOG。
+
+### Risks
+- 若接口字段变更，文档示例与真实响应可能出现偏差，需要定期同步。
+
+### Validation
+- `node --check routes/navigationRoutes.js`
+- `node --input-type=module -e "import ejs from 'ejs'; await ejs.renderFile('views/api-doc-template.ejs',{doc:{}}); console.log('api-doc-template.ejs render ok');"`
+- `node --input-type=module -e "import ejs from 'ejs'; await ejs.renderFile('views/api-doc-xiaohongshu-search-notes-v2.ejs',{doc:{}}); console.log('api-doc-xiaohongshu-search-notes-v2.ejs render ok');"`
+
+## 2026-07-11 / migrate-xiaohongshu-search-notes-v2-upstream
+
+### Objective
+将 `/xiaohongshu/search_notes_v2` 的上游调用切换到 TikHub App V2 搜索接口，并保持现有返回字段与兼容调用方式不变。
+
+### Context
+旧实现使用 `/api/v1/xiaohongshu/app/search_notes_v2`（`sort/type/publish_time` 参数），新上游为 `/api/v1/xiaohongshu/app_v2/search_notes`（`sort_type/note_type/time_filter` 等参数）。
+
+### Scope
+- `utils/tikhub.io.js`：仅调整 `th_xiaohongshu.search_notes_v2`。
+- 保持路由、计费逻辑和响应外层结构 `{ code, msg, data }` 不变。
+
+### Plan
+1. 切换上游 URL 至 `/api/v1/xiaohongshu/app_v2/search_notes`。
+2. 增加入参兼容映射：
+	- `sort`/`sort_type` -> `sort_type`
+	- `type`/`note_type` -> `note_type`
+	- `publish_time`/`time_filter` -> `time_filter`
+3. 支持透传翻页上下文（`search_id`、`search_session_id`）及可选参数（`source`、`ai_mode`）。
+4. 将扣费从 1 分调整为 2 分。
+5. 依据上游真实返回，规整输出为 `data.posts + data.pagination`，去除无用透传字段。
+6. 执行最小语法校验并同步 QA/RELEASE/CHANGELOG。
+
+### Risks
+- App V2 上游返回体字段名可能变化；需持续保持列表字段兜底逻辑。
+- 旧调用方可能混用中英文排序/类型值；需保持映射宽容。
+
+### Validation
+- `node --check utils/tikhub.io.js`
+
 ## 2026-07-10 / implement-network-log-dashboard-mvp
 
 ### Objective
