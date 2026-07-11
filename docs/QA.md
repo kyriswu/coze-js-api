@@ -9,6 +9,7 @@
 | QA-01 | `node --check routes/navigationRoutes.js` | 新增文档路由后语法正确 | 命令执行无输出 | pass |
 | QA-02 | 渲染 `views/api-doc-template.ejs` | 通用模板可渲染 | `api-doc-template.ejs render ok` | pass |
 | QA-03 | 渲染 `views/api-doc-xiaohongshu-search-notes-v2.ejs` | 接口实例页可渲染 | `api-doc-xiaohongshu-search-notes-v2.ejs render ok` | pass |
+| QA-04 | 文档示例域名核查 | 调用示例固定使用生产主域名 | 已改为 `https://coze-js-api.devtoo.uk` | pass |
 
 ## Command Evidence
 ```bash
@@ -21,6 +22,7 @@ cd /root/coze-js-api && node --input-type=module -e "import ejs from 'ejs'; awai
 - 已确认新增独立文档页 `GET /docs/xiaohongshu/search_notes_v2`。
 - 已确认页面包含调用示例、请求参数、返回参数、返回示例与翻页说明。
 - 已确认模板说明可复用于后续其他接口，仅需替换路由中的 `doc` 数据对象。
+- 已确认示例 curl 主域名固定为 `https://coze-js-api.devtoo.uk`。
 
 ## Defects Found
 | ID | Severity | Description | Status |

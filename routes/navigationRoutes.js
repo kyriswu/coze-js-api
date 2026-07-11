@@ -435,6 +435,7 @@ router.get('/', (req, res) => {
 
 router.get('/docs/xiaohongshu/search_notes_v2', (req, res) => {
     const pageUrl = `${tool.getBaseUrl(req)}${req.originalUrl}`;
+    const docsBaseUrl = 'https://coze-js-api.devtoo.uk';
 
     const doc = {
         title: '小红书搜索笔记 API 文档',
@@ -460,7 +461,7 @@ router.get('/docs/xiaohongshu/search_notes_v2', (req, res) => {
         examples: [
             {
                 title: '基础搜索',
-                code: `curl -X POST "${tool.getBaseUrl(req)}/xiaohongshu/search_notes_v2" \\
+                                code: `curl -X POST "${docsBaseUrl}/xiaohongshu/search_notes_v2" \\
   -H "Content-Type: application/json" \\
   -d '{
     "keyword": "美食推荐",
@@ -469,7 +470,7 @@ router.get('/docs/xiaohongshu/search_notes_v2', (req, res) => {
             },
             {
                 title: '带筛选与翻页参数',
-                code: `curl -X POST "${tool.getBaseUrl(req)}/xiaohongshu/search_notes_v2" \\
+                                code: `curl -X POST "${docsBaseUrl}/xiaohongshu/search_notes_v2" \\
   -H "Content-Type: application/json" \\
   -d '{
     "keyword": "美食推荐",
