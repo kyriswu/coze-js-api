@@ -1,6 +1,67 @@
 # QA
 
 ## Iteration
+2026-07-12 / add-file-transfer-promote-temp-to-persistent
+
+## Test Matrix
+| Case ID | Step | Expected | Actual | Status |
+|---|---|---|---|---|
+| QA-01 | `node --check index.js` | 新增 promote 路由后主入口语法正确 | 命令执行无输出 | pass |
+| QA-02 | 渲染 `views/file-transfer.ejs` | 页面模板可渲染，新增“转为永久”按钮逻辑不报错 | `file-transfer.ejs render ok` | pass |
+| QA-03 | 编辑器错误检查 `index.js` + `views/file-transfer.ejs` | 无新增静态错误 | `No errors found` | pass |
+
+## Command Evidence
+```bash
+cd /root/coze-js-api && node --check index.js && node --input-type=module -e "import ejs from 'ejs'; await ejs.renderFile('views/file-transfer.ejs',{seo:{}}); console.log('file-transfer.ejs render ok');"
+```
+
+## Manual Checks
+- 已确认新增后端动作仅允许 `temp -> persistent`，不暴露通用文件移动能力。
+- 已确认列表卡片与详情抽屉仅对临时文件显示“转为永久”按钮。
+- 已确认提升动作完成后会刷新当前列表，避免临时区过滤下展示过期数据。
+
+## Defects Found
+| ID | Severity | Description | Status |
+|---|---|---|---|
+| BUG-01 | low | 本轮未执行浏览器端真实“转为永久”点击手测，仅完成语法、模板渲染和编辑器错误检查 | open |
+
+## Final QA Verdict
+- [ ] pass
+- [x] conditional pass
+- [ ] fail
+
+## Iteration
+2026-07-12 / add-file-transfer-persistent-storage-first-slice
+
+## Test Matrix
+| Case ID | Step | Expected | Actual | Status |
+|---|---|---|---|---|
+| QA-01 | `node --check index.js` | file-transfer storage 改造后主入口语法正确 | 命令执行无输出 | pass |
+| QA-02 | 渲染 `views/file-transfer.ejs` | 页面模板可渲染，新增 storage 选择与筛选脚本不报错 | `file-transfer.ejs render ok` | pass |
+| QA-03 | 编辑器错误检查 `index.js` + `views/file-transfer.ejs` | 无新增静态错误 | `No errors found` | pass |
+
+## Command Evidence
+```bash
+cd /root/coze-js-api && node --check index.js && node --input-type=module -e "import ejs from 'ejs'; await ejs.renderFile('views/file-transfer.ejs',{seo:{}}); console.log('file-transfer.ejs render ok');"
+```
+
+## Manual Checks
+- 已确认第一版仅新增 `downloads/persistent` 白名单存储，不改动其他业务下载接口的默认落盘位置。
+- 已确认 file-transfer 页面支持选择“临时文件 / 永久文件”上传目标。
+- 已确认列表筛选支持按“全部目录 / 临时区 / 永久区”查看。
+- 已确认文件详情和删除动作带 storage 语义，避免同名跨目录文件操作混淆。
+
+## Defects Found
+| ID | Severity | Description | Status |
+|---|---|---|---|
+| BUG-01 | low | 本轮未执行浏览器端真实上传/删除手测，仅完成语法、模板渲染和编辑器错误检查 | open |
+
+## Final QA Verdict
+- [ ] pass
+- [x] conditional pass
+- [ ] fail
+
+## Iteration
 2026-07-11 / simplify-api-doc-template-display-for-xiaohongshu-page
 
 ## Test Matrix

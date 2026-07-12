@@ -1,5 +1,67 @@
 # RELEASE
 
+## Enhancement
+2026-07-12 / add-file-transfer-promote-temp-to-persistent
+
+### Summary
+为 `file-transfer` 增加“一键转为永久文件”动作，允许把已存在于临时区的文件直接迁移到 `downloads/persistent`，无需重新上传。
+
+### What Changed
+- 更新 `index.js`
+	- 新增 `POST /file-transfer/file/promote`，仅允许将 `temp` 文件提升到 `persistent`。
+	- 提升成功后返回新的 `storage`、`relativePath`、`url` 等文件元数据。
+	- 同步迁移文件访问统计 key，避免提升后热度数据断档。
+- 更新 `views/file-transfer.ejs`
+	- 列表卡片对临时文件新增“转为永久”按钮。
+	- 详情抽屉对临时文件新增“转为永久”按钮，永久文件不显示该动作。
+
+### Impact
+#### API/Behavior
+- 新增只读外观之外的一个写操作：`POST /file-transfer/file/promote`。
+- 仅支持 `temp -> persistent`，不支持任意目录之间的通用移动。
+
+#### Internal Modules
+- 影响 `index.js`、`views/file-transfer.ejs`。
+
+### Breaking Changes
+- none
+
+### Rollback Notes
+- 回滚 `index.js` 中 `/file-transfer/file/promote` 路由与访问统计迁移逻辑。
+- 回滚 `views/file-transfer.ejs` 中“转为永久”按钮与调用逻辑。
+
+## Enhancement
+2026-07-12 / add-file-transfer-persistent-storage-first-slice
+
+### Summary
+为 `file-transfer` 增加第一版永久文件区，支持把手动保留文件上传到 `downloads/persistent`，并在页面中按临时区/永久区进行查看和删除。
+
+### What Changed
+- 更新 `index.js`
+	- 新增 `temp` 与 `persistent` 两个 file-transfer 存储白名单。
+	- `GET /file-transfer/files` 新增 `storage` 维度筛选，并返回 `storage`、`relativePath` 元数据。
+	- `POST /file-transfer/upload`、`POST /file-transfer/upload/chunk`、`POST /file-transfer/upload/complete`、`DELETE /file-transfer/file` 支持 `storage` 参数。
+	- 文件访问统计 key 从纯文件名升级为相对路径，避免临时区与永久区同名文件统计串扰。
+- 更新 `views/file-transfer.ejs`
+	- 新增上传位置选择：临时文件 `/downloads`、永久文件 `/downloads/persistent`。
+	- 新增列表范围筛选：全部目录、临时区、永久区。
+	- 文件卡片与详情面板新增存储位置信息，删除操作按 storage 定位文件。
+
+### Impact
+#### API/Behavior
+- `file-transfer` 默认行为仍兼容旧逻辑：未传 `storage` 时继续写入临时区 `downloads/`。
+- 新增 `storage=persistent` 后，可显式写入 `downloads/persistent/`。
+
+#### Internal Modules
+- 影响 `index.js`、`views/file-transfer.ejs`。
+
+### Breaking Changes
+- none
+
+### Rollback Notes
+- 回滚 `index.js` 中 file-transfer 的 storage 白名单与路径级访问统计逻辑。
+- 回滚 `views/file-transfer.ejs` 中上传位置选择与目录范围筛选 UI。
+
 ## Improvement
 2026-07-11 / simplify-api-doc-template-display-for-xiaohongshu-page
 

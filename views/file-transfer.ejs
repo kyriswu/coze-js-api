@@ -152,6 +152,22 @@
       gap: 8px;
     }
 
+    .stack {
+      display: grid;
+      gap: 8px;
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+    }
+
+    .field-label {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
     button {
       border: 0;
       border-radius: 10px;
@@ -586,6 +602,26 @@
       border: 1px solid #d1dfd3;
     }
 
+    .storage-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 58px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #185538;
+      background: #e8f7ee;
+      border: 1px solid #c6e7d0;
+    }
+
+    .storage-badge.persistent {
+      color: #1e4e86;
+      background: #ebf5ff;
+      border-color: #cfe0fb;
+    }
+
     .time {
       font-size: 12px;
       color: var(--muted);
@@ -805,6 +841,15 @@
     <section class="layout">
       <aside class="panel sidebar">
         <h2 class="section-title">上传中枢</h2>
+        <div class="stack">
+          <div class="field">
+            <label class="field-label" for="uploadStorageSelect">上传位置</label>
+            <select id="uploadStorageSelect">
+              <option value="temp" selected>临时文件 /downloads</option>
+              <option value="persistent">永久文件 /downloads/persistent</option>
+            </select>
+          </div>
+        </div>
         <label id="dropzone" class="dropzone" for="uploadInput">
           <div>
             <strong>拖拽文件到这里</strong>
@@ -817,7 +862,7 @@
           <button id="refreshBtn" class="ghost" type="button">刷新列表</button>
         </div>
         <p id="status" class="status"></p>
-        <p class="hint">上传接口沿用现有 <code>POST /file-transfer/upload</code>；支持拖拽/选择/粘贴（Ctrl+V）入队；文件名冲突时服务端会自动追加序号。</p>
+        <p class="hint">上传接口沿用现有 <code>POST /file-transfer/upload</code>；支持拖拽/选择/粘贴（Ctrl+V）入队；文件名冲突时服务端会自动追加序号。永久文件会写入 <code>/downloads/persistent</code>。</p>
 
         <h3 class="section-title">上传队列</h3>
         <div id="queueList" class="queue">
@@ -829,6 +874,11 @@
         <div class="controls">
           <div class="search-row">
             <input id="searchInput" type="search" placeholder="按文件名搜索，回车执行" />
+            <select id="storageFilterSelect">
+              <option value="all" selected>范围：全部目录</option>
+              <option value="temp">范围：临时区</option>
+              <option value="persistent">范围：永久区</option>
+            </select>
             <select id="sortSelect">
               <option value="updatedAt:desc">更新时间：新到旧</option>
               <option value="updatedAt:asc">更新时间：旧到新</option>
@@ -922,6 +972,7 @@
     <div class="drawer-foot">
       <button id="drawerOpenBtn" class="ghost" type="button" disabled>打开</button>
       <button id="drawerCopyBtn" class="ghost" type="button" disabled>复制链接</button>
+      <button id="drawerPromoteBtn" class="ghost" type="button" disabled>转为永久</button>
       <button id="drawerDeleteBtn" class="danger" type="button" disabled>删除</button>
     </div>
   </aside>
@@ -931,8 +982,10 @@
     const dropzone = document.getElementById('dropzone');
     const uploadBtn = document.getElementById('uploadBtn');
     const refreshBtn = document.getElementById('refreshBtn');
+    const uploadStorageSelectEl = document.getElementById('uploadStorageSelect');
     const queueListEl = document.getElementById('queueList');
     const searchInput = document.getElementById('searchInput');
+    const storageFilterSelectEl = document.getElementById('storageFilterSelect');
     const sortSelectEl = document.getElementById('sortSelect');
     const pageSizeSelectEl = document.getElementById('pageSizeSelect');
     const typeChipRowEl = document.getElementById('typeChipRow');
@@ -956,6 +1009,7 @@
     const drawerCloseBtn = document.getElementById('drawerCloseBtn');
     const drawerOpenBtn = document.getElementById('drawerOpenBtn');
     const drawerCopyBtn = document.getElementById('drawerCopyBtn');
+    const drawerPromoteBtn = document.getElementById('drawerPromoteBtn');
     const drawerDeleteBtn = document.getElementById('drawerDeleteBtn');
     const prevBtn = document.getElementById('prevBtn');
     const nextBtn = document.getElementById('nextBtn');
@@ -965,6 +1019,7 @@
       page: 1,
       pageSize: 20,
       totalPages: 1,
+      selectedStorage: 'all',
       selectedType: 'all',
       isUploading: false,
     };
@@ -976,6 +1031,18 @@
     let selectedFile = null;
     const CHUNK_SIZE = 8 * 1024 * 1024;
     const CHUNK_UPLOAD_THRESHOLD = 16 * 1024 * 1024;
+
+    function normalizeStorage(storage) {
+      return String(storage || '').toLowerCase() === 'persistent' ? 'persistent' : 'temp';
+    }
+
+    function formatStorageName(storage) {
+      return normalizeStorage(storage) === 'persistent' ? '永久文件' : '临时文件';
+    }
+
+    function getUploadStorage() {
+      return normalizeStorage(uploadStorageSelectEl?.value || 'temp');
+    }
 
     function escapeHtml(input) {
       return String(input || '')
@@ -1108,6 +1175,8 @@
         drawerContentEl.innerHTML = '<p class="empty">请选择一个文件查看详情</p>';
         drawerOpenBtn.disabled = true;
         drawerCopyBtn.disabled = true;
+        drawerPromoteBtn.disabled = true;
+        drawerPromoteBtn.style.display = 'none';
         drawerDeleteBtn.disabled = true;
         return;
       }
@@ -1115,11 +1184,12 @@
       const safeName = escapeHtml(selectedFile.name || '');
       const safeType = escapeHtml(formatTypeName(selectedFile.fileType || 'no_ext'));
       const safeUrl = escapeHtml(selectedFile.url || '#');
-      const encodedName = encodeURIComponent(selectedFile.name || '');
       const created = selectedFile.createdAt ? new Date(selectedFile.createdAt).toLocaleString() : '-';
       const updated = selectedFile.updatedAt ? new Date(selectedFile.updatedAt).toLocaleString() : '-';
       const family = getPreviewFamily(selectedFile.fileType);
       const previewTag = family === 'image' ? '图片' : family === 'video' ? '视频' : family === 'audio' ? '音频' : family === 'pdf' ? 'PDF' : '通用文件';
+      const storageName = escapeHtml(formatStorageName(selectedFile.storage));
+      const relativePath = escapeHtml(selectedFile.relativePath || selectedFile.name || '');
 
       drawerContentEl.innerHTML = `
         <h4 class="drawer-file-name">${safeName}</h4>
@@ -1130,6 +1200,10 @@
           <div class="drawer-row">
             <span class="drawer-label">文件类型</span>
             <span class="drawer-value">${safeType}（${previewTag}）</span>
+          </div>
+          <div class="drawer-row">
+            <span class="drawer-label">存储位置</span>
+            <span class="drawer-value">${storageName}</span>
           </div>
           <div class="drawer-row">
             <span class="drawer-label">文件体积</span>
@@ -1153,7 +1227,7 @@
           </div>
           <div class="drawer-row">
             <span class="drawer-label">相对路径</span>
-            <span class="drawer-value">/downloads/${escapeHtml(selectedFile.name || '')}</span>
+            <span class="drawer-value">/downloads/${relativePath}</span>
           </div>
         </div>
       `;
@@ -1162,8 +1236,14 @@
       drawerOpenBtn.setAttribute('data-url', selectedFile.url || '#');
       drawerCopyBtn.disabled = false;
       drawerCopyBtn.setAttribute('data-url', selectedFile.url || '');
+      const canPromote = normalizeStorage(selectedFile.storage) === 'temp';
+      drawerPromoteBtn.disabled = !canPromote;
+      drawerPromoteBtn.style.display = canPromote ? '' : 'none';
+      drawerPromoteBtn.setAttribute('data-name', selectedFile.name || '');
+      drawerPromoteBtn.setAttribute('data-storage', normalizeStorage(selectedFile.storage));
       drawerDeleteBtn.disabled = false;
-      drawerDeleteBtn.setAttribute('data-name', encodedName);
+      drawerDeleteBtn.setAttribute('data-name', selectedFile.name || '');
+      drawerDeleteBtn.setAttribute('data-storage', normalizeStorage(selectedFile.storage));
     }
 
     function openDrawer(file) {
@@ -1235,12 +1315,15 @@
         const safeUrl = escapeHtml(file.url || '#');
         const created = file.createdAt ? new Date(file.createdAt).toLocaleString() : '-';
         const updated = file.updatedAt ? new Date(file.updatedAt).toLocaleString() : '-';
+        const safeStorage = normalizeStorage(file.storage);
+        const safeRelativePath = encodeURIComponent(file.relativePath || file.name || '');
         return `
           <article class="file-item">
             ${buildPreview(file)}
             <div>
               <h3 class="file-name">${safeName}</h3>
               <div class="tag-row">
+                <span class="storage-badge ${safeStorage}">${escapeHtml(formatStorageName(safeStorage))}</span>
                 <span class="tag">类型 ${safeType}</span>
                 <span class="tag">大小 ${formatBytes(file.size)}</span>
                 <span class="tag">访问 ${Number(file.accessCount || 0)}</span>
@@ -1251,10 +1334,11 @@
               </div>
             </div>
             <div class="action-column">
-              <button type="button" class="ghost" data-action="detail" data-name="${encodeURIComponent(file.name || '')}">查看详情</button>
+              <button type="button" class="ghost" data-action="detail" data-relative-path="${safeRelativePath}">查看详情</button>
               <button type="button" class="ghost" data-action="open" data-url="${safeUrl}">打开文件</button>
               <button type="button" class="ghost" data-action="copy" data-url="${safeUrl}">复制链接</button>
-              <button type="button" class="danger" data-action="delete" data-name="${encodeURIComponent(file.name || '')}">删除文件</button>
+              ${safeStorage === 'temp' ? `<button type="button" class="ghost" data-action="promote" data-name="${encodeURIComponent(file.name || '')}" data-storage="temp">转为永久</button>` : ''}
+              <button type="button" class="danger" data-action="delete" data-name="${encodeURIComponent(file.name || '')}" data-storage="${safeStorage}">删除文件</button>
             </div>
           </article>
         `;
@@ -1265,9 +1349,8 @@
         button.addEventListener('click', () => {
           const action = button.getAttribute('data-action');
           if (action === 'detail') {
-            const encodedName = button.getAttribute('data-name') || '';
-            const fileName = decodeURIComponent(encodedName);
-            const file = currentFiles.find((item) => item.name === fileName);
+            const relativePath = decodeURIComponent(button.getAttribute('data-relative-path') || '');
+            const file = currentFiles.find((item) => item.relativePath === relativePath);
             if (file) {
               openDrawer(file);
             }
@@ -1283,9 +1366,18 @@
             copyLink(url);
             return;
           }
+          if (action === 'promote') {
+            const encodedName = button.getAttribute('data-name') || '';
+            const fileName = decodeURIComponent(encodedName);
+            const storage = button.getAttribute('data-storage') || 'temp';
+            promoteFile(fileName, storage);
+            return;
+          }
           if (action === 'delete') {
             const encodedName = button.getAttribute('data-name') || '';
-            deleteFile(encodedName);
+            const fileName = decodeURIComponent(encodedName);
+            const storage = button.getAttribute('data-storage') || 'temp';
+            deleteFile(fileName, storage);
           }
         });
       });
@@ -1307,7 +1399,7 @@
         <article class="queue-item">
           <div class="queue-head">
             <span class="queue-name">${escapeHtml(item.file.name)}</span>
-            <span class="queue-size">${formatBytes(item.file.size)}</span>
+            <span class="queue-size">${formatStorageName(item.storage)} · ${formatBytes(item.file.size)}</span>
           </div>
           <div class="progress"><span style="width: ${Math.min(100, Math.max(0, item.progress || 0))}%"></span></div>
           <div class="queue-head">
@@ -1326,12 +1418,14 @@
 
       files.forEach((file) => {
         queueId += 1;
+        const storage = getUploadStorage();
         uploadQueue.push({
           id: queueId,
           file,
+          storage,
           progress: 0,
           status: 'pending',
-          message: '待上传',
+          message: `待上传到${formatStorageName(storage)}`,
         });
       });
 
@@ -1391,10 +1485,11 @@
       }
     }
 
-    async function completeChunkUploadWithRetry(uploadId, fileName, totalChunks, maxRetries = 2) {
+    async function completeChunkUploadWithRetry(uploadId, fileName, totalChunks, maxRetries = 2, storage = 'temp') {
       const params = new URLSearchParams({
         uploadId,
         filename: fileName,
+        storage: normalizeStorage(storage),
         totalChunks: String(totalChunks),
       });
 
@@ -1430,6 +1525,7 @@
       const uploadId = queueItem.uploadId || buildUploadSessionId(file);
       queueItem.uploadId = uploadId;
       const totalChunks = Math.max(1, Math.ceil(file.size / CHUNK_SIZE));
+      const storage = normalizeStorage(queueItem.storage);
 
       for (let index = 0; index < totalChunks; index += 1) {
         const start = index * CHUNK_SIZE;
@@ -1440,6 +1536,7 @@
         const params = new URLSearchParams({
           uploadId,
           filename: file.name,
+          storage,
           index: String(index),
           totalChunks: String(totalChunks),
         });
@@ -1469,13 +1566,14 @@
         renderQueue();
       }
 
-      return completeChunkUploadWithRetry(uploadId, file.name, totalChunks, 2);
+      return completeChunkUploadWithRetry(uploadId, file.name, totalChunks, 2, storage);
     }
 
     function uploadSingleFile(queueItem) {
       return new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest();
-        const uploadUrl = `/file-transfer/upload?filename=${encodeURIComponent(queueItem.file.name)}`;
+        const storage = normalizeStorage(queueItem.storage);
+        const uploadUrl = `/file-transfer/upload?filename=${encodeURIComponent(queueItem.file.name)}&storage=${encodeURIComponent(storage)}`;
         xhr.open('POST', uploadUrl);
         xhr.setRequestHeader('Content-Type', 'application/octet-stream');
         xhr.setRequestHeader('X-File-Name', encodeURIComponent(queueItem.file.name));
@@ -1572,15 +1670,20 @@
       }
     }
 
-    async function deleteFile(encodedFileName) {
-      const fileName = decodeURIComponent(String(encodedFileName || ''));
-      const ok = window.confirm(`确认删除文件：${fileName}？`);
+    async function deleteFile(fileName, storage = 'temp') {
+      const safeName = String(fileName || '');
+      const safeStorage = normalizeStorage(storage);
+      const ok = window.confirm(`确认删除${formatStorageName(safeStorage)}：${safeName}？`);
       if (!ok) {
         return;
       }
 
       try {
-        const res = await fetch(`/file-transfer/file?filename=${encodeURIComponent(fileName)}`, {
+        const params = new URLSearchParams({
+          filename: safeName,
+          storage: safeStorage,
+        });
+        const res = await fetch(`/file-transfer/file?${params.toString()}`, {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
@@ -1590,15 +1693,62 @@
         if (!res.ok || payload.code !== 0) {
           throw new Error(payload.msg || '删除失败');
         }
-        if (selectedFile && selectedFile.name === fileName) {
+        if (selectedFile && selectedFile.name === safeName && normalizeStorage(selectedFile.storage) === safeStorage) {
           selectedFile = null;
           renderDrawer();
           closeDrawer();
         }
-        setStatus(`删除成功：${fileName}`, 'ok');
+        setStatus(`删除成功：${safeName}`, 'ok');
         await loadFiles(pageState.page);
       } catch (error) {
         setStatus(error.message || '删除失败', 'error');
+      }
+    }
+
+    async function promoteFile(fileName, storage = 'temp') {
+      const safeName = String(fileName || '');
+      const safeStorage = normalizeStorage(storage);
+      if (safeStorage !== 'temp') {
+        setStatus('仅支持将临时文件转为永久文件', 'warn');
+        return;
+      }
+
+      const ok = window.confirm(`确认将临时文件转为永久文件：${safeName}？`);
+      if (!ok) {
+        return;
+      }
+
+      try {
+        const params = new URLSearchParams({
+          filename: safeName,
+          storage: safeStorage,
+        });
+        const res = await fetch(`/file-transfer/file/promote?${params.toString()}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        const payload = await res.json();
+        if (!res.ok || payload.code !== 0) {
+          throw new Error(payload.msg || '转为永久文件失败');
+        }
+
+        if (selectedFile && selectedFile.name === safeName && normalizeStorage(selectedFile.storage) === safeStorage) {
+          selectedFile = {
+            ...selectedFile,
+            ...(payload.data || {}),
+            fileType: selectedFile.fileType,
+            accessCount: selectedFile.accessCount || 0,
+            access24h: selectedFile.access24h || 0,
+          };
+          renderDrawer();
+        }
+
+        setStatus(`已转为永久文件：${safeName}`, 'ok');
+        await loadFiles(pageState.page);
+      } catch (error) {
+        setStatus(error.message || '转为永久文件失败', 'error');
       }
     }
 
@@ -1612,6 +1762,7 @@
       if (search) {
         params.set('search', search);
       }
+      params.set('storage', pageState.selectedStorage || 'all');
       params.set('fileType', pageState.selectedType || 'all');
       params.set('sortBy', sortBy || 'updatedAt');
       params.set('sortOrder', sortOrder || 'desc');
@@ -1631,6 +1782,7 @@
         const total = payload?.data?.total || files.length;
         pageState.page = payload?.data?.page || pageState.page;
         pageState.totalPages = payload?.data?.totalPages || 1;
+        pageState.selectedStorage = payload?.data?.storage || pageState.selectedStorage;
 
         typeStatsCache = Array.isArray(payload?.data?.typeStats) ? payload.data.typeStats : [];
         renderTypeChips();
@@ -1643,9 +1795,13 @@
         statAccess24hEl.textContent = String(payload?.data?.accessStats?.totalAccess24h || 0);
 
         metaEl.textContent = `共 ${total} 个文件（每页 ${pageState.pageSize} 条）`;
-        activeMetaEl.textContent = pageState.selectedType === 'all'
-          ? '当前筛选：全部类型'
-          : `当前筛选：${formatTypeName(pageState.selectedType)}`;
+        const storageMeta = pageState.selectedStorage === 'all'
+          ? '全部目录'
+          : formatStorageName(pageState.selectedStorage);
+        const typeMeta = pageState.selectedType === 'all'
+          ? '全部类型'
+          : formatTypeName(pageState.selectedType);
+        activeMetaEl.textContent = `当前范围：${storageMeta} · 当前类型：${typeMeta}`;
       } catch (error) {
         metaEl.textContent = '加载失败';
         activeMetaEl.textContent = '';
@@ -1695,6 +1851,10 @@
       }
     });
     sortSelectEl.addEventListener('change', () => loadFiles(1));
+    storageFilterSelectEl.addEventListener('change', () => {
+      pageState.selectedStorage = storageFilterSelectEl.value || 'all';
+      loadFiles(1);
+    });
 
     pageSizeSelectEl.addEventListener('change', () => {
       const pageSize = Number.parseInt(String(pageSizeSelectEl.value || '20'), 10);
@@ -1724,9 +1884,15 @@
       const url = drawerCopyBtn.getAttribute('data-url') || '';
       copyLink(url);
     });
+    drawerPromoteBtn.addEventListener('click', async () => {
+      const fileName = drawerPromoteBtn.getAttribute('data-name') || '';
+      const storage = drawerPromoteBtn.getAttribute('data-storage') || 'temp';
+      await promoteFile(fileName, storage);
+    });
     drawerDeleteBtn.addEventListener('click', async () => {
-      const encodedName = drawerDeleteBtn.getAttribute('data-name') || '';
-      await deleteFile(encodedName);
+      const fileName = drawerDeleteBtn.getAttribute('data-name') || '';
+      const storage = drawerDeleteBtn.getAttribute('data-storage') || 'temp';
+      await deleteFile(fileName, storage);
     });
 
     document.addEventListener('keydown', (event) => {

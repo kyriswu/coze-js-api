@@ -1,0 +1,494 @@
+{
+  "communities": {
+    "0": [
+      "index",
+      "index_agent",
+      "index_app",
+      "index_buildchunksessiondir",
+      "index_buildfileaccesscountkey",
+      "index_buildfileaccesshourkey",
+      "index_buildsafeexistingfilepath",
+      "index_buildsafeuploadtarget",
+      "index_cansearchgoogle_canusehtmlparse_dailyuse_verifyapiaccess_consumeapicredits",
+      "index_createfileaccesstrackmiddleware",
+      "index_dirname",
+      "index_downloadpdf",
+      "index_downloadsdir",
+      "index_extract_pdf_url",
+      "index_filename",
+      "index_formathourid",
+      "index_get_doc_direct_link",
+      "index_getfilepublicurl",
+      "index_getlast15dayscreatedstats",
+      "index_getlast24hourids",
+      "index_gettypestats",
+      "index_listdownloadfiles",
+      "index_sanitizeuploadfilename",
+      "index_sanitizeuploadsessionid",
+      "index_scankeysbypattern",
+      "index_sortfiles",
+      "index_uploadchunksdir",
+      "index_validateurl",
+      "index_zyteextract",
+      "utils_tikhub_io",
+      "utils_tikhub_io_normalizewechatarticledetail",
+      "utils_tikhub_io_normalizewechatmplistitem",
+      "utils_tikhub_io_th_bilibili",
+      "utils_tikhub_io_th_douyin",
+      "utils_tikhub_io_th_douyin_billboard",
+      "utils_tikhub_io_th_tiktok",
+      "utils_tikhub_io_th_twitter",
+      "utils_tikhub_io_th_wechat_channels",
+      "utils_tikhub_io_th_wechat_media",
+      "utils_tikhub_io_th_xiaohongshu",
+      "utils_tikhub_io_th_youtube",
+      "utils_tikhub_io_tikhubrequest"
+    ],
+    "1": [
+      "utils_bazi",
+      "utils_bazi_calc_ba_zi",
+      "utils_bazi_calc_cang_gan",
+      "utils_bazi_calc_zi_wei",
+      "utils_bazi_points",
+      "utils_commonutils",
+      "utils_commonutils_commonutils",
+      "utils_commonutils_config",
+      "utils_netdiskapi",
+      "utils_netdiskapi_netdiskapi",
+      "utils_qwether",
+      "utils_qwether_isvaliddate",
+      "utils_qwether_qweather_tool",
+      "utils_qwether_qweatherfetch",
+      "utils_redisclient",
+      "utils_redisclient_redis",
+      "utils_tavily",
+      "utils_tavily_ad_constants",
+      "utils_tavily_appendadmessage",
+      "utils_tavily_tv_search",
+      "utils_thirdparrtyapi_aitoken",
+      "utils_thirdparrtyapi_aitoken_aitoken",
+      "utils_thirdparrtyapi_aitoken_gpt_image_edit_max_retries",
+      "utils_thirdparrtyapi_aitoken_gpt_image_edit_retry_base_delay_ms",
+      "utils_thirdparrtyapi_coze",
+      "utils_thirdparrtyapi_coze_config",
+      "utils_thirdparrtyapi_coze_coze",
+      "utils_thirdparrtyapi_coze_timestamptodatetime",
+      "utils_thirdparrtyapi_cozecom",
+      "utils_thirdparrtyapi_cozecom_config",
+      "utils_thirdparrtyapi_cozecom_cozecom",
+      "utils_thirdparrtyapi_cozecom_timestamptodatetime",
+      "utils_thirdparrtyapi_feishu",
+      "utils_thirdparrtyapi_feishu_feishu",
+      "utils_thirdpartyused",
+      "utils_thirdpartyused_request_type",
+      "utils_thirdpartyused_thirdpartyused",
+      "utils_unkey",
+      "utils_unkey_unkey"
+    ],
+    "2": [
+      "utils_thirdparrtyapi_browserless",
+      "utils_thirdparrtyapi_browserless_browser_session_sweep_interval_ms",
+      "utils_thirdparrtyapi_browserless_browser_session_ttl_ms",
+      "utils_thirdparrtyapi_browserless_browserless",
+      "utils_thirdparrtyapi_browserless_browsersessionsweeper",
+      "utils_thirdparrtyapi_browserless_closebrowsersession",
+      "utils_thirdparrtyapi_browserless_dirname",
+      "utils_thirdparrtyapi_browserless_disableloadmedia",
+      "utils_thirdparrtyapi_browserless_doactions",
+      "utils_thirdparrtyapi_browserless_filename",
+      "utils_thirdparrtyapi_browserless_generateconnectionid",
+      "utils_thirdparrtyapi_browserless_getqingguoproxy",
+      "utils_thirdparrtyapi_browserless_limit",
+      "utils_thirdparrtyapi_browserless_puppeteer_connect",
+      "utils_thirdparrtyapi_browserless_safelyhandlerequestinterception",
+      "utils_thirdparrtyapi_browserless_sweepstalebrowsersessions",
+      "utils_thirdparrtyapi_filetool",
+      "utils_thirdparrtyapi_filetool_filetool",
+      "utils_tool",
+      "utils_tool_dirname",
+      "utils_tool_download_max_retries",
+      "utils_tool_download_parallel_chunk_size",
+      "utils_tool_download_parallel_concurrency",
+      "utils_tool_download_parallel_min_size",
+      "utils_tool_download_rate_limit",
+      "utils_tool_download_retry_base_delay",
+      "utils_tool_download_stream_hwm",
+      "utils_tool_download_timeout",
+      "utils_tool_downloadaxios",
+      "utils_tool_downloadhttpagent",
+      "utils_tool_downloadhttpsagent",
+      "utils_tool_execpromise",
+      "utils_tool_filename",
+      "utils_tool_parseenvint",
+      "utils_whisperapi",
+      "utils_whisperapi_openai",
+      "utils_whisperapi_whisperapi"
+    ],
+    "3": [
+      "package_dependencies",
+      "package_dependencies_axios",
+      "package_dependencies_cheerio",
+      "package_dependencies_coze_api",
+      "package_dependencies_dayjs",
+      "package_dependencies_ejs",
+      "package_dependencies_express",
+      "package_dependencies_fluent_ffmpeg",
+      "package_dependencies_http_proxy_agent",
+      "package_dependencies_https_proxy_agent",
+      "package_dependencies_ioredis",
+      "package_dependencies_iztro",
+      "package_dependencies_jsdom",
+      "package_dependencies_lunar_javascript",
+      "package_dependencies_node_fetch",
+      "package_dependencies_openai",
+      "package_dependencies_p_limit",
+      "package_dependencies_puppeteer_core",
+      "package_dependencies_puppeteer_extra",
+      "package_dependencies_puppeteer_extra_plugin_stealth",
+      "package_dependencies_redis",
+      "package_dependencies_socks_proxy_agent",
+      "package_dependencies_stream_throttle"
+    ],
+    "4": [
+      "utils_apiaccess",
+      "utils_apiaccess_createapiaccesshelpers",
+      "utils_loadenv",
+      "utils_loadenv_dirname",
+      "utils_loadenv_envfilepath",
+      "utils_loadenv_filename",
+      "utils_loadenv_stripwrappingquotes",
+      "utils_thirdparrtyapi_evolink_ai",
+      "utils_thirdparrtyapi_evolink_ai_buildclienterror",
+      "utils_thirdparrtyapi_evolink_ai_buildrequesterror",
+      "utils_thirdparrtyapi_evolink_ai_calculatecreditcost",
+      "utils_thirdparrtyapi_evolink_ai_ensureapikey",
+      "utils_thirdparrtyapi_evolink_ai_evolink",
+      "utils_thirdparrtyapi_evolink_ai_final_statuses",
+      "utils_thirdparrtyapi_evolink_ai_getaxiosconfig",
+      "utils_thirdparrtyapi_evolink_ai_getcreditused",
+      "utils_thirdparrtyapi_evolink_ai_getfinalimageurl",
+      "utils_thirdparrtyapi_evolink_ai_normalizepositivenumber",
+      "utils_thirdparrtyapi_evolink_ai_sleep",
+      "utils_thirdparrtyapi_evolink_ai_verifyapiaccess_consumeapicredits"
+    ],
+    "5": [
+      "utils_customerror",
+      "utils_customerror_baseerror",
+      "utils_customerror_baseerror_constructor",
+      "utils_customerror_fileoperationerror",
+      "utils_customerror_fileoperationerror_constructor",
+      "utils_customerror_invalidapikeyerror",
+      "utils_customerror_invalidapikeyerror_constructor",
+      "utils_customerror_notfounderror",
+      "utils_customerror_notfounderror_constructor",
+      "utils_customerror_quotaexceedederror",
+      "utils_customerror_quotaexceedederror_constructor",
+      "utils_customerror_ratelimiterror",
+      "utils_customerror_ratelimiterror_constructor",
+      "utils_customerror_validationerror",
+      "utils_customerror_validationerror_constructor"
+    ],
+    "6": [
+      "utils_networkanalytics",
+      "utils_networkanalytics_buildtimeline",
+      "utils_networkanalytics_collectlastlines",
+      "utils_networkanalytics_default_scan_limit",
+      "utils_networkanalytics_getnetworkdashboardmetrics",
+      "utils_networkanalytics_incmap",
+      "utils_networkanalytics_matchfilters",
+      "utils_networkanalytics_minutestart",
+      "utils_networkanalytics_normalizemethod",
+      "utils_networkanalytics_parserediseventline",
+      "utils_networkanalytics_safestring",
+      "utils_networkanalytics_seedredisfromfileifempty",
+      "utils_networkanalytics_statusclass",
+      "utils_networkanalytics_tofinitenumber",
+      "utils_networkanalytics_topentries"
+    ],
+    "7": [
+      "any",
+      "argumentparser",
+      "skills_twitterwebapi_scripts_twitter_api",
+      "skills_twitterwebapi_scripts_twitter_api_build_parser",
+      "skills_twitterwebapi_scripts_twitter_api_get_api_key",
+      "skills_twitterwebapi_scripts_twitter_api_main",
+      "skills_twitterwebapi_scripts_twitter_api_normalize_detail",
+      "skills_twitterwebapi_scripts_twitter_api_normalize_search",
+      "skills_twitterwebapi_scripts_twitter_api_pick_first",
+      "skills_twitterwebapi_scripts_twitter_api_post_json",
+      "skills_twitterwebapi_scripts_twitter_api_print_detail_result",
+      "skills_twitterwebapi_scripts_twitter_api_print_search_result",
+      "skills_twitterwebapi_scripts_twitter_api_run_detail",
+      "skills_twitterwebapi_scripts_twitter_api_run_search"
+    ],
+    "8": [
+      "utils_axiosinterceptors",
+      "utils_axiosinterceptors_attachaxiosratelimitlogger",
+      "utils_networklogger",
+      "utils_networklogger_emit",
+      "utils_networklogger_ensurefilelogger",
+      "utils_networklogger_log_mode",
+      "utils_networklogger_logaxioserror",
+      "utils_networklogger_logaxiosrequest",
+      "utils_networklogger_loghttprequest",
+      "utils_networklogger_logratelimit",
+      "utils_networklogger_redis_events_max",
+      "utils_networklogger_writetofile",
+      "utils_networklogger_writetoredis"
+    ],
+    "9": [
+      "utils_tool_tool",
+      "utils_volcengine_io",
+      "utils_volcengine_io_decodewebsearchresponse",
+      "utils_volcengine_io_normalizewebsearcheventframes",
+      "utils_volcengine_io_normalizewebsearchpayload",
+      "utils_volcengine_io_normalizewebsearchresult",
+      "utils_volcengine_io_safejsonparse",
+      "utils_volcengine_io_toboolean",
+      "utils_volcengine_io_tonumber",
+      "utils_volcengine_io_ve_contents_generations_tasks",
+      "utils_volcengine_io_ve_seedream_5_0_lite",
+      "utils_volcengine_io_ve_web_search"
+    ],
+    "10": [
+      "package",
+      "package_author",
+      "package_description",
+      "package_keywords",
+      "package_license",
+      "package_main",
+      "package_name",
+      "package_scripts",
+      "package_scripts_test",
+      "package_type",
+      "package_version"
+    ],
+    "11": [
+      "scripts_network_log_analyze",
+      "scripts_network_log_analyze_analyze",
+      "scripts_network_log_analyze_default_file",
+      "scripts_network_log_analyze_inc",
+      "scripts_network_log_analyze_main",
+      "scripts_network_log_analyze_parseargs",
+      "scripts_network_log_analyze_printhelp",
+      "scripts_network_log_analyze_printhuman",
+      "scripts_network_log_analyze_statusclass",
+      "scripts_network_log_analyze_topentries",
+      "scripts_network_log_analyze_topslowrequests"
+    ],
+    "12": [
+      "routes_navigationroutes",
+      "routes_navigationroutes_parseendpoint",
+      "routes_navigationroutes_router",
+      "routes_navigationroutes_servicecards",
+      "routes_navigationroutes_servicecategories",
+      "routes_navigationroutes_servicestats",
+      "routes_navigationroutes_sitemapcategoryitems",
+      "routes_navigationroutes_sitemappageitems",
+      "routes_navigationroutes_xmlescape"
+    ],
+    "13": [
+      "skills_douyin_billboard_fetch_hot_rise_list_scripts_fetch_hot_rise_list",
+      "skills_douyin_billboard_fetch_hot_rise_list_scripts_fetch_hot_rise_list_fetch_hot_rise_list",
+      "skills_douyin_billboard_fetch_hot_rise_list_scripts_fetch_hot_rise_list_get_api_key",
+      "skills_douyin_billboard_fetch_hot_rise_list_scripts_fetch_hot_rise_list_main",
+      "skills_douyin_billboard_fetch_hot_rise_list_scripts_fetch_hot_rise_list_print_results",
+      "skills_douyin_billboard_fetch_hot_rise_list_scripts_fetch_hot_rise_list_rationale_23"
+    ],
+    "14": [
+      "skills_google_search_web_scripts_google_search",
+      "skills_google_search_web_scripts_google_search_get_api_key",
+      "skills_google_search_web_scripts_google_search_google_search",
+      "skills_google_search_web_scripts_google_search_main",
+      "skills_google_search_web_scripts_google_search_print_results",
+      "skills_google_search_web_scripts_google_search_rationale_23"
+    ],
+    "15": [
+      "skills_volcengine_web_search_scripts_web_search",
+      "skills_volcengine_web_search_scripts_web_search_get_api_key",
+      "skills_volcengine_web_search_scripts_web_search_main",
+      "skills_volcengine_web_search_scripts_web_search_parse_bool",
+      "skills_volcengine_web_search_scripts_web_search_print_results",
+      "skills_volcengine_web_search_scripts_web_search_web_search"
+    ],
+    "16": [
+      "utils_htmlcontent",
+      "utils_htmlcontent_extract_html_conent",
+      "utils_htmlcontent_extract_html_conent_standard",
+      "utils_htmlcontent_htmltoqueryselector"
+    ],
+    "17": [
+      "start",
+      "start_compose",
+      "start_sh__entry"
+    ],
+    "18": [
+      "utils_thirdparrtyapi_aimlapi",
+      "utils_thirdparrtyapi_aimlapi_aimlapi",
+      "utils_thirdparrtyapi_aimlapi_api"
+    ],
+    "19": [
+      "utils_thirdparrtyapi_cloudflare",
+      "utils_thirdparrtyapi_cloudflare_cloudflareapi",
+      "utils_thirdparrtyapi_cloudflare_whispermaxfilebytes"
+    ],
+    "20": [
+      "utils_thirdparrtyapi_lemonfoxai",
+      "utils_thirdparrtyapi_lemonfoxai_lemonfoxai",
+      "utils_thirdparrtyapi_lemonfoxai_openai"
+    ],
+    "21": [
+      "server",
+      "server_sh__entry"
+    ],
+    "22": [
+      "skills_douyin_transcribe_api_scripts_transcribe_douyin",
+      "skills_douyin_transcribe_api_scripts_transcribe_douyin_sh__entry"
+    ],
+    "23": [
+      "start_lite",
+      "start_lite_sh__entry"
+    ],
+    "24": [
+      "utils_search1api",
+      "utils_search1api_search1api"
+    ],
+    "25": [
+      "utils_thirdparrtyapi_firecrawl",
+      "utils_thirdparrtyapi_firecrawl_firecrawltool"
+    ],
+    "26": [
+      "utils_thirdparrtyapi_tencentapi",
+      "utils_thirdparrtyapi_tencentapi_tencentapi"
+    ],
+    "27": [
+      "utils_zyte",
+      "utils_zyte_zyte"
+    ],
+    "28": [
+      "pdf2images"
+    ]
+  },
+  "cohesion": {
+    "0": 0.07665505226480836,
+    "1": 0.08232118758434548,
+    "2": 0.06456456456456457,
+    "3": 0.08695652173913043,
+    "4": 0.11052631578947368,
+    "5": 0.13333333333333333,
+    "6": 0.2857142857142857,
+    "7": 0.32967032967032966,
+    "8": 0.32051282051282054,
+    "9": 0.24242424242424243,
+    "10": 0.18181818181818182,
+    "11": 0.32727272727272727,
+    "12": 0.2222222222222222,
+    "13": 0.5333333333333333,
+    "14": 0.5333333333333333,
+    "15": 0.6,
+    "16": 0.6666666666666666,
+    "17": 1.0,
+    "18": 0.6666666666666666,
+    "19": 0.6666666666666666,
+    "20": 0.6666666666666666,
+    "21": 1.0,
+    "22": 1.0,
+    "23": 1.0,
+    "24": 1.0,
+    "25": 1.0,
+    "26": 1.0,
+    "27": 1.0,
+    "28": 1.0
+  },
+  "gods": [
+    {
+      "id": "utils_networkanalytics_getnetworkdashboardmetrics",
+      "label": "getNetworkDashboardMetrics()",
+      "degree": 12
+    },
+    {
+      "id": "utils_redisclient_redis",
+      "label": "redis",
+      "degree": 9
+    },
+    {
+      "id": "utils_unkey_unkey",
+      "label": "unkey",
+      "degree": 9
+    },
+    {
+      "id": "utils_commonutils_commonutils",
+      "label": "commonUtils",
+      "degree": 8
+    },
+    {
+      "id": "utils_networklogger_emit",
+      "label": "emit()",
+      "degree": 7
+    },
+    {
+      "id": "scripts_network_log_analyze_analyze",
+      "label": "analyze()",
+      "degree": 6
+    },
+    {
+      "id": "index_sanitizeuploadfilename",
+      "label": "sanitizeUploadFileName()",
+      "degree": 6
+    },
+    {
+      "id": "skills_twitterwebapi_scripts_twitter_api_main",
+      "label": "main()",
+      "degree": 5
+    },
+    {
+      "id": "skills_volcengine_web_search_scripts_web_search_main",
+      "label": "main()",
+      "degree": 5
+    },
+    {
+      "id": "index_listdownloadfiles",
+      "label": "listDownloadFiles()",
+      "degree": 5
+    }
+  ],
+  "surprises": [
+    {
+      "source": "attachAxiosRateLimitLogger()",
+      "target": "logAxiosError()",
+      "source_files": [
+        "utils/axiosInterceptors.js",
+        "utils/networkLogger.js"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "cross-file semantic connection"
+    },
+    {
+      "source": "attachAxiosRateLimitLogger()",
+      "target": "logAxiosRequest()",
+      "source_files": [
+        "utils/axiosInterceptors.js",
+        "utils/networkLogger.js"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "cross-file semantic connection"
+    },
+    {
+      "source": "attachAxiosRateLimitLogger()",
+      "target": "logRateLimit()",
+      "source_files": [
+        "utils/axiosInterceptors.js",
+        "utils/networkLogger.js"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "cross-file semantic connection"
+    }
+  ],
+  "tokens": {
+    "input": 0,
+    "output": 0
+  }
+}

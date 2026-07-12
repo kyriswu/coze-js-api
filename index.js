@@ -1094,15 +1094,63 @@ import tencentapi from './utils/ThirdParrtyApi/tencentapi.js';
 import firecrawlTool from './utils/ThirdParrtyApi/firecrawl.js';
 
 const downloadsDir = path.resolve(path.join(__dirname, 'downloads'));
+const persistentDownloadsDir = path.resolve(path.join(downloadsDir, 'persistent'));
 const uploadChunksDir = path.resolve(path.join(downloadsDir, '.upload_chunks'));
-
-const getFilePublicUrl = (req, fileName) => {
-    const encodedName = encodeURIComponent(fileName);
-    return `${req.protocol}://${req.get('host')}/downloads/${encodedName}`;
+const fileTransferStorageMap = {
+    temp: {
+        key: 'temp',
+        label: '临时文件',
+        dir: downloadsDir,
+        publicPrefix: '/downloads',
+    },
+    persistent: {
+        key: 'persistent',
+        label: '永久文件',
+        dir: persistentDownloadsDir,
+        publicPrefix: '/downloads/persistent',
+    },
 };
 
-const buildFileAccessCountKey = (fileName) => `file_transfer:access_count:${sanitizeUploadFileName(fileName)}`;
-const buildFileAccessHourKey = (fileName, hourId) => `file_transfer:access_hour:${sanitizeUploadFileName(fileName)}:${hourId}`;
+const sanitizeStoragePathSegment = (value = '') => {
+    const safeValue = String(value || '').trim().replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 160);
+    return safeValue || '';
+};
+
+const normalizeFileTransferStorage = (rawStorage, { allowAll = false } = {}) => {
+    const normalized = String(rawStorage || '').trim().toLowerCase();
+    if (allowAll && normalized === 'all') {
+        return 'all';
+    }
+    return normalized === 'persistent' ? 'persistent' : 'temp';
+};
+
+const getFileTransferStorageConfig = (rawStorage, options = {}) => {
+    const storageKey = normalizeFileTransferStorage(rawStorage, options);
+    if (storageKey === 'all') {
+        return null;
+    }
+    return fileTransferStorageMap[storageKey] || fileTransferStorageMap.temp;
+};
+
+const buildStorageRelativePath = (storageKey, fileName) => {
+    const safeName = sanitizeUploadFileName(fileName);
+    return storageKey === 'persistent' ? `persistent/${safeName}` : safeName;
+};
+
+const buildTrackedFileKey = (relativePath = '') => String(relativePath || '')
+    .split('/')
+    .map((part) => sanitizeStoragePathSegment(part))
+    .filter(Boolean)
+    .join('__');
+
+const getFilePublicUrl = (req, fileName, storageKey = 'temp') => {
+    const storage = getFileTransferStorageConfig(storageKey);
+    const encodedName = encodeURIComponent(sanitizeUploadFileName(fileName));
+    return `${req.protocol}://${req.get('host')}${storage.publicPrefix}/${encodedName}`;
+};
+
+const buildFileAccessCountKey = (relativePath) => `file_transfer:access_count:${buildTrackedFileKey(relativePath)}`;
+const buildFileAccessHourKey = (relativePath, hourId) => `file_transfer:access_hour:${buildTrackedFileKey(relativePath)}:${hourId}`;
 
 const formatHourId = (date) => {
     const year = date.getFullYear();
@@ -1135,21 +1183,24 @@ const sanitizeUploadFileName = (rawName = '') => {
     return safeName || 'upload.bin';
 };
 
-const buildSafeUploadTarget = (fileName) => {
+const buildSafeUploadTarget = (fileName, rawStorage = 'temp') => {
+    const storage = getFileTransferStorageConfig(rawStorage);
     const safeName = sanitizeUploadFileName(fileName);
     const parsedExt = path.extname(safeName).slice(0, 16);
     const baseName = path.basename(safeName, parsedExt).replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 80) || 'upload';
     const ext = path.extname(safeName).slice(0, 16);
     const uniqueFileName = `${baseName}-${Date.now()}-${crypto.randomBytes(4).toString('hex')}${ext || parsedExt}`;
-    const targetPath = path.resolve(path.join(downloadsDir, uniqueFileName));
+    const targetPath = path.resolve(path.join(storage.dir, uniqueFileName));
 
-    if (!targetPath.startsWith(`${downloadsDir}${path.sep}`)) {
+    if (!targetPath.startsWith(`${storage.dir}${path.sep}`)) {
         throw new Error('非法文件路径');
     }
 
     return {
+        storage: storage.key,
         fileName: uniqueFileName,
         filePath: targetPath,
+        relativePath: buildStorageRelativePath(storage.key, uniqueFileName),
     };
 };
 
@@ -1174,23 +1225,69 @@ const buildChunkSessionDir = (uploadId) => {
     };
 };
 
-const buildSafeExistingFilePath = (fileName) => {
+const buildSafeExistingFilePath = (fileName, rawStorage = 'temp') => {
+    const storage = getFileTransferStorageConfig(rawStorage);
     const safeName = sanitizeUploadFileName(fileName);
-    const filePath = path.resolve(path.join(downloadsDir, safeName));
+    const filePath = path.resolve(path.join(storage.dir, safeName));
 
-    if (!filePath.startsWith(`${downloadsDir}${path.sep}`)) {
+    if (!filePath.startsWith(`${storage.dir}${path.sep}`)) {
         throw new Error('非法文件路径');
     }
 
     return {
+        storage: storage.key,
         fileName: safeName,
         filePath,
+        relativePath: buildStorageRelativePath(storage.key, safeName),
     };
 };
 
-const listDownloadFiles = async (req, searchKeyword = '') => {
+const migrateFileAccessStats = async (sourceRelativePath, targetRelativePath) => {
+    if (!sourceRelativePath || !targetRelativePath || sourceRelativePath === targetRelativePath) {
+        return;
+    }
+
+    const totalSourceKey = buildFileAccessCountKey(sourceRelativePath);
+    const totalTargetKey = buildFileAccessCountKey(targetRelativePath);
+    const hourIds = getLast24HourIds();
+    const sourceHourKeys = hourIds.map((hourId) => buildFileAccessHourKey(sourceRelativePath, hourId));
+    const targetHourKeys = hourIds.map((hourId) => buildFileAccessHourKey(targetRelativePath, hourId));
+
+    const [sourceTotalRaw, targetTotalRaw, sourceHoursRaw, targetHoursRaw] = await Promise.all([
+        redis.get(totalSourceKey),
+        redis.get(totalTargetKey),
+        sourceHourKeys.length > 0 ? redis.mget(sourceHourKeys) : [],
+        targetHourKeys.length > 0 ? redis.mget(targetHourKeys) : [],
+    ]);
+
+    const sourceTotal = Number.parseInt(String(sourceTotalRaw || '0'), 10);
+    const targetTotal = Number.parseInt(String(targetTotalRaw || '0'), 10);
+    const multi = redis.multi();
+
+    multi.set(totalTargetKey, String((Number.isNaN(sourceTotal) ? 0 : sourceTotal) + (Number.isNaN(targetTotal) ? 0 : targetTotal)));
+    multi.del(totalSourceKey);
+
+    hourIds.forEach((hourId, index) => {
+        const sourceValue = Number.parseInt(String(sourceHoursRaw?.[index] || '0'), 10);
+        const targetValue = Number.parseInt(String(targetHoursRaw?.[index] || '0'), 10);
+        const merged = (Number.isNaN(sourceValue) ? 0 : sourceValue) + (Number.isNaN(targetValue) ? 0 : targetValue);
+        const targetHourKey = targetHourKeys[index];
+        const sourceHourKey = sourceHourKeys[index];
+
+        if (merged > 0) {
+            multi.set(targetHourKey, String(merged));
+            multi.expire(targetHourKey, 60 * 60 * 48);
+        }
+        multi.del(sourceHourKey);
+    });
+
+    await multi.exec();
+};
+
+const listStorageFiles = async (req, storage, searchKeyword = '') => {
     const keyword = String(searchKeyword || '').trim().toLowerCase();
-    const entries = await fs.promises.readdir(downloadsDir, { withFileTypes: true });
+    await fs.promises.mkdir(storage.dir, { recursive: true });
+    const entries = await fs.promises.readdir(storage.dir, { withFileTypes: true });
     const files = [];
 
     for (const entry of entries) {
@@ -1203,18 +1300,37 @@ const listDownloadFiles = async (req, searchKeyword = '') => {
             continue;
         }
 
-        const fullPath = path.join(downloadsDir, fileName);
+        const fullPath = path.join(storage.dir, fileName);
         const stats = await fs.promises.stat(fullPath);
         const createdAt = stats.birthtimeMs > 0 ? stats.birthtime : stats.mtime;
+        const relativePath = buildStorageRelativePath(storage.key, fileName);
 
         files.push({
             name: fileName,
+            storage: storage.key,
+            storageLabel: storage.label,
+            relativePath,
             size: stats.size,
             fileType: path.extname(fileName).replace('.', '').toLowerCase() || 'no_ext',
             createdAt: createdAt.toISOString(),
             updatedAt: stats.mtime.toISOString(),
-            url: getFilePublicUrl(req, fileName),
+            url: getFilePublicUrl(req, fileName, storage.key),
         });
+    }
+
+    return files;
+};
+
+const listDownloadFiles = async (req, searchKeyword = '', rawStorage = 'all') => {
+    const storageKey = normalizeFileTransferStorage(rawStorage, { allowAll: true });
+    const storages = storageKey === 'all'
+        ? Object.values(fileTransferStorageMap)
+        : [getFileTransferStorageConfig(storageKey)];
+    const files = [];
+
+    for (const storage of storages) {
+        const storageFiles = await listStorageFiles(req, storage, searchKeyword);
+        files.push(...storageFiles);
     }
 
     if (files.length === 0) {
@@ -1225,13 +1341,13 @@ const listDownloadFiles = async (req, searchKeyword = '') => {
     const hourKeyCountPerFile = hourIds.length;
 
     try {
-        const accessKeys = files.map((item) => buildFileAccessCountKey(item.name));
+        const accessKeys = files.map((item) => buildFileAccessCountKey(item.relativePath));
         const rawCounts = await redis.mget(accessKeys);
 
         const flat24hKeys = [];
         files.forEach((item) => {
             hourIds.forEach((hourId) => {
-                flat24hKeys.push(buildFileAccessHourKey(item.name, hourId));
+                flat24hKeys.push(buildFileAccessHourKey(item.relativePath, hourId));
             });
         });
 
@@ -1357,7 +1473,9 @@ app.get('/network-dashboard/metrics', async (req, res) => {
 app.get('/file-transfer/files', async (req, res) => {
     try {
         await fs.promises.mkdir(downloadsDir, { recursive: true });
-        const allFiles = await listDownloadFiles(req, req.query.search);
+        await fs.promises.mkdir(persistentDownloadsDir, { recursive: true });
+        const storage = normalizeFileTransferStorage(req.query.storage, { allowAll: true });
+        const allFiles = await listDownloadFiles(req, req.query.search, storage);
         const fileType = String(req.query.fileType || 'all').trim().toLowerCase();
         const sortBy = ['updatedAt', 'size', 'name', 'createdAt'].includes(String(req.query.sortBy))
             ? String(req.query.sortBy)
@@ -1412,6 +1530,7 @@ app.get('/file-transfer/files', async (req, res) => {
                 pageSize,
                 totalPages,
                 files: pagedFiles,
+                storage,
                 fileType,
                 sortBy,
                 sortOrder,
@@ -1435,6 +1554,7 @@ app.get('/file-transfer/files', async (req, res) => {
 
 app.delete('/file-transfer/file', async (req, res) => {
     const rawName = req.query.filename || req.body?.filename;
+    const storage = normalizeFileTransferStorage(req.query.storage || req.body?.storage);
     if (!rawName) {
         return res.status(400).send({
             code: -1,
@@ -1443,13 +1563,13 @@ app.delete('/file-transfer/file', async (req, res) => {
     }
 
     try {
-        const { fileName, filePath } = buildSafeExistingFilePath(rawName);
+        const { fileName, filePath } = buildSafeExistingFilePath(rawName, storage);
         await fs.promises.access(filePath, fs.constants.F_OK);
         await fs.promises.unlink(filePath);
         return res.send({
             code: 0,
             msg: 'success',
-            data: { name: fileName },
+            data: { name: fileName, storage },
         });
     } catch (error) {
         if (error.code === 'ENOENT') {
@@ -1462,6 +1582,81 @@ app.delete('/file-transfer/file', async (req, res) => {
         return res.status(500).send({
             code: -1,
             msg: '文件删除失败',
+        });
+    }
+});
+
+app.post('/file-transfer/file/promote', async (req, res) => {
+    const rawName = req.query.filename || req.body?.filename;
+    const sourceStorage = normalizeFileTransferStorage(req.query.storage || req.body?.storage);
+
+    if (!rawName) {
+        return res.status(400).send({
+            code: -1,
+            msg: 'filename 不能为空',
+        });
+    }
+
+    if (sourceStorage !== 'temp') {
+        return res.status(400).send({
+            code: -1,
+            msg: '仅支持将临时文件转为永久文件',
+        });
+    }
+
+    try {
+        const source = buildSafeExistingFilePath(rawName, 'temp');
+        const target = buildSafeExistingFilePath(rawName, 'persistent');
+
+        await fs.promises.access(source.filePath, fs.constants.F_OK);
+        await fs.promises.mkdir(persistentDownloadsDir, { recursive: true });
+
+        try {
+            await fs.promises.access(target.filePath, fs.constants.F_OK);
+            return res.status(409).send({
+                code: -1,
+                msg: '永久目录已存在同名文件',
+            });
+        } catch (targetError) {
+            if (targetError.code !== 'ENOENT') {
+                throw targetError;
+            }
+        }
+
+        await fs.promises.rename(source.filePath, target.filePath);
+        try {
+            await migrateFileAccessStats(source.relativePath, target.relativePath);
+        } catch (redisError) {
+            console.error('Error migrating file access stats during promote:', redisError.message);
+        }
+
+        const stats = await fs.promises.stat(target.filePath);
+        const createdAt = stats.birthtimeMs > 0 ? stats.birthtime : stats.mtime;
+
+        return res.send({
+            code: 0,
+            msg: 'success',
+            data: {
+                name: target.fileName,
+                storage: 'persistent',
+                relativePath: target.relativePath,
+                size: stats.size,
+                createdAt: createdAt.toISOString(),
+                updatedAt: stats.mtime.toISOString(),
+                url: getFilePublicUrl(req, target.fileName, 'persistent'),
+            },
+        });
+    } catch (error) {
+        if (error.code === 'ENOENT') {
+            return res.status(404).send({
+                code: -1,
+                msg: '文件不存在',
+            });
+        }
+        console.error('Error promoting file in /file-transfer/file/promote:', error.message);
+        return res.status(500).send({
+            code: -1,
+            msg: '转为永久文件失败',
         });
     }
 });
@@ -1483,10 +1678,12 @@ app.post('/file-transfer/upload', express.raw({ type: '*/*', limit: globalBodyLi
     }
 
     const rawFileName = req.query.filename || req.headers['x-file-name'] || 'upload.bin';
+    const storage = normalizeFileTransferStorage(req.query.storage);
 
     try {
-        await fs.promises.mkdir(downloadsDir, { recursive: true });
-        const { fileName, filePath } = buildSafeUploadTarget(rawFileName);
+        const storageConfig = getFileTransferStorageConfig(storage);
+        await fs.promises.mkdir(storageConfig.dir, { recursive: true });
+        const { fileName, filePath, relativePath } = buildSafeUploadTarget(rawFileName, storage);
         await fs.promises.writeFile(filePath, req.body);
         const stats = await fs.promises.stat(filePath);
 
@@ -1495,9 +1692,11 @@ app.post('/file-transfer/upload', express.raw({ type: '*/*', limit: globalBodyLi
             msg: 'success',
             data: {
                 name: fileName,
+                storage,
+                relativePath,
                 size: stats.size,
                 updatedAt: stats.mtime.toISOString(),
-                url: getFilePublicUrl(req, fileName),
+                url: getFilePublicUrl(req, fileName, storage),
             },
         });
     } catch (error) {
@@ -1512,6 +1711,7 @@ app.post('/file-transfer/upload', express.raw({ type: '*/*', limit: globalBodyLi
 app.post('/file-transfer/upload/chunk', express.raw({ type: '*/*', limit: globalBodyLimit }), async (req, res) => {
     const uploadId = req.query.uploadId;
     const rawFileName = req.query.filename || req.headers['x-file-name'] || 'upload.bin';
+    const storage = normalizeFileTransferStorage(req.query.storage);
     const rawIndex = Number.parseInt(String(req.query.index || '0'), 10);
     const rawTotalChunks = Number.parseInt(String(req.query.totalChunks || '0'), 10);
 
@@ -1543,6 +1743,7 @@ app.post('/file-transfer/upload/chunk', express.raw({ type: '*/*', limit: global
             JSON.stringify({
                 uploadId: safeUploadId,
                 fileName: safeName,
+                storage,
                 totalChunks: rawTotalChunks,
                 updatedAt: new Date().toISOString(),
             }),
@@ -1572,6 +1773,7 @@ app.post('/file-transfer/upload/chunk', express.raw({ type: '*/*', limit: global
 app.post('/file-transfer/upload/complete', async (req, res) => {
     const uploadId = req.body?.uploadId || req.query.uploadId;
     const rawFileName = req.body?.filename || req.query.filename || 'upload.bin';
+    const storage = normalizeFileTransferStorage(req.body?.storage || req.query.storage);
     const parsedTotalChunks = Number.parseInt(String(req.body?.totalChunks || req.query.totalChunks || '0'), 10);
 
     if (Number.isNaN(parsedTotalChunks) || parsedTotalChunks < 1) {
@@ -1582,9 +1784,10 @@ app.post('/file-transfer/upload/complete', async (req, res) => {
     }
 
     try {
-        await fs.promises.mkdir(downloadsDir, { recursive: true });
+        const storageConfig = getFileTransferStorageConfig(storage);
+        await fs.promises.mkdir(storageConfig.dir, { recursive: true });
         const { sessionDir } = buildChunkSessionDir(uploadId);
-        const { fileName, filePath } = buildSafeUploadTarget(rawFileName);
+        const { fileName, filePath, relativePath } = buildSafeUploadTarget(rawFileName, storage);
 
         for (let i = 0; i < parsedTotalChunks; i += 1) {
             const partPath = path.join(sessionDir, `${i}.part`);
@@ -1605,11 +1808,13 @@ app.post('/file-transfer/upload/complete', async (req, res) => {
             code: 0,
             msg: 'success',
             data: {
-            uploadId: sanitizeUploadSessionId(uploadId),
+                uploadId: sanitizeUploadSessionId(uploadId),
                 name: fileName,
+                storage,
+                relativePath,
                 size: stats.size,
                 updatedAt: stats.mtime.toISOString(),
-                url: getFilePublicUrl(req, fileName),
+                url: getFilePublicUrl(req, fileName, storage),
             },
         });
     } catch (error) {
@@ -1630,14 +1835,17 @@ const createFileAccessTrackMiddleware = () => (req, res, next) => {
         }
     })();
 
-    const fileName = path.basename(decodedPath || '').trim();
-    if (!fileName || fileName === '/' || fileName === '.') {
+    const relativePath = String(decodedPath || '')
+        .split(/[\\/]+/)
+        .map((part) => sanitizeStoragePathSegment(part))
+        .filter(Boolean)
+        .join('/');
+    if (!relativePath) {
         return next();
     }
 
-    const safeName = sanitizeUploadFileName(fileName);
-    const accessKey = buildFileAccessCountKey(safeName);
-    const hourKey = buildFileAccessHourKey(safeName, formatHourId(new Date()));
+    const accessKey = buildFileAccessCountKey(relativePath);
+    const hourKey = buildFileAccessHourKey(relativePath, formatHourId(new Date()));
 
     res.on('finish', () => {
         if (res.statusCode >= 200 && res.statusCode < 400) {

@@ -1,5 +1,61 @@
 # PLAN
 
+## 2026-07-12 / add-file-transfer-promote-temp-to-persistent
+
+### Objective
+为 `file-transfer` 增加“一键转为永久文件”动作，让已上传到临时区的文件可以直接迁移到 `downloads/persistent`。
+
+### Context
+第一版已经完成临时区与永久区分离，但临时文件若想保留仍需要重新上传。当前增量只补“temp -> persistent”提升动作，不扩展为通用文件移动系统。
+
+### Scope
+- `index.js`：新增受限 promote 路由，并迁移访问统计 key。
+- `views/file-transfer.ejs`：为临时文件增加“转为永久”按钮，覆盖列表项和详情抽屉。
+
+### Plan
+1. 增加只允许 `temp -> persistent` 的后端 promote 接口。
+2. 迁移磁盘文件，并同步转移访问统计数据。
+3. 在 UI 中仅对临时文件展示“转为永久”操作。
+4. 执行最小语法与模板渲染校验。
+5. 同步 QA/RELEASE/CHANGELOG。
+
+### Risks
+- 若永久目录存在同名文件，提升动作需要阻止覆盖。
+- 若不迁移访问统计，热度数据会在提升后丢失连续性。
+
+### Validation
+- `node --check index.js`
+- `node --input-type=module -e "import ejs from 'ejs'; await ejs.renderFile('views/file-transfer.ejs',{seo:{}}); console.log('file-transfer.ejs render ok');"`
+
+## 2026-07-12 / add-file-transfer-persistent-storage-first-slice
+
+### Objective
+为 `file-transfer` 增加第一版永久文件区，使用白名单目录 `downloads/persistent`，让手动保留文件不再被外部 15 天清理任务误删。
+
+### Context
+当前 `file-transfer` 的上传、列表和删除都默认围绕 `downloads` 根目录工作，而外部定时任务会清理其中超过 15 天的文件。需要在不改造其他下载类接口的前提下，先让 `file-transfer` 支持临时区和永久区双区模型。
+
+### Scope
+- `index.js`：新增 `temp/persistent` 存储白名单、storage 感知的上传/列表/删除逻辑、路径级访问统计键。
+- `views/file-transfer.ejs`：新增上传位置选择、目录范围筛选、存储标签和 storage 感知删除。
+- 不扩展到其他写入 `downloads/` 的业务接口。
+
+### Plan
+1. 增加服务端 `storage=temp|persistent` 白名单映射，仅允许写入 `downloads/` 或 `downloads/persistent/`。
+2. 让 `/file-transfer/files`、`/file-transfer/upload`、分片上传完成接口和删除接口理解 `storage` 参数。
+3. 返回 `storage` 与 `relativePath` 元数据，并把访问统计 key 从“仅文件名”升级为“相对路径”。
+4. 在 file-transfer 页面增加上传目标选择与目录范围筛选。
+5. 执行最小语法与模板渲染校验。
+6. 同步 QA/RELEASE/CHANGELOG。
+
+### Risks
+- 若后续外部清理任务仍递归扫描 `downloads/persistent`，永久文件仍可能被误删，需要同步清理策略。
+- 本轮未实现“临时文件转永久文件”的移动操作，仍需重新上传到永久区。
+
+### Validation
+- `node --check index.js`
+- `node --input-type=module -e "import ejs from 'ejs'; await ejs.renderFile('views/file-transfer.ejs',{seo:{}}); console.log('file-transfer.ejs render ok');"`
+
 ## 2026-07-11 / simplify-api-doc-template-display-for-xiaohongshu-page
 
 ### Objective

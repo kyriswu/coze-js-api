@@ -1,6 +1,35 @@
 # Current Plan
 
 ## Goal
+Add a one-click `file-transfer` action that moves a temporary file into the persistent whitelist directory `downloads/persistent`.
+
+## Context
+The first storage split is already in place with `temp` and `persistent` areas. The next slice is a direct promotion flow so a file already uploaded to the temp area can be moved into `downloads/persistent` without re-uploading it.
+
+## Scope / Impact
+- Primary backend module: `index.js`
+- Primary frontend view: `views/file-transfer.ejs`
+- Supporting docs sync: `docs/PLAN.md`, `docs/QA.md`, `docs/RELEASE.md`, `CHANGELOG.md`
+- Keep existing upload/list/delete behavior compatible; add one storage promotion action for temp files only.
+
+## Implementation Steps
+1. Add a dedicated file-transfer move endpoint that only accepts `temp -> persistent` promotion.
+2. Move the file on disk without exposing arbitrary paths, and migrate access counters from the temp relative path to the persistent relative path.
+3. Expose a one-click UI action for temp files in the list and detail drawer; hide it for persistent files.
+4. Run focused syntax/render validation.
+5. Sync delivery/QA docs for this implementation batch.
+
+## Risks
+- If the move action accepts arbitrary source/target storage values, it could become a generic file move surface.
+- If access counters are not migrated, promoted files will appear to lose historical popularity data.
+- UI changes must avoid showing “转为永久” on files already in the persistent area.
+
+## Validation
+- `node --check index.js`
+- `node --input-type=module -e "import ejs from 'ejs'; await ejs.renderFile('views/file-transfer.ejs',{seo:{}}); console.log('file-transfer.ejs render ok');"`
+# Current Plan
+
+## Goal
 Simplify the `/docs/xiaohongshu/search_notes_v2` template presentation by removing upstream source display and footer template note.
 
 ## Context

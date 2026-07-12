@@ -1,5 +1,23 @@
 # CHANGELOG
 
+## 2026-07-12
+
+### Added
+- `file-transfer` 新增一键“转为永久文件”动作，可将临时区文件直接迁移到 `downloads/persistent`。
+
+### Changed
+- 新增 `POST /file-transfer/file/promote`，且仅允许 `temp -> persistent`。
+- 提升文件时同步迁移访问统计，避免转永久后热度数据丢失。
+- 文件列表卡片和详情抽屉对临时文件显示“转为永久”按钮。
+
+## 2026-07-12
+
+### Changed
+- `file-transfer` 新增第一版永久文件区支持，可通过 `storage=persistent` 将文件上传到 `downloads/persistent`。
+- `GET /file-transfer/files`、上传分片完成和删除流程新增 storage 感知，列表项返回 `storage` 与 `relativePath` 元数据。
+- `views/file-transfer.ejs` 新增上传位置选择、目录范围筛选和存储位置展示。
+- 文件访问统计 key 从文件名升级为相对路径，避免临时区与永久区同名文件串统计。
+
 ## 2026-07-11
 
 ### Changed
