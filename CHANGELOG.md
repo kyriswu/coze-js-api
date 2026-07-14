@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## 2026-07-14
+
+### Added
+- 新增 Hermes chat-completions 薄代理 `POST /deployment`，用于转发到 `https://hermes.devtool.uk/v1/chat/completions`。
+- 新增 `utils/ThirdParrtyApi/hermes-agent.js` 作为 Hermes 上游封装。
+
+### Changed
+- `POST /deployment` 保持上游 JSON 与状态码直通，不再额外包装响应结构。
+- Hermes 上游授权改为固定值 `Bearer 4f3f1c7d9b2a6e8c5d0f9a1b3e7c2d4f6`。
+- `POST /deployment` 按最终客户端 IP 做一次性调用限制，适配多层代理场景。
+- `POST /deployment` 在 IP 超限后要求输入可用 unkey 才能继续调用。
+
 ## 2026-07-12
 
 ### Added

@@ -1,6 +1,40 @@
 # RELEASE
 
 ## Enhancement
+2026-07-14 / add-hermes-deployment-proxy
+
+### Summary
+新增 Hermes chat-completions 薄代理接口，并通过 `POST /deployment` 对外暴露。
+
+### What Changed
+- 新增 `utils/ThirdParrtyApi/hermes-agent.js`
+	- 封装 `https://hermes.devtool.uk/v1/chat/completions` 的 JSON POST 调用。
+	- 固定使用授权值 `Bearer 4f3f1c7d9b2a6e8c5d0f9a1b3e7c2d4f6`。
+- 更新 `index.js`
+	- 新增 `POST /deployment`。
+	- 直接回传 Hermes 上游的状态码与 JSON 响应。
+	- 基于最终客户端 IP 增加一次性调用限制，同一 IP 仅允许成功调用一次。
+	- 当同一 IP 达到免费次数后，需要提供可用 unkey 才能继续调用。
+
+### Impact
+#### API/Behavior
+- 新增只读代理入口：`POST /deployment`。
+- 默认行为保持薄代理，不额外包装 Hermes 的返回内容。
+- `POST /deployment` 对最终客户端 IP 做一次性限制，适配多层代理链路。
+- `POST /deployment` 在免费次数耗尽后要求提供 unkey，作为继续使用的兜底通道。
+
+#### Internal Modules
+- 影响 `index.js`。
+- 新增 `utils/ThirdParrtyApi/hermes-agent.js`。
+
+### Breaking Changes
+- none
+
+### Rollback Notes
+- 删除 `index.js` 中 `/deployment` 路由。
+- 删除 `utils/ThirdParrtyApi/hermes-agent.js`。
+
+## Enhancement
 2026-07-12 / add-file-transfer-promote-temp-to-persistent
 
 ### Summary

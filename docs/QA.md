@@ -1,6 +1,40 @@
 # QA
 
 ## Iteration
+2026-07-14 / add-hermes-deployment-proxy
+
+## Test Matrix
+| Case ID | Step | Expected | Actual | Status |
+|---|---|---|---|---|
+| QA-01 | `node --check utils/ThirdParrtyApi/hermes-agent.js` | 新增 Hermes 客户端语法正确 | 命令执行无输出 | pass |
+| QA-02 | `node --check index.js` | 新增 `/deployment` 路由后主入口语法正确 | 命令执行无输出 | pass |
+| QA-03 | 带 `X-Forwarded-For` 的 `/deployment` 冒烟请求 | 通过最终 IP 限制并返回 Hermes 响应 | 返回 `{"code":-1,"msg":"timeout of 30000ms exceeded"}` | conditional |
+| QA-04 | 同一 IP 的第二次 `/deployment` 请求且不带 unkey | 命中免费次数限制 | 返回 429 且提示输入 unkey | pass |
+
+## Command Evidence
+```bash
+cd /root/coze-js-api && node --check utils/ThirdParrtyApi/hermes-agent.js && node --check index.js
+cd /root/coze-js-api && curl -s -o /tmp/hermes_deployment_test.out -w '%{http_code}\n' -X POST http://localhost:3000/deployment -H 'Content-Type: application/json' -H 'X-Forwarded-For: 203.0.113.10, 10.0.0.2' -d '{"model":"hermes-agent","messages":[{"role":"system","content":"你是一个能使用终端和文件工具的 Hermes Agent。"},{"role":"user","content":"你好"}],"stream":false}'
+```
+
+## Manual Checks
+- 已静态确认 Hermes 封装会固定使用约定的 Authorization 值，不再读取请求头或环境变量。
+- 已静态确认 `/deployment` 会优先从 `X-Forwarded-For`、`Forwarded`、`X-Real-IP` 中解析最终客户端 IP，并对同一 IP 仅允许一次成功调用。
+- 已静态确认同一 IP 在免费次数耗尽后，若未提供 unkey，会被拒绝并提示输入 unkey。
+- 已静态确认 `/deployment` 会把上游返回的状态码与 JSON 直接回传，不再额外包装。
+- 已执行一次本地冒烟请求，Hermes 上游返回超时错误 `timeout of 30000ms exceeded`。
+
+## Defects Found
+| ID | Severity | Description | Status |
+|---|---|---|---|
+| BUG-01 | low | Hermes 上游在本地冒烟中返回超时，尚未完成成功联调 | open |
+
+## Final QA Verdict
+- [ ] pass
+- [x] conditional pass
+- [ ] fail
+
+## Iteration
 2026-07-12 / add-file-transfer-promote-temp-to-persistent
 
 ## Test Matrix

@@ -1,4 +1,36 @@
+新增限制要求每个最终客户端 IP 只能成功调用一次，若超出免费次数则需要输入 unkey 才能继续调用。
 # PLAN
+
+## 2026-07-14 / add-hermes-deployment-proxy
+
+### Objective
+为 Hermes 聊天完成接口增加一个薄代理入口，并通过 `POST /deployment` 暴露给内部调用方。
+
+### Context
+用户提供了 Hermes 上游 `chat/completions` 的完整 curl 示例。当前实现采用轻量转发：保留 `model`、`messages`、`stream` 请求形态，并使用固定授权值 `4f3f1c7d9b2a6e8c5d0f9a1b3e7c2d4f6`。新增限制要求每个最终客户端 IP 只能成功调用一次。
+
+### Scope
+- `utils/ThirdParrtyApi/hermes-agent.js`：Hermes 上游调用封装。
+- `index.js`：新增 `POST /deployment`。
+
+### Plan
+1. 新增 Hermes 封装模块，向 `/v1/chat/completions` 发起 JSON POST。
+2. 新增 `/deployment` 路由，转发请求体并回传上游状态与 JSON。
+3. 固定使用指定的 Hermes Authorization 值，不再从请求或环境变量解析。
+4. 基于最终客户端 IP 做一次性调用限制，兼容多层代理链路。
+5. 当 IP 超限时，要求提供可用 unkey 才允许继续调用。
+6. 保持错误处理简洁，避免引入额外响应包装层。
+7. 执行语法验证并同步 QA/RELEASE/CHANGELOG。
+
+### Risks
+- 固定授权值会让凭据轮换变得更依赖代码更新。
+- 代理链路识别若被上游网关篡改，客户端 IP 判定会受到影响；当前采用 `X-Forwarded-For`/`Forwarded`/`X-Real-IP` 的常见优先级。
+- 超限后的 unkey 入口若余额不足，会拒绝继续调用。
+- 过度校验会偏离“薄代理”目标，因此仅做最小必要归一化。
+
+### Validation
+- `node --check utils/ThirdParrtyApi/hermes-agent.js`
+- `node --check index.js`
 
 ## 2026-07-12 / add-file-transfer-promote-temp-to-persistent
 

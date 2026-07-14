@@ -1,6 +1,33 @@
 # Current Plan
 
 ## Goal
+Add a Hermes chat-completions proxy interface and expose it through a new `/deployment` endpoint.
+
+## Context
+The user provided a direct `curl` example for `https://hermes.devtool.uk/v1/chat/completions` with a bearer token, `model: hermes-agent`, and a simple `messages` array. The implementation should be a thin wrapper that forwards that request shape with minimal behavior changes.
+
+## Scope / Impact
+- Primary backend module: `utils/ThirdParrtyApi/hermes-agent.js`
+- Primary route wiring: `index.js`
+- Docs sync: `docs/PLAN.md`, `docs/QA.md`, `docs/RELEASE.md`, `CHANGELOG.md`
+- Keep the response as a direct upstream passthrough unless the upstream call fails.
+
+## Implementation Steps
+1. Add a dedicated Hermes client module that posts to `/v1/chat/completions` with the provided authorization token and JSON payload.
+2. Add a `/deployment` endpoint in `index.js` that forwards the request body to the Hermes client.
+3. Keep request and response handling thin, preserving upstream JSON and status details where possible.
+4. Run focused syntax validation.
+5. Sync QA/release/changelog notes for this batch.
+
+## Risks
+- Hardcoding a bearer token would make rotation harder; prefer env-driven configuration if the repo already supports it.
+- Passing arbitrary request bodies through without validation could let unsupported upstream fields leak through, but that is acceptable for a thin proxy if the goal is direct compatibility.
+
+## Validation
+- `node --check utils/ThirdParrtyApi/hermes-agent.js`
+- `node --check index.js`
+
+## Goal
 Add a one-click `file-transfer` action that moves a temporary file into the persistent whitelist directory `downloads/persistent`.
 
 ## Context
