@@ -1,6 +1,35 @@
 # QA
 
 ## Iteration
+2026-07-15 / file-transfer-upload-full-url
+
+## Test Matrix
+| Case ID | Step | Expected | Actual | Status |
+|---|---|---|---|---|
+| QA-01 | `node --check index.js` | file-transfer 上传完整链接逻辑所在入口文件语法正确 | 命令执行无输出 | pass |
+
+## Command Evidence
+```bash
+cd /root/coze-js-api && node --check index.js
+```
+
+## Manual Checks
+- 静态确认 `getFilePublicUrl` 使用当前请求的 `protocol` 与 `Host` 生成完整链接。
+- 静态确认 `POST /file-transfer/upload` 与 `POST /file-transfer/upload/complete` 均通过该逻辑返回 `data.url`。
+- 静态确认临时文件与永久文件分别使用 `/downloads/`、`/downloads/persistent/` 公开路径，文件名经 URL 编码。
+- 按需求未运行测试、未启动服务、未发起真实上传请求。
+
+## Defects Found
+| ID | Severity | Description | Status |
+|---|---|---|---|
+| BUG-01 | low | 未执行真实上传联调；本轮仅完成静态核查与语法检查 | open |
+
+## Final QA Verdict
+- [ ] pass
+- [x] conditional pass
+- [ ] fail
+
+## Iteration
 2026-07-14 / add-hermes-deployment-proxy
 
 ## Test Matrix

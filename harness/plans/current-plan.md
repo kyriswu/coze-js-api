@@ -1,6 +1,29 @@
 # Current Plan
 
 ## Goal
+Ensure file-transfer upload completion responses provide a full public URL generated from the request Host.
+
+## Scope / Impact
+- Primary backend module: `index.js`
+- Delivery records: `docs/plans/2026-07-15-file-transfer-upload-full-url-design.md`, `docs/QA.md`, `docs/RELEASE.md`, `CHANGELOG.md`
+- Preserve the existing `data.url` response field and all upload routes.
+
+## Implementation Steps
+1. [x] Keep one public URL helper for file-transfer storage locations.
+2. [x] Ensure both single-file upload and chunk-complete responses return the helper result.
+3. [x] Verify statically that returned links use request protocol, request Host, and encoded public path.
+4. [x] Run the requested syntax-only validation.
+5. [x] Update delivery records.
+
+## Risks
+- Reverse-proxy protocol forwarding must be configured correctly for HTTPS links; Host remains derived from the incoming request.
+- No fixed public hostname is introduced, so links intentionally follow the caller's Host.
+
+## Validation
+- `node --check index.js`
+- Passed with no output. Per request, no upload request, test, or service run was performed.
+
+## Goal
 Add a Hermes chat-completions proxy interface and expose it through a new `/deployment` endpoint.
 
 ## Context

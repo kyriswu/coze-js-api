@@ -1,5 +1,26 @@
 # RELEASE
 
+## Improvement
+2026-07-15 / file-transfer-upload-full-url
+
+### Summary
+`file-transfer` 上传完成响应统一返回基于当前请求域名的完整文件链接。
+
+### What Changed
+- `index.js`
+  - `POST /file-transfer/upload` 与 `POST /file-transfer/upload/complete` 的 `data.url` 均通过同一链接生成逻辑返回。
+  - 链接使用请求的协议和 Host；临时文件指向 `/downloads/`，永久文件指向 `/downloads/persistent/`。
+
+### Impact
+#### API/Behavior
+- 保持既有 `data.url` 字段与响应结构兼容；调用方可直接使用完整链接。
+
+### Breaking Changes
+- none
+
+### Rollback Notes
+- 恢复为原有的 `data.url` 生成逻辑。
+
 ## Enhancement
 2026-07-14 / add-hermes-deployment-proxy
 
