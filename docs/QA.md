@@ -1,6 +1,30 @@
 # QA
 
 ## Iteration
+2026-07-15 / file-transfer-upload-https-url
+
+## Test Matrix
+| Case ID | Step | Expected | Actual | Status |
+|---|---|---|---|---|
+| QA-01 | `node --check index.js` | HTTPS 链接生成逻辑所在入口文件语法正确 | 命令执行无输出 | pass |
+| QA-02 | 静态检查 `getFilePublicUrl` 调用点 | 普通上传与分片合并完成均返回 HTTPS `data.url` | helper 固定返回 `https://${req.get('host')}`；两个接口均复用 helper | pass |
+
+## Command Evidence
+```bash
+cd /root/coze-js-api && node --check index.js
+cd /root/coze-js-api && rg -n 'return `https://\$\{req\.get\('"'"'host'"'"'\)\}' index.js
+cd /root/coze-js-api && rg -n 'url: getFilePublicUrl\(req, fileName, storage\)' index.js
+```
+
+## Manual Checks
+- 未启动服务或发起真实上传请求；本轮完成语法与静态调用链核查。
+
+## Final QA Verdict
+- [ ] pass
+- [x] conditional pass
+- [ ] fail
+
+## Iteration
 2026-07-15 / file-transfer-upload-full-url
 
 ## Test Matrix

@@ -1262,7 +1262,7 @@ const buildTrackedFileKey = (relativePath = '') => String(relativePath || '')
 const getFilePublicUrl = (req, fileName, storageKey = 'temp') => {
     const storage = getFileTransferStorageConfig(storageKey);
     const encodedName = encodeURIComponent(sanitizeUploadFileName(fileName));
-    return `${req.protocol}://${req.get('host')}${storage.publicPrefix}/${encodedName}`;
+    return `https://${req.get('host')}${storage.publicPrefix}/${encodedName}`;
 };
 
 const buildFileAccessCountKey = (relativePath) => `file_transfer:access_count:${buildTrackedFileKey(relativePath)}`;

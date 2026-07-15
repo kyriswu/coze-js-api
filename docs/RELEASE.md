@@ -1,6 +1,27 @@
 # RELEASE
 
 ## Improvement
+2026-07-15 / file-transfer-upload-https-url
+
+### Summary
+`file-transfer` 上传完成响应统一返回 HTTPS 文件链接。
+
+### What Changed
+- `index.js`
+  - 共享链接生成逻辑固定使用 `https://`，并继续使用请求 Host、存储路径和已编码文件名。
+  - `POST /file-transfer/upload` 与 `POST /file-transfer/upload/complete` 均保持复用该逻辑。
+
+### Impact
+#### API/Behavior
+- 保持 `data.url` 字段和响应结构兼容；两个上传完成接口返回的链接协议由请求协议改为 HTTPS。
+
+### Breaking Changes
+- none
+
+### Rollback Notes
+- 恢复共享链接生成逻辑使用 `req.protocol`。
+
+## Improvement
 2026-07-15 / file-transfer-upload-full-url
 
 ### Summary

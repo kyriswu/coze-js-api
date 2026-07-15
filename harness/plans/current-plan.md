@@ -1,6 +1,28 @@
 # Current Plan
 
 ## Goal
+Return HTTPS public URLs from both file-transfer upload completion endpoints.
+
+## Scope / Impact
+- Primary backend module: `index.js`
+- Delivery records: `docs/plans/2026-07-15-file-transfer-upload-https-url-design.md`, `docs/QA.md`, `docs/RELEASE.md`, `CHANGELOG.md`
+- Preserve the existing Host-derived domain, public paths, response shape, and `data.url` field.
+
+## Implementation Steps
+1. [x] Change the shared file-transfer public URL helper to use HTTPS.
+2. [x] Verify direct upload and chunk-complete responses continue to reuse the helper.
+3. [x] Run focused syntax and static checks.
+4. [x] Update delivery records.
+
+## Risks
+- Callers that previously received an HTTP link will now receive the requested HTTPS link.
+- Host continues to be taken from the incoming request; deployments must send the intended Host header.
+
+## Validation
+- `node --check index.js` — passed with no output.
+- Static check confirmed `getFilePublicUrl` returns `https://${req.get('host')}` and both upload completion handlers reuse it.
+
+## Goal
 Ensure file-transfer upload completion responses provide a full public URL generated from the request Host.
 
 ## Scope / Impact

@@ -3,6 +3,7 @@
 ## 2026-07-15
 
 ### Changed
+- `POST /file-transfer/upload` 与 `POST /file-transfer/upload/complete` 的 `data.url` 现固定使用 HTTPS，保留请求 Host 和既有公开文件路径。
 - `file-transfer` 的普通上传和分片合并完成响应均在 `data.url` 返回当前请求域名下的完整可访问链接；临时和永久文件分别使用对应公开路径。
 
 ## 2026-07-14
