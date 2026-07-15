@@ -1,6 +1,34 @@
 # QA
 
 ## Iteration
+2026-07-15 / static-zip-deployment-executor
+
+## Test Matrix
+| Case ID | Step | Expected | Actual | Status |
+|---|---|---|---|---|
+| QA-01 | `node --check index.js && node --check utils/staticZipDeployment.js` | 路由与执行器语法正确 | host 与 app container 均通过 | pass |
+| QA-02 | `node --test test/staticZipDeployment.test.js` | 受信静态 ZIP 发布为 immutable URL | 通过，返回 `status=deployed` | pass |
+| QA-03 | 同测试：外部 ZIP URL | 不做远程抓取，返回 allowlist 拒绝 | 通过，`UNTRUSTED_ARTIFACT_URL` | pass |
+| QA-04 | 同测试：manifest SHA 不匹配 | 不创建 release，结构化拒绝 | 通过，`STATIC_VALIDATION_FAILED` | pass |
+
+## Command Evidence
+```bash
+cd /root/coze-js-api && node --check index.js && node --check utils/staticZipDeployment.js
+cd /root/coze-js-api && node --test test/staticZipDeployment.test.js
+docker exec coze-js-api-app-1 sh -lc 'node --check /app/index.js && node --check /app/utils/staticZipDeployment.js && node --test /app/test/staticZipDeployment.test.js'
+```
+
+## Manual Checks
+- 已真实执行私有链路冒烟：上传生成的合格 ZIP，`POST /deployment` 返回 HTTP `201` 与 `status=deployed`；返回的唯一 immutable HTTPS release URL 经公网复验为 HTTP `200`、`text/html` 且包含预期页面标记。
+- 已真实提交 `https://example.com/not-trusted.zip`：HTTP `422`，`reason=UNTRUSTED_ARTIFACT_URL`，未进行任意远程下载。
+- 对坏 ZIP 的自动回归测试确认只产生结构化拒绝，且无 `release-*` 目录残留。
+
+## Final QA Verdict
+- [x] pass
+- [ ] conditional pass
+- [ ] fail
+
+## Iteration
 2026-07-15 / file-transfer-upload-https-url
 
 ## Test Matrix

@@ -2,7 +2,13 @@
 
 ## 2026-07-15
 
+### Added
+- `POST /deployment` 现执行本地、受控的静态 ZIP 验证与发布：仅接受本服务上传目录中的 HTTPS `.zip` 地址，校验 ZIP 布局、路径、权限、大小、压缩比、静态扩展名、manifest 哈希和 dossier 声明后，发布为 `https://static.devtool.uk/static-releases/release-.../` 的不可变 release。
+- 新增 `utils/staticZipDeployment.js` 以及覆盖成功发布、非受信 URL 拒绝、manifest 哈希不匹配拒绝的回归测试。
+
 ### Changed
+- `POST /deployment` 不再把 ZIP URL 交给 Hermes chat-completions 解析；成功时返回结构化 `status=deployed`、release ID、公开 URL、ZIP SHA-256 与 HTTP 验证，失败时返回结构化 `status=rejected` 和可验证原因。
+- 免费额度仅在真实发布成功后才写入，非法请求或验证失败不会消耗免费额度。
 - `POST /file-transfer/upload` 与 `POST /file-transfer/upload/complete` 的 `data.url` 现固定使用 HTTPS，保留请求 Host 和既有公开文件路径。
 - `file-transfer` 的普通上传和分片合并完成响应均在 `data.url` 返回当前请求域名下的完整可访问链接；临时和永久文件分别使用对应公开路径。
 

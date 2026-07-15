@@ -1,6 +1,26 @@
 # RELEASE
 
 ## Improvement
+2026-07-15 / static-zip-deployment-executor
+
+### Summary
+将 `POST /deployment` 从 Hermes 文本代理替换为可执行、可验证且 fail-closed 的纯静态 ZIP 发布器。
+
+### What Changed
+- 新增 `utils/staticZipDeployment.js`：只解析本服务上传目录中的受信 HTTPS ZIP URL；先进行 ZIP 路径、符号链接/可执行文件、文件数量/解压大小/压缩比、静态文件类型、manifest SHA-256 和 dossier 校验，再发布。
+- `index.js`：`POST /deployment` 请求体固定为仅 `{ "content": "<HTTPS ZIP URL>" }`，不再调用 Hermes chat-completions。成功后将 `site/` 原子移入 `/app/downloads/static-releases/release-.../`。
+- 使用已有的 Nginx 静态根 `/root/coze-js-api/downloads`，新 release 对外地址为 `https://static.devtool.uk/static-releases/release-.../`；没有新增端口、域名、Nginx、Git 或 PM2 操作。
+
+### API / Behavior
+- 成功：HTTP `201`，返回 `{ status, releaseId, url, zipSha256, httpVerification }`，其中 `status=deployed`。
+- 资格不合格：HTTP `422`，返回 `{ status:"rejected", reason, checks }`；上传成功不等于上线成功。
+- 请求体多字段或缺少 `content`：HTTP `400`。
+- 非受信 URL 不会被下载，返回 `UNTRUSTED_ARTIFACT_URL`。
+
+### Rollback Notes
+- 恢复 `index.js` 中原 `/deployment` 路由并移除 `utils/staticZipDeployment.js`；不影响既有上传文件与已发布 release 目录。
+
+## Improvement
 2026-07-15 / file-transfer-upload-https-url
 
 ### Summary
