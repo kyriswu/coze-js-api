@@ -82,6 +82,52 @@ test('accepts the previously published manifest and dossier template fields duri
     assert.equal(result.status, 'deployed');
 });
 
+test('rejects a release whose root-absolute asset URL would 404 beneath its immutable release path', async (t) => {
+    const sandbox = await fs.mkdtemp(path.join(os.tmpdir(), 'static-deploy-test-'));
+    const downloadsDir = path.join(sandbox, 'downloads');
+    const sourceDir = path.join(sandbox, 'source');
+    const siteDir = path.join(sourceDir, 'site');
+    await fs.mkdir(path.join(siteDir, 'assets'), { recursive: true });
+    const html = '<!doctype html><script type="module" src="/assets/app.js"></script>';
+    const js = 'document.body.textContent = "app";';
+    await fs.writeFile(path.join(siteDir, 'index.html'), html);
+    await fs.writeFile(path.join(siteDir, 'assets', 'app.js'), js);
+    await fs.writeFile(path.join(sourceDir, 'artifact-manifest.json'), JSON.stringify({
+        version: 1,
+        files: [
+            { path: 'site/index.html', size: Buffer.byteLength(html), sha256: sha256(html) },
+            { path: 'site/assets/app.js', size: Buffer.byteLength(js), sha256: sha256(js) },
+        ],
+    }));
+    await fs.writeFile(path.join(sourceDir, 'deployment-dossier.json'), JSON.stringify({ source: { type: 'local-static-artifact' }, safeToSubmit: true }));
+    await fs.mkdir(downloadsDir, { recursive: true });
+    execFileSync('python3', ['-c', [
+        'import os, sys, zipfile',
+        'src, out = sys.argv[1], sys.argv[2]',
+        'with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as z:',
+        '  for root, _, files in os.walk(src):',
+        '    for name in files:',
+        '      p = os.path.join(root, name)',
+        '      z.write(p, os.path.relpath(p, src))',
+    ].join('\n'), sourceDir, path.join(downloadsDir, 'absolute-assets.zip')]);
+    t.after(() => fs.rm(sandbox, { recursive: true, force: true }));
+
+    const result = await deployStaticZip({
+        content: 'https://coze-js-api.devtool.uk/downloads/absolute-assets.zip',
+        downloadsDir,
+        publicBaseUrl: 'https://static.devtool.uk/static-releases',
+        verifyPublicUrl: async () => ({ status: 200, contentType: 'text/html', body: 'ok' }),
+    });
+
+    assert.deepEqual(result, {
+        status: 'rejected',
+        reason: 'STATIC_VALIDATION_FAILED',
+        checks: ['site/index.html 使用根绝对静态资源路径 /assets/app.js；release 子路径部署必须使用相对路径'],
+    });
+    const releaseEntries = await fs.readdir(path.join(downloadsDir, 'static-releases'));
+    assert.deepEqual(releaseEntries.filter((entry) => entry.startsWith('release-')), []);
+});
+
 test('rejects an artifact URL outside the private upload allowlist without creating a release', async (t) => {
     const sandbox = await fs.mkdtemp(path.join(os.tmpdir(), 'static-deploy-test-'));
     const downloadsDir = path.join(sandbox, 'downloads');

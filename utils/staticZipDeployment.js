@@ -196,6 +196,26 @@ const listRegularFiles = async (rootDir, relativeDir = '') => {
     return files;
 };
 
+const assertReleaseRelativeStaticPaths = async (siteDir, files) => {
+    const textExtensions = new Set(['.html', '.css', '.js', '.mjs']);
+    const localPaths = new Set(files.map((file) => file.relativePath));
+    const quotedRootPath = /['"](\/[^'"\s?#]+)(?:[?#][^'"]*)?['"]/g;
+
+    for (const file of files) {
+        if (!textExtensions.has(path.posix.extname(file.relativePath).toLowerCase())) continue;
+        const text = await fs.readFile(file.absolutePath, 'utf8');
+        for (const match of text.matchAll(quotedRootPath)) {
+            const referencedPath = match[1].slice(1);
+            if (localPaths.has(referencedPath)) {
+                reject(
+                    'STATIC_VALIDATION_FAILED',
+                    `site/${file.relativePath} 使用根绝对静态资源路径 ${match[1]}；release 子路径部署必须使用相对路径`,
+                );
+            }
+        }
+    }
+};
+
 const validateExtractedArtifact = async (extractedDir) => {
     let manifest;
     let dossier;
@@ -227,6 +247,7 @@ const validateExtractedArtifact = async (extractedDir) => {
         reject('STATIC_VALIDATION_FAILED', 'manifest 文件清单与解压 site 文件数量不一致');
     }
 
+    await assertReleaseRelativeStaticPaths(siteDir, files);
     for (const file of files) {
         const expectedFile = expected.get(file.relativePath);
         const actualSha256 = await sha256File(file.absolutePath);
