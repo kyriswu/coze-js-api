@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 2026-07-16
+
+### Changed
+- 图像 API 上游基础域名由 `api.openai-hub.com` 切换为 `api.openai-hub.net`，现有请求路径和接口行为保持不变。
+
 ## 2026-07-15
 
 ### Added

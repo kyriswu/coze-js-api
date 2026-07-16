@@ -1,6 +1,21 @@
 # RELEASE
 
 ## Improvement
+2026-07-16 / openai-hub-domain-cutover
+
+### Summary
+将图像 API 上游从即将停止解析的 `api.openai-hub.com` 切换至 `api.openai-hub.net`。
+
+### What Changed
+- `utils/ThirdParrtyApi/aitoken.js` 中的共享 API 基础地址已更新；图像生成与编辑路径保持不变。
+
+### Breaking Changes
+- none
+
+### Rollback Notes
+- 将共享 API 基础地址恢复为原域名；原域名停止解析后该回滚不可用。
+
+## Improvement
 2026-07-15 / static-zip-deployment-executor
 
 ### Summary

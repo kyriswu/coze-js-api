@@ -1,6 +1,26 @@
 # QA
 
 ## Iteration
+2026-07-16 / openai-hub-domain-cutover
+
+## Test Matrix
+| Case ID | Step | Expected | Actual | Status |
+|---|---|---|---|---|
+| QA-01 | Search executable configuration for retiring host | No active `api.openai-hub.com` reference remains; historical delivery records may mention it | No active reference found | pass |
+| QA-02 | `node --check utils/ThirdParrtyApi/aitoken.js` | Client syntax is valid | Command completed successfully | pass |
+
+## Command Evidence
+```bash
+cd /root/coze-js-api && node --check utils/ThirdParrtyApi/aitoken.js
+cd /root/coze-js-api && ! rg -n -i --hidden --glob '!node_modules/**' --glob '!.git/**' --glob '!docs/**' --glob '!CHANGELOG.md' 'api\.openai-hub\.com' .
+```
+
+## Final QA Verdict
+- [x] pass
+- [ ] conditional pass
+- [ ] fail
+
+## Iteration
 2026-07-15 / static-zip-deployment-executor
 
 ## Test Matrix

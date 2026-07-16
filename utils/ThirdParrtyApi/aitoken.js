@@ -5,7 +5,7 @@ import unkey from '../unkey.js';
 import redis from '../redisClient.js';
 
 const openaihub_api_key = 'sk-xQEHwDSCU78fni0S7Y4J0h27M9GPzfgi33RsHZxt5IFj3ylt';
-const OPENAI_HUB_BASE = 'https://api.openai-hub.com';
+const OPENAI_HUB_BASE = 'https://api.openai-hub.net';
 const GPT_IMAGE_API_ID = 'api_413Kmmitqy3qaDo4';
 const openaihub_GPT_IMAGE_MODEL = 'gpt-image-2';
 const GPT_IMAGE_EDIT_MAX_RETRIES = Number.parseInt(process.env.GPT_IMAGE_EDIT_MAX_RETRIES || '2', 10);
