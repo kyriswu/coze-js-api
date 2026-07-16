@@ -21,6 +21,7 @@ import { getNetworkDashboardMetrics } from './utils/networkAnalytics.js';
 import { createApiAccessHelpers } from './utils/apiAccess.js';
 import { extract_html_conent, extract_html_conent_standard } from './utils/htmlContent.js';
 import { deployStaticZip } from './utils/staticZipDeployment.js';
+import { createDeploymentHandler } from './utils/deploymentRoute.js';
 import { calc_ba_zi, calc_zi_wei, points } from './utils/bazi.js';
 import netdiskapi from './utils/netdiskapi.js';
 import tool from './utils/tool.js';
@@ -41,6 +42,7 @@ const app = express();
 const port = 3000;
 const environment = process.env.NODE_ENV || 'development';
 const globalBodyLimit = process.env.REQUEST_BODY_LIMIT || '500mb';
+const downloadsDir = path.resolve(path.join(__dirname, 'downloads'));
 
 app.use(express.json({ limit: globalBodyLimit }))
 app.use(express.text({ limit: globalBodyLimit }))
@@ -100,31 +102,7 @@ const {
     unkeyApiId,
 });
 
-const normalizeRequestIp = (value = '') => String(value || '')
-    .trim()
-    .replace(/^::ffff:/i, '')
-    .replace(/^\[|\]$/g, '');
 
-const getFinalClientIp = (req) => {
-    const forwardedFor = String(req.headers['x-forwarded-for'] || '')
-        .split(',')
-        .map((item) => normalizeRequestIp(item))
-        .filter(Boolean);
-
-    if (forwardedFor.length > 0) {
-        return forwardedFor[0];
-    }
-
-    const forwarded = String(req.headers.forwarded || '');
-    const forwardedMatch = forwarded.match(/for=(?:"?\[?)([^;,"]+)(?:\]??"?)/i);
-    if (forwardedMatch?.[1]) {
-        return normalizeRequestIp(forwardedMatch[1]);
-    }
-
-    return normalizeRequestIp(req.headers['x-real-ip'] || req.ip || req.socket?.remoteAddress || 'unknown');
-};
-
-// 从维基百科搜索条目
 app.post('/zh_wikipedia/search_item', async (req, res) => {
     const { item } = req.body;
 
@@ -423,62 +401,11 @@ app.post('/parse_html', async (req, res) => {
     }
 })
 
-app.post('/deployment', async (req, res) => {
-    try {
-        const requestKeys = Object.keys(req.body || {});
-        if (requestKeys.length !== 1 || requestKeys[0] !== 'content') {
-            return res.status(400).json({
-                status: 'rejected',
-                reason: 'INVALID_REQUEST',
-                checks: ['请求体必须且只能包含 content'],
-            });
-        }
-
-        const finalClientIp = getFinalClientIp(req);
-        const claimKey = `deployment:static:ip:${finalClientIp}`;
-        const apiKey = req.headers['x-api-key'] || req.headers.api_key;
-        const hasUsedFreeCall = await redis.get(claimKey);
-        if (hasUsedFreeCall && !apiKey) {
-            return res.status(429).json({
-                status: 'rejected',
-                reason: 'FREE_DEPLOYMENT_LIMIT_REACHED',
-                checks: ['该 IP 已使用免费静态发布额度；请使用 X-API-Key'],
-            });
-        }
-
-        if (apiKey) {
-            const { valid, remaining } = await unkey.verifyKey(unkeyApiId, apiKey, 1);
-            if (!valid || remaining <= 0) {
-                return res.status(403).json({
-                    status: 'rejected',
-                    reason: 'API_KEY_INVALID_OR_EXHAUSTED',
-                    checks: ['X-API-Key 未通过部署额度验证'],
-                });
-            }
-        }
-
-        const result = await deployStaticZip({
-            content: req.body.content,
-            downloadsDir,
-            publicBaseUrl: 'https://static.devtool.uk/static-releases',
-        });
-        if (result.status !== 'deployed') {
-            return res.status(422).json(result);
-        }
-
-        if (!apiKey) {
-            await redis.set(claimKey, `${Date.now()}`, 'NX', 'EX', 60 * 60 * 24 * 365);
-        }
-        return res.status(201).json(result);
-    } catch (error) {
-        console.error('[deployment] static ZIP deployment failed:', error);
-        return res.status(500).json({
-            status: 'rejected',
-            reason: 'DEPLOYMENT_INTERNAL_ERROR',
-            checks: ['部署端发生未预期错误'],
-        });
-    }
-})
+app.post('/deployment', createDeploymentHandler({
+    deployStaticZip,
+    downloadsDir,
+    publicBaseUrl: 'https://static.devtool.uk/static-releases',
+}))
 
 app.post('/wyy/hot_comment', async (req, res) => {
 
@@ -1176,7 +1103,6 @@ app.post('/download_pdf', async (req, res) => {
 })
 
 
-const downloadsDir = path.resolve(path.join(__dirname, 'downloads'));
 const persistentDownloadsDir = path.resolve(path.join(downloadsDir, 'persistent'));
 const uploadChunksDir = path.resolve(path.join(downloadsDir, '.upload_chunks'));
 const fileTransferStorageMap = {

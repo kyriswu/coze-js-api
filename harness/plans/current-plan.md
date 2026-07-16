@@ -1,16 +1,17 @@
 # Current Plan
 
 ## Goal
-Before `openai-hub.com` stops resolving on 2026-07-16 evening, switch the image API client to `api.openai-hub.net` without changing request paths or behavior.
 
-## Verified Context
-- `utils/ThirdParrtyApi/aitoken.js` is the only tracked source reference to the retiring domain and centralizes the base URL for image-generation and image-edit requests.
+Enable automatic Graphify maintenance for Agent-led code changes and committed code changes.
 
-## Implementation Steps
-1. [x] Replace the base URL constant only.
-2. [x] Confirm no executable configuration references the retiring domain and run a Node syntax check.
-3. [x] Record the verification and release note in the delivery documents.
+## Steps
 
-## Compatibility Rules
-- Preserve endpoint paths, authentication, timeouts, request bodies, response handling, and public API shape.
-- Do not add fallback routing or new configuration.
+1. [x] Read repository workflow, project context, coding rules, and Graphify hook guidance.
+2. [x] Install Graphify's Agent integration in `AGENTS.md`.
+3. [x] Install and verify the Graphify post-commit hook.
+4. [x] Check delivery documentation for any required updates.
+
+## Scope
+
+- Change only Graphify Agent and Git-hook configuration.
+- Preserve application code and existing API behavior.

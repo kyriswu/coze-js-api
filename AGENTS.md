@@ -11,6 +11,12 @@
 - 不要记录或输出密钥、token、敏感载荷。
 - 完成后同步检查 `docs/QA.md`、`docs/RELEASE.md` 和 `CHANGELOG.md` 是否需要更新。
 
+## Graphify
+
+- 回答代码结构、架构或文件关系问题前，如 `graphify-out/graph.json` 存在，先执行 `graphify query "<问题>"` 查询现有图谱。
+- 完成代码、文档或其他受图谱追踪文件的修改后，执行 `graphify . --update` 更新知识图谱；若图谱不存在，则执行 `graphify .` 完整重建。
+- 更新后确认 `graphify-out/graph.json` 与 `graphify-out/GRAPH_REPORT.md` 已生成；不要将密钥、token 或敏感载荷纳入图谱。
+
 ## 推荐入口
 
 - `harness/README.md`

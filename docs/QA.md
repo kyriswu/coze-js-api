@@ -1,6 +1,36 @@
 # QA
 
 ## Iteration
+2026-07-16 / public-static-deployment-no-quota
+
+## Test Matrix
+| Case ID | Step | Expected | Actual | Status |
+|---|---|---|---|---|
+| QA-01 | `node --test test/deploymentRoute.test.js test/staticZipDeployment.test.js` | 内容唯一的合格部署不读取配额或 API key，且保留 ZIP 校验 | 6 passed, 0 failed | pass |
+| QA-02 | `node --check index.js && node --check utils/deploymentRoute.js` | 入口和路由处理器语法有效 | 两项均成功 | pass |
+| QA-03 | 重启已挂载项目目录的 app 容器 | 新路由代码被加载且服务恢复 | container running；本机 `/` HTTP 200 | pass |
+| QA-04 | 无 `X-API-Key` 对同一合格 ZIP 连续两次 POST `/deployment` | 两次均发布，绝不返回 IP 免费额度 429 | 两次均 HTTP 201 / `status=deployed` | pass |
+| QA-05 | 请求两个返回的 immutable 公网 URL | HTTPS 页面可访问 | 两次均 HTTP 200 / `text/html` | pass |
+
+## Command Evidence
+```bash
+cd /root/coze-js-api && node --test test/deploymentRoute.test.js test/staticZipDeployment.test.js
+cd /root/coze-js-api && node --check index.js && node --check utils/deploymentRoute.js && git diff --check
+docker restart coze-js-api-app-1
+curl -X POST https://coze-js-api.devtool.uk/deployment -H 'Content-Type: application/json' --data '{"content":"https://coze-js-api.devtool.uk/downloads/current-release-1784192733280-472e4a13.zip"}'
+```
+
+## Manual Checks
+- 未携带 `X-API-Key`，相同来源 ZIP 连续两次部署均成功：`release-1784193350437-0653be687c38`、`release-1784193350748-c07c7fa1e059`。
+- 发布 URL 已经公网复验：HTTP `200`、`text/html`。
+- 仍保留受信 HTTPS ZIP URL allowlist、ZIP/manifest/哈希、解压安全、静态类型与发布后 HTTP 校验；仅移除了 IP 年度免费额度和 API key 部署额度验证。
+
+## Final QA Verdict
+- [x] pass
+- [ ] conditional pass
+- [ ] fail
+
+## Iteration
 2026-07-16 / openai-hub-domain-cutover
 
 ## Test Matrix

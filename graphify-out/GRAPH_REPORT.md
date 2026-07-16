@@ -1,61 +1,62 @@
-# Graph Report - /root/coze-js-api  (2026-07-11)
+# Graph Report - .  (2026-07-16)
 
 ## Corpus Check
-- cluster-only mode — file stats not available
+- 62 files · ~65,891 words
+- Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 310 nodes · 437 edges · 29 communities (17 shown, 12 thin omitted)
-- Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 1 edges (avg confidence: 0.5)
+- 370 nodes · 621 edges · 30 communities (21 shown, 9 thin omitted)
+- Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 2 edges (avg confidence: 0.65)
 - Token cost: 0 input · 0 output
 
-## Graph Freshness
-- Built from commit: `1899204d`
-- Run `git rev-parse HEAD` and compare to check if the graph is stale.
-- Run `graphify update .` after code changes (no API cost).
-
 ## Community Hubs (Navigation)
-- index.js
-- commonUtils.js
-- tool.js
-- dependencies
-- evolink.ai.js
-- CustomError.js
-- networkAnalytics.js
-- twitter_api.py
-- networkLogger.js
-- volcengine.io.js
-- package.json
-- network-log-analyze.mjs
-- navigationRoutes.js
-- fetch_hot_rise_list.py
-- google_search.py
-- web_search.py
-- htmlContent.js
-- start.sh
-- aimlapi.js
-- cloudflare.js
-- lemonfoxai.js
-- server.sh
-- transcribe_douyin.sh
-- start_lite.sh
-- search1api.js
-- firecrawl.js
-- tencentapi.js
-- zyte.js
+- Navigation and Bazi
+- Node Dependencies
+- Browser Automation
+- HTTP API Server
+- Static ZIP Deployment
+- API Access Control
+- Application Errors
+- Network Analytics
+- Twitter API Script
+- Request Logging
+- TikHub Integrations
+- Volcengine Tools
+- Package Metadata
+- Network Log CLI
+- File Transfer Storage
+- File Access Metrics
+- Hot Rise Script
+- Google Search Script
+- Web Search Script
+- HTML Extraction
+- Deployment Route Tests
+- Hermes Agent
+- Startup Script
+- AIML API Client
+- Cloudflare Client
+- Lemonfox Client
+- Server Script
+- Douyin Transcript
+- Lite Startup Script
 
 ## God Nodes (most connected - your core abstractions)
-1. `getNetworkDashboardMetrics()` - 12 edges
-2. `redis` - 9 edges
-3. `unkey` - 9 edges
-4. `commonUtils` - 8 edges
-5. `emit()` - 7 edges
-6. `analyze()` - 6 edges
-7. `sanitizeUploadFileName()` - 6 edges
-8. `main()` - 5 edges
-9. `main()` - 5 edges
-10. `listDownloadFiles()` - 5 edges
+1. `redis` - 14 edges
+2. `getNetworkDashboardMetrics()` - 12 edges
+3. `unkey` - 12 edges
+4. `reject()` - 11 edges
+5. `commonUtils` - 10 edges
+6. `deployStaticZip()` - 10 edges
+7. `listDownloadFiles()` - 7 edges
+8. `emit()` - 7 edges
+9. `getFileTransferStorageConfig()` - 6 edges
+10. `analyze()` - 6 edges
 
 ## Surprising Connections (you probably didn't know these)
+- `downloadPdf()` --indirect_call--> `reject()`  [INFERRED]
+  index.js → utils/staticZipDeployment.js
+- `zyteExtract()` --calls--> `htmlToQuerySelector()`  [EXTRACTED]
+  index.js → utils/htmlContent.js
 - `attachAxiosRateLimitLogger()` --calls--> `logAxiosError()`  [EXTRACTED]
   utils/axiosInterceptors.js → utils/networkLogger.js
 - `attachAxiosRateLimitLogger()` --calls--> `logAxiosRequest()`  [EXTRACTED]
@@ -66,97 +67,113 @@
 ## Import Cycles
 - None detected.
 
-## Communities (29 total, 12 thin omitted)
+## Communities (30 total, 9 thin omitted)
 
-### Community 0 - "index.js"
-Cohesion: 0.08
-Nodes (31): agent, app, buildChunkSessionDir(), buildFileAccessCountKey(), buildFileAccessHourKey(), buildSafeExistingFilePath(), buildSafeUploadTarget(), {
+### Community 0 - "Navigation and Bazi"
+Cohesion: 0.07
+Nodes (27): router, serviceCards, serviceCategories, serviceStats, sitemapCategoryItems, sitemapPageItems, calc_ba_zi, calc_zi_wei (+19 more)
+
+### Community 1 - "Node Dependencies"
+Cohesion: 0.04
+Nodes (45): axios, cheerio, @coze/api, dayjs, ejs, express, fluent-ffmpeg, http-proxy-agent (+37 more)
+
+### Community 2 - "Browser Automation"
+Cohesion: 0.06
+Nodes (29): BROWSER_SESSION_SWEEP_INTERVAL_MS, BROWSER_SESSION_TTL_MS, browserless, browserSessionSweeper, closeBrowserSession(), __dirname, disableLoadMedia(), __filename (+21 more)
+
+### Community 3 - "HTTP API Server"
+Cohesion: 0.09
+Nodes (18): agent, app, buildChunkSessionDir(), {
     canSearchGoogle,
     canUseHtmlParse,
     dailyUse,
     verifyApiAccess,
     consumeApiCredits,
-} (+23 more)
+}, __dirname, downloadPdf(), downloadsDir, extract_pdf_url() (+10 more)
 
-### Community 1 - "commonUtils.js"
-Cohesion: 0.08
-Nodes (21): calc_ba_zi, calc_zi_wei, points, commonUtils, CONFIG, netdiskapi, qweather_tool, redis (+13 more)
+### Community 4 - "Static ZIP Deployment"
+Cohesion: 0.22
+Nodes (17): createValidArtifact(), sha256(), ALLOWED_STATIC_EXTENSIONS, assertReleaseRelativeStaticPaths(), assertWithin(), DeploymentRejected, deployStaticZip(), execFile (+9 more)
 
-### Community 2 - "tool.js"
-Cohesion: 0.06
-Nodes (28): BROWSER_SESSION_SWEEP_INTERVAL_MS, BROWSER_SESSION_TTL_MS, browserless, browserSessionSweeper, closeBrowserSession(), __dirname, disableLoadMedia(), __filename (+20 more)
-
-### Community 3 - "dependencies"
-Cohesion: 0.09
-Nodes (23): dependencies, axios, cheerio, @coze/api, dayjs, ejs, express, fluent-ffmpeg (+15 more)
-
-### Community 4 - "evolink.ai.js"
+### Community 5 - "API Access Control"
 Cohesion: 0.11
 Nodes (9): createApiAccessHelpers(), __dirname, envFilePath, __filename, ensureApiKey(), evolink, FINAL_STATUSES, getAxiosConfig() (+1 more)
 
-### Community 5 - "CustomError.js"
+### Community 6 - "Application Errors"
 Cohesion: 0.13
 Nodes (7): BaseError, FileOperationError, InvalidApiKeyError, NotFoundError, QuotaExceededError, RateLimitError, ValidationError
 
-### Community 6 - "networkAnalytics.js"
+### Community 7 - "Network Analytics"
 Cohesion: 0.29
 Nodes (14): buildTimeline(), collectLastLines(), DEFAULT_SCAN_LIMIT, getNetworkDashboardMetrics(), incMap(), matchFilters(), minuteStart(), normalizeMethod() (+6 more)
 
-### Community 7 - "twitter_api.py"
+### Community 8 - "Twitter API Script"
 Cohesion: 0.33
 Nodes (13): Any, ArgumentParser, build_parser(), get_api_key(), main(), normalize_detail(), normalize_search(), pick_first() (+5 more)
 
-### Community 8 - "networkLogger.js"
+### Community 9 - "Request Logging"
 Cohesion: 0.32
 Nodes (11): attachAxiosRateLimitLogger(), emit(), ensureFileLogger(), LOG_MODE, logAxiosError(), logAxiosRequest(), logHttpRequest(), logRateLimit() (+3 more)
 
-### Community 9 - "volcengine.io.js"
+### Community 10 - "TikHub Integrations"
+Cohesion: 0.15
+Nodes (9): th_bilibili, th_douyin, th_douyin_billboard, th_tiktok, th_twitter, th_wechat_channels, th_wechat_media, th_xiaohongshu (+1 more)
+
+### Community 11 - "Volcengine Tools"
 Cohesion: 0.24
 Nodes (11): tool, decodeWebSearchResponse(), normalizeWebSearchEventFrames(), normalizeWebSearchPayload(), normalizeWebSearchResult(), safeJsonParse(), toBoolean(), toNumber() (+3 more)
 
-### Community 10 - "package.json"
+### Community 12 - "Package Metadata"
 Cohesion: 0.18
 Nodes (10): author, description, keywords, license, main, name, scripts, test (+2 more)
 
-### Community 11 - "network-log-analyze.mjs"
+### Community 13 - "Network Log CLI"
 Cohesion: 0.33
 Nodes (10): analyze(), DEFAULT_FILE, inc(), main(), parseArgs(), printHelp(), printHuman(), statusClass() (+2 more)
 
-### Community 12 - "navigationRoutes.js"
-Cohesion: 0.22
-Nodes (6): router, serviceCards, serviceCategories, serviceStats, sitemapCategoryItems, sitemapPageItems
+### Community 14 - "File Transfer Storage"
+Cohesion: 0.42
+Nodes (9): buildSafeExistingFilePath(), buildSafeUploadTarget(), buildStorageRelativePath(), getFilePublicUrl(), getFileTransferStorageConfig(), listDownloadFiles(), listStorageFiles(), normalizeFileTransferStorage() (+1 more)
 
-### Community 13 - "fetch_hot_rise_list.py"
+### Community 15 - "File Access Metrics"
+Cohesion: 0.39
+Nodes (8): buildFileAccessCountKey(), buildFileAccessHourKey(), buildTrackedFileKey(), createFileAccessTrackMiddleware(), formatHourId(), getLast24HourIds(), migrateFileAccessStats(), sanitizeStoragePathSegment()
+
+### Community 16 - "Hot Rise Script"
 Cohesion: 0.53
 Nodes (5): fetch_hot_rise_list(), get_api_key(), main(), print_results(), 优先使用参数传入的 key，否则读取环境变量 AZT_API_KEY
 
-### Community 14 - "google_search.py"
+### Community 17 - "Google Search Script"
 Cohesion: 0.53
 Nodes (5): get_api_key(), google_search(), main(), print_results(), 优先使用参数传入的 key，否则读取环境变量 AZT_API_KEY（免费版可不填）
 
-### Community 15 - "web_search.py"
+### Community 18 - "Web Search Script"
 Cohesion: 0.60
 Nodes (5): get_api_key(), main(), parse_bool(), print_results(), web_search()
 
+### Community 19 - "HTML Extraction"
+Cohesion: 0.50
+Nodes (4): zyteExtract(), extract_html_conent(), extract_html_conent_standard(), htmlToQuerySelector()
+
 ## Knowledge Gaps
-- **107 isolated node(s):** `name`, `type`, `version`, `main`, `test` (+102 more)
+- **91 isolated node(s):** `__filename`, `__dirname`, `app`, `downloadsDir`, `agent` (+86 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **12 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **9 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `th_youtube` connect `index.js` to `tool.js`?**
-  _High betweenness centrality (0.075) - this node is a cross-community bridge._
-- **Why does `redis` connect `commonUtils.js` to `tool.js`, `evolink.ai.js`?**
-  _High betweenness centrality (0.033) - this node is a cross-community bridge._
-- **Why does `getNetworkDashboardMetrics()` connect `networkAnalytics.js` to `index.js`?**
-  _High betweenness centrality (0.019) - this node is a cross-community bridge._
-- **What connects `name`, `type`, `version` to the rest of the system?**
-  _109 weakly-connected nodes found - possible documentation gaps or missing edges._
-- **Should `index.js` be split into smaller, more focused modules?**
-  _Cohesion score 0.07665505226480836 - nodes in this community are weakly interconnected._
-- **Should `commonUtils.js` be split into smaller, more focused modules?**
-  _Cohesion score 0.08232118758434548 - nodes in this community are weakly interconnected._
-- **Should `tool.js` be split into smaller, more focused modules?**
+- **Why does `dependencies` connect `Node Dependencies` to `Package Metadata`?**
+  _High betweenness centrality (0.021) - this node is a cross-community bridge._
+- **Why does `deployStaticZip()` connect `Static ZIP Deployment` to `HTTP API Server`?**
+  _High betweenness centrality (0.016) - this node is a cross-community bridge._
+- **Why does `getNetworkDashboardMetrics()` connect `Network Analytics` to `HTTP API Server`?**
+  _High betweenness centrality (0.014) - this node is a cross-community bridge._
+- **What connects `__filename`, `__dirname`, `app` to the rest of the system?**
+  _91 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Should `Navigation and Bazi` be split into smaller, more focused modules?**
+  _Cohesion score 0.06648936170212766 - nodes in this community are weakly interconnected._
+- **Should `Node Dependencies` be split into smaller, more focused modules?**
+  _Cohesion score 0.044444444444444446 - nodes in this community are weakly interconnected._
+- **Should `Browser Automation` be split into smaller, more focused modules?**
   _Cohesion score 0.06456456456456457 - nodes in this community are weakly interconnected._

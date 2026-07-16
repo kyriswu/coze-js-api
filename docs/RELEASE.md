@@ -1,6 +1,27 @@
 # RELEASE
 
 ## Improvement
+2026-07-16 / public-static-deployment-no-quota
+
+### Summary
+`POST /deployment` 取消 IP 免费额度与 `X-API-Key` 额度校验；任何调用者均可提交已由本服务上传、符合静态发布规则的 ZIP URL。
+
+### What Changed
+- 新增 `utils/deploymentRoute.js`，将部署入口收敛为 content-only 请求和 `deployStaticZip` 调用。
+- `index.js` 不再查询 Redis 的 IP claim，也不再验证 Unkey API key 或返回 `FREE_DEPLOYMENT_LIMIT_REACHED`。
+- 保留原有的 URL allowlist、ZIP/manifest/hash 校验、安全解压、immutable release 与 HTTP 公开校验。
+
+### API / Behavior
+- 请求形状保持 `{ "content": "<HTTPS ZIP URL>" }`；`X-API-Key` 不再需要，也不影响部署结果。
+- 合格 ZIP 每次调用均返回 HTTP `201` 与独立 immutable release URL；无配额 `429`。
+
+### Resource Boundary
+- 此接口不消耗 LLM，但仍会消耗有限的网络、磁盘、CPU 和 Nginx 带宽。当前继续依靠受信本地 URL、ZIP 大小/条目/解压限制和静态类型限制降低滥用面。
+
+### Rollback Notes
+- 恢复原 `index.js` 中含 Redis/Unkey 检查的 `/deployment` 路由，并移除 `utils/deploymentRoute.js`；不会删除既有已发布 release。
+
+## Improvement
 2026-07-16 / openai-hub-domain-cutover
 
 ### Summary
