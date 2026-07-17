@@ -96,7 +96,7 @@ const commonUtils = {
      * 统一校验入口
      * 重点：返回 true 代表通过，返回 false 代表已处理响应并拦截后续逻辑
      */
-    valid_redis_key: async function (key_header, unkey_api_id, api_key, req, res) {
+    valid_redis_key: async function (key_header, unkey_api_id, api_key, req, res, requiredCredits = 1) {
         const host = req.hostname || req.headers?.host || '';
         if (host === 'localhost' || host.startsWith('localhost:')) {
             return true;
@@ -123,7 +123,7 @@ const commonUtils = {
                     res.send({ code: -1, msg: this.MESSAGE.TOKEN_EXPIRED });
                     return false;
                 }
-                if (remaining <= 0) {
+                if (remaining < requiredCredits) {
                     res.send({ code: -1, msg: this.MESSAGE.TOKEN_NO_TIMES });
                     return false;
                 }

@@ -1420,3 +1420,34 @@ curl --request POST \
 - 环境变量：
 - 启动命令：
 - 验证命令：
+
+## Feature
+2026-07-17 / add-wechat-universal-search
+
+### Summary
+新增微信搜一搜综合搜索接口，按 TikHub 文档提供公众号、文章、视频、直播等垂类搜索与 cursor 翻页能力。
+
+### What Changed
+- 在 `utils/tikhub.io.js` 的 `th_wechat_media` 中新增 `fetch_universal_search`。
+- 在 `index.js` 新增 `POST /wechat_search/v2/fetch_search`。
+- 请求支持 `keyword`、`business_type`、`sort`、`publish_time`、`offset`、`cursor`、`raw` 和可选 `api_key`，并校验文档规定的枚举和值域。
+- 上游调用使用 30 秒超时，并以 JSON 文本直通响应，保留 64 位 ID 的精确值。
+- 每个身份每天可免费试用 1 次；成功的 API Key 调用扣 3 积分，且调用前要求至少有 3 积分余额。
+- `valid_redis_key` 增加可选最低积分参数，既有调用保持默认 1 积分行为不变。
+
+### Impact
+
+#### API/Behavior
+- 新增接口：`POST /wechat_search/v2/fetch_search`。
+- 该接口响应保持 TikHub 上游 JSON 结构，而非本项目常规包装结构，以避免大整数精度损失。
+
+#### Internal Modules
+- 更新 `utils/tikhub.io.js`、`utils/commonUtils.js`、`index.js`，并新增离线单元测试。
+
+### Breaking Changes
+- none
+
+### Rollback Notes
+- 回滚 `utils/tikhub.io.js` 中的 `fetch_universal_search`。
+- 移除 `index.js` 中 `/wechat_search/v2/fetch_search` 的路由注册。
+- 如不再需要最低余额预检，回滚 `utils/commonUtils.js` 的可选 `requiredCredits` 参数。

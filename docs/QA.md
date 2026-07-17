@@ -103,6 +103,37 @@ cd /root/coze-js-api && rg -n 'url: getFilePublicUrl\(req, fileName, storage\)' 
 - [ ] fail
 
 ## Iteration
+2026-07-17 / add-wechat-universal-search
+
+## Test Matrix
+| Case ID | Step | Expected | Actual | Status |
+|---|---|---|---|---|
+| QA-01 | `node --check utils/commonUtils.js && node --check utils/tikhub.io.js && node --check index.js` | 修改后的服务文件无语法错误 | 命令无输出 | pass |
+| QA-02 | `node --test test/wechatUniversalSearch.test.js` | 缺少关键字、非法垂类和正常参数转发均通过 | 1 个测试文件通过 | pass |
+| QA-03 | 上游真实请求 | 30 秒超时、原始 JSON 直通且 64 位 ID 不失真 | 需要外部 TikHub 服务与有效凭据，未执行 | block |
+
+## Command Evidence
+```bash
+cd /root/coze-js-api && node --check utils/commonUtils.js && node --check utils/tikhub.io.js && node --check index.js
+cd /root/coze-js-api && node --test test/wechatUniversalSearch.test.js
+```
+
+## Manual Checks
+- 确认路由为 `POST /wechat_search/v2/fetch_search`。
+- 确认请求接受 body/query 参数、校验 TikHub 枚举值，并将上游响应作为文本发送。
+- 确认无 `api_key` 时使用端点专属 Redis key 限制为每天一次；有 `api_key` 时余额门槛和成功扣费均为 3 积分。
+
+## Defects Found
+| ID | Severity | Description | Status |
+|---|---|---|---|
+| BUG-01 | - | 未发现本地语法或离线测试缺陷；上游联调待有效凭据环境执行 | open |
+
+## Final QA Verdict
+- [ ] pass
+- [x] conditional pass
+- [ ] fail
+
+## Iteration
 2026-07-15 / file-transfer-upload-full-url
 
 ## Test Matrix

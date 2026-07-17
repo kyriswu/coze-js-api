@@ -701,6 +701,95 @@ function normalizeWechatMpListItem(item) {
 // 微信公众号
 export const th_wechat_media = {
     /**
+     * 微信搜一搜综合搜索。以原始 JSON 文本转发响应，避免 64 位 ID 被 JavaScript Number 舍入。
+     */
+    fetch_universal_search: async function (req, res) {
+        const paramsFromReq = {
+            ...(req.query || {}),
+            ...(req.body || {})
+        };
+        const {
+            keyword,
+            business_type = 'all',
+            sort = 'default',
+            publish_time = 'all',
+            offset = 0,
+            cursor,
+            raw = true,
+            api_key
+        } = paramsFromReq;
+        const normalizedKeyword = typeof keyword === 'string' ? keyword.trim() : '';
+        const allowedBusinessTypes = new Set(['all', 'account', 'article', 'video', 'live_stream', 'moments', 'news', 'book', 'listen', 'image', 'encyclopedia', 'weixin_index']);
+        const allowedSorts = new Set(['default', 'latest', 'hot', '0', '1', '2']);
+        const allowedPublishTimes = new Set(['all', 'day', 'week', 'half_year', '0', '1', '2', '3']);
+        const normalizedOffset = Number(offset);
+        const normalizedRaw = raw === true || raw === 'true'
+            ? true
+            : raw === false || raw === 'false'
+                ? false
+                : null;
+
+        if (!normalizedKeyword || normalizedKeyword.length > 100) {
+            return res.send({ code: -1, msg: 'keyword 必须是去除空白后的 1-100 个字符' });
+        }
+        if (!allowedBusinessTypes.has(String(business_type))) {
+            return res.send({ code: -1, msg: 'business_type 参数无效' });
+        }
+        if (!allowedSorts.has(String(sort))) {
+            return res.send({ code: -1, msg: 'sort 必须是 default/latest/hot 或 0/1/2' });
+        }
+        if (!allowedPublishTimes.has(String(publish_time))) {
+            return res.send({ code: -1, msg: 'publish_time 必须是 all/day/week/half_year 或 0/1/2/3' });
+        }
+        if (!Number.isInteger(normalizedOffset) || normalizedOffset < 0) {
+            return res.send({ code: -1, msg: 'offset 必须是非负整数' });
+        }
+        if (normalizedRaw === null) {
+            return res.send({ code: -1, msg: 'raw 必须是 true 或 false' });
+        }
+
+        try {
+            const isValid = await commonUtils.valid_redis_key('wechat_universal_search', unkey_api_id, api_key, req, res, 3);
+            if (!isValid) return;
+
+            const requestBody = {
+                keyword: normalizedKeyword,
+                business_type: String(business_type),
+                sort,
+                publish_time,
+                offset: normalizedOffset,
+                raw: normalizedRaw
+            };
+            if (typeof cursor !== 'undefined' && cursor !== null && String(cursor) !== '') {
+                requestBody.cursor = String(cursor);
+            }
+
+            const response = await axios.post('https://api.tikhub.io/api/v1/wechat_search/v2/fetch_search', requestBody, {
+                timeout: 30000,
+                responseType: 'text',
+                transformResponse: [(data) => data],
+                headers: {
+                    Authorization: `Bearer ${tikhub_api_token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            const upstreamPayload = response.data;
+            const isSuccessful = /"code"\s*:\s*200(?:\s*[,}])/.test(upstreamPayload);
+
+            if (api_key && isSuccessful) {
+                await unkey.verifyKey(unkey_api_id, api_key, 3, { platform: 'wechat_search', action: 'universal_search' });
+            }
+
+            return res.status(response.status).type('application/json').send(upstreamPayload);
+        } catch (error) {
+            console.error('WeChat Universal Search Error:', error.response ? error.response.status : error.message);
+            if (!res.headersSent) {
+                return res.send({ code: -1, msg: commonUtils.MESSAGE.SERVER_ERROR });
+            }
+        }
+    },
+
+    /**
      * 获取微信公众号文章列表
      */
     get_wechat_mp_article_list: async function (req, res) {

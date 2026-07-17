@@ -799,6 +799,7 @@ app.post('/youtube/get_channel_videos_v2', th_youtube.get_channel_videos_v2);
 app.post('/xiaohongshu/home_notes', th_xiaohongshu.fetch_home_notes);
 app.post('/xiaohongshu/search_notes_v2', th_xiaohongshu.search_notes_v2);
 app.post('/xiaohongshu/get_note_info_v1', th_xiaohongshu.get_note_info_v1);
+app.post('/wechat_search/v2/fetch_search', th_wechat_media.fetch_universal_search);
 // 通过公众号用户id获取文章
 app.post('/wx_gzh/get_user_articles', th_wechat_media.get_wechat_mp_article_list);
 

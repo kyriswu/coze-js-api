@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## 2026-07-17
+
+### Added
+- 新增 TikHub 微信搜一搜综合搜索接口：`POST /wechat_search/v2/fetch_search`。
+
+### Changed
+- 新接口保留 TikHub 原始 JSON 文本，避免 `docID`、`feedNonceId` 等 64 位 ID 经 JavaScript 解析后失真。
+- 新接口每个身份每天可免费试用 1 次；使用 `api_key` 的成功请求扣 3 积分，并在调用上游前校验余额不少于 3 积分。
+
 ## 2026-07-16
 
 ### Changed
