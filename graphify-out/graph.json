@@ -4432,8 +4432,8 @@
       "_origin": "ast",
       "community": 15,
       "norm_label": "navigationroutes.js",
-      "id": "routes_navigationroutes",
-      "community_name": "navigationRoutes.js"
+      "community_name": "navigationRoutes.js",
+      "id": "routes_navigationroutes"
     },
     {
       "label": "router",
@@ -4443,8 +4443,8 @@
       "_origin": "ast",
       "community": 15,
       "norm_label": "router",
-      "id": "routes_navigationroutes_router",
-      "community_name": "navigationRoutes.js"
+      "community_name": "navigationRoutes.js",
+      "id": "routes_navigationroutes_router"
     },
     {
       "label": "serviceCategories",
@@ -4454,8 +4454,8 @@
       "_origin": "ast",
       "community": 15,
       "norm_label": "servicecategories",
-      "id": "routes_navigationroutes_servicecategories",
-      "community_name": "navigationRoutes.js"
+      "community_name": "navigationRoutes.js",
+      "id": "routes_navigationroutes_servicecategories"
     },
     {
       "label": "serviceCards",
@@ -4465,8 +4465,8 @@
       "_origin": "ast",
       "community": 15,
       "norm_label": "servicecards",
-      "id": "routes_navigationroutes_servicecards",
-      "community_name": "navigationRoutes.js"
+      "community_name": "navigationRoutes.js",
+      "id": "routes_navigationroutes_servicecards"
     },
     {
       "label": "serviceStats",
@@ -4476,8 +4476,8 @@
       "_origin": "ast",
       "community": 15,
       "norm_label": "servicestats",
-      "id": "routes_navigationroutes_servicestats",
-      "community_name": "navigationRoutes.js"
+      "community_name": "navigationRoutes.js",
+      "id": "routes_navigationroutes_servicestats"
     },
     {
       "label": "xmlEscape()",
@@ -4487,8 +4487,8 @@
       "_origin": "ast",
       "community": 15,
       "norm_label": "xmlescape()",
-      "id": "routes_navigationroutes_xmlescape",
-      "community_name": "navigationRoutes.js"
+      "community_name": "navigationRoutes.js",
+      "id": "routes_navigationroutes_xmlescape"
     },
     {
       "label": "parseEndpoint()",
@@ -4498,8 +4498,8 @@
       "_origin": "ast",
       "community": 15,
       "norm_label": "parseendpoint()",
-      "id": "routes_navigationroutes_parseendpoint",
-      "community_name": "navigationRoutes.js"
+      "community_name": "navigationRoutes.js",
+      "id": "routes_navigationroutes_parseendpoint"
     },
     {
       "label": "sitemapPageItems",
@@ -4509,8 +4509,8 @@
       "_origin": "ast",
       "community": 15,
       "norm_label": "sitemappageitems",
-      "id": "routes_navigationroutes_sitemappageitems",
-      "community_name": "navigationRoutes.js"
+      "community_name": "navigationRoutes.js",
+      "id": "routes_navigationroutes_sitemappageitems"
     },
     {
       "label": "sitemapCategoryItems",
@@ -4520,8 +4520,8 @@
       "_origin": "ast",
       "community": 15,
       "norm_label": "sitemapcategoryitems",
-      "id": "routes_navigationroutes_sitemapcategoryitems",
-      "community_name": "navigationRoutes.js"
+      "community_name": "navigationRoutes.js",
+      "id": "routes_navigationroutes_sitemapcategoryitems"
     }
   ],
   "links": [
@@ -10987,5 +10987,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "b7eefc545496703336e76cf504b01acb54ca68b2"
+  "built_at_commit": "7c17d4cfea475c6681ce2ab139f1b8d066006fe7"
 }

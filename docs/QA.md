@@ -8,6 +8,7 @@
 |---|---|---|---|---|
 | QA-SD-01 | `node --check routes/navigationRoutes.js`、`node --check index.js`、`git diff --check` | 文档路由、应用入口和差异格式有效 | 均成功 | pass |
 | QA-SD-02 | `npm test` | 既有回归不受文档页影响 | 21 passed, 0 failed | pass |
+| QA-SD-03 | `GET /docs/volcengine/seedance-2-0`、`/readyz` | 文档页可公开访问，active app 就绪 | HTTP 200 / `text/html; charset=utf-8`，页面包含接口路径；`/readyz` 为 200，blue healthy | pass |
 
 ## Manual Checks
 - 文档页复用现有 API 文档模板，准确说明 `POST /volcengine/contents/generations/tasks` 与 `GET /volcengine/contents/generations/tasks/:task_id`。

@@ -3797,7 +3797,7 @@
       "_origin": "ast",
       "community": 4,
       "norm_label": "apiaccess.test.js",
-      "community_name": "navigationRoutes.js",
+      "community_name": "evolink.ai.js",
       "id": "test_apiaccess_test"
     },
     {
@@ -3808,7 +3808,7 @@
       "_origin": "ast",
       "community": 4,
       "norm_label": "verifykey()",
-      "community_name": "navigationRoutes.js",
+      "community_name": "evolink.ai.js",
       "id": "test_apiaccess_test_verifykey"
     },
     {
@@ -3819,7 +3819,7 @@
       "_origin": "ast",
       "community": 4,
       "norm_label": "aitoken.js",
-      "community_name": "navigationRoutes.js",
+      "community_name": "evolink.ai.js",
       "id": "utils_thirdparrtyapi_aitoken"
     },
     {
@@ -3830,7 +3830,7 @@
       "_origin": "ast",
       "community": 4,
       "norm_label": "gpt_image_edit_max_retries",
-      "community_name": "navigationRoutes.js",
+      "community_name": "evolink.ai.js",
       "id": "utils_thirdparrtyapi_aitoken_gpt_image_edit_max_retries"
     },
     {
@@ -3841,7 +3841,7 @@
       "_origin": "ast",
       "community": 4,
       "norm_label": "gpt_image_edit_retry_base_delay_ms",
-      "community_name": "navigationRoutes.js",
+      "community_name": "evolink.ai.js",
       "id": "utils_thirdparrtyapi_aitoken_gpt_image_edit_retry_base_delay_ms"
     },
     {
@@ -3852,7 +3852,7 @@
       "_origin": "ast",
       "community": 4,
       "norm_label": "aitoken",
-      "community_name": "navigationRoutes.js",
+      "community_name": "evolink.ai.js",
       "id": "utils_thirdparrtyapi_aitoken_aitoken"
     },
     {
@@ -3863,7 +3863,7 @@
       "_origin": "ast",
       "community": 4,
       "norm_label": "apiaccess.js",
-      "community_name": "navigationRoutes.js",
+      "community_name": "evolink.ai.js",
       "id": "utils_apiaccess"
     },
     {
@@ -3874,7 +3874,7 @@
       "_origin": "ast",
       "community": 4,
       "norm_label": "chargeapicredits()",
-      "community_name": "navigationRoutes.js",
+      "community_name": "evolink.ai.js",
       "id": "utils_apiaccess_chargeapicredits"
     },
     {
@@ -3885,7 +3885,7 @@
       "_origin": "ast",
       "community": 4,
       "norm_label": "createapiaccesshelpers()",
-      "community_name": "navigationRoutes.js",
+      "community_name": "evolink.ai.js",
       "id": "utils_apiaccess_createapiaccesshelpers"
     },
     {
@@ -4430,9 +4430,10 @@
       "source_file": "routes/navigationRoutes.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "routes_navigationroutes",
       "community": 15,
-      "norm_label": "navigationroutes.js"
+      "norm_label": "navigationroutes.js",
+      "community_name": "navigationRoutes.js",
+      "id": "routes_navigationroutes"
     },
     {
       "label": "router",
@@ -4440,9 +4441,10 @@
       "source_file": "routes/navigationRoutes.js",
       "source_location": "L7",
       "_origin": "ast",
-      "id": "routes_navigationroutes_router",
       "community": 15,
-      "norm_label": "router"
+      "norm_label": "router",
+      "community_name": "navigationRoutes.js",
+      "id": "routes_navigationroutes_router"
     },
     {
       "label": "serviceCategories",
@@ -4450,9 +4452,10 @@
       "source_file": "routes/navigationRoutes.js",
       "source_location": "L9",
       "_origin": "ast",
-      "id": "routes_navigationroutes_servicecategories",
       "community": 15,
-      "norm_label": "servicecategories"
+      "norm_label": "servicecategories",
+      "community_name": "navigationRoutes.js",
+      "id": "routes_navigationroutes_servicecategories"
     },
     {
       "label": "serviceCards",
@@ -4460,9 +4463,10 @@
       "source_file": "routes/navigationRoutes.js",
       "source_location": "L20",
       "_origin": "ast",
-      "id": "routes_navigationroutes_servicecards",
       "community": 15,
-      "norm_label": "servicecards"
+      "norm_label": "servicecards",
+      "community_name": "navigationRoutes.js",
+      "id": "routes_navigationroutes_servicecards"
     },
     {
       "label": "serviceStats",
@@ -4470,9 +4474,10 @@
       "source_file": "routes/navigationRoutes.js",
       "source_location": "L383",
       "_origin": "ast",
-      "id": "routes_navigationroutes_servicestats",
       "community": 15,
-      "norm_label": "servicestats"
+      "norm_label": "servicestats",
+      "community_name": "navigationRoutes.js",
+      "id": "routes_navigationroutes_servicestats"
     },
     {
       "label": "xmlEscape()",
@@ -4480,9 +4485,10 @@
       "source_file": "routes/navigationRoutes.js",
       "source_location": "L390",
       "_origin": "ast",
-      "id": "routes_navigationroutes_xmlescape",
       "community": 15,
-      "norm_label": "xmlescape()"
+      "norm_label": "xmlescape()",
+      "community_name": "navigationRoutes.js",
+      "id": "routes_navigationroutes_xmlescape"
     },
     {
       "label": "parseEndpoint()",
@@ -4490,9 +4496,10 @@
       "source_file": "routes/navigationRoutes.js",
       "source_location": "L397",
       "_origin": "ast",
-      "id": "routes_navigationroutes_parseendpoint",
       "community": 15,
-      "norm_label": "parseendpoint()"
+      "norm_label": "parseendpoint()",
+      "community_name": "navigationRoutes.js",
+      "id": "routes_navigationroutes_parseendpoint"
     },
     {
       "label": "sitemapPageItems",
@@ -4500,9 +4507,10 @@
       "source_file": "routes/navigationRoutes.js",
       "source_location": "L405",
       "_origin": "ast",
-      "id": "routes_navigationroutes_sitemappageitems",
       "community": 15,
-      "norm_label": "sitemappageitems"
+      "norm_label": "sitemappageitems",
+      "community_name": "navigationRoutes.js",
+      "id": "routes_navigationroutes_sitemappageitems"
     },
     {
       "label": "sitemapCategoryItems",
@@ -4510,9 +4518,10 @@
       "source_file": "routes/navigationRoutes.js",
       "source_location": "L424",
       "_origin": "ast",
-      "id": "routes_navigationroutes_sitemapcategoryitems",
       "community": 15,
-      "norm_label": "sitemapcategoryitems"
+      "norm_label": "sitemapcategoryitems",
+      "community_name": "navigationRoutes.js",
+      "id": "routes_navigationroutes_sitemapcategoryitems"
     }
   ],
   "links": [
@@ -10895,9 +10904,9 @@
       "source_location": "L397",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "routes_navigationroutes",
-      "target": "routes_navigationroutes_parseendpoint",
-      "confidence_score": 1.0
+      "target": "routes_navigationroutes_parseendpoint"
     },
     {
       "relation": "contains",
@@ -10906,9 +10915,9 @@
       "source_location": "L7",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "routes_navigationroutes",
-      "target": "routes_navigationroutes_router",
-      "confidence_score": 1.0
+      "target": "routes_navigationroutes_router"
     },
     {
       "relation": "contains",
@@ -10917,9 +10926,9 @@
       "source_location": "L20",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "routes_navigationroutes",
-      "target": "routes_navigationroutes_servicecards",
-      "confidence_score": 1.0
+      "target": "routes_navigationroutes_servicecards"
     },
     {
       "relation": "contains",
@@ -10928,9 +10937,9 @@
       "source_location": "L9",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "routes_navigationroutes",
-      "target": "routes_navigationroutes_servicecategories",
-      "confidence_score": 1.0
+      "target": "routes_navigationroutes_servicecategories"
     },
     {
       "relation": "contains",
@@ -10939,9 +10948,9 @@
       "source_location": "L383",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "routes_navigationroutes",
-      "target": "routes_navigationroutes_servicestats",
-      "confidence_score": 1.0
+      "target": "routes_navigationroutes_servicestats"
     },
     {
       "relation": "contains",
@@ -10950,9 +10959,9 @@
       "source_location": "L424",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "routes_navigationroutes",
-      "target": "routes_navigationroutes_sitemapcategoryitems",
-      "confidence_score": 1.0
+      "target": "routes_navigationroutes_sitemapcategoryitems"
     },
     {
       "relation": "contains",
@@ -10961,9 +10970,9 @@
       "source_location": "L405",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "routes_navigationroutes",
-      "target": "routes_navigationroutes_sitemappageitems",
-      "confidence_score": 1.0
+      "target": "routes_navigationroutes_sitemappageitems"
     },
     {
       "relation": "contains",
@@ -10972,11 +10981,11 @@
       "source_location": "L390",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "routes_navigationroutes",
-      "target": "routes_navigationroutes_xmlescape",
-      "confidence_score": 1.0
+      "target": "routes_navigationroutes_xmlescape"
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "b7eefc545496703336e76cf504b01acb54ca68b2"
+  "built_at_commit": "7c17d4cfea475c6681ce2ab139f1b8d066006fe7"
 }

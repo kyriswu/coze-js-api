@@ -4,7 +4,7 @@
 
 - [x] 文档路由与应用入口语法检查通过。
 - [x] 全量 Node 测试：`npm test`，21 passed / 0 failed。
-- [ ] 公网文档页 HTTP 验证。
+- [x] 公网文档页 HTTP 验证：HTTP 200 / `text/html; charset=utf-8`，页面标题与任务接口路径存在；active blue `/readyz` 为 200。
 
 ## 2026-07-17 · Shared Lite-Chat Redis Migration
 
