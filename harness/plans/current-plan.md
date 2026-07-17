@@ -8,6 +8,16 @@
 
 **Tech Stack:** Node.js 22 / Express / ioredis, Docker Compose, Nginx, Bash.
 
+## Safety Follow-up — 2026-07-17
+
+**Finding:** Post-cutover failure handling had a state-order window: an error after Nginx reload but before active-color persistence could stop the newly active candidate. The script also began old-color drain without verifying the candidate through Nginx.
+
+**Smallest safe slice:** Add a regression test for these two ordering invariants; after reload, mark the candidate as traffic-serving before any fallible state persistence; then verify Nginx routes to its `/readyz`. On failure, atomically restore the prior include and retain the old color. Start drain only after this verification succeeds.
+
+- [ ] Add failing deployment-script regression test and implement the ordered rollback guard.
+- [ ] Execute a live `blue → green` cutover to prove the post-switch validation and drain ordering.
+- [ ] Update QA/Release/Graphify evidence for the follow-up.
+
 ## Completion Status — 2026-07-17
 
 - [x] Task 1 complete: lifecycle endpoints and graceful shutdown implemented and tested.

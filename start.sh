@@ -11,6 +11,9 @@ ACTIVE_BACKEND_FILE="$NGINX_STATE_DIR/active-backend.conf"
 LOCK_FILE=/var/lock/coze-js-api-deploy.lock
 READINESS_TIMEOUT_SECONDS="${READINESS_TIMEOUT_SECONDS:-120}"
 DRAIN_TIMEOUT_SECONDS="${DRAIN_TIMEOUT_SECONDS:-1800}"
+POST_SWITCH_VALIDATION_ATTEMPTS="${POST_SWITCH_VALIDATION_ATTEMPTS:-3}"
+POST_SWITCH_VALIDATION_INTERVAL_SECONDS="${POST_SWITCH_VALIDATION_INTERVAL_SECONDS:-2}"
+NGINX_VALIDATION_HOST="${NGINX_VALIDATION_HOST:-coze-js-api.devtool.uk}"
 
 mkdir -p "$STATE_DIR" "$NGINX_STATE_DIR"
 exec 9>"$LOCK_FILE"
@@ -100,9 +103,37 @@ curl --fail --silent --show-error "http://127.0.0.1:${next_port}/" >/dev/null
 backup_file="$(mktemp "$NGINX_STATE_DIR/active-backend.backup.XXXXXX")"
 cp "$ACTIVE_BACKEND_FILE" "$backup_file"
 restore_nginx_backend() {
-    cp "$backup_file" "$ACTIVE_BACKEND_FILE"
+    local restore_file
+    restore_file="$(mktemp "$NGINX_STATE_DIR/active-backend.restore.XXXXXX")"
+    cp "$backup_file" "$restore_file"
+    chmod 0644 "$restore_file"
+    mv -f "$restore_file" "$ACTIVE_BACKEND_FILE"
     nginx -t
     systemctl reload nginx
+}
+
+verify_nginx_candidate() {
+    local attempt
+    for ((attempt = 1; attempt <= POST_SWITCH_VALIDATION_ATTEMPTS; attempt += 1)); do
+        curl --noproxy '*' --insecure --fail --silent --show-error \
+            --resolve "${NGINX_VALIDATION_HOST}:443:127.0.0.1" \
+            "https://${NGINX_VALIDATION_HOST}/readyz" >/dev/null
+        if (( attempt < POST_SWITCH_VALIDATION_ATTEMPTS )); then
+            sleep "$POST_SWITCH_VALIDATION_INTERVAL_SECONDS"
+        fi
+    done
+}
+
+rollback_switched_traffic() {
+    local reason="$1"
+    echo "Post-switch validation failed: $reason. Restoring $current_color." >&2
+    if restore_nginx_backend; then
+        switched=0
+        "${COMPOSE[@]}" stop -t 20 "$next_service" >/dev/null 2>&1 || true
+    else
+        echo "Rollback reload failed; leaving $next_color running because it may still serve traffic." >&2
+    fi
+    exit 1
 }
 
 write_backend "$next_color"
@@ -114,12 +145,18 @@ if ! systemctl reload nginx; then
     restore_nginx_backend || true
     exit 1
 fi
-rm -f "$backup_file"
-printf '%s\n' "$next_color" > "$ACTIVE_COLOR_FILE"
+# Nginx now routes to the candidate. Protect it before any fallible state persistence.
 switched=1
+if ! printf '%s\n' "$next_color" > "$ACTIVE_COLOR_FILE"; then
+    rollback_switched_traffic "could not persist active color"
+fi
+if ! verify_nginx_candidate; then
+    rollback_switched_traffic "Nginx readiness check failed"
+fi
+rm -f "$backup_file" || echo "Could not remove backend backup: $backup_file" >&2
 trap - ERR
 
-echo "Traffic switched to $next_color. Scheduling background drain for: $current_color"
+echo "Traffic switched to $next_color and passed Nginx validation. Scheduling background drain for: $current_color"
 drain_log="$STATE_DIR/drain-${current_color}-$(date +%Y%m%d%H%M%S).log"
 if [[ "$current_color" == "legacy" ]]; then
     legacy_container="$($ENGINE ps -aq \
