@@ -9,7 +9,7 @@
       "source_file": "test/deploymentRoute.test.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 18,
+      "community": 19,
       "community_name": "deploymentRoute.test.js",
       "norm_label": "deploymentroute.test.js",
       "id": "test_deploymentroute_test"
@@ -20,7 +20,7 @@
       "source_file": "test/deploymentRoute.test.js",
       "source_location": "L5",
       "_origin": "ast",
-      "community": 18,
+      "community": 19,
       "community_name": "deploymentRoute.test.js",
       "norm_label": "createresponse()",
       "id": "test_deploymentroute_test_createresponse"
@@ -31,7 +31,7 @@
       "source_file": "utils/deploymentRoute.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 18,
+      "community": 19,
       "community_name": "deploymentRoute.test.js",
       "norm_label": "deploymentroute.js",
       "id": "utils_deploymentroute"
@@ -42,7 +42,7 @@
       "source_file": "utils/deploymentRoute.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 18,
+      "community": 19,
       "community_name": "deploymentRoute.test.js",
       "norm_label": "createdeploymenthandler()",
       "id": "utils_deploymentroute_createdeploymenthandler"
@@ -53,7 +53,7 @@
       "source_file": "pdf2images.py",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 35,
+      "community": 36,
       "norm_label": "pdf2images.py",
       "community_name": "pdf2images.py",
       "id": "pdf2images"
@@ -64,7 +64,7 @@
       "source_file": "routes/navigationRoutes.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 4,
+      "community": 6,
       "norm_label": "navigationroutes.js",
       "community_name": "navigationRoutes.js",
       "id": "routes_navigationroutes"
@@ -75,7 +75,7 @@
       "source_file": "routes/navigationRoutes.js",
       "source_location": "L7",
       "_origin": "ast",
-      "community": 4,
+      "community": 6,
       "norm_label": "router",
       "community_name": "navigationRoutes.js",
       "id": "routes_navigationroutes_router"
@@ -86,7 +86,7 @@
       "source_file": "routes/navigationRoutes.js",
       "source_location": "L9",
       "_origin": "ast",
-      "community": 4,
+      "community": 6,
       "norm_label": "servicecategories",
       "community_name": "navigationRoutes.js",
       "id": "routes_navigationroutes_servicecategories"
@@ -97,7 +97,7 @@
       "source_file": "routes/navigationRoutes.js",
       "source_location": "L20",
       "_origin": "ast",
-      "community": 4,
+      "community": 6,
       "norm_label": "servicecards",
       "community_name": "navigationRoutes.js",
       "id": "routes_navigationroutes_servicecards"
@@ -108,7 +108,7 @@
       "source_file": "routes/navigationRoutes.js",
       "source_location": "L374",
       "_origin": "ast",
-      "community": 4,
+      "community": 6,
       "norm_label": "servicestats",
       "community_name": "navigationRoutes.js",
       "id": "routes_navigationroutes_servicestats"
@@ -119,7 +119,7 @@
       "source_file": "routes/navigationRoutes.js",
       "source_location": "L381",
       "_origin": "ast",
-      "community": 4,
+      "community": 6,
       "norm_label": "xmlescape()",
       "community_name": "navigationRoutes.js",
       "id": "routes_navigationroutes_xmlescape"
@@ -130,7 +130,7 @@
       "source_file": "routes/navigationRoutes.js",
       "source_location": "L388",
       "_origin": "ast",
-      "community": 4,
+      "community": 6,
       "norm_label": "parseendpoint()",
       "community_name": "navigationRoutes.js",
       "id": "routes_navigationroutes_parseendpoint"
@@ -141,7 +141,7 @@
       "source_file": "routes/navigationRoutes.js",
       "source_location": "L396",
       "_origin": "ast",
-      "community": 4,
+      "community": 6,
       "norm_label": "sitemappageitems",
       "community_name": "navigationRoutes.js",
       "id": "routes_navigationroutes_sitemappageitems"
@@ -152,7 +152,7 @@
       "source_file": "routes/navigationRoutes.js",
       "source_location": "L414",
       "_origin": "ast",
-      "community": 4,
+      "community": 6,
       "norm_label": "sitemapcategoryitems",
       "community_name": "navigationRoutes.js",
       "id": "routes_navigationroutes_sitemapcategoryitems"
@@ -288,7 +288,7 @@
         "kind": "file"
       },
       "_origin": "ast",
-      "community": 25,
+      "community": 26,
       "norm_label": "server.sh",
       "community_name": "server.sh",
       "id": "server"
@@ -303,7 +303,7 @@
         "kind": "bash_entrypoint"
       },
       "_origin": "ast",
-      "community": 25,
+      "community": 26,
       "norm_label": "server.sh script",
       "community_name": "server.sh",
       "id": "server_sh__entry"
@@ -314,7 +314,7 @@
       "source_file": "skills/douyin-billboard-fetch-hot-rise-list/scripts/fetch_hot_rise_list.py",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 15,
+      "community": 16,
       "norm_label": "fetch_hot_rise_list.py",
       "community_name": "fetch_hot_rise_list.py",
       "id": "skills_douyin_billboard_fetch_hot_rise_list_scripts_fetch_hot_rise_list"
@@ -325,7 +325,7 @@
       "source_file": "skills/douyin-billboard-fetch-hot-rise-list/scripts/fetch_hot_rise_list.py",
       "source_location": "L22",
       "_origin": "ast",
-      "community": 15,
+      "community": 16,
       "norm_label": "get_api_key()",
       "community_name": "fetch_hot_rise_list.py",
       "id": "skills_douyin_billboard_fetch_hot_rise_list_scripts_fetch_hot_rise_list_get_api_key"
@@ -336,7 +336,7 @@
       "source_file": "skills/douyin-billboard-fetch-hot-rise-list/scripts/fetch_hot_rise_list.py",
       "source_location": "L38",
       "_origin": "ast",
-      "community": 15,
+      "community": 16,
       "norm_label": "fetch_hot_rise_list()",
       "community_name": "fetch_hot_rise_list.py",
       "id": "skills_douyin_billboard_fetch_hot_rise_list_scripts_fetch_hot_rise_list_fetch_hot_rise_list"
@@ -347,7 +347,7 @@
       "source_file": "skills/douyin-billboard-fetch-hot-rise-list/scripts/fetch_hot_rise_list.py",
       "source_location": "L74",
       "_origin": "ast",
-      "community": 15,
+      "community": 16,
       "norm_label": "print_results()",
       "community_name": "fetch_hot_rise_list.py",
       "id": "skills_douyin_billboard_fetch_hot_rise_list_scripts_fetch_hot_rise_list_print_results"
@@ -358,7 +358,7 @@
       "source_file": "skills/douyin-billboard-fetch-hot-rise-list/scripts/fetch_hot_rise_list.py",
       "source_location": "L114",
       "_origin": "ast",
-      "community": 15,
+      "community": 16,
       "norm_label": "main()",
       "community_name": "fetch_hot_rise_list.py",
       "id": "skills_douyin_billboard_fetch_hot_rise_list_scripts_fetch_hot_rise_list_main"
@@ -369,7 +369,7 @@
       "source_file": "skills/douyin-billboard-fetch-hot-rise-list/scripts/fetch_hot_rise_list.py",
       "source_location": "L23",
       "_origin": "ast",
-      "community": 15,
+      "community": 16,
       "norm_label": "\u4f18\u5148\u4f7f\u7528\u53c2\u6570\u4f20\u5165\u7684 key,\u5426\u5219\u8bfb\u53d6\u73af\u5883\u53d8\u91cf azt_api_key",
       "community_name": "fetch_hot_rise_list.py",
       "id": "skills_douyin_billboard_fetch_hot_rise_list_scripts_fetch_hot_rise_list_rationale_23"
@@ -384,7 +384,7 @@
         "kind": "file"
       },
       "_origin": "ast",
-      "community": 26,
+      "community": 27,
       "norm_label": "transcribe_douyin.sh",
       "community_name": "transcribe_douyin.sh",
       "id": "skills_douyin_transcribe_api_scripts_transcribe_douyin"
@@ -399,7 +399,7 @@
         "kind": "bash_entrypoint"
       },
       "_origin": "ast",
-      "community": 26,
+      "community": 27,
       "norm_label": "transcribe_douyin.sh script",
       "community_name": "transcribe_douyin.sh",
       "id": "skills_douyin_transcribe_api_scripts_transcribe_douyin_sh__entry"
@@ -410,7 +410,7 @@
       "source_file": "skills/google-search-web/scripts/google_search.py",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 16,
+      "community": 17,
       "norm_label": "google_search.py",
       "community_name": "google_search.py",
       "id": "skills_google_search_web_scripts_google_search"
@@ -421,7 +421,7 @@
       "source_file": "skills/google-search-web/scripts/google_search.py",
       "source_location": "L22",
       "_origin": "ast",
-      "community": 16,
+      "community": 17,
       "norm_label": "get_api_key()",
       "community_name": "google_search.py",
       "id": "skills_google_search_web_scripts_google_search_get_api_key"
@@ -432,7 +432,7 @@
       "source_file": "skills/google-search-web/scripts/google_search.py",
       "source_location": "L27",
       "_origin": "ast",
-      "community": 16,
+      "community": 17,
       "norm_label": "google_search()",
       "community_name": "google_search.py",
       "id": "skills_google_search_web_scripts_google_search_google_search"
@@ -443,7 +443,7 @@
       "source_file": "skills/google-search-web/scripts/google_search.py",
       "source_location": "L49",
       "_origin": "ast",
-      "community": 16,
+      "community": 17,
       "norm_label": "print_results()",
       "community_name": "google_search.py",
       "id": "skills_google_search_web_scripts_google_search_print_results"
@@ -454,7 +454,7 @@
       "source_file": "skills/google-search-web/scripts/google_search.py",
       "source_location": "L85",
       "_origin": "ast",
-      "community": 16,
+      "community": 17,
       "norm_label": "main()",
       "community_name": "google_search.py",
       "id": "skills_google_search_web_scripts_google_search_main"
@@ -465,7 +465,7 @@
       "source_file": "skills/google-search-web/scripts/google_search.py",
       "source_location": "L23",
       "_origin": "ast",
-      "community": 16,
+      "community": 17,
       "norm_label": "\u4f18\u5148\u4f7f\u7528\u53c2\u6570\u4f20\u5165\u7684 key,\u5426\u5219\u8bfb\u53d6\u73af\u5883\u53d8\u91cf azt_api_key(\u514d\u8d39\u7248\u53ef\u4e0d\u586b)",
       "community_name": "google_search.py",
       "id": "skills_google_search_web_scripts_google_search_rationale_23"
@@ -476,7 +476,7 @@
       "source_file": "skills/twitterwebapi/scripts/twitter_api.py",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 10,
+      "community": 11,
       "norm_label": "twitter_api.py",
       "community_name": "twitter_api.py",
       "id": "skills_twitterwebapi_scripts_twitter_api"
@@ -487,7 +487,7 @@
       "source_file": "skills/twitterwebapi/scripts/twitter_api.py",
       "source_location": "L22",
       "_origin": "ast",
-      "community": 10,
+      "community": 11,
       "norm_label": "get_api_key()",
       "community_name": "twitter_api.py",
       "id": "skills_twitterwebapi_scripts_twitter_api_get_api_key"
@@ -498,7 +498,7 @@
       "source_file": "skills/twitterwebapi/scripts/twitter_api.py",
       "source_location": "L27",
       "_origin": "ast",
-      "community": 10,
+      "community": 11,
       "norm_label": "post_json()",
       "community_name": "twitter_api.py",
       "id": "skills_twitterwebapi_scripts_twitter_api_post_json"
@@ -509,7 +509,7 @@
       "source_file": "",
       "source_location": "",
       "_origin": "ast",
-      "community": 10,
+      "community": 11,
       "norm_label": "any",
       "community_name": "twitter_api.py",
       "id": "any"
@@ -520,7 +520,7 @@
       "source_file": "skills/twitterwebapi/scripts/twitter_api.py",
       "source_location": "L47",
       "_origin": "ast",
-      "community": 10,
+      "community": 11,
       "norm_label": "pick_first()",
       "community_name": "twitter_api.py",
       "id": "skills_twitterwebapi_scripts_twitter_api_pick_first"
@@ -531,7 +531,7 @@
       "source_file": "skills/twitterwebapi/scripts/twitter_api.py",
       "source_location": "L54",
       "_origin": "ast",
-      "community": 10,
+      "community": 11,
       "norm_label": "normalize_detail()",
       "community_name": "twitter_api.py",
       "id": "skills_twitterwebapi_scripts_twitter_api_normalize_detail"
@@ -542,7 +542,7 @@
       "source_file": "skills/twitterwebapi/scripts/twitter_api.py",
       "source_location": "L71",
       "_origin": "ast",
-      "community": 10,
+      "community": 11,
       "norm_label": "normalize_search()",
       "community_name": "twitter_api.py",
       "id": "skills_twitterwebapi_scripts_twitter_api_normalize_search"
@@ -553,7 +553,7 @@
       "source_file": "skills/twitterwebapi/scripts/twitter_api.py",
       "source_location": "L97",
       "_origin": "ast",
-      "community": 10,
+      "community": 11,
       "norm_label": "print_detail_result()",
       "community_name": "twitter_api.py",
       "id": "skills_twitterwebapi_scripts_twitter_api_print_detail_result"
@@ -564,7 +564,7 @@
       "source_file": "skills/twitterwebapi/scripts/twitter_api.py",
       "source_location": "L120",
       "_origin": "ast",
-      "community": 10,
+      "community": 11,
       "norm_label": "print_search_result()",
       "community_name": "twitter_api.py",
       "id": "skills_twitterwebapi_scripts_twitter_api_print_search_result"
@@ -575,7 +575,7 @@
       "source_file": "skills/twitterwebapi/scripts/twitter_api.py",
       "source_location": "L152",
       "_origin": "ast",
-      "community": 10,
+      "community": 11,
       "norm_label": "run_detail()",
       "community_name": "twitter_api.py",
       "id": "skills_twitterwebapi_scripts_twitter_api_run_detail"
@@ -586,7 +586,7 @@
       "source_file": "skills/twitterwebapi/scripts/twitter_api.py",
       "source_location": "L164",
       "_origin": "ast",
-      "community": 10,
+      "community": 11,
       "norm_label": "run_search()",
       "community_name": "twitter_api.py",
       "id": "skills_twitterwebapi_scripts_twitter_api_run_search"
@@ -597,7 +597,7 @@
       "source_file": "skills/twitterwebapi/scripts/twitter_api.py",
       "source_location": "L178",
       "_origin": "ast",
-      "community": 10,
+      "community": 11,
       "norm_label": "build_parser()",
       "community_name": "twitter_api.py",
       "id": "skills_twitterwebapi_scripts_twitter_api_build_parser"
@@ -608,7 +608,7 @@
       "source_file": "",
       "source_location": "",
       "_origin": "ast",
-      "community": 10,
+      "community": 11,
       "norm_label": "argumentparser",
       "community_name": "twitter_api.py",
       "id": "argumentparser"
@@ -619,7 +619,7 @@
       "source_file": "skills/twitterwebapi/scripts/twitter_api.py",
       "source_location": "L199",
       "_origin": "ast",
-      "community": 10,
+      "community": 11,
       "norm_label": "main()",
       "community_name": "twitter_api.py",
       "id": "skills_twitterwebapi_scripts_twitter_api_main"
@@ -630,7 +630,7 @@
       "source_file": "skills/volcengine-web-search/scripts/web_search.py",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 17,
+      "community": 18,
       "norm_label": "web_search.py",
       "community_name": "web_search.py",
       "id": "skills_volcengine_web_search_scripts_web_search"
@@ -641,7 +641,7 @@
       "source_file": "skills/volcengine-web-search/scripts/web_search.py",
       "source_location": "L22",
       "_origin": "ast",
-      "community": 17,
+      "community": 18,
       "norm_label": "parse_bool()",
       "community_name": "web_search.py",
       "id": "skills_volcengine_web_search_scripts_web_search_parse_bool"
@@ -652,7 +652,7 @@
       "source_file": "skills/volcengine-web-search/scripts/web_search.py",
       "source_location": "L33",
       "_origin": "ast",
-      "community": 17,
+      "community": 18,
       "norm_label": "get_api_key()",
       "community_name": "web_search.py",
       "id": "skills_volcengine_web_search_scripts_web_search_get_api_key"
@@ -663,7 +663,7 @@
       "source_file": "skills/volcengine-web-search/scripts/web_search.py",
       "source_location": "L48",
       "_origin": "ast",
-      "community": 17,
+      "community": 18,
       "norm_label": "web_search()",
       "community_name": "web_search.py",
       "id": "skills_volcengine_web_search_scripts_web_search_web_search"
@@ -674,7 +674,7 @@
       "source_file": "skills/volcengine-web-search/scripts/web_search.py",
       "source_location": "L95",
       "_origin": "ast",
-      "community": 17,
+      "community": 18,
       "norm_label": "print_results()",
       "community_name": "web_search.py",
       "id": "skills_volcengine_web_search_scripts_web_search_print_results"
@@ -685,7 +685,7 @@
       "source_file": "skills/volcengine-web-search/scripts/web_search.py",
       "source_location": "L159",
       "_origin": "ast",
-      "community": 17,
+      "community": 18,
       "norm_label": "main()",
       "community_name": "web_search.py",
       "id": "skills_volcengine_web_search_scripts_web_search_main"
@@ -700,7 +700,7 @@
         "kind": "file"
       },
       "_origin": "ast",
-      "community": 27,
+      "community": 28,
       "norm_label": "start_lite.sh",
       "community_name": "start_lite.sh",
       "id": "start_lite"
@@ -715,7 +715,7 @@
         "kind": "bash_entrypoint"
       },
       "_origin": "ast",
-      "community": 27,
+      "community": 28,
       "norm_label": "start_lite.sh script",
       "community_name": "start_lite.sh",
       "id": "start_lite_sh__entry"
@@ -726,7 +726,7 @@
       "source_file": "test/staticZipDeployment.test.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 5,
+      "community": 4,
       "norm_label": "staticzipdeployment.test.js",
       "community_name": "staticZipDeployment.js",
       "id": "test_staticzipdeployment_test"
@@ -737,7 +737,7 @@
       "source_file": "test/staticZipDeployment.test.js",
       "source_location": "L12",
       "_origin": "ast",
-      "community": 5,
+      "community": 4,
       "norm_label": "sha256()",
       "community_name": "staticZipDeployment.js",
       "id": "test_staticzipdeployment_test_sha256"
@@ -748,7 +748,7 @@
       "source_file": "test/staticZipDeployment.test.js",
       "source_location": "L14",
       "_origin": "ast",
-      "community": 5,
+      "community": 4,
       "norm_label": "createvalidartifact()",
       "community_name": "staticZipDeployment.js",
       "id": "test_staticzipdeployment_test_createvalidartifact"
@@ -759,7 +759,7 @@
       "source_file": "utils/CustomError.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 8,
+      "community": 9,
       "norm_label": "customerror.js",
       "community_name": "CustomError.js",
       "id": "utils_customerror"
@@ -770,7 +770,7 @@
       "source_file": "utils/CustomError.js",
       "source_location": "L2",
       "_origin": "ast",
-      "community": 8,
+      "community": 9,
       "norm_label": "baseerror",
       "community_name": "CustomError.js",
       "id": "utils_customerror_baseerror"
@@ -781,7 +781,7 @@
       "source_file": "utils/CustomError.js",
       "source_location": "L3",
       "_origin": "ast",
-      "community": 8,
+      "community": 9,
       "norm_label": ".constructor()",
       "community_name": "CustomError.js",
       "id": "utils_customerror_baseerror_constructor"
@@ -792,7 +792,7 @@
       "source_file": "utils/CustomError.js",
       "source_location": "L11",
       "_origin": "ast",
-      "community": 8,
+      "community": 9,
       "norm_label": "quotaexceedederror",
       "community_name": "CustomError.js",
       "id": "utils_customerror_quotaexceedederror"
@@ -803,7 +803,7 @@
       "source_file": "utils/CustomError.js",
       "source_location": "L12",
       "_origin": "ast",
-      "community": 8,
+      "community": 9,
       "norm_label": ".constructor()",
       "community_name": "CustomError.js",
       "id": "utils_customerror_quotaexceedederror_constructor"
@@ -814,7 +814,7 @@
       "source_file": "utils/CustomError.js",
       "source_location": "L19",
       "_origin": "ast",
-      "community": 8,
+      "community": 9,
       "norm_label": "invalidapikeyerror",
       "community_name": "CustomError.js",
       "id": "utils_customerror_invalidapikeyerror"
@@ -825,7 +825,7 @@
       "source_file": "utils/CustomError.js",
       "source_location": "L20",
       "_origin": "ast",
-      "community": 8,
+      "community": 9,
       "norm_label": ".constructor()",
       "community_name": "CustomError.js",
       "id": "utils_customerror_invalidapikeyerror_constructor"
@@ -836,7 +836,7 @@
       "source_file": "utils/CustomError.js",
       "source_location": "L27",
       "_origin": "ast",
-      "community": 8,
+      "community": 9,
       "norm_label": "validationerror",
       "community_name": "CustomError.js",
       "id": "utils_customerror_validationerror"
@@ -847,7 +847,7 @@
       "source_file": "utils/CustomError.js",
       "source_location": "L28",
       "_origin": "ast",
-      "community": 8,
+      "community": 9,
       "norm_label": ".constructor()",
       "community_name": "CustomError.js",
       "id": "utils_customerror_validationerror_constructor"
@@ -858,7 +858,7 @@
       "source_file": "utils/CustomError.js",
       "source_location": "L35",
       "_origin": "ast",
-      "community": 8,
+      "community": 9,
       "norm_label": "notfounderror",
       "community_name": "CustomError.js",
       "id": "utils_customerror_notfounderror"
@@ -869,7 +869,7 @@
       "source_file": "utils/CustomError.js",
       "source_location": "L36",
       "_origin": "ast",
-      "community": 8,
+      "community": 9,
       "norm_label": ".constructor()",
       "community_name": "CustomError.js",
       "id": "utils_customerror_notfounderror_constructor"
@@ -880,7 +880,7 @@
       "source_file": "utils/CustomError.js",
       "source_location": "L43",
       "_origin": "ast",
-      "community": 8,
+      "community": 9,
       "norm_label": "ratelimiterror",
       "community_name": "CustomError.js",
       "id": "utils_customerror_ratelimiterror"
@@ -891,7 +891,7 @@
       "source_file": "utils/CustomError.js",
       "source_location": "L44",
       "_origin": "ast",
-      "community": 8,
+      "community": 9,
       "norm_label": ".constructor()",
       "community_name": "CustomError.js",
       "id": "utils_customerror_ratelimiterror_constructor"
@@ -902,7 +902,7 @@
       "source_file": "utils/CustomError.js",
       "source_location": "L52",
       "_origin": "ast",
-      "community": 8,
+      "community": 9,
       "norm_label": "fileoperationerror",
       "community_name": "CustomError.js",
       "id": "utils_customerror_fileoperationerror"
@@ -913,7 +913,7 @@
       "source_file": "utils/CustomError.js",
       "source_location": "L53",
       "_origin": "ast",
-      "community": 8,
+      "community": 9,
       "norm_label": ".constructor()",
       "community_name": "CustomError.js",
       "id": "utils_customerror_fileoperationerror_constructor"
@@ -924,7 +924,7 @@
       "source_file": "utils/ThirdParrtyApi/aimlapi.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 21,
+      "community": 22,
       "norm_label": "aimlapi.js",
       "community_name": "aimlapi.js",
       "id": "utils_thirdparrtyapi_aimlapi"
@@ -935,7 +935,7 @@
       "source_file": "utils/ThirdParrtyApi/aimlapi.js",
       "source_location": "L8",
       "_origin": "ast",
-      "community": 21,
+      "community": 22,
       "norm_label": "api",
       "community_name": "aimlapi.js",
       "id": "utils_thirdparrtyapi_aimlapi_api"
@@ -946,54 +946,10 @@
       "source_file": "utils/ThirdParrtyApi/aimlapi.js",
       "source_location": "L12",
       "_origin": "ast",
-      "community": 21,
+      "community": 22,
       "norm_label": "aimlapi",
       "community_name": "aimlapi.js",
       "id": "utils_thirdparrtyapi_aimlapi_aimlapi"
-    },
-    {
-      "label": "aitoken.js",
-      "file_type": "code",
-      "source_file": "utils/ThirdParrtyApi/aitoken.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "community": 4,
-      "norm_label": "aitoken.js",
-      "community_name": "navigationRoutes.js",
-      "id": "utils_thirdparrtyapi_aitoken"
-    },
-    {
-      "label": "GPT_IMAGE_EDIT_MAX_RETRIES",
-      "file_type": "code",
-      "source_file": "utils/ThirdParrtyApi/aitoken.js",
-      "source_location": "L11",
-      "_origin": "ast",
-      "community": 4,
-      "norm_label": "gpt_image_edit_max_retries",
-      "community_name": "navigationRoutes.js",
-      "id": "utils_thirdparrtyapi_aitoken_gpt_image_edit_max_retries"
-    },
-    {
-      "label": "GPT_IMAGE_EDIT_RETRY_BASE_DELAY_MS",
-      "file_type": "code",
-      "source_file": "utils/ThirdParrtyApi/aitoken.js",
-      "source_location": "L12",
-      "_origin": "ast",
-      "community": 4,
-      "norm_label": "gpt_image_edit_retry_base_delay_ms",
-      "community_name": "navigationRoutes.js",
-      "id": "utils_thirdparrtyapi_aitoken_gpt_image_edit_retry_base_delay_ms"
-    },
-    {
-      "label": "aitoken",
-      "file_type": "code",
-      "source_file": "utils/ThirdParrtyApi/aitoken.js",
-      "source_location": "L14",
-      "_origin": "ast",
-      "community": 4,
-      "norm_label": "aitoken",
-      "community_name": "navigationRoutes.js",
-      "id": "utils_thirdparrtyapi_aitoken_aitoken"
     },
     {
       "label": "browserless.js",
@@ -1177,7 +1133,7 @@
       "source_file": "utils/ThirdParrtyApi/cloudflare.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 22,
+      "community": 23,
       "norm_label": "cloudflare.js",
       "community_name": "cloudflare.js",
       "id": "utils_thirdparrtyapi_cloudflare"
@@ -1188,7 +1144,7 @@
       "source_file": "utils/ThirdParrtyApi/cloudflare.js",
       "source_location": "L6",
       "_origin": "ast",
-      "community": 22,
+      "community": 23,
       "norm_label": "whispermaxfilebytes",
       "community_name": "cloudflare.js",
       "id": "utils_thirdparrtyapi_cloudflare_whispermaxfilebytes"
@@ -1199,7 +1155,7 @@
       "source_file": "utils/ThirdParrtyApi/cloudflare.js",
       "source_location": "L11",
       "_origin": "ast",
-      "community": 22,
+      "community": 23,
       "norm_label": "cloudflareapi",
       "community_name": "cloudflare.js",
       "id": "utils_thirdparrtyapi_cloudflare_cloudflareapi"
@@ -1254,7 +1210,7 @@
       "source_file": "utils/ThirdParrtyApi/cozecom.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "cozecom.js",
       "community_name": "navigationRoutes.js",
       "id": "utils_thirdparrtyapi_cozecom"
@@ -1265,7 +1221,7 @@
       "source_file": "utils/ThirdParrtyApi/cozecom.js",
       "source_location": "L6",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "config",
       "community_name": "navigationRoutes.js",
       "id": "utils_thirdparrtyapi_cozecom_config"
@@ -1276,7 +1232,7 @@
       "source_file": "utils/ThirdParrtyApi/cozecom.js",
       "source_location": "L26",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "timestamptodatetime()",
       "community_name": "navigationRoutes.js",
       "id": "utils_thirdparrtyapi_cozecom_timestamptodatetime"
@@ -1287,7 +1243,7 @@
       "source_file": "utils/ThirdParrtyApi/cozecom.js",
       "source_location": "L33",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "cozecom",
       "community_name": "navigationRoutes.js",
       "id": "utils_thirdparrtyapi_cozecom_cozecom"
@@ -1298,7 +1254,7 @@
       "source_file": "utils/ThirdParrtyApi/evolink.ai.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 6,
+      "community": 7,
       "norm_label": "evolink.ai.js",
       "community_name": "evolink.ai.js",
       "id": "utils_thirdparrtyapi_evolink_ai"
@@ -1309,7 +1265,7 @@
       "source_file": "utils/ThirdParrtyApi/evolink.ai.js",
       "source_location": "L15",
       "_origin": "ast",
-      "community": 6,
+      "community": 7,
       "norm_label": "final_statuses",
       "community_name": "evolink.ai.js",
       "id": "utils_thirdparrtyapi_evolink_ai_final_statuses"
@@ -1320,7 +1276,7 @@
       "source_file": "utils/ThirdParrtyApi/evolink.ai.js",
       "source_location": "L18",
       "_origin": "ast",
-      "community": 6,
+      "community": 7,
       "norm_label": "{ verifyapiaccess, consumeapicredits }",
       "community_name": "evolink.ai.js",
       "id": "utils_thirdparrtyapi_evolink_ai_verifyapiaccess_consumeapicredits"
@@ -1331,7 +1287,7 @@
       "source_file": "utils/ThirdParrtyApi/evolink.ai.js",
       "source_location": "L27",
       "_origin": "ast",
-      "community": 6,
+      "community": 7,
       "norm_label": "ensureapikey()",
       "community_name": "evolink.ai.js",
       "id": "utils_thirdparrtyapi_evolink_ai_ensureapikey"
@@ -1342,7 +1298,7 @@
       "source_file": "utils/ThirdParrtyApi/evolink.ai.js",
       "source_location": "L37",
       "_origin": "ast",
-      "community": 6,
+      "community": 7,
       "norm_label": "sleep()",
       "community_name": "evolink.ai.js",
       "id": "utils_thirdparrtyapi_evolink_ai_sleep"
@@ -1353,7 +1309,7 @@
       "source_file": "utils/ThirdParrtyApi/evolink.ai.js",
       "source_location": "L41",
       "_origin": "ast",
-      "community": 6,
+      "community": 7,
       "norm_label": "getaxiosconfig()",
       "community_name": "evolink.ai.js",
       "id": "utils_thirdparrtyapi_evolink_ai_getaxiosconfig"
@@ -1364,7 +1320,7 @@
       "source_file": "utils/ThirdParrtyApi/evolink.ai.js",
       "source_location": "L51",
       "_origin": "ast",
-      "community": 6,
+      "community": 7,
       "norm_label": "normalizepositivenumber()",
       "community_name": "evolink.ai.js",
       "id": "utils_thirdparrtyapi_evolink_ai_normalizepositivenumber"
@@ -1375,7 +1331,7 @@
       "source_file": "utils/ThirdParrtyApi/evolink.ai.js",
       "source_location": "L56",
       "_origin": "ast",
-      "community": 6,
+      "community": 7,
       "norm_label": "buildrequesterror()",
       "community_name": "evolink.ai.js",
       "id": "utils_thirdparrtyapi_evolink_ai_buildrequesterror"
@@ -1386,7 +1342,7 @@
       "source_file": "utils/ThirdParrtyApi/evolink.ai.js",
       "source_location": "L68",
       "_origin": "ast",
-      "community": 6,
+      "community": 7,
       "norm_label": "buildclienterror()",
       "community_name": "evolink.ai.js",
       "id": "utils_thirdparrtyapi_evolink_ai_buildclienterror"
@@ -1397,7 +1353,7 @@
       "source_file": "utils/ThirdParrtyApi/evolink.ai.js",
       "source_location": "L75",
       "_origin": "ast",
-      "community": 6,
+      "community": 7,
       "norm_label": "getfinalimageurl()",
       "community_name": "evolink.ai.js",
       "id": "utils_thirdparrtyapi_evolink_ai_getfinalimageurl"
@@ -1408,7 +1364,7 @@
       "source_file": "utils/ThirdParrtyApi/evolink.ai.js",
       "source_location": "L83",
       "_origin": "ast",
-      "community": 6,
+      "community": 7,
       "norm_label": "getcreditused()",
       "community_name": "evolink.ai.js",
       "id": "utils_thirdparrtyapi_evolink_ai_getcreditused"
@@ -1419,7 +1375,7 @@
       "source_file": "utils/ThirdParrtyApi/evolink.ai.js",
       "source_location": "L88",
       "_origin": "ast",
-      "community": 6,
+      "community": 7,
       "norm_label": "calculatecreditcost()",
       "community_name": "evolink.ai.js",
       "id": "utils_thirdparrtyapi_evolink_ai_calculatecreditcost"
@@ -1430,7 +1386,7 @@
       "source_file": "utils/ThirdParrtyApi/evolink.ai.js",
       "source_location": "L100",
       "_origin": "ast",
-      "community": 6,
+      "community": 7,
       "norm_label": "evolink",
       "community_name": "evolink.ai.js",
       "id": "utils_thirdparrtyapi_evolink_ai_evolink"
@@ -1441,7 +1397,7 @@
       "source_file": "utils/ThirdParrtyApi/feishu.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 31,
+      "community": 32,
       "norm_label": "feishu.js",
       "community_name": "feishu.js",
       "id": "utils_thirdparrtyapi_feishu"
@@ -1452,7 +1408,7 @@
       "source_file": "utils/ThirdParrtyApi/feishu.js",
       "source_location": "L5",
       "_origin": "ast",
-      "community": 31,
+      "community": 32,
       "norm_label": "feishu",
       "community_name": "feishu.js",
       "id": "utils_thirdparrtyapi_feishu_feishu"
@@ -1485,7 +1441,7 @@
       "source_file": "utils/ThirdParrtyApi/firecrawl.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 32,
+      "community": 33,
       "norm_label": "firecrawl.js",
       "community_name": "firecrawl.js",
       "id": "utils_thirdparrtyapi_firecrawl"
@@ -1496,7 +1452,7 @@
       "source_file": "utils/ThirdParrtyApi/firecrawl.js",
       "source_location": "L10",
       "_origin": "ast",
-      "community": 32,
+      "community": 33,
       "norm_label": "firecrawltool",
       "community_name": "firecrawl.js",
       "id": "utils_thirdparrtyapi_firecrawl_firecrawltool"
@@ -1507,7 +1463,7 @@
       "source_file": "utils/ThirdParrtyApi/hermes-agent.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 20,
+      "community": 21,
       "norm_label": "hermes-agent.js",
       "community_name": "hermes-agent.js",
       "id": "utils_thirdparrtyapi_hermes_agent"
@@ -1518,7 +1474,7 @@
       "source_file": "utils/ThirdParrtyApi/hermes-agent.js",
       "source_location": "L5",
       "_origin": "ast",
-      "community": 20,
+      "community": 21,
       "norm_label": "hermes_default_timeout_ms",
       "community_name": "hermes-agent.js",
       "id": "utils_thirdparrtyapi_hermes_agent_hermes_default_timeout_ms"
@@ -1529,7 +1485,7 @@
       "source_file": "utils/ThirdParrtyApi/hermes-agent.js",
       "source_location": "L8",
       "_origin": "ast",
-      "community": 20,
+      "community": 21,
       "norm_label": "normalizepayload()",
       "community_name": "hermes-agent.js",
       "id": "utils_thirdparrtyapi_hermes_agent_normalizepayload"
@@ -1540,7 +1496,7 @@
       "source_file": "utils/ThirdParrtyApi/hermes-agent.js",
       "source_location": "L26",
       "_origin": "ast",
-      "community": 20,
+      "community": 21,
       "norm_label": "hermesagent",
       "community_name": "hermes-agent.js",
       "id": "utils_thirdparrtyapi_hermes_agent_hermesagent"
@@ -1551,7 +1507,7 @@
       "source_file": "utils/ThirdParrtyApi/lemonfoxai.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 23,
+      "community": 24,
       "norm_label": "lemonfoxai.js",
       "community_name": "lemonfoxai.js",
       "id": "utils_thirdparrtyapi_lemonfoxai"
@@ -1562,7 +1518,7 @@
       "source_file": "utils/ThirdParrtyApi/lemonfoxai.js",
       "source_location": "L8",
       "_origin": "ast",
-      "community": 23,
+      "community": 24,
       "norm_label": "openai",
       "community_name": "lemonfoxai.js",
       "id": "utils_thirdparrtyapi_lemonfoxai_openai"
@@ -1573,7 +1529,7 @@
       "source_file": "utils/ThirdParrtyApi/lemonfoxai.js",
       "source_location": "L13",
       "_origin": "ast",
-      "community": 23,
+      "community": 24,
       "norm_label": "lemonfoxai",
       "community_name": "lemonfoxai.js",
       "id": "utils_thirdparrtyapi_lemonfoxai_lemonfoxai"
@@ -1584,7 +1540,7 @@
       "source_file": "utils/ThirdParrtyApi/tencentapi.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 33,
+      "community": 34,
       "norm_label": "tencentapi.js",
       "community_name": "tencentapi.js",
       "id": "utils_thirdparrtyapi_tencentapi"
@@ -1595,32 +1551,10 @@
       "source_file": "utils/ThirdParrtyApi/tencentapi.js",
       "source_location": "L8",
       "_origin": "ast",
-      "community": 33,
+      "community": 34,
       "norm_label": "tencentapi",
       "community_name": "tencentapi.js",
       "id": "utils_thirdparrtyapi_tencentapi_tencentapi"
-    },
-    {
-      "label": "apiAccess.js",
-      "file_type": "code",
-      "source_file": "utils/apiAccess.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "community": 6,
-      "norm_label": "apiaccess.js",
-      "community_name": "evolink.ai.js",
-      "id": "utils_apiaccess"
-    },
-    {
-      "label": "createApiAccessHelpers()",
-      "file_type": "code",
-      "source_file": "utils/apiAccess.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "community": 6,
-      "norm_label": "createapiaccesshelpers()",
-      "community_name": "evolink.ai.js",
-      "id": "utils_apiaccess_createapiaccesshelpers"
     },
     {
       "label": "axiosInterceptors.js",
@@ -1628,7 +1562,7 @@
       "source_file": "utils/axiosInterceptors.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 11,
+      "community": 5,
       "norm_label": "axiosinterceptors.js",
       "community_name": "networkLogger.js",
       "id": "utils_axiosinterceptors"
@@ -1639,7 +1573,7 @@
       "source_file": "utils/axiosInterceptors.js",
       "source_location": "L3",
       "_origin": "ast",
-      "community": 11,
+      "community": 5,
       "norm_label": "attachaxiosratelimitlogger()",
       "community_name": "networkLogger.js",
       "id": "utils_axiosinterceptors_attachaxiosratelimitlogger"
@@ -1705,7 +1639,7 @@
       "source_file": "utils/htmlContent.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 19,
+      "community": 20,
       "norm_label": "htmlcontent.js",
       "community_name": "htmlContent.js",
       "id": "utils_htmlcontent"
@@ -1716,7 +1650,7 @@
       "source_file": "utils/htmlContent.js",
       "source_location": "L3",
       "_origin": "ast",
-      "community": 19,
+      "community": 20,
       "norm_label": "htmltoqueryselector()",
       "community_name": "htmlContent.js",
       "id": "utils_htmlcontent_htmltoqueryselector"
@@ -1727,7 +1661,7 @@
       "source_file": "utils/htmlContent.js",
       "source_location": "L32",
       "_origin": "ast",
-      "community": 19,
+      "community": 20,
       "norm_label": "extract_html_conent()",
       "community_name": "htmlContent.js",
       "id": "utils_htmlcontent_extract_html_conent"
@@ -1738,7 +1672,7 @@
       "source_file": "utils/htmlContent.js",
       "source_location": "L63",
       "_origin": "ast",
-      "community": 19,
+      "community": 20,
       "norm_label": "extract_html_conent_standard()",
       "community_name": "htmlContent.js",
       "id": "utils_htmlcontent_extract_html_conent_standard"
@@ -1749,7 +1683,7 @@
       "source_file": "utils/loadEnv.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 6,
+      "community": 7,
       "norm_label": "loadenv.js",
       "community_name": "evolink.ai.js",
       "id": "utils_loadenv"
@@ -1760,7 +1694,7 @@
       "source_file": "utils/loadEnv.js",
       "source_location": "L5",
       "_origin": "ast",
-      "community": 6,
+      "community": 7,
       "norm_label": "__filename",
       "community_name": "evolink.ai.js",
       "id": "utils_loadenv_filename"
@@ -1771,7 +1705,7 @@
       "source_file": "utils/loadEnv.js",
       "source_location": "L6",
       "_origin": "ast",
-      "community": 6,
+      "community": 7,
       "norm_label": "__dirname",
       "community_name": "evolink.ai.js",
       "id": "utils_loadenv_dirname"
@@ -1782,7 +1716,7 @@
       "source_file": "utils/loadEnv.js",
       "source_location": "L7",
       "_origin": "ast",
-      "community": 6,
+      "community": 7,
       "norm_label": "envfilepath",
       "community_name": "evolink.ai.js",
       "id": "utils_loadenv_envfilepath"
@@ -1793,7 +1727,7 @@
       "source_file": "utils/loadEnv.js",
       "source_location": "L9",
       "_origin": "ast",
-      "community": 6,
+      "community": 7,
       "norm_label": "stripwrappingquotes()",
       "community_name": "evolink.ai.js",
       "id": "utils_loadenv_stripwrappingquotes"
@@ -1804,7 +1738,7 @@
       "source_file": "utils/netdiskapi.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "netdiskapi.js",
       "community_name": "navigationRoutes.js",
       "id": "utils_netdiskapi"
@@ -1815,7 +1749,7 @@
       "source_file": "utils/netdiskapi.js",
       "source_location": "L6",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "netdiskapi",
       "community_name": "navigationRoutes.js",
       "id": "utils_netdiskapi_netdiskapi"
@@ -1826,7 +1760,7 @@
       "source_file": "utils/networkAnalytics.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 9,
+      "community": 10,
       "norm_label": "networkanalytics.js",
       "community_name": "networkAnalytics.js",
       "id": "utils_networkanalytics"
@@ -1837,7 +1771,7 @@
       "source_file": "utils/networkAnalytics.js",
       "source_location": "L8",
       "_origin": "ast",
-      "community": 9,
+      "community": 10,
       "norm_label": "default_scan_limit",
       "community_name": "networkAnalytics.js",
       "id": "utils_networkanalytics_default_scan_limit"
@@ -1848,7 +1782,7 @@
       "source_file": "utils/networkAnalytics.js",
       "source_location": "L13",
       "_origin": "ast",
-      "community": 9,
+      "community": 10,
       "norm_label": "tofinitenumber()",
       "community_name": "networkAnalytics.js",
       "id": "utils_networkanalytics_tofinitenumber"
@@ -1859,7 +1793,7 @@
       "source_file": "utils/networkAnalytics.js",
       "source_location": "L18",
       "_origin": "ast",
-      "community": 9,
+      "community": 10,
       "norm_label": "safestring()",
       "community_name": "networkAnalytics.js",
       "id": "utils_networkanalytics_safestring"
@@ -1870,7 +1804,7 @@
       "source_file": "utils/networkAnalytics.js",
       "source_location": "L25",
       "_origin": "ast",
-      "community": 9,
+      "community": 10,
       "norm_label": "normalizemethod()",
       "community_name": "networkAnalytics.js",
       "id": "utils_networkanalytics_normalizemethod"
@@ -1881,7 +1815,7 @@
       "source_file": "utils/networkAnalytics.js",
       "source_location": "L27",
       "_origin": "ast",
-      "community": 9,
+      "community": 10,
       "norm_label": "statusclass()",
       "community_name": "networkAnalytics.js",
       "id": "utils_networkanalytics_statusclass"
@@ -1892,7 +1826,7 @@
       "source_file": "utils/networkAnalytics.js",
       "source_location": "L37",
       "_origin": "ast",
-      "community": 9,
+      "community": 10,
       "norm_label": "minutestart()",
       "community_name": "networkAnalytics.js",
       "id": "utils_networkanalytics_minutestart"
@@ -1903,7 +1837,7 @@
       "source_file": "utils/networkAnalytics.js",
       "source_location": "L39",
       "_origin": "ast",
-      "community": 9,
+      "community": 10,
       "norm_label": "incmap()",
       "community_name": "networkAnalytics.js",
       "id": "utils_networkanalytics_incmap"
@@ -1914,7 +1848,7 @@
       "source_file": "utils/networkAnalytics.js",
       "source_location": "L44",
       "_origin": "ast",
-      "community": 9,
+      "community": 10,
       "norm_label": "topentries()",
       "community_name": "networkAnalytics.js",
       "id": "utils_networkanalytics_topentries"
@@ -1925,7 +1859,7 @@
       "source_file": "utils/networkAnalytics.js",
       "source_location": "L51",
       "_origin": "ast",
-      "community": 9,
+      "community": 10,
       "norm_label": "parserediseventline()",
       "community_name": "networkAnalytics.js",
       "id": "utils_networkanalytics_parserediseventline"
@@ -1936,7 +1870,7 @@
       "source_file": "utils/networkAnalytics.js",
       "source_location": "L72",
       "_origin": "ast",
-      "community": 9,
+      "community": 10,
       "norm_label": "collectlastlines()",
       "community_name": "networkAnalytics.js",
       "id": "utils_networkanalytics_collectlastlines"
@@ -1947,7 +1881,7 @@
       "source_file": "utils/networkAnalytics.js",
       "source_location": "L85",
       "_origin": "ast",
-      "community": 9,
+      "community": 10,
       "norm_label": "seedredisfromfileifempty()",
       "community_name": "networkAnalytics.js",
       "id": "utils_networkanalytics_seedredisfromfileifempty"
@@ -1958,7 +1892,7 @@
       "source_file": "utils/networkAnalytics.js",
       "source_location": "L106",
       "_origin": "ast",
-      "community": 9,
+      "community": 10,
       "norm_label": "buildtimeline()",
       "community_name": "networkAnalytics.js",
       "id": "utils_networkanalytics_buildtimeline"
@@ -1969,7 +1903,7 @@
       "source_file": "utils/networkAnalytics.js",
       "source_location": "L131",
       "_origin": "ast",
-      "community": 9,
+      "community": 10,
       "norm_label": "matchfilters()",
       "community_name": "networkAnalytics.js",
       "id": "utils_networkanalytics_matchfilters"
@@ -1980,7 +1914,7 @@
       "source_file": "utils/networkAnalytics.js",
       "source_location": "L158",
       "_origin": "ast",
-      "community": 9,
+      "community": 10,
       "norm_label": "getnetworkdashboardmetrics()",
       "community_name": "networkAnalytics.js",
       "id": "utils_networkanalytics_getnetworkdashboardmetrics"
@@ -1991,7 +1925,7 @@
       "source_file": "utils/networkLogger.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 11,
+      "community": 5,
       "norm_label": "networklogger.js",
       "community_name": "networkLogger.js",
       "id": "utils_networklogger"
@@ -2002,7 +1936,7 @@
       "source_file": "utils/networkLogger.js",
       "source_location": "L5",
       "_origin": "ast",
-      "community": 11,
+      "community": 5,
       "norm_label": "log_mode",
       "community_name": "networkLogger.js",
       "id": "utils_networklogger_log_mode"
@@ -2013,7 +1947,7 @@
       "source_file": "utils/networkLogger.js",
       "source_location": "L13",
       "_origin": "ast",
-      "community": 11,
+      "community": 5,
       "norm_label": "redis_events_max",
       "community_name": "networkLogger.js",
       "id": "utils_networklogger_redis_events_max"
@@ -2024,7 +1958,7 @@
       "source_file": "utils/networkLogger.js",
       "source_location": "L20",
       "_origin": "ast",
-      "community": 11,
+      "community": 5,
       "norm_label": "ensurefilelogger()",
       "community_name": "networkLogger.js",
       "id": "utils_networklogger_ensurefilelogger"
@@ -2035,7 +1969,7 @@
       "source_file": "utils/networkLogger.js",
       "source_location": "L30",
       "_origin": "ast",
-      "community": 11,
+      "community": 5,
       "norm_label": "writetofile()",
       "community_name": "networkLogger.js",
       "id": "utils_networklogger_writetofile"
@@ -2046,7 +1980,7 @@
       "source_file": "utils/networkLogger.js",
       "source_location": "L42",
       "_origin": "ast",
-      "community": 11,
+      "community": 5,
       "norm_label": "writetoredis()",
       "community_name": "networkLogger.js",
       "id": "utils_networklogger_writetoredis"
@@ -2057,7 +1991,7 @@
       "source_file": "utils/networkLogger.js",
       "source_location": "L57",
       "_origin": "ast",
-      "community": 11,
+      "community": 5,
       "norm_label": "emit()",
       "community_name": "networkLogger.js",
       "id": "utils_networklogger_emit"
@@ -2068,7 +2002,7 @@
       "source_file": "utils/networkLogger.js",
       "source_location": "L92",
       "_origin": "ast",
-      "community": 11,
+      "community": 5,
       "norm_label": "loghttprequest()",
       "community_name": "networkLogger.js",
       "id": "utils_networklogger_loghttprequest"
@@ -2079,7 +2013,7 @@
       "source_file": "utils/networkLogger.js",
       "source_location": "L99",
       "_origin": "ast",
-      "community": 11,
+      "community": 5,
       "norm_label": "logaxiosrequest()",
       "community_name": "networkLogger.js",
       "id": "utils_networklogger_logaxiosrequest"
@@ -2090,7 +2024,7 @@
       "source_file": "utils/networkLogger.js",
       "source_location": "L106",
       "_origin": "ast",
-      "community": 11,
+      "community": 5,
       "norm_label": "logaxioserror()",
       "community_name": "networkLogger.js",
       "id": "utils_networklogger_logaxioserror"
@@ -2101,7 +2035,7 @@
       "source_file": "utils/networkLogger.js",
       "source_location": "L113",
       "_origin": "ast",
-      "community": 11,
+      "community": 5,
       "norm_label": "logratelimit()",
       "community_name": "networkLogger.js",
       "id": "utils_networklogger_logratelimit"
@@ -2156,7 +2090,7 @@
       "source_file": "utils/redisClient.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "redisclient.js",
       "community_name": "navigationRoutes.js",
       "id": "utils_redisclient"
@@ -2167,7 +2101,7 @@
       "source_file": "utils/redisClient.js",
       "source_location": "L8",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "redis",
       "community_name": "navigationRoutes.js",
       "id": "utils_redisclient_redis"
@@ -2178,7 +2112,7 @@
       "source_file": "utils/search1api.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 30,
+      "community": 31,
       "norm_label": "search1api.js",
       "community_name": "search1api.js",
       "id": "utils_search1api"
@@ -2189,7 +2123,7 @@
       "source_file": "utils/search1api.js",
       "source_location": "L2",
       "_origin": "ast",
-      "community": 30,
+      "community": 31,
       "norm_label": "search1api",
       "community_name": "search1api.js",
       "id": "utils_search1api_search1api"
@@ -2200,7 +2134,7 @@
       "source_file": "utils/staticZipDeployment.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 5,
+      "community": 4,
       "norm_label": "staticzipdeployment.js",
       "community_name": "staticZipDeployment.js",
       "id": "utils_staticzipdeployment"
@@ -2211,7 +2145,7 @@
       "source_file": "utils/staticZipDeployment.js",
       "source_location": "L7",
       "_origin": "ast",
-      "community": 5,
+      "community": 4,
       "norm_label": "execfile",
       "community_name": "staticZipDeployment.js",
       "id": "utils_staticzipdeployment_execfile"
@@ -2222,7 +2156,7 @@
       "source_file": "utils/staticZipDeployment.js",
       "source_location": "L13",
       "_origin": "ast",
-      "community": 5,
+      "community": 4,
       "norm_label": "trusted_upload_hosts",
       "community_name": "staticZipDeployment.js",
       "id": "utils_staticzipdeployment_trusted_upload_hosts"
@@ -2233,7 +2167,7 @@
       "source_file": "utils/staticZipDeployment.js",
       "source_location": "L14",
       "_origin": "ast",
-      "community": 5,
+      "community": 4,
       "norm_label": "allowed_static_extensions",
       "community_name": "staticZipDeployment.js",
       "id": "utils_staticzipdeployment_allowed_static_extensions"
@@ -2244,7 +2178,7 @@
       "source_file": "utils/staticZipDeployment.js",
       "source_location": "L19",
       "_origin": "ast",
-      "community": 5,
+      "community": 4,
       "norm_label": "deploymentrejected",
       "community_name": "staticZipDeployment.js",
       "id": "utils_staticzipdeployment_deploymentrejected"
@@ -2255,7 +2189,7 @@
       "source_file": "utils/staticZipDeployment.js",
       "source_location": "L20",
       "_origin": "ast",
-      "community": 5,
+      "community": 4,
       "norm_label": ".constructor()",
       "community_name": "staticZipDeployment.js",
       "id": "utils_staticzipdeployment_deploymentrejected_constructor"
@@ -2266,7 +2200,7 @@
       "source_file": "utils/staticZipDeployment.js",
       "source_location": "L27",
       "_origin": "ast",
-      "community": 5,
+      "community": 4,
       "norm_label": "reject()",
       "community_name": "staticZipDeployment.js",
       "id": "utils_staticzipdeployment_reject"
@@ -2277,7 +2211,7 @@
       "source_file": "utils/staticZipDeployment.js",
       "source_location": "L31",
       "_origin": "ast",
-      "community": 5,
+      "community": 4,
       "norm_label": "sha256file()",
       "community_name": "staticZipDeployment.js",
       "id": "utils_staticzipdeployment_sha256file"
@@ -2288,7 +2222,7 @@
       "source_file": "utils/staticZipDeployment.js",
       "source_location": "L36",
       "_origin": "ast",
-      "community": 5,
+      "community": 4,
       "norm_label": "assertwithin()",
       "community_name": "staticZipDeployment.js",
       "id": "utils_staticzipdeployment_assertwithin"
@@ -2299,7 +2233,7 @@
       "source_file": "utils/staticZipDeployment.js",
       "source_location": "L45",
       "_origin": "ast",
-      "community": 5,
+      "community": 4,
       "norm_label": "resolvetrustedzippath()",
       "community_name": "staticZipDeployment.js",
       "id": "utils_staticzipdeployment_resolvetrustedzippath"
@@ -2310,7 +2244,7 @@
       "source_file": "utils/staticZipDeployment.js",
       "source_location": "L95",
       "_origin": "ast",
-      "community": 5,
+      "community": 4,
       "norm_label": "runarchivecommand()",
       "community_name": "staticZipDeployment.js",
       "id": "utils_staticzipdeployment_runarchivecommand"
@@ -2321,7 +2255,7 @@
       "source_file": "utils/staticZipDeployment.js",
       "source_location": "L103",
       "_origin": "ast",
-      "community": 5,
+      "community": 4,
       "norm_label": "getarchiveentries()",
       "community_name": "staticZipDeployment.js",
       "id": "utils_staticzipdeployment_getarchiveentries"
@@ -2332,7 +2266,7 @@
       "source_file": "utils/staticZipDeployment.js",
       "source_location": "L142",
       "_origin": "ast",
-      "community": 5,
+      "community": 4,
       "norm_label": "validatezipmetadata()",
       "community_name": "staticZipDeployment.js",
       "id": "utils_staticzipdeployment_validatezipmetadata"
@@ -2343,7 +2277,7 @@
       "source_file": "utils/staticZipDeployment.js",
       "source_location": "L179",
       "_origin": "ast",
-      "community": 5,
+      "community": 4,
       "norm_label": "listregularfiles()",
       "community_name": "staticZipDeployment.js",
       "id": "utils_staticzipdeployment_listregularfiles"
@@ -2354,7 +2288,7 @@
       "source_file": "utils/staticZipDeployment.js",
       "source_location": "L199",
       "_origin": "ast",
-      "community": 5,
+      "community": 4,
       "norm_label": "assertreleaserelativestaticpaths()",
       "community_name": "staticZipDeployment.js",
       "id": "utils_staticzipdeployment_assertreleaserelativestaticpaths"
@@ -2365,7 +2299,7 @@
       "source_file": "utils/staticZipDeployment.js",
       "source_location": "L219",
       "_origin": "ast",
-      "community": 5,
+      "community": 4,
       "norm_label": "validateextractedartifact()",
       "community_name": "staticZipDeployment.js",
       "id": "utils_staticzipdeployment_validateextractedartifact"
@@ -2376,7 +2310,7 @@
       "source_file": "utils/staticZipDeployment.js",
       "source_location": "L262",
       "_origin": "ast",
-      "community": 5,
+      "community": 4,
       "norm_label": "defaultverifypublicurl()",
       "community_name": "staticZipDeployment.js",
       "id": "utils_staticzipdeployment_defaultverifypublicurl"
@@ -2387,7 +2321,7 @@
       "source_file": "utils/staticZipDeployment.js",
       "source_location": "L269",
       "_origin": "ast",
-      "community": 5,
+      "community": 4,
       "norm_label": "deploystaticzip()",
       "community_name": "staticZipDeployment.js",
       "id": "utils_staticzipdeployment_deploystaticzip"
@@ -2838,7 +2772,7 @@
       "source_file": "utils/zyte.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 34,
+      "community": 35,
       "norm_label": "zyte.js",
       "community_name": "zyte.js",
       "id": "utils_zyte"
@@ -2849,7 +2783,7 @@
       "source_file": "utils/zyte.js",
       "source_location": "L3",
       "_origin": "ast",
-      "community": 34,
+      "community": 35,
       "norm_label": "zyte",
       "community_name": "zyte.js",
       "id": "utils_zyte_zyte"
@@ -2860,7 +2794,7 @@
       "source_file": "test/wechatUniversalSearch.test.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 7,
+      "community": 8,
       "norm_label": "wechatuniversalsearch.test.js",
       "community_name": "tikhub.io.js",
       "id": "test_wechatuniversalsearch_test"
@@ -2871,7 +2805,7 @@
       "source_file": "test/wechatUniversalSearch.test.js",
       "source_location": "L7",
       "_origin": "ast",
-      "community": 7,
+      "community": 8,
       "norm_label": "createresponse()",
       "community_name": "tikhub.io.js",
       "id": "test_wechatuniversalsearch_test_createresponse"
@@ -2915,7 +2849,7 @@
       "source_file": "utils/tikhub.io.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 7,
+      "community": 8,
       "norm_label": "tikhub.io.js",
       "community_name": "tikhub.io.js",
       "id": "utils_tikhub_io"
@@ -2926,7 +2860,7 @@
       "source_file": "utils/tikhub.io.js",
       "source_location": "L14",
       "_origin": "ast",
-      "community": 7,
+      "community": 8,
       "norm_label": "th_youtube",
       "community_name": "tikhub.io.js",
       "id": "utils_tikhub_io_th_youtube"
@@ -2937,7 +2871,7 @@
       "source_file": "utils/tikhub.io.js",
       "source_location": "L110",
       "_origin": "ast",
-      "community": 7,
+      "community": 8,
       "norm_label": "th_bilibili",
       "community_name": "tikhub.io.js",
       "id": "utils_tikhub_io_th_bilibili"
@@ -2948,7 +2882,7 @@
       "source_file": "utils/tikhub.io.js",
       "source_location": "L376",
       "_origin": "ast",
-      "community": 7,
+      "community": 8,
       "norm_label": "th_xiaohongshu",
       "community_name": "tikhub.io.js",
       "id": "utils_tikhub_io_th_xiaohongshu"
@@ -2959,7 +2893,7 @@
       "source_file": "utils/tikhub.io.js",
       "source_location": "L634",
       "_origin": "ast",
-      "community": 7,
+      "community": 8,
       "norm_label": "tikhubrequest()",
       "community_name": "tikhub.io.js",
       "id": "utils_tikhub_io_tikhubrequest"
@@ -2970,7 +2904,7 @@
       "source_file": "utils/tikhub.io.js",
       "source_location": "L645",
       "_origin": "ast",
-      "community": 7,
+      "community": 8,
       "norm_label": "normalizewechatarticledetail()",
       "community_name": "tikhub.io.js",
       "id": "utils_tikhub_io_normalizewechatarticledetail"
@@ -2981,7 +2915,7 @@
       "source_file": "utils/tikhub.io.js",
       "source_location": "L655",
       "_origin": "ast",
-      "community": 7,
+      "community": 8,
       "norm_label": "normalizewechatmplistitem()",
       "community_name": "tikhub.io.js",
       "id": "utils_tikhub_io_normalizewechatmplistitem"
@@ -2992,7 +2926,7 @@
       "source_file": "utils/tikhub.io.js",
       "source_location": "L702",
       "_origin": "ast",
-      "community": 7,
+      "community": 8,
       "norm_label": "th_wechat_media",
       "community_name": "tikhub.io.js",
       "id": "utils_tikhub_io_th_wechat_media"
@@ -3003,7 +2937,7 @@
       "source_file": "utils/tikhub.io.js",
       "source_location": "L1021",
       "_origin": "ast",
-      "community": 7,
+      "community": 8,
       "norm_label": "th_wechat_channels",
       "community_name": "tikhub.io.js",
       "id": "utils_tikhub_io_th_wechat_channels"
@@ -3014,7 +2948,7 @@
       "source_file": "utils/tikhub.io.js",
       "source_location": "L1084",
       "_origin": "ast",
-      "community": 7,
+      "community": 8,
       "norm_label": "th_douyin",
       "community_name": "tikhub.io.js",
       "id": "utils_tikhub_io_th_douyin"
@@ -3025,7 +2959,7 @@
       "source_file": "utils/tikhub.io.js",
       "source_location": "L1515",
       "_origin": "ast",
-      "community": 7,
+      "community": 8,
       "norm_label": "th_tiktok",
       "community_name": "tikhub.io.js",
       "id": "utils_tikhub_io_th_tiktok"
@@ -3036,7 +2970,7 @@
       "source_file": "utils/tikhub.io.js",
       "source_location": "L1757",
       "_origin": "ast",
-      "community": 7,
+      "community": 8,
       "norm_label": "th_twitter",
       "community_name": "tikhub.io.js",
       "id": "utils_tikhub_io_th_twitter"
@@ -3047,450 +2981,10 @@
       "source_file": "utils/tikhub.io.js",
       "source_location": "L1855",
       "_origin": "ast",
-      "community": 7,
+      "community": 8,
       "norm_label": "th_douyin_billboard",
       "community_name": "tikhub.io.js",
       "id": "utils_tikhub_io_th_douyin_billboard"
-    },
-    {
-      "label": "index.js",
-      "file_type": "code",
-      "source_file": "index.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "community": 0,
-      "norm_label": "index.js",
-      "community_name": "index.js",
-      "id": "index"
-    },
-    {
-      "label": "__filename",
-      "file_type": "code",
-      "source_file": "index.js",
-      "source_location": "L13",
-      "_origin": "ast",
-      "community": 0,
-      "norm_label": "__filename",
-      "community_name": "index.js",
-      "id": "index_filename"
-    },
-    {
-      "label": "__dirname",
-      "file_type": "code",
-      "source_file": "index.js",
-      "source_location": "L14",
-      "_origin": "ast",
-      "community": 0,
-      "norm_label": "__dirname",
-      "community_name": "index.js",
-      "id": "index_dirname"
-    },
-    {
-      "label": "app",
-      "file_type": "code",
-      "source_file": "index.js",
-      "source_location": "L46",
-      "_origin": "ast",
-      "community": 0,
-      "norm_label": "app",
-      "community_name": "index.js",
-      "id": "index_app"
-    },
-    {
-      "label": "downloadsDir",
-      "file_type": "code",
-      "source_file": "index.js",
-      "source_location": "L50",
-      "_origin": "ast",
-      "community": 0,
-      "norm_label": "downloadsdir",
-      "community_name": "index.js",
-      "id": "index_downloadsdir"
-    },
-    {
-      "label": "agent",
-      "file_type": "code",
-      "source_file": "index.js",
-      "source_location": "L84",
-      "_origin": "ast",
-      "community": 0,
-      "norm_label": "agent",
-      "community_name": "index.js",
-      "id": "index_agent"
-    },
-    {
-      "label": "{\n    canSearchGoogle,\n    canUseHtmlParse,\n    dailyUse,\n    verifyApiAccess,\n    consumeApiCredits,\n}",
-      "file_type": "code",
-      "source_file": "index.js",
-      "source_location": "L98",
-      "_origin": "ast",
-      "community": 0,
-      "norm_label": "{\n    cansearchgoogle,\n    canusehtmlparse,\n    dailyuse,\n    verifyapiaccess,\n    consumeapicredits,\n}",
-      "community_name": "index.js",
-      "id": "index_cansearchgoogle_canusehtmlparse_dailyuse_verifyapiaccess_consumeapicredits"
-    },
-    {
-      "label": "zyteExtract()",
-      "file_type": "code",
-      "source_file": "index.js",
-      "source_location": "L529",
-      "_origin": "ast",
-      "community": 0,
-      "norm_label": "zyteextract()",
-      "community_name": "index.js",
-      "id": "index_zyteextract"
-    },
-    {
-      "label": "scanKeysByPattern()",
-      "file_type": "code",
-      "source_file": "index.js",
-      "source_location": "L900",
-      "_origin": "ast",
-      "community": 0,
-      "norm_label": "scankeysbypattern()",
-      "community_name": "index.js",
-      "id": "index_scankeysbypattern"
-    },
-    {
-      "label": "extract_pdf_url()",
-      "file_type": "code",
-      "source_file": "index.js",
-      "source_location": "L981",
-      "_origin": "ast",
-      "community": 0,
-      "norm_label": "extract_pdf_url()",
-      "community_name": "index.js",
-      "id": "index_extract_pdf_url"
-    },
-    {
-      "label": "validateUrl()",
-      "file_type": "code",
-      "source_file": "index.js",
-      "source_location": "L997",
-      "_origin": "ast",
-      "community": 0,
-      "norm_label": "validateurl()",
-      "community_name": "index.js",
-      "id": "index_validateurl"
-    },
-    {
-      "label": "downloadPdf()",
-      "file_type": "code",
-      "source_file": "index.js",
-      "source_location": "L1020",
-      "_origin": "ast",
-      "community": 0,
-      "norm_label": "downloadpdf()",
-      "community_name": "index.js",
-      "id": "index_downloadpdf"
-    },
-    {
-      "label": "persistentDownloadsDir",
-      "file_type": "code",
-      "source_file": "index.js",
-      "source_location": "L1115",
-      "_origin": "ast",
-      "community": 0,
-      "norm_label": "persistentdownloadsdir",
-      "community_name": "index.js",
-      "id": "index_persistentdownloadsdir"
-    },
-    {
-      "label": "uploadChunksDir",
-      "file_type": "code",
-      "source_file": "index.js",
-      "source_location": "L1116",
-      "_origin": "ast",
-      "community": 0,
-      "norm_label": "uploadchunksdir",
-      "community_name": "index.js",
-      "id": "index_uploadchunksdir"
-    },
-    {
-      "label": "fileTransferStorageMap",
-      "file_type": "code",
-      "source_file": "index.js",
-      "source_location": "L1117",
-      "_origin": "ast",
-      "community": 0,
-      "norm_label": "filetransferstoragemap",
-      "community_name": "index.js",
-      "id": "index_filetransferstoragemap"
-    },
-    {
-      "label": "sanitizeStoragePathSegment()",
-      "file_type": "code",
-      "source_file": "index.js",
-      "source_location": "L1132",
-      "_origin": "ast",
-      "community": 0,
-      "norm_label": "sanitizestoragepathsegment()",
-      "community_name": "index.js",
-      "id": "index_sanitizestoragepathsegment"
-    },
-    {
-      "label": "normalizeFileTransferStorage()",
-      "file_type": "code",
-      "source_file": "index.js",
-      "source_location": "L1137",
-      "_origin": "ast",
-      "community": 0,
-      "norm_label": "normalizefiletransferstorage()",
-      "community_name": "index.js",
-      "id": "index_normalizefiletransferstorage"
-    },
-    {
-      "label": "getFileTransferStorageConfig()",
-      "file_type": "code",
-      "source_file": "index.js",
-      "source_location": "L1145",
-      "_origin": "ast",
-      "community": 0,
-      "norm_label": "getfiletransferstorageconfig()",
-      "community_name": "index.js",
-      "id": "index_getfiletransferstorageconfig"
-    },
-    {
-      "label": "buildStorageRelativePath()",
-      "file_type": "code",
-      "source_file": "index.js",
-      "source_location": "L1153",
-      "_origin": "ast",
-      "community": 0,
-      "norm_label": "buildstoragerelativepath()",
-      "community_name": "index.js",
-      "id": "index_buildstoragerelativepath"
-    },
-    {
-      "label": "buildTrackedFileKey()",
-      "file_type": "code",
-      "source_file": "index.js",
-      "source_location": "L1158",
-      "_origin": "ast",
-      "community": 0,
-      "norm_label": "buildtrackedfilekey()",
-      "community_name": "index.js",
-      "id": "index_buildtrackedfilekey"
-    },
-    {
-      "label": "getFilePublicUrl()",
-      "file_type": "code",
-      "source_file": "index.js",
-      "source_location": "L1164",
-      "_origin": "ast",
-      "community": 0,
-      "norm_label": "getfilepublicurl()",
-      "community_name": "index.js",
-      "id": "index_getfilepublicurl"
-    },
-    {
-      "label": "buildFileAccessCountKey()",
-      "file_type": "code",
-      "source_file": "index.js",
-      "source_location": "L1170",
-      "_origin": "ast",
-      "community": 0,
-      "norm_label": "buildfileaccesscountkey()",
-      "community_name": "index.js",
-      "id": "index_buildfileaccesscountkey"
-    },
-    {
-      "label": "buildFileAccessHourKey()",
-      "file_type": "code",
-      "source_file": "index.js",
-      "source_location": "L1171",
-      "_origin": "ast",
-      "community": 0,
-      "norm_label": "buildfileaccesshourkey()",
-      "community_name": "index.js",
-      "id": "index_buildfileaccesshourkey"
-    },
-    {
-      "label": "formatHourId()",
-      "file_type": "code",
-      "source_file": "index.js",
-      "source_location": "L1173",
-      "_origin": "ast",
-      "community": 0,
-      "norm_label": "formathourid()",
-      "community_name": "index.js",
-      "id": "index_formathourid"
-    },
-    {
-      "label": "getLast24HourIds()",
-      "file_type": "code",
-      "source_file": "index.js",
-      "source_location": "L1181",
-      "_origin": "ast",
-      "community": 0,
-      "norm_label": "getlast24hourids()",
-      "community_name": "index.js",
-      "id": "index_getlast24hourids"
-    },
-    {
-      "label": "sanitizeUploadFileName()",
-      "file_type": "code",
-      "source_file": "index.js",
-      "source_location": "L1192",
-      "_origin": "ast",
-      "community": 0,
-      "norm_label": "sanitizeuploadfilename()",
-      "community_name": "index.js",
-      "id": "index_sanitizeuploadfilename"
-    },
-    {
-      "label": "buildSafeUploadTarget()",
-      "file_type": "code",
-      "source_file": "index.js",
-      "source_location": "L1204",
-      "_origin": "ast",
-      "community": 0,
-      "norm_label": "buildsafeuploadtarget()",
-      "community_name": "index.js",
-      "id": "index_buildsafeuploadtarget"
-    },
-    {
-      "label": "sanitizeUploadSessionId()",
-      "file_type": "code",
-      "source_file": "index.js",
-      "source_location": "L1225",
-      "_origin": "ast",
-      "community": 0,
-      "norm_label": "sanitizeuploadsessionid()",
-      "community_name": "index.js",
-      "id": "index_sanitizeuploadsessionid"
-    },
-    {
-      "label": "buildChunkSessionDir()",
-      "file_type": "code",
-      "source_file": "index.js",
-      "source_location": "L1230",
-      "_origin": "ast",
-      "community": 0,
-      "norm_label": "buildchunksessiondir()",
-      "community_name": "index.js",
-      "id": "index_buildchunksessiondir"
-    },
-    {
-      "label": "buildSafeExistingFilePath()",
-      "file_type": "code",
-      "source_file": "index.js",
-      "source_location": "L1246",
-      "_origin": "ast",
-      "community": 0,
-      "norm_label": "buildsafeexistingfilepath()",
-      "community_name": "index.js",
-      "id": "index_buildsafeexistingfilepath"
-    },
-    {
-      "label": "migrateFileAccessStats()",
-      "file_type": "code",
-      "source_file": "index.js",
-      "source_location": "L1263",
-      "_origin": "ast",
-      "community": 0,
-      "norm_label": "migratefileaccessstats()",
-      "community_name": "index.js",
-      "id": "index_migratefileaccessstats"
-    },
-    {
-      "label": "listStorageFiles()",
-      "file_type": "code",
-      "source_file": "index.js",
-      "source_location": "L1305",
-      "_origin": "ast",
-      "community": 0,
-      "norm_label": "liststoragefiles()",
-      "community_name": "index.js",
-      "id": "index_liststoragefiles"
-    },
-    {
-      "label": "listDownloadFiles()",
-      "file_type": "code",
-      "source_file": "index.js",
-      "source_location": "L1342",
-      "_origin": "ast",
-      "community": 0,
-      "norm_label": "listdownloadfiles()",
-      "community_name": "index.js",
-      "id": "index_listdownloadfiles"
-    },
-    {
-      "label": "getLast15DaysCreatedStats()",
-      "file_type": "code",
-      "source_file": "index.js",
-      "source_location": "L1398",
-      "_origin": "ast",
-      "community": 0,
-      "norm_label": "getlast15dayscreatedstats()",
-      "community_name": "index.js",
-      "id": "index_getlast15dayscreatedstats"
-    },
-    {
-      "label": "getTypeStats()",
-      "file_type": "code",
-      "source_file": "index.js",
-      "source_location": "L1427",
-      "_origin": "ast",
-      "community": 0,
-      "norm_label": "gettypestats()",
-      "community_name": "index.js",
-      "id": "index_gettypestats"
-    },
-    {
-      "label": "sortFiles()",
-      "file_type": "code",
-      "source_file": "index.js",
-      "source_location": "L1439",
-      "_origin": "ast",
-      "community": 0,
-      "norm_label": "sortfiles()",
-      "community_name": "index.js",
-      "id": "index_sortfiles"
-    },
-    {
-      "label": "createFileAccessTrackMiddleware()",
-      "file_type": "code",
-      "source_file": "index.js",
-      "source_location": "L1847",
-      "_origin": "ast",
-      "community": 0,
-      "norm_label": "createfileaccesstrackmiddleware()",
-      "community_name": "index.js",
-      "id": "index_createfileaccesstrackmiddleware"
-    },
-    {
-      "label": "get_doc_direct_link()",
-      "file_type": "code",
-      "source_file": "index.js",
-      "source_location": "L2460",
-      "_origin": "ast",
-      "community": 0,
-      "norm_label": "get_doc_direct_link()",
-      "community_name": "index.js",
-      "id": "index_get_doc_direct_link"
-    },
-    {
-      "label": "server",
-      "file_type": "code",
-      "source_file": "index.js",
-      "source_location": "L3115",
-      "_origin": "ast",
-      "community": 0,
-      "norm_label": "server",
-      "community_name": "index.js",
-      "id": "index_server"
-    },
-    {
-      "label": "shutdown",
-      "file_type": "code",
-      "source_file": "index.js",
-      "source_location": "L3119",
-      "_origin": "ast",
-      "community": 0,
-      "norm_label": "shutdown",
-      "community_name": "index.js",
-      "id": "index_shutdown"
     },
     {
       "label": "package.json",
@@ -3619,7 +3113,7 @@
       "source_file": "package.json",
       "source_location": "L13",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "dependencies",
       "community_name": "dependencies",
       "id": "package_dependencies"
@@ -3630,7 +3124,7 @@
       "source_file": "package.json",
       "source_location": "L14",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "@coze/api",
       "community_name": "dependencies",
       "id": "package_dependencies_coze_api"
@@ -3641,7 +3135,7 @@
       "source_file": "package.json",
       "source_location": "L14",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "@coze/api",
       "community_name": "dependencies",
       "id": "coze_api"
@@ -3652,7 +3146,7 @@
       "source_file": "package.json",
       "source_location": "L15",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "axios",
       "community_name": "dependencies",
       "id": "package_dependencies_axios"
@@ -3663,7 +3157,7 @@
       "source_file": "package.json",
       "source_location": "L15",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "axios",
       "community_name": "dependencies",
       "id": "axios"
@@ -3674,7 +3168,7 @@
       "source_file": "package.json",
       "source_location": "L16",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "cheerio",
       "community_name": "dependencies",
       "id": "package_dependencies_cheerio"
@@ -3685,7 +3179,7 @@
       "source_file": "package.json",
       "source_location": "L16",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "cheerio",
       "community_name": "dependencies",
       "id": "cheerio"
@@ -3696,7 +3190,7 @@
       "source_file": "package.json",
       "source_location": "L17",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "dayjs",
       "community_name": "dependencies",
       "id": "package_dependencies_dayjs"
@@ -3707,7 +3201,7 @@
       "source_file": "package.json",
       "source_location": "L17",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "dayjs",
       "community_name": "dependencies",
       "id": "dayjs"
@@ -3718,7 +3212,7 @@
       "source_file": "package.json",
       "source_location": "L18",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "ejs",
       "community_name": "dependencies",
       "id": "package_dependencies_ejs"
@@ -3729,7 +3223,7 @@
       "source_file": "package.json",
       "source_location": "L18",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "ejs",
       "community_name": "dependencies",
       "id": "ejs"
@@ -3740,7 +3234,7 @@
       "source_file": "package.json",
       "source_location": "L19",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "express",
       "community_name": "dependencies",
       "id": "package_dependencies_express"
@@ -3751,7 +3245,7 @@
       "source_file": "package.json",
       "source_location": "L19",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "express",
       "community_name": "dependencies",
       "id": "express"
@@ -3762,7 +3256,7 @@
       "source_file": "package.json",
       "source_location": "L20",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "fluent-ffmpeg",
       "community_name": "dependencies",
       "id": "package_dependencies_fluent_ffmpeg"
@@ -3773,7 +3267,7 @@
       "source_file": "package.json",
       "source_location": "L20",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "fluent-ffmpeg",
       "community_name": "dependencies",
       "id": "fluent_ffmpeg"
@@ -3784,7 +3278,7 @@
       "source_file": "package.json",
       "source_location": "L21",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "http-proxy-agent",
       "community_name": "dependencies",
       "id": "package_dependencies_http_proxy_agent"
@@ -3795,7 +3289,7 @@
       "source_file": "package.json",
       "source_location": "L21",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "http-proxy-agent",
       "community_name": "dependencies",
       "id": "http_proxy_agent"
@@ -3806,7 +3300,7 @@
       "source_file": "package.json",
       "source_location": "L22",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "https-proxy-agent",
       "community_name": "dependencies",
       "id": "package_dependencies_https_proxy_agent"
@@ -3817,7 +3311,7 @@
       "source_file": "package.json",
       "source_location": "L23",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "ioredis",
       "community_name": "dependencies",
       "id": "package_dependencies_ioredis"
@@ -3828,7 +3322,7 @@
       "source_file": "package.json",
       "source_location": "L23",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "ioredis",
       "community_name": "dependencies",
       "id": "ioredis"
@@ -3839,7 +3333,7 @@
       "source_file": "package.json",
       "source_location": "L24",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "iztro",
       "community_name": "dependencies",
       "id": "package_dependencies_iztro"
@@ -3850,7 +3344,7 @@
       "source_file": "package.json",
       "source_location": "L24",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "iztro",
       "community_name": "dependencies",
       "id": "iztro"
@@ -3861,7 +3355,7 @@
       "source_file": "package.json",
       "source_location": "L25",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "jsdom",
       "community_name": "dependencies",
       "id": "package_dependencies_jsdom"
@@ -3872,7 +3366,7 @@
       "source_file": "package.json",
       "source_location": "L25",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "jsdom",
       "community_name": "dependencies",
       "id": "jsdom"
@@ -3883,7 +3377,7 @@
       "source_file": "package.json",
       "source_location": "L26",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "lunar-javascript",
       "community_name": "dependencies",
       "id": "package_dependencies_lunar_javascript"
@@ -3894,7 +3388,7 @@
       "source_file": "package.json",
       "source_location": "L26",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "lunar-javascript",
       "community_name": "dependencies",
       "id": "lunar_javascript"
@@ -3905,7 +3399,7 @@
       "source_file": "package.json",
       "source_location": "L27",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "node-fetch",
       "community_name": "dependencies",
       "id": "package_dependencies_node_fetch"
@@ -3916,7 +3410,7 @@
       "source_file": "package.json",
       "source_location": "L27",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "node-fetch",
       "community_name": "dependencies",
       "id": "node_fetch"
@@ -3927,7 +3421,7 @@
       "source_file": "package.json",
       "source_location": "L28",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "openai",
       "community_name": "dependencies",
       "id": "package_dependencies_openai"
@@ -3938,7 +3432,7 @@
       "source_file": "package.json",
       "source_location": "L28",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "openai",
       "community_name": "dependencies",
       "id": "openai"
@@ -3949,7 +3443,7 @@
       "source_file": "package.json",
       "source_location": "L29",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "p-limit",
       "community_name": "dependencies",
       "id": "package_dependencies_p_limit"
@@ -3960,7 +3454,7 @@
       "source_file": "package.json",
       "source_location": "L29",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "p-limit",
       "community_name": "dependencies",
       "id": "p_limit"
@@ -3971,7 +3465,7 @@
       "source_file": "package.json",
       "source_location": "L30",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "puppeteer-core",
       "community_name": "dependencies",
       "id": "package_dependencies_puppeteer_core"
@@ -3982,7 +3476,7 @@
       "source_file": "package.json",
       "source_location": "L30",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "puppeteer-core",
       "community_name": "dependencies",
       "id": "puppeteer_core"
@@ -3993,7 +3487,7 @@
       "source_file": "package.json",
       "source_location": "L31",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "puppeteer-extra",
       "community_name": "dependencies",
       "id": "package_dependencies_puppeteer_extra"
@@ -4004,7 +3498,7 @@
       "source_file": "package.json",
       "source_location": "L31",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "puppeteer-extra",
       "community_name": "dependencies",
       "id": "puppeteer_extra"
@@ -4015,7 +3509,7 @@
       "source_file": "package.json",
       "source_location": "L32",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "puppeteer-extra-plugin-stealth",
       "community_name": "dependencies",
       "id": "package_dependencies_puppeteer_extra_plugin_stealth"
@@ -4026,7 +3520,7 @@
       "source_file": "package.json",
       "source_location": "L32",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "puppeteer-extra-plugin-stealth",
       "community_name": "dependencies",
       "id": "puppeteer_extra_plugin_stealth"
@@ -4037,7 +3531,7 @@
       "source_file": "package.json",
       "source_location": "L33",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "redis",
       "community_name": "dependencies",
       "id": "package_dependencies_redis"
@@ -4048,7 +3542,7 @@
       "source_file": "package.json",
       "source_location": "L33",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "redis",
       "community_name": "dependencies",
       "id": "redis"
@@ -4059,7 +3553,7 @@
       "source_file": "package.json",
       "source_location": "L34",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "socks-proxy-agent",
       "community_name": "dependencies",
       "id": "package_dependencies_socks_proxy_agent"
@@ -4070,7 +3564,7 @@
       "source_file": "package.json",
       "source_location": "L34",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "socks-proxy-agent",
       "community_name": "dependencies",
       "id": "socks_proxy_agent"
@@ -4081,7 +3575,7 @@
       "source_file": "package.json",
       "source_location": "L35",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "stream-throttle",
       "community_name": "dependencies",
       "id": "package_dependencies_stream_throttle"
@@ -4092,7 +3586,7 @@
       "source_file": "package.json",
       "source_location": "L35",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "stream-throttle",
       "community_name": "dependencies",
       "id": "stream_throttle"
@@ -4103,7 +3597,7 @@
       "source_file": "test/appLifecycle.test.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 0,
+      "community": 14,
       "norm_label": "applifecycle.test.js",
       "community_name": "index.js",
       "id": "test_applifecycle_test"
@@ -4114,7 +3608,7 @@
       "source_file": "test/appLifecycle.test.js",
       "source_location": "L10",
       "_origin": "ast",
-      "community": 0,
+      "community": 14,
       "norm_label": "createresponse()",
       "community_name": "index.js",
       "id": "test_applifecycle_test_createresponse"
@@ -4125,7 +3619,7 @@
       "source_file": "test/appLifecycle.test.js",
       "source_location": "L39",
       "_origin": "ast",
-      "community": 0,
+      "community": 14,
       "norm_label": "ping()",
       "community_name": "index.js",
       "id": "test_applifecycle_test_ping"
@@ -4136,7 +3630,7 @@
       "source_file": "test/appLifecycle.test.js",
       "source_location": "L61",
       "_origin": "ast",
-      "community": 0,
+      "community": 14,
       "norm_label": "error()",
       "community_name": "index.js",
       "id": "test_applifecycle_test_error"
@@ -4147,7 +3641,7 @@
       "source_file": "test/appLifecycle.test.js",
       "source_location": "L76",
       "_origin": "ast",
-      "community": 0,
+      "community": 14,
       "norm_label": "close()",
       "community_name": "index.js",
       "id": "test_applifecycle_test_close"
@@ -4158,7 +3652,7 @@
       "source_file": "test/appLifecycle.test.js",
       "source_location": "L83",
       "_origin": "ast",
-      "community": 0,
+      "community": 14,
       "norm_label": "log()",
       "community_name": "index.js",
       "id": "test_applifecycle_test_log"
@@ -4169,7 +3663,7 @@
       "source_file": "utils/appLifecycle.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 0,
+      "community": 14,
       "norm_label": "applifecycle.js",
       "community_name": "index.js",
       "id": "utils_applifecycle"
@@ -4180,7 +3674,7 @@
       "source_file": "utils/appLifecycle.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 0,
+      "community": 14,
       "norm_label": "createhealthhandler()",
       "community_name": "index.js",
       "id": "utils_applifecycle_createhealthhandler"
@@ -4191,7 +3685,7 @@
       "source_file": "utils/appLifecycle.js",
       "source_location": "L7",
       "_origin": "ast",
-      "community": 0,
+      "community": 14,
       "norm_label": "createreadinesshandler()",
       "community_name": "index.js",
       "id": "utils_applifecycle_createreadinesshandler"
@@ -4202,7 +3696,7 @@
       "source_file": "utils/appLifecycle.js",
       "source_location": "L19",
       "_origin": "ast",
-      "community": 0,
+      "community": 14,
       "norm_label": "creategracefulshutdown()",
       "community_name": "index.js",
       "id": "utils_applifecycle_creategracefulshutdown"
@@ -4217,7 +3711,7 @@
         "kind": "file"
       },
       "_origin": "ast",
-      "community": 14,
+      "community": 15,
       "norm_label": "start.sh",
       "community_name": "start.sh",
       "id": "start"
@@ -4232,7 +3726,7 @@
         "kind": "bash_entrypoint"
       },
       "_origin": "ast",
-      "community": 14,
+      "community": 15,
       "norm_label": "start.sh script",
       "community_name": "start.sh",
       "id": "start_sh__entry"
@@ -4247,7 +3741,7 @@
         "kind": "bash_function"
       },
       "_origin": "ast",
-      "community": 14,
+      "community": 15,
       "norm_label": "read_active_color()",
       "community_name": "start.sh",
       "id": "start_read_active_color"
@@ -4262,7 +3756,7 @@
         "kind": "bash_function"
       },
       "_origin": "ast",
-      "community": 14,
+      "community": 15,
       "norm_label": "backend_port_for()",
       "community_name": "start.sh",
       "id": "start_backend_port_for"
@@ -4277,7 +3771,7 @@
         "kind": "bash_function"
       },
       "_origin": "ast",
-      "community": 14,
+      "community": 15,
       "norm_label": "write_backend()",
       "community_name": "start.sh",
       "id": "start_write_backend"
@@ -4292,7 +3786,7 @@
         "kind": "bash_function"
       },
       "_origin": "ast",
-      "community": 14,
+      "community": 15,
       "norm_label": "cleanup_failure()",
       "community_name": "start.sh",
       "id": "start_cleanup_failure"
@@ -4307,7 +3801,7 @@
         "kind": "bash_function"
       },
       "_origin": "ast",
-      "community": 14,
+      "community": 15,
       "norm_label": "restore_nginx_backend()",
       "community_name": "start.sh",
       "id": "start_restore_nginx_backend"
@@ -4322,7 +3816,7 @@
         "kind": "bash_function"
       },
       "_origin": "ast",
-      "community": 14,
+      "community": 15,
       "norm_label": "verify_nginx_candidate()",
       "community_name": "start.sh",
       "id": "start_verify_nginx_candidate"
@@ -4337,7 +3831,7 @@
         "kind": "bash_function"
       },
       "_origin": "ast",
-      "community": 14,
+      "community": 15,
       "norm_label": "rollback_switched_traffic()",
       "community_name": "start.sh",
       "id": "start_rollback_switched_traffic"
@@ -4348,7 +3842,7 @@
       "source_file": "test/startScript.test.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 29,
+      "community": 30,
       "norm_label": "startscript.test.js",
       "community_name": "startScript.test.js",
       "id": "test_startscript_test"
@@ -4359,7 +3853,7 @@
       "source_file": "test/startScript.test.js",
       "source_location": "L5",
       "_origin": "ast",
-      "community": 29,
+      "community": 30,
       "norm_label": "script",
       "community_name": "startScript.test.js",
       "id": "test_startscript_test_script"
@@ -4374,10 +3868,10 @@
         "kind": "file"
       },
       "_origin": "ast",
-      "community": 24,
+      "community": 25,
       "norm_label": "cleanup-stopped-app-containers.sh",
-      "id": "scripts_cleanup_stopped_app_containers",
-      "community_name": "cleanup-stopped-app-containers.sh"
+      "community_name": "cleanup-stopped-app-containers.sh",
+      "id": "scripts_cleanup_stopped_app_containers"
     },
     {
       "label": "cleanup-stopped-app-containers.sh script",
@@ -4389,10 +3883,10 @@
         "kind": "bash_entrypoint"
       },
       "_origin": "ast",
-      "community": 24,
+      "community": 25,
       "norm_label": "cleanup-stopped-app-containers.sh script",
-      "id": "scripts_cleanup_stopped_app_containers_sh__entry",
-      "community_name": "cleanup-stopped-app-containers.sh"
+      "community_name": "cleanup-stopped-app-containers.sh",
+      "id": "scripts_cleanup_stopped_app_containers_sh__entry"
     },
     {
       "label": "cleanupStoppedContainers.test.js",
@@ -4400,10 +3894,10 @@
       "source_file": "test/cleanupStoppedContainers.test.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 28,
+      "community": 29,
       "norm_label": "cleanupstoppedcontainers.test.js",
-      "id": "test_cleanupstoppedcontainers_test",
-      "community_name": "cleanupStoppedContainers.test.js"
+      "community_name": "cleanupStoppedContainers.test.js",
+      "id": "test_cleanupstoppedcontainers_test"
     },
     {
       "label": "repoRoot",
@@ -4411,10 +3905,500 @@
       "source_file": "test/cleanupStoppedContainers.test.js",
       "source_location": "L9",
       "_origin": "ast",
-      "community": 28,
+      "community": 29,
       "norm_label": "reporoot",
-      "id": "test_cleanupstoppedcontainers_test_reporoot",
-      "community_name": "cleanupStoppedContainers.test.js"
+      "community_name": "cleanupStoppedContainers.test.js",
+      "id": "test_cleanupstoppedcontainers_test_reporoot"
+    },
+    {
+      "label": "index.js",
+      "file_type": "code",
+      "source_file": "index.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "index.js",
+      "id": "index"
+    },
+    {
+      "label": "__filename",
+      "file_type": "code",
+      "source_file": "index.js",
+      "source_location": "L13",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "__filename",
+      "id": "index_filename"
+    },
+    {
+      "label": "__dirname",
+      "file_type": "code",
+      "source_file": "index.js",
+      "source_location": "L14",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "__dirname",
+      "id": "index_dirname"
+    },
+    {
+      "label": "app",
+      "file_type": "code",
+      "source_file": "index.js",
+      "source_location": "L46",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "app",
+      "id": "index_app"
+    },
+    {
+      "label": "downloadsDir",
+      "file_type": "code",
+      "source_file": "index.js",
+      "source_location": "L50",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "downloadsdir",
+      "id": "index_downloadsdir"
+    },
+    {
+      "label": "agent",
+      "file_type": "code",
+      "source_file": "index.js",
+      "source_location": "L84",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "agent",
+      "id": "index_agent"
+    },
+    {
+      "label": "{\n    canSearchGoogle,\n    canUseHtmlParse,\n    dailyUse,\n    verifyApiAccess,\n    consumeApiCredits,\n    chargeApiCreditsAtomically,\n}",
+      "file_type": "code",
+      "source_file": "index.js",
+      "source_location": "L98",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "{\n    cansearchgoogle,\n    canusehtmlparse,\n    dailyuse,\n    verifyapiaccess,\n    consumeapicredits,\n    chargeapicreditsatomically,\n}",
+      "id": "index_cansearchgoogle_canusehtmlparse_dailyuse_verifyapiaccess_consumeapicredits_chargeapicreditsatomically"
+    },
+    {
+      "label": "zyteExtract()",
+      "file_type": "code",
+      "source_file": "index.js",
+      "source_location": "L533",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "zyteextract()",
+      "id": "index_zyteextract"
+    },
+    {
+      "label": "scanKeysByPattern()",
+      "file_type": "code",
+      "source_file": "index.js",
+      "source_location": "L904",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "scankeysbypattern()",
+      "id": "index_scankeysbypattern"
+    },
+    {
+      "label": "extract_pdf_url()",
+      "file_type": "code",
+      "source_file": "index.js",
+      "source_location": "L985",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "extract_pdf_url()",
+      "id": "index_extract_pdf_url"
+    },
+    {
+      "label": "validateUrl()",
+      "file_type": "code",
+      "source_file": "index.js",
+      "source_location": "L1001",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "validateurl()",
+      "id": "index_validateurl"
+    },
+    {
+      "label": "downloadPdf()",
+      "file_type": "code",
+      "source_file": "index.js",
+      "source_location": "L1024",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "downloadpdf()",
+      "id": "index_downloadpdf"
+    },
+    {
+      "label": "persistentDownloadsDir",
+      "file_type": "code",
+      "source_file": "index.js",
+      "source_location": "L1119",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "persistentdownloadsdir",
+      "id": "index_persistentdownloadsdir"
+    },
+    {
+      "label": "uploadChunksDir",
+      "file_type": "code",
+      "source_file": "index.js",
+      "source_location": "L1120",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "uploadchunksdir",
+      "id": "index_uploadchunksdir"
+    },
+    {
+      "label": "fileTransferStorageMap",
+      "file_type": "code",
+      "source_file": "index.js",
+      "source_location": "L1121",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "filetransferstoragemap",
+      "id": "index_filetransferstoragemap"
+    },
+    {
+      "label": "sanitizeStoragePathSegment()",
+      "file_type": "code",
+      "source_file": "index.js",
+      "source_location": "L1136",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "sanitizestoragepathsegment()",
+      "id": "index_sanitizestoragepathsegment"
+    },
+    {
+      "label": "normalizeFileTransferStorage()",
+      "file_type": "code",
+      "source_file": "index.js",
+      "source_location": "L1141",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "normalizefiletransferstorage()",
+      "id": "index_normalizefiletransferstorage"
+    },
+    {
+      "label": "getFileTransferStorageConfig()",
+      "file_type": "code",
+      "source_file": "index.js",
+      "source_location": "L1149",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "getfiletransferstorageconfig()",
+      "id": "index_getfiletransferstorageconfig"
+    },
+    {
+      "label": "buildStorageRelativePath()",
+      "file_type": "code",
+      "source_file": "index.js",
+      "source_location": "L1157",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "buildstoragerelativepath()",
+      "id": "index_buildstoragerelativepath"
+    },
+    {
+      "label": "buildTrackedFileKey()",
+      "file_type": "code",
+      "source_file": "index.js",
+      "source_location": "L1162",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "buildtrackedfilekey()",
+      "id": "index_buildtrackedfilekey"
+    },
+    {
+      "label": "getFilePublicUrl()",
+      "file_type": "code",
+      "source_file": "index.js",
+      "source_location": "L1168",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "getfilepublicurl()",
+      "id": "index_getfilepublicurl"
+    },
+    {
+      "label": "buildFileAccessCountKey()",
+      "file_type": "code",
+      "source_file": "index.js",
+      "source_location": "L1174",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "buildfileaccesscountkey()",
+      "id": "index_buildfileaccesscountkey"
+    },
+    {
+      "label": "buildFileAccessHourKey()",
+      "file_type": "code",
+      "source_file": "index.js",
+      "source_location": "L1175",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "buildfileaccesshourkey()",
+      "id": "index_buildfileaccesshourkey"
+    },
+    {
+      "label": "formatHourId()",
+      "file_type": "code",
+      "source_file": "index.js",
+      "source_location": "L1177",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "formathourid()",
+      "id": "index_formathourid"
+    },
+    {
+      "label": "getLast24HourIds()",
+      "file_type": "code",
+      "source_file": "index.js",
+      "source_location": "L1185",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "getlast24hourids()",
+      "id": "index_getlast24hourids"
+    },
+    {
+      "label": "sanitizeUploadFileName()",
+      "file_type": "code",
+      "source_file": "index.js",
+      "source_location": "L1196",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "sanitizeuploadfilename()",
+      "id": "index_sanitizeuploadfilename"
+    },
+    {
+      "label": "buildSafeUploadTarget()",
+      "file_type": "code",
+      "source_file": "index.js",
+      "source_location": "L1208",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "buildsafeuploadtarget()",
+      "id": "index_buildsafeuploadtarget"
+    },
+    {
+      "label": "sanitizeUploadSessionId()",
+      "file_type": "code",
+      "source_file": "index.js",
+      "source_location": "L1229",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "sanitizeuploadsessionid()",
+      "id": "index_sanitizeuploadsessionid"
+    },
+    {
+      "label": "buildChunkSessionDir()",
+      "file_type": "code",
+      "source_file": "index.js",
+      "source_location": "L1234",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "buildchunksessiondir()",
+      "id": "index_buildchunksessiondir"
+    },
+    {
+      "label": "buildSafeExistingFilePath()",
+      "file_type": "code",
+      "source_file": "index.js",
+      "source_location": "L1250",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "buildsafeexistingfilepath()",
+      "id": "index_buildsafeexistingfilepath"
+    },
+    {
+      "label": "migrateFileAccessStats()",
+      "file_type": "code",
+      "source_file": "index.js",
+      "source_location": "L1267",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "migratefileaccessstats()",
+      "id": "index_migratefileaccessstats"
+    },
+    {
+      "label": "listStorageFiles()",
+      "file_type": "code",
+      "source_file": "index.js",
+      "source_location": "L1309",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "liststoragefiles()",
+      "id": "index_liststoragefiles"
+    },
+    {
+      "label": "listDownloadFiles()",
+      "file_type": "code",
+      "source_file": "index.js",
+      "source_location": "L1346",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "listdownloadfiles()",
+      "id": "index_listdownloadfiles"
+    },
+    {
+      "label": "getLast15DaysCreatedStats()",
+      "file_type": "code",
+      "source_file": "index.js",
+      "source_location": "L1402",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "getlast15dayscreatedstats()",
+      "id": "index_getlast15dayscreatedstats"
+    },
+    {
+      "label": "getTypeStats()",
+      "file_type": "code",
+      "source_file": "index.js",
+      "source_location": "L1431",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "gettypestats()",
+      "id": "index_gettypestats"
+    },
+    {
+      "label": "sortFiles()",
+      "file_type": "code",
+      "source_file": "index.js",
+      "source_location": "L1443",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "sortfiles()",
+      "id": "index_sortfiles"
+    },
+    {
+      "label": "createFileAccessTrackMiddleware()",
+      "file_type": "code",
+      "source_file": "index.js",
+      "source_location": "L1851",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "createfileaccesstrackmiddleware()",
+      "id": "index_createfileaccesstrackmiddleware"
+    },
+    {
+      "label": "get_doc_direct_link()",
+      "file_type": "code",
+      "source_file": "index.js",
+      "source_location": "L2464",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "get_doc_direct_link()",
+      "id": "index_get_doc_direct_link"
+    },
+    {
+      "label": "server",
+      "file_type": "code",
+      "source_file": "index.js",
+      "source_location": "L3119",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "server",
+      "id": "index_server"
+    },
+    {
+      "label": "shutdown",
+      "file_type": "code",
+      "source_file": "index.js",
+      "source_location": "L3123",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "shutdown",
+      "id": "index_shutdown"
+    },
+    {
+      "label": "apiAccess.test.js",
+      "file_type": "code",
+      "source_file": "test/apiAccess.test.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 6,
+      "norm_label": "apiaccess.test.js",
+      "id": "test_apiaccess_test"
+    },
+    {
+      "label": "verifyKey()",
+      "file_type": "code",
+      "source_file": "test/apiAccess.test.js",
+      "source_location": "L8",
+      "_origin": "ast",
+      "community": 6,
+      "norm_label": "verifykey()",
+      "id": "test_apiaccess_test_verifykey"
+    },
+    {
+      "label": "aitoken.js",
+      "file_type": "code",
+      "source_file": "utils/ThirdParrtyApi/aitoken.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 6,
+      "norm_label": "aitoken.js",
+      "id": "utils_thirdparrtyapi_aitoken"
+    },
+    {
+      "label": "GPT_IMAGE_EDIT_MAX_RETRIES",
+      "file_type": "code",
+      "source_file": "utils/ThirdParrtyApi/aitoken.js",
+      "source_location": "L12",
+      "_origin": "ast",
+      "community": 6,
+      "norm_label": "gpt_image_edit_max_retries",
+      "id": "utils_thirdparrtyapi_aitoken_gpt_image_edit_max_retries"
+    },
+    {
+      "label": "GPT_IMAGE_EDIT_RETRY_BASE_DELAY_MS",
+      "file_type": "code",
+      "source_file": "utils/ThirdParrtyApi/aitoken.js",
+      "source_location": "L13",
+      "_origin": "ast",
+      "community": 6,
+      "norm_label": "gpt_image_edit_retry_base_delay_ms",
+      "id": "utils_thirdparrtyapi_aitoken_gpt_image_edit_retry_base_delay_ms"
+    },
+    {
+      "label": "aitoken",
+      "file_type": "code",
+      "source_file": "utils/ThirdParrtyApi/aitoken.js",
+      "source_location": "L15",
+      "_origin": "ast",
+      "community": 6,
+      "norm_label": "aitoken",
+      "id": "utils_thirdparrtyapi_aitoken_aitoken"
+    },
+    {
+      "label": "apiAccess.js",
+      "file_type": "code",
+      "source_file": "utils/apiAccess.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 6,
+      "norm_label": "apiaccess.js",
+      "id": "utils_apiaccess"
+    },
+    {
+      "label": "chargeApiCredits()",
+      "file_type": "code",
+      "source_file": "utils/apiAccess.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 6,
+      "norm_label": "chargeapicredits()",
+      "id": "utils_apiaccess_chargeapicredits"
+    },
+    {
+      "label": "createApiAccessHelpers()",
+      "file_type": "code",
+      "source_file": "utils/apiAccess.js",
+      "source_location": "L13",
+      "_origin": "ast",
+      "community": 6,
+      "norm_label": "createapiaccesshelpers()",
+      "id": "utils_apiaccess_createapiaccesshelpers"
     }
   ],
   "links": [
@@ -5759,87 +5743,6 @@
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
-      "source_file": "utils/ThirdParrtyApi/aitoken.js",
-      "source_location": "L5",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "utils_thirdparrtyapi_aitoken",
-      "target": "utils_redisclient"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "utils/ThirdParrtyApi/aitoken.js",
-      "source_location": "L5",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "utils_thirdparrtyapi_aitoken",
-      "target": "utils_redisclient_redis"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "utils/ThirdParrtyApi/aitoken.js",
-      "source_location": "L14",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "utils_thirdparrtyapi_aitoken",
-      "target": "utils_thirdparrtyapi_aitoken_aitoken"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "utils/ThirdParrtyApi/aitoken.js",
-      "source_location": "L11",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "utils_thirdparrtyapi_aitoken",
-      "target": "utils_thirdparrtyapi_aitoken_gpt_image_edit_max_retries"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "utils/ThirdParrtyApi/aitoken.js",
-      "source_location": "L12",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "utils_thirdparrtyapi_aitoken",
-      "target": "utils_thirdparrtyapi_aitoken_gpt_image_edit_retry_base_delay_ms"
-    },
-    {
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "utils/ThirdParrtyApi/aitoken.js",
-      "source_location": "L4",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "utils_thirdparrtyapi_aitoken",
-      "target": "utils_unkey"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "utils/ThirdParrtyApi/aitoken.js",
-      "source_location": "L4",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "utils_thirdparrtyapi_aitoken",
-      "target": "utils_unkey_unkey"
-    },
-    {
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
       "source_file": "utils/ThirdParrtyApi/browserless.js",
       "source_location": "L14",
       "weight": 1.0,
@@ -6691,17 +6594,6 @@
       "confidence_score": 1.0,
       "source": "utils_thirdparrtyapi_tencentapi",
       "target": "utils_thirdparrtyapi_tencentapi_tencentapi"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "utils/apiAccess.js",
-      "source_location": "L1",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "utils_apiaccess",
-      "target": "utils_apiaccess_createapiaccesshelpers"
     },
     {
       "relation": "contains",
@@ -9069,879 +8961,6 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L84",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index",
-      "target": "index_agent"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L46",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index",
-      "target": "index_app"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L1230",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index",
-      "target": "index_buildchunksessiondir"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L1170",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index",
-      "target": "index_buildfileaccesscountkey"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L1171",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index",
-      "target": "index_buildfileaccesshourkey"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L1246",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index",
-      "target": "index_buildsafeexistingfilepath"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L1204",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index",
-      "target": "index_buildsafeuploadtarget"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L1153",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index",
-      "target": "index_buildstoragerelativepath"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L1158",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index",
-      "target": "index_buildtrackedfilekey"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L98",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index",
-      "target": "index_cansearchgoogle_canusehtmlparse_dailyuse_verifyapiaccess_consumeapicredits"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L1847",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index",
-      "target": "index_createfileaccesstrackmiddleware"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L14",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index",
-      "target": "index_dirname"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L1020",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index",
-      "target": "index_downloadpdf"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L50",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index",
-      "target": "index_downloadsdir"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L981",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index",
-      "target": "index_extract_pdf_url"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L13",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index",
-      "target": "index_filename"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L1117",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index",
-      "target": "index_filetransferstoragemap"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L1173",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index",
-      "target": "index_formathourid"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L2460",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index",
-      "target": "index_get_doc_direct_link"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L1164",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index",
-      "target": "index_getfilepublicurl"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L1145",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index",
-      "target": "index_getfiletransferstorageconfig"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L1398",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index",
-      "target": "index_getlast15dayscreatedstats"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L1181",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index",
-      "target": "index_getlast24hourids"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L1427",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index",
-      "target": "index_gettypestats"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L1342",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index",
-      "target": "index_listdownloadfiles"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L1305",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index",
-      "target": "index_liststoragefiles"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L1263",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index",
-      "target": "index_migratefileaccessstats"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L1137",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index",
-      "target": "index_normalizefiletransferstorage"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L1115",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index",
-      "target": "index_persistentdownloadsdir"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L1132",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index",
-      "target": "index_sanitizestoragepathsegment"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L1192",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index",
-      "target": "index_sanitizeuploadfilename"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L1225",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index",
-      "target": "index_sanitizeuploadsessionid"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L900",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index",
-      "target": "index_scankeysbypattern"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L3115",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index",
-      "target": "index_server"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L3119",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index",
-      "target": "index_shutdown"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L1439",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index",
-      "target": "index_sortfiles"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L1116",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index",
-      "target": "index_uploadchunksdir"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L997",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index",
-      "target": "index_validateurl"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L529",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index",
-      "target": "index_zyteextract"
-    },
-    {
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L21",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index",
-      "target": "utils_applifecycle"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L21",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index",
-      "target": "utils_applifecycle_creategracefulshutdown"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L21",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index",
-      "target": "utils_applifecycle_createhealthhandler"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L21",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index",
-      "target": "utils_applifecycle_createreadinesshandler"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L1028",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index_downloadpdf",
-      "target": "index_extract_pdf_url"
-    },
-    {
-      "relation": "indirect_call",
-      "context": "argument",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "index.js",
-      "source_location": "L992",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "index_extract_pdf_url",
-      "target": "test_applifecycle_test_error"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L1025",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index_downloadpdf",
-      "target": "index_validateurl"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L1160",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index_buildtrackedfilekey",
-      "target": "index_sanitizestoragepathsegment"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L1858",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index_createfileaccesstrackmiddleware",
-      "target": "index_sanitizestoragepathsegment"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L1146",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index_getfiletransferstorageconfig",
-      "target": "index_normalizefiletransferstorage"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L1343",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index_listdownloadfiles",
-      "target": "index_normalizefiletransferstorage"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L1247",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index_buildsafeexistingfilepath",
-      "target": "index_getfiletransferstorageconfig"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L1205",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index_buildsafeuploadtarget",
-      "target": "index_getfiletransferstorageconfig"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L1165",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index_getfilepublicurl",
-      "target": "index_getfiletransferstorageconfig"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L1346",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index_listdownloadfiles",
-      "target": "index_getfiletransferstorageconfig"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L1259",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index_buildsafeexistingfilepath",
-      "target": "index_buildstoragerelativepath"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L1221",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index_buildsafeuploadtarget",
-      "target": "index_buildstoragerelativepath"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L1154",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index_buildstoragerelativepath",
-      "target": "index_sanitizeuploadfilename"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L1324",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index_liststoragefiles",
-      "target": "index_buildstoragerelativepath"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L1170",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index_buildfileaccesscountkey",
-      "target": "index_buildtrackedfilekey"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L1171",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index_buildfileaccesshourkey",
-      "target": "index_buildtrackedfilekey"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L1166",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index_getfilepublicurl",
-      "target": "index_sanitizeuploadfilename"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L1335",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index_liststoragefiles",
-      "target": "index_getfilepublicurl"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L1865",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index_createfileaccesstrackmiddleware",
-      "target": "index_buildfileaccesscountkey"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L1362",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index_listdownloadfiles",
-      "target": "index_buildfileaccesscountkey"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L1268",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index_migratefileaccessstats",
-      "target": "index_buildfileaccesscountkey"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L1866",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index_createfileaccesstrackmiddleware",
-      "target": "index_buildfileaccesshourkey"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L1368",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index_listdownloadfiles",
-      "target": "index_buildfileaccesshourkey"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L1271",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index_migratefileaccessstats",
-      "target": "index_buildfileaccesshourkey"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L1866",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index_createfileaccesstrackmiddleware",
-      "target": "index_formathourid"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L1187",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index_getlast24hourids",
-      "target": "index_formathourid"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L1358",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index_listdownloadfiles",
-      "target": "index_getlast24hourids"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L1270",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index_migratefileaccessstats",
-      "target": "index_getlast24hourids"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L1248",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index_buildsafeexistingfilepath",
-      "target": "index_sanitizeuploadfilename"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L1206",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index_buildsafeuploadtarget",
-      "target": "index_sanitizeuploadfilename"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L1231",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index_buildchunksessiondir",
-      "target": "index_sanitizeuploadsessionid"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "index.js",
-      "source_location": "L1350",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "index_listdownloadfiles",
-      "target": "index_liststoragefiles"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
       "source_file": "package.json",
       "source_location": "L10",
       "weight": 1.0,
@@ -10882,8 +9901,995 @@
       "confidence_score": 1.0,
       "source": "test_cleanupstoppedcontainers_test",
       "target": "test_cleanupstoppedcontainers_test_reporoot"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L84",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index",
+      "target": "index_agent"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L46",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index",
+      "target": "index_app"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L1234",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index",
+      "target": "index_buildchunksessiondir"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L1174",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index",
+      "target": "index_buildfileaccesscountkey"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L1175",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index",
+      "target": "index_buildfileaccesshourkey"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L1250",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index",
+      "target": "index_buildsafeexistingfilepath"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L1208",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index",
+      "target": "index_buildsafeuploadtarget"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L1157",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index",
+      "target": "index_buildstoragerelativepath"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L1162",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index",
+      "target": "index_buildtrackedfilekey"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L98",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index",
+      "target": "index_cansearchgoogle_canusehtmlparse_dailyuse_verifyapiaccess_consumeapicredits_chargeapicreditsatomically"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L1851",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index",
+      "target": "index_createfileaccesstrackmiddleware"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L14",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index",
+      "target": "index_dirname"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L1024",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index",
+      "target": "index_downloadpdf"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L50",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index",
+      "target": "index_downloadsdir"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L985",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index",
+      "target": "index_extract_pdf_url"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L13",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index",
+      "target": "index_filename"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L1121",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index",
+      "target": "index_filetransferstoragemap"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L1177",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index",
+      "target": "index_formathourid"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L2464",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index",
+      "target": "index_get_doc_direct_link"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L1168",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index",
+      "target": "index_getfilepublicurl"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L1149",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index",
+      "target": "index_getfiletransferstorageconfig"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L1402",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index",
+      "target": "index_getlast15dayscreatedstats"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L1185",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index",
+      "target": "index_getlast24hourids"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L1431",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index",
+      "target": "index_gettypestats"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L1346",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index",
+      "target": "index_listdownloadfiles"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L1309",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index",
+      "target": "index_liststoragefiles"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L1267",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index",
+      "target": "index_migratefileaccessstats"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L1141",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index",
+      "target": "index_normalizefiletransferstorage"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L1119",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index",
+      "target": "index_persistentdownloadsdir"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L1136",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index",
+      "target": "index_sanitizestoragepathsegment"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L1196",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index",
+      "target": "index_sanitizeuploadfilename"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L1229",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index",
+      "target": "index_sanitizeuploadsessionid"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L904",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index",
+      "target": "index_scankeysbypattern"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L3119",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index",
+      "target": "index_server"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L3123",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index",
+      "target": "index_shutdown"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L1443",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index",
+      "target": "index_sortfiles"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L1120",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index",
+      "target": "index_uploadchunksdir"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L1001",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index",
+      "target": "index_validateurl"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L533",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index",
+      "target": "index_zyteextract"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L26",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index",
+      "target": "utils_apiaccess"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L26",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index",
+      "target": "utils_apiaccess_createapiaccesshelpers"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L89",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index",
+      "target": "utils_thirdparrtyapi_aitoken"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L89",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index",
+      "target": "utils_thirdparrtyapi_aitoken_aitoken"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L1032",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index_downloadpdf",
+      "target": "index_extract_pdf_url"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L1029",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index_downloadpdf",
+      "target": "index_validateurl"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L1164",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index_buildtrackedfilekey",
+      "target": "index_sanitizestoragepathsegment"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L1862",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index_createfileaccesstrackmiddleware",
+      "target": "index_sanitizestoragepathsegment"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L1150",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index_getfiletransferstorageconfig",
+      "target": "index_normalizefiletransferstorage"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L1347",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index_listdownloadfiles",
+      "target": "index_normalizefiletransferstorage"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L1251",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index_buildsafeexistingfilepath",
+      "target": "index_getfiletransferstorageconfig"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L1209",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index_buildsafeuploadtarget",
+      "target": "index_getfiletransferstorageconfig"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L1169",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index_getfilepublicurl",
+      "target": "index_getfiletransferstorageconfig"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L1350",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index_listdownloadfiles",
+      "target": "index_getfiletransferstorageconfig"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L1263",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index_buildsafeexistingfilepath",
+      "target": "index_buildstoragerelativepath"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L1225",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index_buildsafeuploadtarget",
+      "target": "index_buildstoragerelativepath"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L1158",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index_buildstoragerelativepath",
+      "target": "index_sanitizeuploadfilename"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L1328",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index_liststoragefiles",
+      "target": "index_buildstoragerelativepath"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L1174",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index_buildfileaccesscountkey",
+      "target": "index_buildtrackedfilekey"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L1175",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index_buildfileaccesshourkey",
+      "target": "index_buildtrackedfilekey"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L1170",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index_getfilepublicurl",
+      "target": "index_sanitizeuploadfilename"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L1339",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index_liststoragefiles",
+      "target": "index_getfilepublicurl"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L1869",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index_createfileaccesstrackmiddleware",
+      "target": "index_buildfileaccesscountkey"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L1366",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index_listdownloadfiles",
+      "target": "index_buildfileaccesscountkey"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L1272",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index_migratefileaccessstats",
+      "target": "index_buildfileaccesscountkey"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L1870",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index_createfileaccesstrackmiddleware",
+      "target": "index_buildfileaccesshourkey"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L1372",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index_listdownloadfiles",
+      "target": "index_buildfileaccesshourkey"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L1275",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index_migratefileaccessstats",
+      "target": "index_buildfileaccesshourkey"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L1870",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index_createfileaccesstrackmiddleware",
+      "target": "index_formathourid"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L1191",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index_getlast24hourids",
+      "target": "index_formathourid"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L1362",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index_listdownloadfiles",
+      "target": "index_getlast24hourids"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L1274",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index_migratefileaccessstats",
+      "target": "index_getlast24hourids"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L1252",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index_buildsafeexistingfilepath",
+      "target": "index_sanitizeuploadfilename"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L1210",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index_buildsafeuploadtarget",
+      "target": "index_sanitizeuploadfilename"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L1235",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index_buildchunksessiondir",
+      "target": "index_sanitizeuploadsessionid"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "index.js",
+      "source_location": "L1354",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index_listdownloadfiles",
+      "target": "index_liststoragefiles"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "test/apiAccess.test.js",
+      "source_location": "L45",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "test_apiaccess_test",
+      "target": "test_apiaccess_test_verifykey"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "test/apiAccess.test.js",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "test_apiaccess_test",
+      "target": "utils_apiaccess"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "test/apiAccess.test.js",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "test_apiaccess_test",
+      "target": "utils_apiaccess_chargeapicredits"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "test/apiAccess.test.js",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "test_apiaccess_test",
+      "target": "utils_apiaccess_createapiaccesshelpers"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "utils/ThirdParrtyApi/aitoken.js",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "utils_thirdparrtyapi_aitoken",
+      "target": "utils_apiaccess"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "utils/ThirdParrtyApi/aitoken.js",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "utils_thirdparrtyapi_aitoken",
+      "target": "utils_apiaccess_chargeapicredits"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "utils/ThirdParrtyApi/aitoken.js",
+      "source_location": "L15",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "utils_thirdparrtyapi_aitoken",
+      "target": "utils_thirdparrtyapi_aitoken_aitoken"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "utils/ThirdParrtyApi/aitoken.js",
+      "source_location": "L12",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "utils_thirdparrtyapi_aitoken",
+      "target": "utils_thirdparrtyapi_aitoken_gpt_image_edit_max_retries"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "utils/ThirdParrtyApi/aitoken.js",
+      "source_location": "L13",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "utils_thirdparrtyapi_aitoken",
+      "target": "utils_thirdparrtyapi_aitoken_gpt_image_edit_retry_base_delay_ms"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "utils/apiAccess.js",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "utils_apiaccess",
+      "target": "utils_apiaccess_chargeapicredits"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "utils/apiAccess.js",
+      "source_location": "L13",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "utils_apiaccess",
+      "target": "utils_apiaccess_createapiaccesshelpers"
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "d67a465d48459c437332a2db11db5f15921ec6b3"
+  "built_at_commit": "dcd2c698c900f07f3d1ba70702ba3f8dd082b118"
 }

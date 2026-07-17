@@ -1,6 +1,27 @@
 # QA
 
 ## Iteration
+2026-07-17 / gpt-image-2-atomic-credit-charge
+
+## Test Matrix
+| Case ID | Step | Expected | Actual | Status |
+|---|---|---|---|---|
+| QA-GI-01 | `node --test test/apiAccess.test.js` | 原子扣减使用一次非零 cost 校验；余额不足被拒绝 | 3 passed, 0 failed | pass |
+| QA-GI-02 | `node --check index.js`、`node --check utils/ThirdParrtyApi/aitoken.js`、`git diff --check` | 语法与差异格式有效 | 均成功 | pass |
+| QA-GI-03 | `npm test` | 全量既有回归和新增扣费测试通过 | 18 passed, 0 failed | pass |
+
+## Manual Checks
+- `POST /gpt-image-2/generate` 在本地参数与余额预检通过后、下载参考图前执行一次 3 积分原子扣减；成功响应路径不再二次扣费。
+- `POST /api/gpt-image-2/generate` 在构建 Base64 图片表单或调用上游前执行同样的 3 积分原子扣减；上游失败不退款，符合确认的计费规则。
+- 余额预检仅用于维持原有错误语义；真正决定是否允许进入上游的操作是非零 cost 的 Unkey 调用。
+
+## Final QA Verdict
+- [x] pass
+- [ ] conditional pass
+- [ ] fail
+
+
+## Iteration
 2026-07-17 / blue-green-deployment
 
 ## Test Matrix

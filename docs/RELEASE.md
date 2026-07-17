@@ -1,5 +1,23 @@
 # RELEASE
 
+## Security Fix
+2026-07-17 / gpt-image-2-atomic-credit-charge
+
+### Summary
+修复 GPT-Image-2 在“余额预检”和“成功后扣费”之间可被并发请求绕过的额度窗口。
+
+### What Changed
+- 新增严格的原子积分扣减辅助逻辑，只有 Unkey 接受 3 积分扣减后才允许请求进入生图流程。
+- `POST /gpt-image-2/generate` 在下载参考图或调用上游前扣费，并移除成功后的第二次扣费。
+- `POST /api/gpt-image-2/generate` 的底层 `aitoken.generate` 应用相同规则；余额不足（少于 3 积分）不会调用上游。
+
+### API / Behavior
+- 路径、请求体和成功响应结构不变。
+- 对已进入生图流程的请求，若后续上游失败，3 积分不退款；这是本次明确确认的计费策略。
+
+### Rollback Notes
+- 恢复两个入口“成功后扣费”的旧顺序即可回退行为，但会重新引入并发超额调用风险，不建议作为常规回滚。
+
 ## Improvement
 2026-07-17 / blue-green-deployment
 

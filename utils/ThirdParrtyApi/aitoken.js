@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import unkey from '../unkey.js';
 import redis from '../redisClient.js';
+import { chargeApiCredits } from '../apiAccess.js';
 
 const openaihub_api_key = 'sk-xQEHwDSCU78fni0S7Y4J0h27M9GPzfgi33RsHZxt5IFj3ylt';
 const OPENAI_HUB_BASE = 'https://api.openai-hub.net';
@@ -196,7 +197,18 @@ const aitoken = {
         if (api_key) {
             const { valid, remaining } = await unkey.verifyKey(GPT_IMAGE_API_ID, api_key.trim(), 0);
             if (!valid) throw Object.assign(new Error('API Key 无效或已过期，请检查后重试！'), { statusCode: 401 });
-            if (remaining === 0) throw Object.assign(new Error('API Key 积分已用完，请联系作者续费！'), { statusCode: 403 });
+            if (remaining !== null && Number(remaining) < 3) throw Object.assign(new Error('API Key 积分已用完，请联系作者续费！'), { statusCode: 403 });
+
+            const charge = await chargeApiCredits({
+                unkey,
+                unkeyApiId: GPT_IMAGE_API_ID,
+                apiKey: api_key.trim(),
+                cost: 3,
+                metadata: { action: 'gpt_image_2_generate' },
+            });
+            if (!charge.ok) {
+                throw Object.assign(new Error('API Key 积分已用完，请联系作者续费！'), { statusCode: 403 });
+            }
         } else {
             const identity = userIdentity || 'anonymous';
             const trialKey = `gpt-image-2:trial:${identity}`;
@@ -239,11 +251,6 @@ const aitoken = {
                 { headers: { Authorization: `Bearer ${openaihub_api_key}`, 'Content-Type': 'application/json' } }
             );
             item = result.data?.[0] || {};
-        }
-
-        // 生成成功后消费付费积分
-        if (api_key) {
-            await unkey.verifyKey(GPT_IMAGE_API_ID, api_key.trim(), 3);
         }
 
         return { imageUrl: item.url || null, b64Image: item.b64_json || null };

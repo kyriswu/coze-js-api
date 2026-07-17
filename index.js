@@ -101,6 +101,7 @@ const {
     dailyUse,
     verifyApiAccess,
     consumeApiCredits,
+    chargeApiCreditsAtomically,
 } = createApiAccessHelpers({
     redis,
     unkey,
@@ -239,6 +240,15 @@ app.post('/gpt-image-2/generate', async (req, res) => {
         return res.status(403).json({ success: false, error: access.response?.msg || commonUtils.MESSAGE.TOKEN_EXPIRED });
     }
 
+    const charge = await chargeApiCreditsAtomically({
+        apiKey: api_key,
+        cost,
+        metadata: { action: 'gpt_image_2_generate' },
+    });
+    if (!charge.ok) {
+        return res.status(403).json({ success: false, error: commonUtils.MESSAGE.TOKEN_NO_TIMES });
+    }
+
     const tempFiles = [];
     try {
         let rawResult;
@@ -277,12 +287,6 @@ app.post('/gpt-image-2/generate', async (req, res) => {
         }
 
         const finalData = savedDownloadUrl || item.url || null;
-        await consumeApiCredits({
-            apiKey: api_key,
-            cost,
-            metadata: { action: 'gpt_image_2_generate' }
-        });
-
         return res.json({
             code: 0,
             msg: "Success",

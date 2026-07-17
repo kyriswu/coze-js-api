@@ -4,10 +4,10 @@
 
 **Goal:** Eliminate the concurrent check-then-charge window for both GPT-Image-2 entry points while retaining the agreed policy that an upstream failure after workflow entry is still charged.
 
-- [ ] Add and test a strict, atomic Unkey credit-charge helper.
-- [ ] Charge three credits after local validation and before expensive work in both GPT-Image-2 paths; remove post-success charging.
-- [ ] Run focused and full tests, syntax checks, then update QA/Release/CHANGELOG if required.
-- [ ] Refresh Graphify and verify its JSON/report outputs.
+- [x] Add and test a strict, atomic Unkey credit-charge helper.
+- [x] Charge three credits after local validation and before expensive work in both GPT-Image-2 paths; remove post-success charging.
+- [x] Run focused and full tests, syntax checks, then update QA/Release/CHANGELOG.
+- [x] Refresh Graphify and verify its JSON/report outputs.
 
 ---
 

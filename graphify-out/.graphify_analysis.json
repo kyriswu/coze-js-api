@@ -1,58 +1,6 @@
 {
   "communities": {
     "0": [
-      "index",
-      "index_agent",
-      "index_app",
-      "index_buildchunksessiondir",
-      "index_buildfileaccesscountkey",
-      "index_buildfileaccesshourkey",
-      "index_buildsafeexistingfilepath",
-      "index_buildsafeuploadtarget",
-      "index_buildstoragerelativepath",
-      "index_buildtrackedfilekey",
-      "index_cansearchgoogle_canusehtmlparse_dailyuse_verifyapiaccess_consumeapicredits",
-      "index_createfileaccesstrackmiddleware",
-      "index_dirname",
-      "index_downloadpdf",
-      "index_downloadsdir",
-      "index_extract_pdf_url",
-      "index_filename",
-      "index_filetransferstoragemap",
-      "index_formathourid",
-      "index_get_doc_direct_link",
-      "index_getfilepublicurl",
-      "index_getfiletransferstorageconfig",
-      "index_getlast15dayscreatedstats",
-      "index_getlast24hourids",
-      "index_gettypestats",
-      "index_listdownloadfiles",
-      "index_liststoragefiles",
-      "index_migratefileaccessstats",
-      "index_normalizefiletransferstorage",
-      "index_persistentdownloadsdir",
-      "index_sanitizestoragepathsegment",
-      "index_sanitizeuploadfilename",
-      "index_sanitizeuploadsessionid",
-      "index_scankeysbypattern",
-      "index_server",
-      "index_shutdown",
-      "index_sortfiles",
-      "index_uploadchunksdir",
-      "index_validateurl",
-      "index_zyteextract",
-      "test_applifecycle_test",
-      "test_applifecycle_test_close",
-      "test_applifecycle_test_createresponse",
-      "test_applifecycle_test_error",
-      "test_applifecycle_test_log",
-      "test_applifecycle_test_ping",
-      "utils_applifecycle",
-      "utils_applifecycle_creategracefulshutdown",
-      "utils_applifecycle_createhealthhandler",
-      "utils_applifecycle_createreadinesshandler"
-    ],
-    "1": [
       "axios",
       "cheerio",
       "coze_api",
@@ -97,6 +45,48 @@
       "redis",
       "socks_proxy_agent",
       "stream_throttle"
+    ],
+    "1": [
+      "index",
+      "index_agent",
+      "index_app",
+      "index_buildchunksessiondir",
+      "index_buildfileaccesscountkey",
+      "index_buildfileaccesshourkey",
+      "index_buildsafeexistingfilepath",
+      "index_buildsafeuploadtarget",
+      "index_buildstoragerelativepath",
+      "index_buildtrackedfilekey",
+      "index_cansearchgoogle_canusehtmlparse_dailyuse_verifyapiaccess_consumeapicredits_chargeapicreditsatomically",
+      "index_createfileaccesstrackmiddleware",
+      "index_dirname",
+      "index_downloadpdf",
+      "index_downloadsdir",
+      "index_extract_pdf_url",
+      "index_filename",
+      "index_filetransferstoragemap",
+      "index_formathourid",
+      "index_get_doc_direct_link",
+      "index_getfilepublicurl",
+      "index_getfiletransferstorageconfig",
+      "index_getlast15dayscreatedstats",
+      "index_getlast24hourids",
+      "index_gettypestats",
+      "index_listdownloadfiles",
+      "index_liststoragefiles",
+      "index_migratefileaccessstats",
+      "index_normalizefiletransferstorage",
+      "index_persistentdownloadsdir",
+      "index_sanitizestoragepathsegment",
+      "index_sanitizeuploadfilename",
+      "index_sanitizeuploadsessionid",
+      "index_scankeysbypattern",
+      "index_server",
+      "index_shutdown",
+      "index_sortfiles",
+      "index_uploadchunksdir",
+      "index_validateurl",
+      "index_zyteextract"
     ],
     "2": [
       "utils_bazi",
@@ -177,29 +167,6 @@
       "utils_whisperapi_whisperapi"
     ],
     "4": [
-      "routes_navigationroutes",
-      "routes_navigationroutes_parseendpoint",
-      "routes_navigationroutes_router",
-      "routes_navigationroutes_servicecards",
-      "routes_navigationroutes_servicecategories",
-      "routes_navigationroutes_servicestats",
-      "routes_navigationroutes_sitemapcategoryitems",
-      "routes_navigationroutes_sitemappageitems",
-      "routes_navigationroutes_xmlescape",
-      "utils_netdiskapi",
-      "utils_netdiskapi_netdiskapi",
-      "utils_redisclient",
-      "utils_redisclient_redis",
-      "utils_thirdparrtyapi_aitoken",
-      "utils_thirdparrtyapi_aitoken_aitoken",
-      "utils_thirdparrtyapi_aitoken_gpt_image_edit_max_retries",
-      "utils_thirdparrtyapi_aitoken_gpt_image_edit_retry_base_delay_ms",
-      "utils_thirdparrtyapi_cozecom",
-      "utils_thirdparrtyapi_cozecom_config",
-      "utils_thirdparrtyapi_cozecom_cozecom",
-      "utils_thirdparrtyapi_cozecom_timestamptodatetime"
-    ],
-    "5": [
       "test_staticzipdeployment_test",
       "test_staticzipdeployment_test_createvalidartifact",
       "test_staticzipdeployment_test_sha256",
@@ -222,9 +189,50 @@
       "utils_staticzipdeployment_validateextractedartifact",
       "utils_staticzipdeployment_validatezipmetadata"
     ],
+    "5": [
+      "utils_axiosinterceptors",
+      "utils_axiosinterceptors_attachaxiosratelimitlogger",
+      "utils_netdiskapi",
+      "utils_netdiskapi_netdiskapi",
+      "utils_networklogger",
+      "utils_networklogger_emit",
+      "utils_networklogger_ensurefilelogger",
+      "utils_networklogger_log_mode",
+      "utils_networklogger_logaxioserror",
+      "utils_networklogger_logaxiosrequest",
+      "utils_networklogger_loghttprequest",
+      "utils_networklogger_logratelimit",
+      "utils_networklogger_redis_events_max",
+      "utils_networklogger_writetofile",
+      "utils_networklogger_writetoredis",
+      "utils_redisclient",
+      "utils_redisclient_redis",
+      "utils_thirdparrtyapi_cozecom",
+      "utils_thirdparrtyapi_cozecom_config",
+      "utils_thirdparrtyapi_cozecom_cozecom",
+      "utils_thirdparrtyapi_cozecom_timestamptodatetime"
+    ],
     "6": [
+      "routes_navigationroutes",
+      "routes_navigationroutes_parseendpoint",
+      "routes_navigationroutes_router",
+      "routes_navigationroutes_servicecards",
+      "routes_navigationroutes_servicecategories",
+      "routes_navigationroutes_servicestats",
+      "routes_navigationroutes_sitemapcategoryitems",
+      "routes_navigationroutes_sitemappageitems",
+      "routes_navigationroutes_xmlescape",
+      "test_apiaccess_test",
+      "test_apiaccess_test_verifykey",
       "utils_apiaccess",
+      "utils_apiaccess_chargeapicredits",
       "utils_apiaccess_createapiaccesshelpers",
+      "utils_thirdparrtyapi_aitoken",
+      "utils_thirdparrtyapi_aitoken_aitoken",
+      "utils_thirdparrtyapi_aitoken_gpt_image_edit_max_retries",
+      "utils_thirdparrtyapi_aitoken_gpt_image_edit_retry_base_delay_ms"
+    ],
+    "7": [
       "utils_loadenv",
       "utils_loadenv_dirname",
       "utils_loadenv_envfilepath",
@@ -244,7 +252,7 @@
       "utils_thirdparrtyapi_evolink_ai_sleep",
       "utils_thirdparrtyapi_evolink_ai_verifyapiaccess_consumeapicredits"
     ],
-    "7": [
+    "8": [
       "test_wechatuniversalsearch_test",
       "test_wechatuniversalsearch_test_createresponse",
       "utils_tikhub_io",
@@ -261,7 +269,7 @@
       "utils_tikhub_io_th_youtube",
       "utils_tikhub_io_tikhubrequest"
     ],
-    "8": [
+    "9": [
       "utils_customerror",
       "utils_customerror_baseerror",
       "utils_customerror_baseerror_constructor",
@@ -278,7 +286,7 @@
       "utils_customerror_validationerror",
       "utils_customerror_validationerror_constructor"
     ],
-    "9": [
+    "10": [
       "utils_networkanalytics",
       "utils_networkanalytics_buildtimeline",
       "utils_networkanalytics_collectlastlines",
@@ -295,7 +303,7 @@
       "utils_networkanalytics_tofinitenumber",
       "utils_networkanalytics_topentries"
     ],
-    "10": [
+    "11": [
       "any",
       "argumentparser",
       "skills_twitterwebapi_scripts_twitter_api",
@@ -310,21 +318,6 @@
       "skills_twitterwebapi_scripts_twitter_api_print_search_result",
       "skills_twitterwebapi_scripts_twitter_api_run_detail",
       "skills_twitterwebapi_scripts_twitter_api_run_search"
-    ],
-    "11": [
-      "utils_axiosinterceptors",
-      "utils_axiosinterceptors_attachaxiosratelimitlogger",
-      "utils_networklogger",
-      "utils_networklogger_emit",
-      "utils_networklogger_ensurefilelogger",
-      "utils_networklogger_log_mode",
-      "utils_networklogger_logaxioserror",
-      "utils_networklogger_logaxiosrequest",
-      "utils_networklogger_loghttprequest",
-      "utils_networklogger_logratelimit",
-      "utils_networklogger_redis_events_max",
-      "utils_networklogger_writetofile",
-      "utils_networklogger_writetoredis"
     ],
     "12": [
       "package",
@@ -353,6 +346,18 @@
       "scripts_network_log_analyze_topslowrequests"
     ],
     "14": [
+      "test_applifecycle_test",
+      "test_applifecycle_test_close",
+      "test_applifecycle_test_createresponse",
+      "test_applifecycle_test_error",
+      "test_applifecycle_test_log",
+      "test_applifecycle_test_ping",
+      "utils_applifecycle",
+      "utils_applifecycle_creategracefulshutdown",
+      "utils_applifecycle_createhealthhandler",
+      "utils_applifecycle_createreadinesshandler"
+    ],
+    "15": [
       "start",
       "start_backend_port_for",
       "start_cleanup_failure",
@@ -363,7 +368,7 @@
       "start_verify_nginx_candidate",
       "start_write_backend"
     ],
-    "15": [
+    "16": [
       "skills_douyin_billboard_fetch_hot_rise_list_scripts_fetch_hot_rise_list",
       "skills_douyin_billboard_fetch_hot_rise_list_scripts_fetch_hot_rise_list_fetch_hot_rise_list",
       "skills_douyin_billboard_fetch_hot_rise_list_scripts_fetch_hot_rise_list_get_api_key",
@@ -371,7 +376,7 @@
       "skills_douyin_billboard_fetch_hot_rise_list_scripts_fetch_hot_rise_list_print_results",
       "skills_douyin_billboard_fetch_hot_rise_list_scripts_fetch_hot_rise_list_rationale_23"
     ],
-    "16": [
+    "17": [
       "skills_google_search_web_scripts_google_search",
       "skills_google_search_web_scripts_google_search_get_api_key",
       "skills_google_search_web_scripts_google_search_google_search",
@@ -379,7 +384,7 @@
       "skills_google_search_web_scripts_google_search_print_results",
       "skills_google_search_web_scripts_google_search_rationale_23"
     ],
-    "17": [
+    "18": [
       "skills_volcengine_web_search_scripts_web_search",
       "skills_volcengine_web_search_scripts_web_search_get_api_key",
       "skills_volcengine_web_search_scripts_web_search_main",
@@ -387,113 +392,113 @@
       "skills_volcengine_web_search_scripts_web_search_print_results",
       "skills_volcengine_web_search_scripts_web_search_web_search"
     ],
-    "18": [
+    "19": [
       "test_deploymentroute_test",
       "test_deploymentroute_test_createresponse",
       "utils_deploymentroute",
       "utils_deploymentroute_createdeploymenthandler"
     ],
-    "19": [
+    "20": [
       "utils_htmlcontent",
       "utils_htmlcontent_extract_html_conent",
       "utils_htmlcontent_extract_html_conent_standard",
       "utils_htmlcontent_htmltoqueryselector"
     ],
-    "20": [
+    "21": [
       "utils_thirdparrtyapi_hermes_agent",
       "utils_thirdparrtyapi_hermes_agent_hermes_default_timeout_ms",
       "utils_thirdparrtyapi_hermes_agent_hermesagent",
       "utils_thirdparrtyapi_hermes_agent_normalizepayload"
     ],
-    "21": [
+    "22": [
       "utils_thirdparrtyapi_aimlapi",
       "utils_thirdparrtyapi_aimlapi_aimlapi",
       "utils_thirdparrtyapi_aimlapi_api"
     ],
-    "22": [
+    "23": [
       "utils_thirdparrtyapi_cloudflare",
       "utils_thirdparrtyapi_cloudflare_cloudflareapi",
       "utils_thirdparrtyapi_cloudflare_whispermaxfilebytes"
     ],
-    "23": [
+    "24": [
       "utils_thirdparrtyapi_lemonfoxai",
       "utils_thirdparrtyapi_lemonfoxai_lemonfoxai",
       "utils_thirdparrtyapi_lemonfoxai_openai"
     ],
-    "24": [
+    "25": [
       "scripts_cleanup_stopped_app_containers",
       "scripts_cleanup_stopped_app_containers_sh__entry"
     ],
-    "25": [
+    "26": [
       "server",
       "server_sh__entry"
     ],
-    "26": [
+    "27": [
       "skills_douyin_transcribe_api_scripts_transcribe_douyin",
       "skills_douyin_transcribe_api_scripts_transcribe_douyin_sh__entry"
     ],
-    "27": [
+    "28": [
       "start_lite",
       "start_lite_sh__entry"
     ],
-    "28": [
+    "29": [
       "test_cleanupstoppedcontainers_test",
       "test_cleanupstoppedcontainers_test_reporoot"
     ],
-    "29": [
+    "30": [
       "test_startscript_test",
       "test_startscript_test_script"
     ],
-    "30": [
+    "31": [
       "utils_search1api",
       "utils_search1api_search1api"
     ],
-    "31": [
+    "32": [
       "utils_thirdparrtyapi_feishu",
       "utils_thirdparrtyapi_feishu_feishu"
     ],
-    "32": [
+    "33": [
       "utils_thirdparrtyapi_firecrawl",
       "utils_thirdparrtyapi_firecrawl_firecrawltool"
     ],
-    "33": [
+    "34": [
       "utils_thirdparrtyapi_tencentapi",
       "utils_thirdparrtyapi_tencentapi_tencentapi"
     ],
-    "34": [
+    "35": [
       "utils_zyte",
       "utils_zyte_zyte"
     ],
-    "35": [
+    "36": [
       "pdf2images"
     ]
   },
   "cohesion": {
-    "0": 0.07183673469387755,
-    "1": 0.046511627906976744,
+    "0": 0.046511627906976744,
+    "1": 0.09102564102564102,
     "2": 0.08408408408408409,
     "3": 0.06456456456456457,
-    "4": 0.12380952380952381,
-    "5": 0.22380952380952382,
-    "6": 0.11052631578947368,
-    "7": 0.14285714285714285,
-    "8": 0.13333333333333333,
-    "9": 0.2857142857142857,
-    "10": 0.32967032967032966,
-    "11": 0.32051282051282054,
+    "4": 0.22380952380952382,
+    "5": 0.17142857142857143,
+    "6": 0.13725490196078433,
+    "7": 0.11764705882352941,
+    "8": 0.14285714285714285,
+    "9": 0.13333333333333333,
+    "10": 0.2857142857142857,
+    "11": 0.32967032967032966,
     "12": 0.18181818181818182,
     "13": 0.32727272727272727,
-    "14": 0.3611111111111111,
-    "15": 0.5333333333333333,
+    "14": 0.26666666666666666,
+    "15": 0.3611111111111111,
     "16": 0.5333333333333333,
-    "17": 0.6,
-    "18": 0.6666666666666666,
+    "17": 0.5333333333333333,
+    "18": 0.6,
     "19": 0.6666666666666666,
-    "20": 0.5,
-    "21": 0.6666666666666666,
+    "20": 0.6666666666666666,
+    "21": 0.5,
     "22": 0.6666666666666666,
     "23": 0.6666666666666666,
-    "24": 1.0,
+    "24": 0.6666666666666666,
     "25": 1.0,
     "26": 1.0,
     "27": 1.0,
@@ -504,7 +509,8 @@
     "32": 1.0,
     "33": 1.0,
     "34": 1.0,
-    "35": 1.0
+    "35": 1.0,
+    "36": 1.0
   },
   "gods": [
     {
@@ -515,7 +521,7 @@
     {
       "id": "utils_redisclient_redis",
       "label": "redis",
-      "degree": 11
+      "degree": 10
     },
     {
       "id": "utils_staticzipdeployment_reject",
@@ -528,14 +534,14 @@
       "degree": 9
     },
     {
-      "id": "utils_unkey_unkey",
-      "label": "unkey",
-      "degree": 9
-    },
-    {
       "id": "utils_commonutils_commonutils",
       "label": "commonUtils",
       "degree": 9
+    },
+    {
+      "id": "utils_unkey_unkey",
+      "label": "unkey",
+      "degree": 8
     },
     {
       "id": "utils_networklogger_emit",
@@ -559,17 +565,6 @@
     }
   ],
   "surprises": [
-    {
-      "source": "extract_pdf_url()",
-      "target": "error()",
-      "source_files": [
-        "index.js",
-        "test/appLifecycle.test.js"
-      ],
-      "confidence": "INFERRED",
-      "relation": "indirect_call",
-      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories"
-    },
     {
       "source": "attachAxiosRateLimitLogger()",
       "target": "logAxiosError()",
@@ -607,18 +602,18 @@
   "questions": [
     {
       "type": "bridge_node",
-      "question": "Why does `redis` connect `navigationRoutes.js` to `volcengine.io.js`, `tool.js`, `evolink.ai.js`, `networkAnalytics.js`, `networkLogger.js`?",
-      "why": "High betweenness centrality (0.035) - this node is a cross-community bridge."
+      "question": "Why does `redis` connect `networkLogger.js` to `volcengine.io.js`, `tool.js`, `navigationRoutes.js`, `evolink.ai.js`, `networkAnalytics.js`?",
+      "why": "High betweenness centrality (0.045) - this node is a cross-community bridge."
+    },
+    {
+      "type": "bridge_node",
+      "question": "Why does `createApiAccessHelpers()` connect `navigationRoutes.js` to `index.js`, `evolink.ai.js`?",
+      "why": "High betweenness centrality (0.026) - this node is a cross-community bridge."
     },
     {
       "type": "bridge_node",
       "question": "Why does `dependencies` connect `dependencies` to `package.json`?",
       "why": "High betweenness centrality (0.017) - this node is a cross-community bridge."
-    },
-    {
-      "type": "bridge_node",
-      "question": "Why does `commonUtils` connect `volcengine.io.js` to `evolink.ai.js`, `tikhub.io.js`?",
-      "why": "High betweenness centrality (0.012) - this node is a cross-community bridge."
     },
     {
       "type": "isolated_nodes",
@@ -627,13 +622,13 @@
     },
     {
       "type": "low_cohesion",
-      "question": "Should `index.js` be split into smaller, more focused modules?",
-      "why": "Cohesion score 0.07183673469387755 - nodes in this community are weakly interconnected."
+      "question": "Should `dependencies` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.046511627906976744 - nodes in this community are weakly interconnected."
     },
     {
       "type": "low_cohesion",
-      "question": "Should `dependencies` be split into smaller, more focused modules?",
-      "why": "Cohesion score 0.046511627906976744 - nodes in this community are weakly interconnected."
+      "question": "Should `index.js` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.09102564102564102 - nodes in this community are weakly interconnected."
     },
     {
       "type": "low_cohesion",

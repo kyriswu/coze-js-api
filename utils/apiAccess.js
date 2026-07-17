@@ -1,3 +1,15 @@
+export async function chargeApiCredits({ unkey, unkeyApiId, apiKey, cost = 1, metadata }) {
+    if (!apiKey) {
+        return { ok: true, remaining: null };
+    }
+
+    const result = await unkey.verifyKey(unkeyApiId, apiKey, cost, metadata);
+    return {
+        ok: result?.valid === true,
+        remaining: result?.remaining,
+    };
+}
+
 export function createApiAccessHelpers({ redis, unkey, commonUtils, environment, tool, unkeyApiId }) {
     async function canSearchGoogle(key) {
         const value = await redis.get(key);
@@ -70,11 +82,22 @@ export function createApiAccessHelpers({ redis, unkey, commonUtils, environment,
         return remaining;
     }
 
+    async function chargeApiCreditsAtomically({ apiKey, cost = 1, metadata }) {
+        return chargeApiCredits({
+            unkey,
+            unkeyApiId,
+            apiKey,
+            cost,
+            metadata,
+        });
+    }
+
     return {
         canSearchGoogle,
         canUseHtmlParse,
         dailyUse,
         verifyApiAccess,
         consumeApiCredits,
+        chargeApiCreditsAtomically,
     };
 }

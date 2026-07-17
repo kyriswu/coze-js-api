@@ -1,5 +1,11 @@
 # Test Checklist
 
+## 2026-07-17 · GPT-Image-2 Atomic Credit Charge
+
+- [x] 原子扣减单测：非零 cost、余额不足拒绝和工厂封装均已覆盖。
+- [x] 语法检查：`index.js` 与 `utils/ThirdParrtyApi/aitoken.js` 均通过。
+- [x] 全量 Node 测试：`npm test`，18 passed / 0 failed。
+
 ## 2026-07-17 · Blue/Green Deployment
 
 - [x] 生命周期单测：`/healthz`、Redis `/readyz` 和优雅关闭均已覆盖。
