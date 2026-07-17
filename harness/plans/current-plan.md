@@ -1,5 +1,13 @@
 # Blue/Green Deployment Implementation Plan
 
+## Seedance Reference Media URL Validation — 2026-07-17
+
+**Goal:** Before upstream task creation, safely confirm every Seedance image/video/audio reference URL is public and reachable; reject unsafe or inaccessible material with a specific, non-sensitive reason.
+
+- [x] Confirm validation scope, redirect handling, safe fallback probe, and rejection behavior.
+- [ ] Add public-address and response-type validation for reference media only.
+- [ ] Update public documentation and delivery records; run syntax/diff checks and refresh Graphify only.
+
 ## Seedance 2.0 Actual Token Billing — 2026-07-17
 
 **Goal:** Settle successful Seedance tasks from actual upstream completion tokens while returning the video with an explicit outstanding-balance state when the key cannot cover final settlement.
