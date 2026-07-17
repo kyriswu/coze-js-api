@@ -1,6 +1,30 @@
 # RELEASE
 
 ## Improvement
+2026-07-17 / blue-green-deployment
+
+### Summary
+将单容器重启发布改为可验证的蓝绿切换：候选实例先在 loopback 端口启动并通过 `/readyz`，再以原子 Nginx include 切流；旧实例仅在成功切换后排空。
+
+### What Changed
+- `index.js` 与 `utils/appLifecycle.js` 新增 `/healthz`、基于 Redis PING 的 `/readyz`，以及 SIGTERM/SIGINT 的 HTTP server 排空。
+- `Dockerfile` 在构建期执行 `npm ci --omit=dev` 并复制应用；运行时只挂载 `downloads`，不再挂载宿主源码或 `node_modules`。
+- Compose 定义 profile 服务 `app-blue`/`app-green`，映射为 `127.0.0.1:3003` 与 `127.0.0.1:3004`。3001/3002 被宿主无关进程占用，故未使用以避免影响它们。
+- 两个 Nginx vhost 共用 `include /etc/nginx/coze-js-api/active-backend.conf`；`start.sh` 仅在候选 healthy、`/readyz` 成功和 `nginx -t` 成功后通过临时文件 + `mv` 修改 active backend 并 reload。
+- `start.sh` 失败时停止候选而不改 Nginx；切换成功后后台执行旧色容器排空，避免发布命令被长连接阻塞。
+
+### Live Deployment Evidence
+- 首次候选 blue 已健康，active backend 为 `server 127.0.0.1:3003;`。
+- `https://coze-js-api.devtool.uk/` 和 `https://coze-js-api-noproxy.devtool.uk/` 均实测 HTTP 200；blue `/readyz` 返回 `{"status":"ready"}`。
+- legacy 在确认无活跃 3000 TCP 连接后退出（exit 143，`restart=no`）；宿主 3000 不再监听。
+
+### Rollback Notes
+1. 保持 blue 运行即可回到已验证的 active 版本；若必须回退到首次迁移前的 legacy 镜像，执行 `docker start coze-js-api-app-1`。
+2. 原子恢复 Nginx backend：写入 `server 127.0.0.1:3000;` 到 `/etc/nginx/coze-js-api/active-backend.conf` 的临时文件，`nginx -t` 成功后 `mv` 覆盖并 `systemctl reload nginx`，再将 `/var/lib/coze-js-api/active-color` 写回 `legacy`。
+3. 仅在 legacy 可用的健康或业务检查通过后再停止 blue；不要直接编辑 live include 或在未经 `nginx -t` 的情况下 reload。
+
+
+## Improvement
 2026-07-16 / public-static-deployment-no-quota
 
 ### Summary

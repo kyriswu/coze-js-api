@@ -1,6 +1,43 @@
 # QA
 
 ## Iteration
+2026-07-17 / blue-green-deployment
+
+## Test Matrix
+| Case ID | Step | Expected | Actual | Status |
+|---|---|---|---|---|
+| QA-BG-01 | `npm test` | 生命周期与既有回归均通过 | 13 passed, 0 failed | pass |
+| QA-BG-02 | `node --check index.js utils/appLifecycle.js`、`bash -n start.sh`、`git diff --check` | 语法与 diff 有效 | 均成功 | pass |
+| QA-BG-03 | `docker compose --profile bluegreen config --quiet`、`nginx -t` | Compose/Nginx 配置可加载 | 均成功（Nginx 仅有既存 `wenyan.devtool.uk` server-name 警告） | pass |
+| QA-BG-04 | 执行首次 `./start.sh` | 候选 ready 后切换，失败不触碰旧 upstream | blue healthy 后切到 `127.0.0.1:3003`；首次 3001 占用失败时仍保留 legacy | pass |
+| QA-BG-05 | 本地 `/readyz`、两个 HTTPS 入口 | active 实例就绪，公网不中断 | `/readyz` 返回 `{"status":"ready"}`；`coze-js-api.devtool.uk` 与 `coze-js-api-noproxy.devtool.uk` 均为 HTTP 200 | pass |
+| QA-BG-06 | legacy 排空后清理 | 不再保留旧实例或 3000 监听 | 无活跃 TCP 连接后 legacy exit 143 / `restart=no`；3000 无监听，blue 仍 healthy | pass |
+
+## Command Evidence
+```bash
+cd /root/coze-js-api
+npm test
+node --check index.js && node --check utils/appLifecycle.js
+bash -n start.sh && docker compose --profile bluegreen config --quiet && git diff --check
+nginx -t
+./start.sh
+curl --noproxy '*' -sfS http://127.0.0.1:3003/readyz
+curl --noproxy '*' -skso /dev/null -w '%{http_code}\n' --resolve coze-js-api.devtool.uk:443:127.0.0.1 https://coze-js-api.devtool.uk/
+curl --noproxy '*' -skso /dev/null -w '%{http_code}\n' --resolve coze-js-api-noproxy.devtool.uk:443:127.0.0.1 https://coze-js-api-noproxy.devtool.uk/
+```
+
+## Manual Checks
+- 原计划的 3001/3002 分别被无关的 `next-server` 与 `fc26` 进程占用，未停止它们；blue/green 改为仅 loopback 的 3003/3004。
+- `active-backend.conf` 以临时文件 + `mv` 原子写入，Nginx 仅在候选 `/readyz` 成功和 `nginx -t` 成功后 reload。
+- 首次 legacy 镜像的 PID 1 为 shell，不能向 Node 转发停止信号；本轮在连接归零后向 idle Node 发送 SIGTERM 完成迁移。新镜像为 Node 直启并已具备 SIGTERM/SIGINT 优雅关闭逻辑。
+
+## Final QA Verdict
+- [x] pass
+- [ ] conditional pass
+- [ ] fail
+
+
+## Iteration
 2026-07-16 / public-static-deployment-no-quota
 
 ## Test Matrix

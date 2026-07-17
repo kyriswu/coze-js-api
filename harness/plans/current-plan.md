@@ -8,6 +8,13 @@
 
 **Tech Stack:** Node.js 22 / Express / ioredis, Docker Compose, Nginx, Bash.
 
+## Completion Status — 2026-07-17
+
+- [x] Task 1 complete: lifecycle endpoints and graceful shutdown implemented and tested.
+- [x] Task 2 complete: immutable image and on-demand blue/green services implemented. The intended 3001/3002 were occupied by unrelated host processes, so the verified loopback ports are 3003/3004.
+- [x] Task 3 complete: Nginx active-backend include and rollback-safe candidate-first deployment flow are live.
+- [x] Task 4 complete: first live cutover verified; blue is active and healthy, both public HTTPS vhosts returned 200, and legacy was drained and stopped.
+
 ---
 
 ### Task 1: Add testable process lifecycle behavior
@@ -38,7 +45,7 @@
 **Steps:**
 1. Extend the image build to install production dependencies from the lockfile and copy application code.
 2. Exclude host dependencies, runtime downloads, secrets, Git metadata, and harness output from the build context.
-3. Replace the single `app` service with `app-blue` and `app-green`; each keeps container port 3000 but maps only to `127.0.0.1:3001` or `127.0.0.1:3002`.
+3. Replace the single `app` service with `app-blue` and `app-green`; each keeps container port 3000 but maps only to the verified available loopback ports `127.0.0.1:3003` and `127.0.0.1:3004` (3001/3002 were occupied by unrelated host processes).
 4. Keep Redis and `downloads` data shared; do not mount the repository into `/app`.
 5. Add an HTTP Docker healthcheck calling `/healthz`, then validate `docker compose config`.
 

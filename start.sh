@@ -119,16 +119,22 @@ printf '%s\n' "$next_color" > "$ACTIVE_COLOR_FILE"
 switched=1
 trap - ERR
 
-echo "Traffic switched to $next_color. Draining previous instance: $current_color"
+echo "Traffic switched to $next_color. Scheduling background drain for: $current_color"
+drain_log="$STATE_DIR/drain-${current_color}-$(date +%Y%m%d%H%M%S).log"
 if [[ "$current_color" == "legacy" ]]; then
     legacy_container="$($ENGINE ps -aq \
         --filter label=com.docker.compose.project=coze-js-api \
         --filter label=com.docker.compose.service=app | head -n 1)"
     if [[ -n "$legacy_container" ]]; then
-        "$ENGINE" stop -t "$DRAIN_TIMEOUT_SECONDS" "$legacy_container"
+        # The legacy service used restart: always. Disable automatic restarts before
+        # asking Docker to stop it, then let Docker enforce the drain timeout itself.
+        "$ENGINE" update --restart=no "$legacy_container" >/dev/null
+        nohup "$ENGINE" stop -t "$DRAIN_TIMEOUT_SECONDS" "$legacy_container" \
+            >"$drain_log" 2>&1 < /dev/null &
     fi
 else
-    "${COMPOSE[@]}" stop -t "$DRAIN_TIMEOUT_SECONDS" "app-$current_color"
+    nohup docker compose --profile bluegreen stop -t "$DRAIN_TIMEOUT_SECONDS" "app-$current_color" \
+        >"$drain_log" 2>&1 < /dev/null &
 fi
 
-echo "Blue/green deployment complete: active=$next_color"
+echo "Blue/green deployment complete: active=$next_color; drain log=$drain_log"
