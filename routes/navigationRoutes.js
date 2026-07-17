@@ -585,7 +585,7 @@ router.get('/docs/volcengine/seedance-2-0', (req, res) => {
         path: createPath,
         upstream: '/api/v3/contents/generations/tasks',
         cost: '仅支持付费 API Key（无免费试用）',
-        description: '创建和轮询接口均不支持免费试用：必须提供创建该任务时使用的有效本项目 API Key。接口会移除本地 api_key 后透传其余业务字段到火山方舟；content 与 tools 也支持以 JSON 字符串提交。任务完成时会在查询响应中返回最终扣除积分或欠费状态。任务对象由上游直接透传，因此以实际 data 内容为准。',
+        description: '创建和轮询接口均不支持免费试用：必须提供创建该任务时使用的有效本项目 API Key。轮询请优先通过 X-API-Key 请求头传递，避免将密钥放入 URL。接口会移除本地 api_key 后透传其余业务字段到火山方舟；content 与 tools 也支持以 JSON 字符串提交。任务完成时会在查询响应中返回最终扣除积分或欠费状态。任务对象由上游直接透传，因此以实际 data 内容为准。',
         requestParams: [
             { name: 'api_key', type: 'string', required: true, desc: '本项目付费 API Key；不支持免费试用，创建任务前校验有效性和可用积分', example: 'uk_live_xxx' },
             { name: 'model', type: 'string', required: true, desc: '视频生成模型名称', example: 'doubao-seedance-2-0-260128' },
@@ -645,7 +645,8 @@ router.get('/docs/volcengine/seedance-2-0', (req, res) => {
             },
             {
                 title: '轮询任务状态',
-                code: `curl "${docBaseUrl}${createPath}/<task_id>?api_key=uk_live_xxx"`,
+                code: `curl "${docBaseUrl}${createPath}/<task_id>" \\
+  -H "X-API-Key: uk_live_xxx"`,
             },
         ],
         responseFields: [

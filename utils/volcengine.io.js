@@ -602,7 +602,7 @@ export const ve_contents_generations_tasks = {
             return res.send({ code: -1, msg: 'task_id is required' });
         }
 
-        const api_key = (req.query && req.query.api_key) || (req.body && req.body.api_key);
+        const api_key = req.get('x-api-key') || (req.query && req.query.api_key) || (req.body && req.body.api_key);
         if (!api_key) {
             return res.send({ code: -1, msg: commonUtils.MESSAGE.TOKEN_EMPTY });
         }
