@@ -1,5 +1,19 @@
 # RELEASE
 
+## Validation Change
+2026-07-17 / seedance-media-url-validation
+
+### Summary
+Seedance 2.0 创建任务会在调用火山方舟前验证每个参考图片、视频和音频链接可安全公开访问。
+
+### API / Behavior
+- 仅检查 `content` 中 `image_url`、`video_url`、`audio_url` 的素材链接。
+- 拒绝非 HTTP(S)、含凭据或非标准端口、非公开网络地址、解析失败、重定向异常、超时、非成功状态和媒体类型不匹配的链接。
+- 校验失败返回 `code: -1`、`msg: 素材链接不可访问`，以及素材的 `content_index`、`content_type` 和原因；不会向上游创建任务。
+
+### Rollback Notes
+- 回退 `utils/volcengine.io.js` 中的参考媒体校验调用与相关辅助函数，即可恢复创建任务时直接透传素材链接的行为。
+
 ## Billing Change
 2026-07-17 / seedance-2-token-billing
 

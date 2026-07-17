@@ -1,6 +1,26 @@
 # QA
 
 ## Iteration
+2026-07-17 / seedance-media-url-validation
+
+## Test Matrix
+| Case ID | Step | Expected | Actual | Status |
+|---|---|---|---|---|
+| QA-SMV-01 | `node --check utils/volcengine.io.js`、`node --check routes/navigationRoutes.js`、`git diff --check` | 素材 URL 校验和文档代码可解析，差异格式有效 | 成功 | pass |
+| QA-SMV-02 | 自动化测试与真实素材 URL 联调 | 未执行，按已确认范围仅做语法检查 | 未执行 | not run |
+
+## Manual Checks
+- 仅 `content` 内的 `image_url`、`video_url`、`audio_url` 参考素材会在上游任务创建前被探测；纯文本请求不受影响。
+- 校验限制为公开 HTTP(S) 地址，逐跳检查重定向地址，使用 HEAD 和受控 Range GET 回退；不下载完整媒体内容。
+- 不可访问时返回 `content_index`、`content_type` 与安全原因，不返回或记录原始链接。
+
+## Final QA Verdict
+- [ ] pass
+- [x] conditional pass
+- [ ] fail
+
+
+## Iteration
 2026-07-17 / seedance-2-token-billing
 
 ## Test Matrix

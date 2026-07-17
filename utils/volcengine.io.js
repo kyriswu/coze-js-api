@@ -1,5 +1,9 @@
 import axios from 'axios';
 import { createHash } from 'node:crypto';
+import dns from 'node:dns';
+import http from 'node:http';
+import https from 'node:https';
+import net from 'node:net';
 import unkey from './unkey.js';
 import commonUtils from './commonUtils.js';
 import tool from './tool.js';
@@ -16,6 +20,10 @@ const SEEDANCE_SETTLEMENT_LOCK_SECONDS = 60;
 const SEEDANCE_CREDITS_PER_YUAN = 20;
 const SEEDANCE_PRICE_PER_MILLION_TOKENS = 46;
 const SEEDANCE_FIXED_CREDITS = 10;
+const SEEDANCE_MEDIA_PROBE_TIMEOUT_MS = 10_000;
+const SEEDANCE_MEDIA_MAX_REDIRECTS = 5;
+const seedanceHttpAgent = new http.Agent({ lookup: lookupPublicAddress });
+const seedanceHttpsAgent = new https.Agent({ lookup: lookupPublicAddress });
 
 function toBoolean(value) {
     if (typeof value === 'boolean') {
@@ -54,6 +62,163 @@ function safeJsonParse(value) {
     } catch (error) {
         return value;
     }
+}
+
+class SeedanceMediaValidationError extends Error {
+    constructor(index, type, reason) {
+        super(reason);
+        this.index = index;
+        this.type = type;
+    }
+}
+
+function isPublicIpAddress(address) {
+    const family = net.isIP(address);
+    if (family === 4) {
+        const [a, b] = address.split('.').map(Number);
+        return !(
+            a === 0
+            || a === 10
+            || a === 127
+            || a >= 224
+            || (a === 100 && b >= 64 && b <= 127)
+            || (a === 169 && b === 254)
+            || (a === 172 && b >= 16 && b <= 31)
+            || (a === 192 && (b === 0 || b === 168))
+            || (a === 198 && (b === 18 || b === 19 || b === 51))
+            || (a === 203 && b === 0)
+        );
+    }
+    if (family === 6) {
+        const normalized = address.toLowerCase();
+        const embeddedIpv4 = normalized.slice(normalized.lastIndexOf(':') + 1);
+        if (net.isIP(embeddedIpv4) === 4 && !isPublicIpAddress(embeddedIpv4)) {
+            return false;
+        }
+        return !(
+            normalized === '::'
+            || normalized === '::1'
+            || normalized.startsWith('fc')
+            || normalized.startsWith('fd')
+            || normalized.startsWith('fe8')
+            || normalized.startsWith('fe9')
+            || normalized.startsWith('fea')
+            || normalized.startsWith('feb')
+            || normalized.startsWith('ff')
+            || normalized.startsWith('2001:db8')
+        );
+    }
+    return false;
+}
+
+function lookupPublicAddress(hostname, options, callback) {
+    dns.lookup(hostname, { all: true, verbatim: true }, (error, addresses) => {
+        if (error) {
+            callback(new Error('域名无法解析'));
+            return;
+        }
+        const publicAddress = addresses.find(({ address }) => isPublicIpAddress(address));
+        if (!publicAddress || addresses.some(({ address }) => !isPublicIpAddress(address))) {
+            callback(new Error('链接指向非公开网络地址'));
+            return;
+        }
+        callback(null, publicAddress.address, publicAddress.family);
+    });
+}
+
+async function assertPublicSeedanceUrl(url) {
+    let parsed;
+    try {
+        parsed = new URL(url);
+    } catch {
+        throw new Error('链接格式无效');
+    }
+    if (!['http:', 'https:'].includes(parsed.protocol)) {
+        throw new Error('仅支持 HTTP 或 HTTPS 链接');
+    }
+    if (parsed.username || parsed.password || (parsed.port && !['80', '443'].includes(parsed.port))) {
+        throw new Error('链接包含不支持的认证信息或端口');
+    }
+
+    await new Promise((resolve, reject) => {
+        lookupPublicAddress(parsed.hostname, {}, (error) => (error ? reject(error) : resolve()));
+    });
+    return parsed;
+}
+
+function isCompatibleMediaType(contentType, mediaType) {
+    const normalized = String(contentType || '').split(';', 1)[0].trim().toLowerCase();
+    return normalized.startsWith(`${mediaType.replace('_url', '')}/`) || normalized === 'application/octet-stream';
+}
+
+async function requestSeedanceMediaProbe(url, method) {
+    const response = await axios.request({
+        method,
+        url,
+        timeout: SEEDANCE_MEDIA_PROBE_TIMEOUT_MS,
+        maxRedirects: 0,
+        validateStatus: () => true,
+        responseType: method === 'GET' ? 'stream' : 'text',
+        headers: method === 'GET' ? { Range: 'bytes=0-0' } : undefined,
+        httpAgent: seedanceHttpAgent,
+        httpsAgent: seedanceHttpsAgent,
+    });
+    response.data?.destroy?.();
+    return response;
+}
+
+async function validateSeedanceMediaUrl(url, mediaType) {
+    let currentUrl = url;
+    for (let redirectCount = 0; redirectCount <= SEEDANCE_MEDIA_MAX_REDIRECTS; redirectCount += 1) {
+        const parsed = await assertPublicSeedanceUrl(currentUrl);
+        let response;
+        try {
+            response = await requestSeedanceMediaProbe(parsed.toString(), 'HEAD');
+            if ([405, 501].includes(response.status)) {
+                response = await requestSeedanceMediaProbe(parsed.toString(), 'GET');
+            }
+        } catch {
+            throw new Error('链接无法访问或请求超时');
+        }
+
+        if (response.status >= 300 && response.status < 400) {
+            const location = response.headers.location;
+            if (!location) throw new Error('重定向缺少目标地址');
+            if (redirectCount === SEEDANCE_MEDIA_MAX_REDIRECTS) throw new Error('重定向次数过多');
+            currentUrl = new URL(location, parsed).toString();
+            continue;
+        }
+        if (response.status < 200 || response.status >= 300) {
+            throw new Error(`链接不可访问（HTTP ${response.status}）`);
+        }
+        if (!isCompatibleMediaType(response.headers['content-type'], mediaType)) {
+            throw new Error('链接返回的内容类型与素材类型不匹配');
+        }
+        return;
+    }
+}
+
+function getSeedanceMediaUrl(item) {
+    const value = item?.[item?.type];
+    if (typeof value === 'string') return value;
+    if (value && typeof value === 'object' && typeof value.url === 'string') return value.url;
+    return null;
+}
+
+async function validateSeedanceReferenceMedia(content) {
+    if (!Array.isArray(content)) return;
+    await Promise.all(content.map(async (item, index) => {
+        if (!['image_url', 'video_url', 'audio_url'].includes(item?.type)) return;
+        const url = getSeedanceMediaUrl(item);
+        if (!url) {
+            throw new SeedanceMediaValidationError(index, item.type, '素材链接缺失');
+        }
+        try {
+            await validateSeedanceMediaUrl(url, item.type);
+        } catch (error) {
+            throw new SeedanceMediaValidationError(index, item.type, error.message || '素材链接校验失败');
+        }
+    }));
 }
 
 function getSeedanceTaskOwnerKey(taskId) {
@@ -551,6 +716,23 @@ export const ve_contents_generations_tasks = {
         }
 
         try {
+            try {
+                await validateSeedanceReferenceMedia(payload.content);
+            } catch (error) {
+                if (error instanceof SeedanceMediaValidationError) {
+                    return res.send({
+                        code: -1,
+                        msg: '素材链接不可访问',
+                        data: {
+                            content_index: error.index,
+                            content_type: error.type,
+                            reason: error.message
+                        }
+                    });
+                }
+                throw error;
+            }
+
             const { valid, remaining: currentRemaining } = await unkey.verifyKey(unkey_api_id, api_key, 0, { platform: 'volcengine', action: 'contents_generations_tasks_create' });
             if (!valid) {
                 return res.send({ code: -1, msg: commonUtils.MESSAGE.TOKEN_EXPIRED });
