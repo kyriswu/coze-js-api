@@ -122,6 +122,7 @@
       "utils_thirdpartyused",
       "utils_thirdpartyused_request_type",
       "utils_thirdpartyused_thirdpartyused",
+      "utils_tool_tool",
       "utils_unkey",
       "utils_unkey_unkey",
       "utils_volcengine_io",
@@ -137,6 +138,68 @@
       "utils_volcengine_io_ve_web_search"
     ],
     "3": [
+      "utils_thirdparrtyapi_browserless",
+      "utils_thirdparrtyapi_browserless_browser_session_sweep_interval_ms",
+      "utils_thirdparrtyapi_browserless_browser_session_ttl_ms",
+      "utils_thirdparrtyapi_browserless_browserless",
+      "utils_thirdparrtyapi_browserless_browsersessionsweeper",
+      "utils_thirdparrtyapi_browserless_closebrowsersession",
+      "utils_thirdparrtyapi_browserless_dirname",
+      "utils_thirdparrtyapi_browserless_disableloadmedia",
+      "utils_thirdparrtyapi_browserless_doactions",
+      "utils_thirdparrtyapi_browserless_filename",
+      "utils_thirdparrtyapi_browserless_generateconnectionid",
+      "utils_thirdparrtyapi_browserless_getqingguoproxy",
+      "utils_thirdparrtyapi_browserless_limit",
+      "utils_thirdparrtyapi_browserless_puppeteer_connect",
+      "utils_thirdparrtyapi_browserless_safelyhandlerequestinterception",
+      "utils_thirdparrtyapi_browserless_sweepstalebrowsersessions",
+      "utils_thirdparrtyapi_filetool",
+      "utils_thirdparrtyapi_filetool_filetool",
+      "utils_tool",
+      "utils_tool_dirname",
+      "utils_tool_download_max_retries",
+      "utils_tool_download_parallel_chunk_size",
+      "utils_tool_download_parallel_concurrency",
+      "utils_tool_download_parallel_min_size",
+      "utils_tool_download_rate_limit",
+      "utils_tool_download_retry_base_delay",
+      "utils_tool_download_stream_hwm",
+      "utils_tool_download_timeout",
+      "utils_tool_downloadaxios",
+      "utils_tool_downloadhttpagent",
+      "utils_tool_downloadhttpsagent",
+      "utils_tool_execpromise",
+      "utils_tool_filename",
+      "utils_tool_parseenvint",
+      "utils_whisperapi",
+      "utils_whisperapi_openai",
+      "utils_whisperapi_whisperapi"
+    ],
+    "4": [
+      "routes_navigationroutes",
+      "routes_navigationroutes_parseendpoint",
+      "routes_navigationroutes_router",
+      "routes_navigationroutes_servicecards",
+      "routes_navigationroutes_servicecategories",
+      "routes_navigationroutes_servicestats",
+      "routes_navigationroutes_sitemapcategoryitems",
+      "routes_navigationroutes_sitemappageitems",
+      "routes_navigationroutes_xmlescape",
+      "utils_netdiskapi",
+      "utils_netdiskapi_netdiskapi",
+      "utils_redisclient",
+      "utils_redisclient_redis",
+      "utils_thirdparrtyapi_aitoken",
+      "utils_thirdparrtyapi_aitoken_aitoken",
+      "utils_thirdparrtyapi_aitoken_gpt_image_edit_max_retries",
+      "utils_thirdparrtyapi_aitoken_gpt_image_edit_retry_base_delay_ms",
+      "utils_thirdparrtyapi_cozecom",
+      "utils_thirdparrtyapi_cozecom_config",
+      "utils_thirdparrtyapi_cozecom_cozecom",
+      "utils_thirdparrtyapi_cozecom_timestamptodatetime"
+    ],
+    "5": [
       "test_staticzipdeployment_test",
       "test_staticzipdeployment_test_createvalidartifact",
       "test_staticzipdeployment_test_sha256",
@@ -159,7 +222,7 @@
       "utils_staticzipdeployment_validateextractedartifact",
       "utils_staticzipdeployment_validatezipmetadata"
     ],
-    "4": [
+    "6": [
       "utils_apiaccess",
       "utils_apiaccess_createapiaccesshelpers",
       "utils_loadenv",
@@ -180,47 +243,6 @@
       "utils_thirdparrtyapi_evolink_ai_normalizepositivenumber",
       "utils_thirdparrtyapi_evolink_ai_sleep",
       "utils_thirdparrtyapi_evolink_ai_verifyapiaccess_consumeapicredits"
-    ],
-    "5": [
-      "utils_tool",
-      "utils_tool_dirname",
-      "utils_tool_download_max_retries",
-      "utils_tool_download_parallel_chunk_size",
-      "utils_tool_download_parallel_concurrency",
-      "utils_tool_download_parallel_min_size",
-      "utils_tool_download_rate_limit",
-      "utils_tool_download_retry_base_delay",
-      "utils_tool_download_stream_hwm",
-      "utils_tool_download_timeout",
-      "utils_tool_downloadaxios",
-      "utils_tool_downloadhttpagent",
-      "utils_tool_downloadhttpsagent",
-      "utils_tool_execpromise",
-      "utils_tool_filename",
-      "utils_tool_parseenvint",
-      "utils_whisperapi",
-      "utils_whisperapi_openai",
-      "utils_whisperapi_whisperapi"
-    ],
-    "6": [
-      "utils_thirdparrtyapi_browserless",
-      "utils_thirdparrtyapi_browserless_browser_session_sweep_interval_ms",
-      "utils_thirdparrtyapi_browserless_browser_session_ttl_ms",
-      "utils_thirdparrtyapi_browserless_browserless",
-      "utils_thirdparrtyapi_browserless_browsersessionsweeper",
-      "utils_thirdparrtyapi_browserless_closebrowsersession",
-      "utils_thirdparrtyapi_browserless_dirname",
-      "utils_thirdparrtyapi_browserless_disableloadmedia",
-      "utils_thirdparrtyapi_browserless_doactions",
-      "utils_thirdparrtyapi_browserless_filename",
-      "utils_thirdparrtyapi_browserless_generateconnectionid",
-      "utils_thirdparrtyapi_browserless_getqingguoproxy",
-      "utils_thirdparrtyapi_browserless_limit",
-      "utils_thirdparrtyapi_browserless_puppeteer_connect",
-      "utils_thirdparrtyapi_browserless_safelyhandlerequestinterception",
-      "utils_thirdparrtyapi_browserless_sweepstalebrowsersessions",
-      "utils_thirdparrtyapi_filetool",
-      "utils_thirdparrtyapi_filetool_filetool"
     ],
     "7": [
       "test_wechatuniversalsearch_test",
@@ -290,22 +312,6 @@
       "skills_twitterwebapi_scripts_twitter_api_run_search"
     ],
     "11": [
-      "routes_navigationroutes",
-      "routes_navigationroutes_parseendpoint",
-      "routes_navigationroutes_router",
-      "routes_navigationroutes_servicecards",
-      "routes_navigationroutes_servicecategories",
-      "routes_navigationroutes_servicestats",
-      "routes_navigationroutes_sitemapcategoryitems",
-      "routes_navigationroutes_sitemappageitems",
-      "routes_navigationroutes_xmlescape",
-      "utils_thirdparrtyapi_aitoken",
-      "utils_thirdparrtyapi_aitoken_aitoken",
-      "utils_thirdparrtyapi_aitoken_gpt_image_edit_max_retries",
-      "utils_thirdparrtyapi_aitoken_gpt_image_edit_retry_base_delay_ms",
-      "utils_tool_tool"
-    ],
-    "12": [
       "utils_axiosinterceptors",
       "utils_axiosinterceptors_attachaxiosratelimitlogger",
       "utils_networklogger",
@@ -320,7 +326,7 @@
       "utils_networklogger_writetofile",
       "utils_networklogger_writetoredis"
     ],
-    "13": [
+    "12": [
       "package",
       "package_author",
       "package_description",
@@ -333,7 +339,7 @@
       "package_type",
       "package_version"
     ],
-    "14": [
+    "13": [
       "scripts_network_log_analyze",
       "scripts_network_log_analyze_analyze",
       "scripts_network_log_analyze_default_file",
@@ -346,26 +352,18 @@
       "scripts_network_log_analyze_topentries",
       "scripts_network_log_analyze_topslowrequests"
     ],
-    "15": [
-      "utils_netdiskapi",
-      "utils_netdiskapi_netdiskapi",
-      "utils_redisclient",
-      "utils_redisclient_redis",
-      "utils_thirdparrtyapi_cozecom",
-      "utils_thirdparrtyapi_cozecom_config",
-      "utils_thirdparrtyapi_cozecom_cozecom",
-      "utils_thirdparrtyapi_cozecom_timestamptodatetime"
-    ],
-    "16": [
+    "14": [
       "start",
       "start_backend_port_for",
       "start_cleanup_failure",
       "start_read_active_color",
       "start_restore_nginx_backend",
+      "start_rollback_switched_traffic",
       "start_sh__entry",
+      "start_verify_nginx_candidate",
       "start_write_backend"
     ],
-    "17": [
+    "15": [
       "skills_douyin_billboard_fetch_hot_rise_list_scripts_fetch_hot_rise_list",
       "skills_douyin_billboard_fetch_hot_rise_list_scripts_fetch_hot_rise_list_fetch_hot_rise_list",
       "skills_douyin_billboard_fetch_hot_rise_list_scripts_fetch_hot_rise_list_get_api_key",
@@ -373,7 +371,7 @@
       "skills_douyin_billboard_fetch_hot_rise_list_scripts_fetch_hot_rise_list_print_results",
       "skills_douyin_billboard_fetch_hot_rise_list_scripts_fetch_hot_rise_list_rationale_23"
     ],
-    "18": [
+    "16": [
       "skills_google_search_web_scripts_google_search",
       "skills_google_search_web_scripts_google_search_get_api_key",
       "skills_google_search_web_scripts_google_search_google_search",
@@ -381,7 +379,7 @@
       "skills_google_search_web_scripts_google_search_print_results",
       "skills_google_search_web_scripts_google_search_rationale_23"
     ],
-    "19": [
+    "17": [
       "skills_volcengine_web_search_scripts_web_search",
       "skills_volcengine_web_search_scripts_web_search_get_api_key",
       "skills_volcengine_web_search_scripts_web_search_main",
@@ -389,102 +387,106 @@
       "skills_volcengine_web_search_scripts_web_search_print_results",
       "skills_volcengine_web_search_scripts_web_search_web_search"
     ],
-    "20": [
+    "18": [
       "test_deploymentroute_test",
       "test_deploymentroute_test_createresponse",
       "utils_deploymentroute",
       "utils_deploymentroute_createdeploymenthandler"
     ],
-    "21": [
+    "19": [
       "utils_htmlcontent",
       "utils_htmlcontent_extract_html_conent",
       "utils_htmlcontent_extract_html_conent_standard",
       "utils_htmlcontent_htmltoqueryselector"
     ],
-    "22": [
+    "20": [
       "utils_thirdparrtyapi_hermes_agent",
       "utils_thirdparrtyapi_hermes_agent_hermes_default_timeout_ms",
       "utils_thirdparrtyapi_hermes_agent_hermesagent",
       "utils_thirdparrtyapi_hermes_agent_normalizepayload"
     ],
-    "23": [
+    "21": [
       "utils_thirdparrtyapi_aimlapi",
       "utils_thirdparrtyapi_aimlapi_aimlapi",
       "utils_thirdparrtyapi_aimlapi_api"
     ],
-    "24": [
+    "22": [
       "utils_thirdparrtyapi_cloudflare",
       "utils_thirdparrtyapi_cloudflare_cloudflareapi",
       "utils_thirdparrtyapi_cloudflare_whispermaxfilebytes"
     ],
-    "25": [
+    "23": [
       "utils_thirdparrtyapi_lemonfoxai",
       "utils_thirdparrtyapi_lemonfoxai_lemonfoxai",
       "utils_thirdparrtyapi_lemonfoxai_openai"
     ],
-    "26": [
+    "24": [
       "server",
       "server_sh__entry"
     ],
-    "27": [
+    "25": [
       "skills_douyin_transcribe_api_scripts_transcribe_douyin",
       "skills_douyin_transcribe_api_scripts_transcribe_douyin_sh__entry"
     ],
-    "28": [
+    "26": [
       "start_lite",
       "start_lite_sh__entry"
     ],
-    "29": [
+    "27": [
+      "test_startscript_test",
+      "test_startscript_test_script"
+    ],
+    "28": [
       "utils_search1api",
       "utils_search1api_search1api"
     ],
-    "30": [
+    "29": [
       "utils_thirdparrtyapi_feishu",
       "utils_thirdparrtyapi_feishu_feishu"
     ],
-    "31": [
+    "30": [
       "utils_thirdparrtyapi_firecrawl",
       "utils_thirdparrtyapi_firecrawl_firecrawltool"
     ],
-    "32": [
+    "31": [
       "utils_thirdparrtyapi_tencentapi",
       "utils_thirdparrtyapi_tencentapi_tencentapi"
     ],
-    "33": [
+    "32": [
       "utils_zyte",
       "utils_zyte_zyte"
     ],
-    "34": [
+    "33": [
       "pdf2images"
     ]
   },
   "cohesion": {
     "0": 0.07183673469387755,
     "1": 0.046511627906976744,
-    "2": 0.0873015873015873,
-    "3": 0.22380952380952382,
-    "4": 0.11052631578947368,
-    "5": 0.1111111111111111,
-    "6": 0.13071895424836602,
+    "2": 0.08408408408408409,
+    "3": 0.06456456456456457,
+    "4": 0.12380952380952381,
+    "5": 0.22380952380952382,
+    "6": 0.11052631578947368,
     "7": 0.14285714285714285,
     "8": 0.13333333333333333,
     "9": 0.2857142857142857,
     "10": 0.32967032967032966,
-    "11": 0.15384615384615385,
-    "12": 0.32051282051282054,
-    "13": 0.18181818181818182,
-    "14": 0.32727272727272727,
-    "15": 0.32142857142857145,
-    "16": 0.38095238095238093,
-    "17": 0.5333333333333333,
-    "18": 0.5333333333333333,
-    "19": 0.6,
-    "20": 0.6666666666666666,
+    "11": 0.32051282051282054,
+    "12": 0.18181818181818182,
+    "13": 0.32727272727272727,
+    "14": 0.3611111111111111,
+    "15": 0.5333333333333333,
+    "16": 0.5333333333333333,
+    "17": 0.6,
+    "18": 0.6666666666666666,
+    "19": 0.6666666666666666,
+    "20": 0.5,
     "21": 0.6666666666666666,
-    "22": 0.5,
+    "22": 0.6666666666666666,
     "23": 0.6666666666666666,
-    "24": 0.6666666666666666,
-    "25": 0.6666666666666666,
+    "24": 1.0,
+    "25": 1.0,
     "26": 1.0,
     "27": 1.0,
     "28": 1.0,
@@ -492,8 +494,7 @@
     "30": 1.0,
     "31": 1.0,
     "32": 1.0,
-    "33": 1.0,
-    "34": 1.0
+    "33": 1.0
   },
   "gods": [
     {
@@ -596,8 +597,8 @@
   "questions": [
     {
       "type": "bridge_node",
-      "question": "Why does `redis` connect `redisClient.js` to `volcengine.io.js`, `evolink.ai.js`, `tool.js`, `browserless.js`, `networkAnalytics.js`, `navigationRoutes.js`, `networkLogger.js`?",
-      "why": "High betweenness centrality (0.036) - this node is a cross-community bridge."
+      "question": "Why does `redis` connect `navigationRoutes.js` to `volcengine.io.js`, `tool.js`, `evolink.ai.js`, `networkAnalytics.js`, `networkLogger.js`?",
+      "why": "High betweenness centrality (0.035) - this node is a cross-community bridge."
     },
     {
       "type": "bridge_node",
@@ -607,12 +608,12 @@
     {
       "type": "bridge_node",
       "question": "Why does `commonUtils` connect `volcengine.io.js` to `evolink.ai.js`, `tikhub.io.js`?",
-      "why": "High betweenness centrality (0.013) - this node is a cross-community bridge."
+      "why": "High betweenness centrality (0.012) - this node is a cross-community bridge."
     },
     {
       "type": "isolated_nodes",
       "question": "What connects `router`, `serviceCategories`, `serviceCards` to the rest of the system?",
-      "why": "119 weakly-connected nodes found - possible documentation gaps or missing edges."
+      "why": "120 weakly-connected nodes found - possible documentation gaps or missing edges."
     },
     {
       "type": "low_cohesion",
@@ -627,7 +628,7 @@
     {
       "type": "low_cohesion",
       "question": "Should `volcengine.io.js` be split into smaller, more focused modules?",
-      "why": "Cohesion score 0.0873015873015873 - nodes in this community are weakly interconnected."
+      "why": "Cohesion score 0.08408408408408409 - nodes in this community are weakly interconnected."
     }
   ]
 }

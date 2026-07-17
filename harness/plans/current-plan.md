@@ -17,7 +17,7 @@
 - [x] Add failing deployment-script regression test and implement the ordered rollback guard.
 - [x] Execute a live `blue → green` cutover to prove the post-switch validation and drain ordering.
 - [x] Update QA/Release/validation/CHANGELOG evidence for the follow-up.
-- [ ] Refresh Graphify after the evidence commit.
+- [x] Refresh Graphify after the evidence commit (`90e9f02c` baseline; graph JSON/report/HTML regenerated).
 
 ## Completion Status — 2026-07-17
 

@@ -55,9 +55,9 @@
     "semantic_hash": "f2d42d7a0d289b7ec09273594ab0ca0c"
   },
   "start.sh": {
-    "mtime": 1784278423.1471648,
-    "ast_hash": "38fbc3c05f0e1be6f29c1ef106d3bc8f",
-    "semantic_hash": "38fbc3c05f0e1be6f29c1ef106d3bc8f"
+    "mtime": 1784279248.759264,
+    "ast_hash": "54b73ad624a85b08b39df53d5e47b5f8",
+    "semantic_hash": "54b73ad624a85b08b39df53d5e47b5f8"
   },
   "start_lite.sh": {
     "mtime": 1752375435.552616,
@@ -323,5 +323,10 @@
     "mtime": 1784277112.5662754,
     "ast_hash": "e40d7b18af695ba4d0e65173dffe9da6",
     "semantic_hash": "e40d7b18af695ba4d0e65173dffe9da6"
+  },
+  "test/startScript.test.js": {
+    "mtime": 1784279257.382257,
+    "ast_hash": "5c308bb9ce058af3419549fadd23e0bb",
+    "semantic_hash": "5c308bb9ce058af3419549fadd23e0bb"
   }
 }
