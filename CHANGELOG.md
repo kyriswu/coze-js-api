@@ -3,6 +3,15 @@
 ## 2026-07-17
 
 ### Added
+- 新增蓝绿发布能力：`/healthz`、Redis 驱动的 `/readyz`、SIGTERM/SIGINT 优雅排空、候选实例验证和 Nginx 原子后端切换。
+
+### Changed
+- 容器镜像在构建阶段通过 `npm ci --omit=dev` 固化应用与依赖；运行时仅挂载 `downloads` 持久目录。
+- 应用发布由单实例强制重建调整为 loopback-only 的 `app-blue`/`app-green` 切换，完成后停止旧实例。
+
+## 2026-07-17
+
+### Added
 - 新增 TikHub 微信搜一搜综合搜索接口：`POST /wechat_search/v2/fetch_search`。
 
 ### Changed

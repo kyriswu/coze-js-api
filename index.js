@@ -18,6 +18,11 @@ import navigationRoutes from './routes/navigationRoutes.js';
 import { attachAxiosRateLimitLogger } from './utils/axiosInterceptors.js';
 import { logHttpRequest } from './utils/networkLogger.js';
 import { getNetworkDashboardMetrics } from './utils/networkAnalytics.js';
+import {
+    createGracefulShutdown,
+    createHealthHandler,
+    createReadinessHandler,
+} from './utils/appLifecycle.js';
 import { createApiAccessHelpers } from './utils/apiAccess.js';
 import { extract_html_conent, extract_html_conent_standard } from './utils/htmlContent.js';
 import { deployStaticZip } from './utils/staticZipDeployment.js';
@@ -46,6 +51,9 @@ const downloadsDir = path.resolve(path.join(__dirname, 'downloads'));
 
 app.use(express.json({ limit: globalBodyLimit }))
 app.use(express.text({ limit: globalBodyLimit }))
+
+app.get('/healthz', createHealthHandler());
+app.get('/readyz', createReadinessHandler({ redis }));
 
 app.use((req, res, next) => {
     const startTime = Date.now();
@@ -3104,6 +3112,10 @@ app.post('/extract-element-from-html', async (req, res) => {
 app.post('/thirdParty/verifyKey',thirdPartyUsed.key_used)
 
 
-app.listen(port, () => {
+const server = app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
-})
+});
+
+const shutdown = createGracefulShutdown({ server });
+process.once('SIGTERM', shutdown);
+process.once('SIGINT', shutdown);

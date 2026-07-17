@@ -120,5 +120,6 @@ package-lock.json
 
 images/*
 downloads
+.deploy-backups/
 zimujun
 .vscode

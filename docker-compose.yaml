@@ -1,20 +1,55 @@
 services:
-  app:
+  app-blue:
     build: .
     image: my-custom-node-python-app
-    working_dir: /app
     env_file:
       - .env
     volumes:
-      - .:/app
+      - ./downloads:/app/downloads
     ports:
-      - "3000:3000"
-    command: sh -c "npm install && node index.js"
+      - "127.0.0.1:3003:3000"
     environment:
-      - NODE_ENV=online
+      NODE_ENV: online
+    depends_on:
+      my-redis:
+        condition: service_started
     networks:
       - my-net
-    restart: always
+    restart: unless-stopped
+    profiles:
+      - bluegreen
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/healthz').then((response) => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 10s
+      timeout: 3s
+      retries: 6
+      start_period: 20s
+
+  app-green:
+    build: .
+    image: my-custom-node-python-app
+    env_file:
+      - .env
+    volumes:
+      - ./downloads:/app/downloads
+    ports:
+      - "127.0.0.1:3004:3000"
+    environment:
+      NODE_ENV: online
+    depends_on:
+      my-redis:
+        condition: service_started
+    networks:
+      - my-net
+    restart: unless-stopped
+    profiles:
+      - bluegreen
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/healthz').then((response) => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 10s
+      timeout: 3s
+      retries: 6
+      start_period: 20s
 
   my-redis:
     image: redis:latest
@@ -23,6 +58,11 @@ services:
     networks:
       - my-net
     restart: always
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 6
 
 volumes:
   redis-data:
