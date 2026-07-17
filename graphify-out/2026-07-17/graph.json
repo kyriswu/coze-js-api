@@ -4430,10 +4430,9 @@
       "source_file": "routes/navigationRoutes.js",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "routes_navigationroutes",
       "community": 15,
-      "norm_label": "navigationroutes.js",
-      "community_name": "navigationRoutes.js",
-      "id": "routes_navigationroutes"
+      "norm_label": "navigationroutes.js"
     },
     {
       "label": "router",
@@ -4441,10 +4440,9 @@
       "source_file": "routes/navigationRoutes.js",
       "source_location": "L7",
       "_origin": "ast",
+      "id": "routes_navigationroutes_router",
       "community": 15,
-      "norm_label": "router",
-      "community_name": "navigationRoutes.js",
-      "id": "routes_navigationroutes_router"
+      "norm_label": "router"
     },
     {
       "label": "serviceCategories",
@@ -4452,10 +4450,9 @@
       "source_file": "routes/navigationRoutes.js",
       "source_location": "L9",
       "_origin": "ast",
+      "id": "routes_navigationroutes_servicecategories",
       "community": 15,
-      "norm_label": "servicecategories",
-      "community_name": "navigationRoutes.js",
-      "id": "routes_navigationroutes_servicecategories"
+      "norm_label": "servicecategories"
     },
     {
       "label": "serviceCards",
@@ -4463,10 +4460,9 @@
       "source_file": "routes/navigationRoutes.js",
       "source_location": "L20",
       "_origin": "ast",
+      "id": "routes_navigationroutes_servicecards",
       "community": 15,
-      "norm_label": "servicecards",
-      "community_name": "navigationRoutes.js",
-      "id": "routes_navigationroutes_servicecards"
+      "norm_label": "servicecards"
     },
     {
       "label": "serviceStats",
@@ -4474,10 +4470,9 @@
       "source_file": "routes/navigationRoutes.js",
       "source_location": "L383",
       "_origin": "ast",
+      "id": "routes_navigationroutes_servicestats",
       "community": 15,
-      "norm_label": "servicestats",
-      "community_name": "navigationRoutes.js",
-      "id": "routes_navigationroutes_servicestats"
+      "norm_label": "servicestats"
     },
     {
       "label": "xmlEscape()",
@@ -4485,10 +4480,9 @@
       "source_file": "routes/navigationRoutes.js",
       "source_location": "L390",
       "_origin": "ast",
+      "id": "routes_navigationroutes_xmlescape",
       "community": 15,
-      "norm_label": "xmlescape()",
-      "community_name": "navigationRoutes.js",
-      "id": "routes_navigationroutes_xmlescape"
+      "norm_label": "xmlescape()"
     },
     {
       "label": "parseEndpoint()",
@@ -4496,10 +4490,9 @@
       "source_file": "routes/navigationRoutes.js",
       "source_location": "L397",
       "_origin": "ast",
+      "id": "routes_navigationroutes_parseendpoint",
       "community": 15,
-      "norm_label": "parseendpoint()",
-      "community_name": "navigationRoutes.js",
-      "id": "routes_navigationroutes_parseendpoint"
+      "norm_label": "parseendpoint()"
     },
     {
       "label": "sitemapPageItems",
@@ -4507,10 +4500,9 @@
       "source_file": "routes/navigationRoutes.js",
       "source_location": "L405",
       "_origin": "ast",
+      "id": "routes_navigationroutes_sitemappageitems",
       "community": 15,
-      "norm_label": "sitemappageitems",
-      "community_name": "navigationRoutes.js",
-      "id": "routes_navigationroutes_sitemappageitems"
+      "norm_label": "sitemappageitems"
     },
     {
       "label": "sitemapCategoryItems",
@@ -4518,10 +4510,9 @@
       "source_file": "routes/navigationRoutes.js",
       "source_location": "L424",
       "_origin": "ast",
+      "id": "routes_navigationroutes_sitemapcategoryitems",
       "community": 15,
-      "norm_label": "sitemapcategoryitems",
-      "community_name": "navigationRoutes.js",
-      "id": "routes_navigationroutes_sitemapcategoryitems"
+      "norm_label": "sitemapcategoryitems"
     }
   ],
   "links": [
@@ -10904,9 +10895,9 @@
       "source_location": "L397",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "routes_navigationroutes",
-      "target": "routes_navigationroutes_parseendpoint"
+      "target": "routes_navigationroutes_parseendpoint",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -10915,9 +10906,9 @@
       "source_location": "L7",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "routes_navigationroutes",
-      "target": "routes_navigationroutes_router"
+      "target": "routes_navigationroutes_router",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -10926,9 +10917,9 @@
       "source_location": "L20",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "routes_navigationroutes",
-      "target": "routes_navigationroutes_servicecards"
+      "target": "routes_navigationroutes_servicecards",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -10937,9 +10928,9 @@
       "source_location": "L9",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "routes_navigationroutes",
-      "target": "routes_navigationroutes_servicecategories"
+      "target": "routes_navigationroutes_servicecategories",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -10948,9 +10939,9 @@
       "source_location": "L383",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "routes_navigationroutes",
-      "target": "routes_navigationroutes_servicestats"
+      "target": "routes_navigationroutes_servicestats",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -10959,9 +10950,9 @@
       "source_location": "L424",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "routes_navigationroutes",
-      "target": "routes_navigationroutes_sitemapcategoryitems"
+      "target": "routes_navigationroutes_sitemapcategoryitems",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -10970,9 +10961,9 @@
       "source_location": "L405",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "routes_navigationroutes",
-      "target": "routes_navigationroutes_sitemappageitems"
+      "target": "routes_navigationroutes_sitemappageitems",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -10981,11 +10972,11 @@
       "source_location": "L390",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "routes_navigationroutes",
-      "target": "routes_navigationroutes_xmlescape"
+      "target": "routes_navigationroutes_xmlescape",
+      "confidence_score": 1.0
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "7c17d4cfea475c6681ce2ab139f1b8d066006fe7"
+  "built_at_commit": "8eb7195fc5a7cf060be1faaedacc9aa88b88640a"
 }

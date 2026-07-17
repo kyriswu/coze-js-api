@@ -584,10 +584,10 @@ router.get('/docs/volcengine/seedance-2-0', (req, res) => {
         method: 'POST',
         path: createPath,
         upstream: '/api/v3/contents/generations/tasks',
-        cost: '创建前需有可用积分',
-        description: '创建接口会移除本地 api_key 后透传其余业务字段到火山方舟；content 与 tools 也支持以 JSON 字符串提交。创建成功后使用返回的任务 ID 请求查询接口。任务对象由上游直接透传，因此以实际 data 内容为准。',
+        cost: '仅支持付费 API Key（无免费试用）',
+        description: '创建接口不支持免费试用：必须提供有效且仍有可用积分的本项目 API Key。接口会移除本地 api_key 后透传其余业务字段到火山方舟；content 与 tools 也支持以 JSON 字符串提交。创建成功后使用返回的任务 ID 请求查询接口。任务对象由上游直接透传，因此以实际 data 内容为准。',
         requestParams: [
-            { name: 'api_key', type: 'string', required: true, desc: '本项目 API Key；创建任务前校验有效性和可用积分', example: 'uk_live_xxx' },
+            { name: 'api_key', type: 'string', required: true, desc: '本项目付费 API Key；不支持免费试用，创建任务前校验有效性和可用积分', example: 'uk_live_xxx' },
             { name: 'model', type: 'string', required: true, desc: '视频生成模型名称', example: 'doubao-seedance-2-0-260128' },
             { name: 'content', type: 'array | JSON string', required: true, desc: '输入内容；至少包含文本，可按需加入参考图、参考视频或参考音频', example: '[{"type":"text","text":"..."}]' },
             { name: 'content[].type', type: 'string', required: true, desc: '内容类型，如 text、image_url、video_url、audio_url', example: 'text' },

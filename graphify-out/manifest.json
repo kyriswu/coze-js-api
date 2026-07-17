@@ -15,9 +15,9 @@
     "semantic_hash": "1cb4158fbf03d4411e9b67b931848e56"
   },
   "routes/navigationRoutes.js": {
-    "mtime": 1784287716.2635355,
-    "ast_hash": "1c9065f6ddc62b57ceba5ad356364179",
-    "semantic_hash": "1c9065f6ddc62b57ceba5ad356364179"
+    "mtime": 1784288330.5574772,
+    "ast_hash": "55f9db44f67a6b321edad9b4749fd989",
+    "semantic_hash": "55f9db44f67a6b321edad9b4749fd989"
   },
   "scripts/network-log-analyze.mjs": {
     "mtime": 1782988747.1796322,

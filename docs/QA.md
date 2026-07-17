@@ -11,7 +11,7 @@
 | QA-SD-03 | `GET /docs/volcengine/seedance-2-0`、`/readyz` | 文档页可公开访问，active app 就绪 | HTTP 200 / `text/html; charset=utf-8`，页面包含接口路径；`/readyz` 为 200，blue healthy | pass |
 
 ## Manual Checks
-- 文档页复用现有 API 文档模板，准确说明 `POST /volcengine/contents/generations/tasks` 与 `GET /volcengine/contents/generations/tasks/:task_id`。
+- 文档页复用现有 API 文档模板，准确说明 `POST /volcengine/contents/generations/tasks` 与 `GET /volcengine/contents/generations/tasks/:task_id`；创建任务明确标注仅支持付费 API Key、无免费试用。
 - 示例仅使用占位 API Key 和示例媒体 URL，不包含实际凭据或敏感载荷。
 
 ## Final QA Verdict
