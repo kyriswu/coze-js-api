@@ -1,5 +1,16 @@
 # Blue/Green Deployment Implementation Plan
 
+## GPT-Image-2 Atomic Credit Charge — 2026-07-17
+
+**Goal:** Eliminate the concurrent check-then-charge window for both GPT-Image-2 entry points while retaining the agreed policy that an upstream failure after workflow entry is still charged.
+
+- [ ] Add and test a strict, atomic Unkey credit-charge helper.
+- [ ] Charge three credits after local validation and before expensive work in both GPT-Image-2 paths; remove post-success charging.
+- [ ] Run focused and full tests, syntax checks, then update QA/Release/CHANGELOG if required.
+- [ ] Refresh Graphify and verify its JSON/report outputs.
+
+---
+
 > **For Hermes:** Execute in small verified slices; use test-first for new application logic.
 
 **Goal:** Replace the single-container restart flow with a blue/green deployment that starts and verifies the new version before Nginx switches traffic, then drains the old version.
