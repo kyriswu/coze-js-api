@@ -136,7 +136,8 @@ async function assertPublicSeedanceUrl(url) {
     if (!['http:', 'https:'].includes(parsed.protocol)) {
         throw new Error('仅支持 HTTP 或 HTTPS 链接');
     }
-    if (parsed.username || parsed.password || (parsed.port && !['80', '443'].includes(parsed.port))) {
+    const defaultPort = parsed.protocol === 'https:' ? '443' : '80';
+    if (parsed.username || parsed.password || (parsed.port && parsed.port !== defaultPort)) {
         throw new Error('链接包含不支持的认证信息或端口');
     }
 
