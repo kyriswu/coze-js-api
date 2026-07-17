@@ -421,42 +421,50 @@
       "utils_thirdparrtyapi_lemonfoxai_openai"
     ],
     "24": [
+      "scripts_cleanup_stopped_app_containers",
+      "scripts_cleanup_stopped_app_containers_sh__entry"
+    ],
+    "25": [
       "server",
       "server_sh__entry"
     ],
-    "25": [
+    "26": [
       "skills_douyin_transcribe_api_scripts_transcribe_douyin",
       "skills_douyin_transcribe_api_scripts_transcribe_douyin_sh__entry"
     ],
-    "26": [
+    "27": [
       "start_lite",
       "start_lite_sh__entry"
     ],
-    "27": [
+    "28": [
+      "test_cleanupstoppedcontainers_test",
+      "test_cleanupstoppedcontainers_test_reporoot"
+    ],
+    "29": [
       "test_startscript_test",
       "test_startscript_test_script"
     ],
-    "28": [
+    "30": [
       "utils_search1api",
       "utils_search1api_search1api"
     ],
-    "29": [
+    "31": [
       "utils_thirdparrtyapi_feishu",
       "utils_thirdparrtyapi_feishu_feishu"
     ],
-    "30": [
+    "32": [
       "utils_thirdparrtyapi_firecrawl",
       "utils_thirdparrtyapi_firecrawl_firecrawltool"
     ],
-    "31": [
+    "33": [
       "utils_thirdparrtyapi_tencentapi",
       "utils_thirdparrtyapi_tencentapi_tencentapi"
     ],
-    "32": [
+    "34": [
       "utils_zyte",
       "utils_zyte_zyte"
     ],
-    "33": [
+    "35": [
       "pdf2images"
     ]
   },
@@ -494,7 +502,9 @@
     "30": 1.0,
     "31": 1.0,
     "32": 1.0,
-    "33": 1.0
+    "33": 1.0,
+    "34": 1.0,
+    "35": 1.0
   },
   "gods": [
     {
@@ -594,8 +604,41 @@
       "why": "cross-file semantic connection"
     }
   ],
-  "tokens": {
-    "input": 0,
-    "output": 0
-  }
+  "questions": [
+    {
+      "type": "bridge_node",
+      "question": "Why does `redis` connect `navigationRoutes.js` to `volcengine.io.js`, `tool.js`, `evolink.ai.js`, `networkAnalytics.js`, `networkLogger.js`?",
+      "why": "High betweenness centrality (0.035) - this node is a cross-community bridge."
+    },
+    {
+      "type": "bridge_node",
+      "question": "Why does `dependencies` connect `dependencies` to `package.json`?",
+      "why": "High betweenness centrality (0.017) - this node is a cross-community bridge."
+    },
+    {
+      "type": "bridge_node",
+      "question": "Why does `commonUtils` connect `volcengine.io.js` to `evolink.ai.js`, `tikhub.io.js`?",
+      "why": "High betweenness centrality (0.012) - this node is a cross-community bridge."
+    },
+    {
+      "type": "isolated_nodes",
+      "question": "What connects `router`, `serviceCategories`, `serviceCards` to the rest of the system?",
+      "why": "122 weakly-connected nodes found - possible documentation gaps or missing edges."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `index.js` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.07183673469387755 - nodes in this community are weakly interconnected."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `dependencies` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.046511627906976744 - nodes in this community are weakly interconnected."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `volcengine.io.js` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.08408408408408409 - nodes in this community are weakly interconnected."
+    }
+  ]
 }

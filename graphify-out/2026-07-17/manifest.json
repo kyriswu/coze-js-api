@@ -328,5 +328,15 @@
     "mtime": 1784279257.382257,
     "ast_hash": "5c308bb9ce058af3419549fadd23e0bb",
     "semantic_hash": "5c308bb9ce058af3419549fadd23e0bb"
+  },
+  "scripts/cleanup-stopped-app-containers.sh": {
+    "mtime": 1784280215.5098774,
+    "ast_hash": "92f4e948e56422fca1be72fc43a9d2b0",
+    "semantic_hash": "92f4e948e56422fca1be72fc43a9d2b0"
+  },
+  "test/cleanupStoppedContainers.test.js": {
+    "mtime": 1784280182.1188352,
+    "ast_hash": "b4d3254b9dd700ac706b8e7beba4d388",
+    "semantic_hash": "b4d3254b9dd700ac706b8e7beba4d388"
   }
 }

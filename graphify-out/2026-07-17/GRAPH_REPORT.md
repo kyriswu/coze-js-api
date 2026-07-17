@@ -4,12 +4,12 @@
 - cluster-only mode — file stats not available
 
 ## Summary
-- 391 nodes · 563 edges · 34 communities (19 shown, 15 thin omitted)
+- 395 nodes · 565 edges · 36 communities (19 shown, 17 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 2 edges (avg confidence: 0.65)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `90e9f02c`
+- Built from commit: `d67a465d`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -38,9 +38,11 @@
 - aimlapi.js
 - cloudflare.js
 - lemonfoxai.js
+- cleanup-stopped-app-containers.sh
 - server.sh
 - transcribe_douyin.sh
 - start_lite.sh
+- cleanupStoppedContainers.test.js
 - startScript.test.js
 - search1api.js
 - feishu.js
@@ -73,7 +75,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (34 total, 15 thin omitted)
+## Communities (36 total, 17 thin omitted)
 
 ### Community 0 - "index.js"
 Cohesion: 0.07
@@ -148,9 +150,9 @@ Cohesion: 0.60
 Nodes (5): get_api_key(), main(), parse_bool(), print_results(), web_search()
 
 ## Knowledge Gaps
-- **120 isolated node(s):** `router`, `serviceCategories`, `serviceCards`, `serviceStats`, `sitemapPageItems` (+115 more)
+- **122 isolated node(s):** `router`, `serviceCategories`, `serviceCards`, `serviceStats`, `sitemapPageItems` (+117 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **15 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **17 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
@@ -158,11 +160,11 @@ _Questions this graph is uniquely positioned to answer:_
 - **Why does `redis` connect `navigationRoutes.js` to `volcengine.io.js`, `tool.js`, `evolink.ai.js`, `networkAnalytics.js`, `networkLogger.js`?**
   _High betweenness centrality (0.035) - this node is a cross-community bridge._
 - **Why does `dependencies` connect `dependencies` to `package.json`?**
-  _High betweenness centrality (0.018) - this node is a cross-community bridge._
+  _High betweenness centrality (0.017) - this node is a cross-community bridge._
 - **Why does `commonUtils` connect `volcengine.io.js` to `evolink.ai.js`, `tikhub.io.js`?**
   _High betweenness centrality (0.012) - this node is a cross-community bridge._
 - **What connects `router`, `serviceCategories`, `serviceCards` to the rest of the system?**
-  _120 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _122 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `index.js` be split into smaller, more focused modules?**
   _Cohesion score 0.07183673469387755 - nodes in this community are weakly interconnected._
 - **Should `dependencies` be split into smaller, more focused modules?**

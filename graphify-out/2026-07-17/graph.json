@@ -53,7 +53,7 @@
       "source_file": "pdf2images.py",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 33,
+      "community": 35,
       "norm_label": "pdf2images.py",
       "community_name": "pdf2images.py",
       "id": "pdf2images"
@@ -288,7 +288,7 @@
         "kind": "file"
       },
       "_origin": "ast",
-      "community": 24,
+      "community": 25,
       "norm_label": "server.sh",
       "community_name": "server.sh",
       "id": "server"
@@ -303,7 +303,7 @@
         "kind": "bash_entrypoint"
       },
       "_origin": "ast",
-      "community": 24,
+      "community": 25,
       "norm_label": "server.sh script",
       "community_name": "server.sh",
       "id": "server_sh__entry"
@@ -384,7 +384,7 @@
         "kind": "file"
       },
       "_origin": "ast",
-      "community": 25,
+      "community": 26,
       "norm_label": "transcribe_douyin.sh",
       "community_name": "transcribe_douyin.sh",
       "id": "skills_douyin_transcribe_api_scripts_transcribe_douyin"
@@ -399,7 +399,7 @@
         "kind": "bash_entrypoint"
       },
       "_origin": "ast",
-      "community": 25,
+      "community": 26,
       "norm_label": "transcribe_douyin.sh script",
       "community_name": "transcribe_douyin.sh",
       "id": "skills_douyin_transcribe_api_scripts_transcribe_douyin_sh__entry"
@@ -700,7 +700,7 @@
         "kind": "file"
       },
       "_origin": "ast",
-      "community": 26,
+      "community": 27,
       "norm_label": "start_lite.sh",
       "community_name": "start_lite.sh",
       "id": "start_lite"
@@ -715,7 +715,7 @@
         "kind": "bash_entrypoint"
       },
       "_origin": "ast",
-      "community": 26,
+      "community": 27,
       "norm_label": "start_lite.sh script",
       "community_name": "start_lite.sh",
       "id": "start_lite_sh__entry"
@@ -1441,7 +1441,7 @@
       "source_file": "utils/ThirdParrtyApi/feishu.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 29,
+      "community": 31,
       "norm_label": "feishu.js",
       "community_name": "feishu.js",
       "id": "utils_thirdparrtyapi_feishu"
@@ -1452,7 +1452,7 @@
       "source_file": "utils/ThirdParrtyApi/feishu.js",
       "source_location": "L5",
       "_origin": "ast",
-      "community": 29,
+      "community": 31,
       "norm_label": "feishu",
       "community_name": "feishu.js",
       "id": "utils_thirdparrtyapi_feishu_feishu"
@@ -1485,7 +1485,7 @@
       "source_file": "utils/ThirdParrtyApi/firecrawl.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 30,
+      "community": 32,
       "norm_label": "firecrawl.js",
       "community_name": "firecrawl.js",
       "id": "utils_thirdparrtyapi_firecrawl"
@@ -1496,7 +1496,7 @@
       "source_file": "utils/ThirdParrtyApi/firecrawl.js",
       "source_location": "L10",
       "_origin": "ast",
-      "community": 30,
+      "community": 32,
       "norm_label": "firecrawltool",
       "community_name": "firecrawl.js",
       "id": "utils_thirdparrtyapi_firecrawl_firecrawltool"
@@ -1584,7 +1584,7 @@
       "source_file": "utils/ThirdParrtyApi/tencentapi.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 31,
+      "community": 33,
       "norm_label": "tencentapi.js",
       "community_name": "tencentapi.js",
       "id": "utils_thirdparrtyapi_tencentapi"
@@ -1595,7 +1595,7 @@
       "source_file": "utils/ThirdParrtyApi/tencentapi.js",
       "source_location": "L8",
       "_origin": "ast",
-      "community": 31,
+      "community": 33,
       "norm_label": "tencentapi",
       "community_name": "tencentapi.js",
       "id": "utils_thirdparrtyapi_tencentapi_tencentapi"
@@ -2178,7 +2178,7 @@
       "source_file": "utils/search1api.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 28,
+      "community": 30,
       "norm_label": "search1api.js",
       "community_name": "search1api.js",
       "id": "utils_search1api"
@@ -2189,7 +2189,7 @@
       "source_file": "utils/search1api.js",
       "source_location": "L2",
       "_origin": "ast",
-      "community": 28,
+      "community": 30,
       "norm_label": "search1api",
       "community_name": "search1api.js",
       "id": "utils_search1api_search1api"
@@ -2838,7 +2838,7 @@
       "source_file": "utils/zyte.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 32,
+      "community": 34,
       "norm_label": "zyte.js",
       "community_name": "zyte.js",
       "id": "utils_zyte"
@@ -2849,7 +2849,7 @@
       "source_file": "utils/zyte.js",
       "source_location": "L3",
       "_origin": "ast",
-      "community": 32,
+      "community": 34,
       "norm_label": "zyte",
       "community_name": "zyte.js",
       "id": "utils_zyte_zyte"
@@ -4217,9 +4217,10 @@
         "kind": "file"
       },
       "_origin": "ast",
-      "id": "start",
       "community": 14,
-      "norm_label": "start.sh"
+      "norm_label": "start.sh",
+      "community_name": "start.sh",
+      "id": "start"
     },
     {
       "label": "start.sh script",
@@ -4231,9 +4232,10 @@
         "kind": "bash_entrypoint"
       },
       "_origin": "ast",
-      "id": "start_sh__entry",
       "community": 14,
-      "norm_label": "start.sh script"
+      "norm_label": "start.sh script",
+      "community_name": "start.sh",
+      "id": "start_sh__entry"
     },
     {
       "label": "read_active_color()",
@@ -4245,9 +4247,10 @@
         "kind": "bash_function"
       },
       "_origin": "ast",
-      "id": "start_read_active_color",
       "community": 14,
-      "norm_label": "read_active_color()"
+      "norm_label": "read_active_color()",
+      "community_name": "start.sh",
+      "id": "start_read_active_color"
     },
     {
       "label": "backend_port_for()",
@@ -4259,9 +4262,10 @@
         "kind": "bash_function"
       },
       "_origin": "ast",
-      "id": "start_backend_port_for",
       "community": 14,
-      "norm_label": "backend_port_for()"
+      "norm_label": "backend_port_for()",
+      "community_name": "start.sh",
+      "id": "start_backend_port_for"
     },
     {
       "label": "write_backend()",
@@ -4273,9 +4277,10 @@
         "kind": "bash_function"
       },
       "_origin": "ast",
-      "id": "start_write_backend",
       "community": 14,
-      "norm_label": "write_backend()"
+      "norm_label": "write_backend()",
+      "community_name": "start.sh",
+      "id": "start_write_backend"
     },
     {
       "label": "cleanup_failure()",
@@ -4287,9 +4292,10 @@
         "kind": "bash_function"
       },
       "_origin": "ast",
-      "id": "start_cleanup_failure",
       "community": 14,
-      "norm_label": "cleanup_failure()"
+      "norm_label": "cleanup_failure()",
+      "community_name": "start.sh",
+      "id": "start_cleanup_failure"
     },
     {
       "label": "restore_nginx_backend()",
@@ -4301,9 +4307,10 @@
         "kind": "bash_function"
       },
       "_origin": "ast",
-      "id": "start_restore_nginx_backend",
       "community": 14,
-      "norm_label": "restore_nginx_backend()"
+      "norm_label": "restore_nginx_backend()",
+      "community_name": "start.sh",
+      "id": "start_restore_nginx_backend"
     },
     {
       "label": "verify_nginx_candidate()",
@@ -4315,9 +4322,10 @@
         "kind": "bash_function"
       },
       "_origin": "ast",
-      "id": "start_verify_nginx_candidate",
       "community": 14,
-      "norm_label": "verify_nginx_candidate()"
+      "norm_label": "verify_nginx_candidate()",
+      "community_name": "start.sh",
+      "id": "start_verify_nginx_candidate"
     },
     {
       "label": "rollback_switched_traffic()",
@@ -4329,9 +4337,10 @@
         "kind": "bash_function"
       },
       "_origin": "ast",
-      "id": "start_rollback_switched_traffic",
       "community": 14,
-      "norm_label": "rollback_switched_traffic()"
+      "norm_label": "rollback_switched_traffic()",
+      "community_name": "start.sh",
+      "id": "start_rollback_switched_traffic"
     },
     {
       "label": "startScript.test.js",
@@ -4339,9 +4348,10 @@
       "source_file": "test/startScript.test.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "test_startscript_test",
-      "community": 27,
-      "norm_label": "startscript.test.js"
+      "community": 29,
+      "norm_label": "startscript.test.js",
+      "community_name": "startScript.test.js",
+      "id": "test_startscript_test"
     },
     {
       "label": "script",
@@ -4349,9 +4359,62 @@
       "source_file": "test/startScript.test.js",
       "source_location": "L5",
       "_origin": "ast",
-      "id": "test_startscript_test_script",
-      "community": 27,
-      "norm_label": "script"
+      "community": 29,
+      "norm_label": "script",
+      "community_name": "startScript.test.js",
+      "id": "test_startscript_test_script"
+    },
+    {
+      "label": "cleanup-stopped-app-containers.sh",
+      "file_type": "code",
+      "source_file": "scripts/cleanup-stopped-app-containers.sh",
+      "source_location": "L1",
+      "metadata": {
+        "language": "bash",
+        "kind": "file"
+      },
+      "_origin": "ast",
+      "community": 24,
+      "norm_label": "cleanup-stopped-app-containers.sh",
+      "id": "scripts_cleanup_stopped_app_containers",
+      "community_name": "cleanup-stopped-app-containers.sh"
+    },
+    {
+      "label": "cleanup-stopped-app-containers.sh script",
+      "file_type": "code",
+      "source_file": "scripts/cleanup-stopped-app-containers.sh",
+      "source_location": "L1",
+      "metadata": {
+        "language": "bash",
+        "kind": "bash_entrypoint"
+      },
+      "_origin": "ast",
+      "community": 24,
+      "norm_label": "cleanup-stopped-app-containers.sh script",
+      "id": "scripts_cleanup_stopped_app_containers_sh__entry",
+      "community_name": "cleanup-stopped-app-containers.sh"
+    },
+    {
+      "label": "cleanupStoppedContainers.test.js",
+      "file_type": "code",
+      "source_file": "test/cleanupStoppedContainers.test.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 28,
+      "norm_label": "cleanupstoppedcontainers.test.js",
+      "id": "test_cleanupstoppedcontainers_test",
+      "community_name": "cleanupStoppedContainers.test.js"
+    },
+    {
+      "label": "repoRoot",
+      "file_type": "code",
+      "source_file": "test/cleanupStoppedContainers.test.js",
+      "source_location": "L9",
+      "_origin": "ast",
+      "community": 28,
+      "norm_label": "reporoot",
+      "id": "test_cleanupstoppedcontainers_test_reporoot",
+      "community_name": "cleanupStoppedContainers.test.js"
     }
   ],
   "links": [
@@ -10646,9 +10709,9 @@
       "source_location": "L35",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "start",
-      "target": "start_backend_port_for",
-      "confidence_score": 1.0
+      "target": "start_backend_port_for"
     },
     {
       "relation": "defines",
@@ -10657,9 +10720,9 @@
       "source_location": "L76",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "start",
-      "target": "start_cleanup_failure",
-      "confidence_score": 1.0
+      "target": "start_cleanup_failure"
     },
     {
       "relation": "defines",
@@ -10668,9 +10731,9 @@
       "source_location": "L27",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "start",
-      "target": "start_read_active_color",
-      "confidence_score": 1.0
+      "target": "start_read_active_color"
     },
     {
       "relation": "defines",
@@ -10679,9 +10742,9 @@
       "source_location": "L105",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "start",
-      "target": "start_restore_nginx_backend",
-      "confidence_score": 1.0
+      "target": "start_restore_nginx_backend"
     },
     {
       "relation": "defines",
@@ -10690,9 +10753,9 @@
       "source_location": "L127",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "start",
-      "target": "start_rollback_switched_traffic",
-      "confidence_score": 1.0
+      "target": "start_rollback_switched_traffic"
     },
     {
       "relation": "contains",
@@ -10701,9 +10764,9 @@
       "source_location": "L1",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "start",
-      "target": "start_sh__entry",
-      "confidence_score": 1.0
+      "target": "start_sh__entry"
     },
     {
       "relation": "defines",
@@ -10712,9 +10775,9 @@
       "source_location": "L115",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "start",
-      "target": "start_verify_nginx_candidate",
-      "confidence_score": 1.0
+      "target": "start_verify_nginx_candidate"
     },
     {
       "relation": "defines",
@@ -10723,9 +10786,9 @@
       "source_location": "L47",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "start",
-      "target": "start_write_backend",
-      "confidence_score": 1.0
+      "target": "start_write_backend"
     },
     {
       "relation": "calls",
@@ -10735,9 +10798,9 @@
       "weight": 1.0,
       "context": "call",
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "start_sh__entry",
-      "target": "start_restore_nginx_backend",
-      "confidence_score": 1.0
+      "target": "start_restore_nginx_backend"
     },
     {
       "relation": "calls",
@@ -10747,9 +10810,9 @@
       "weight": 1.0,
       "context": "call",
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "start_sh__entry",
-      "target": "start_rollback_switched_traffic",
-      "confidence_score": 1.0
+      "target": "start_rollback_switched_traffic"
     },
     {
       "relation": "calls",
@@ -10759,9 +10822,9 @@
       "weight": 1.0,
       "context": "call",
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "start_sh__entry",
-      "target": "start_verify_nginx_candidate",
-      "confidence_score": 1.0
+      "target": "start_verify_nginx_candidate"
     },
     {
       "relation": "calls",
@@ -10771,9 +10834,9 @@
       "weight": 1.0,
       "context": "call",
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "start_sh__entry",
-      "target": "start_write_backend",
-      "confidence_score": 1.0
+      "target": "start_write_backend"
     },
     {
       "relation": "calls",
@@ -10783,9 +10846,9 @@
       "weight": 1.0,
       "context": "call",
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "start_rollback_switched_traffic",
-      "target": "start_restore_nginx_backend",
-      "confidence_score": 1.0
+      "target": "start_restore_nginx_backend"
     },
     {
       "relation": "contains",
@@ -10794,11 +10857,33 @@
       "source_location": "L5",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "test_startscript_test",
-      "target": "test_startscript_test_script",
-      "confidence_score": 1.0
+      "target": "test_startscript_test_script"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/cleanup-stopped-app-containers.sh",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "scripts_cleanup_stopped_app_containers",
+      "target": "scripts_cleanup_stopped_app_containers_sh__entry"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "test/cleanupStoppedContainers.test.js",
+      "source_location": "L9",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "test_cleanupstoppedcontainers_test",
+      "target": "test_cleanupstoppedcontainers_test_reporoot"
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "90e9f02c0f03caf4147689ac6b2a8422a13b1ec4"
+  "built_at_commit": "d67a465d48459c437332a2db11db5f15921ec6b3"
 }
