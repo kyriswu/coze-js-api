@@ -35,32 +35,22 @@
       "index_sanitizeuploadfilename",
       "index_sanitizeuploadsessionid",
       "index_scankeysbypattern",
+      "index_server",
+      "index_shutdown",
       "index_sortfiles",
       "index_uploadchunksdir",
       "index_validateurl",
       "index_zyteextract",
-      "test_wechatuniversalsearch_test",
-      "test_wechatuniversalsearch_test_createresponse",
-      "utils_commonutils",
-      "utils_commonutils_commonutils",
-      "utils_commonutils_config",
-      "utils_tavily",
-      "utils_tavily_ad_constants",
-      "utils_tavily_appendadmessage",
-      "utils_tavily_tv_search",
-      "utils_tikhub_io",
-      "utils_tikhub_io_normalizewechatarticledetail",
-      "utils_tikhub_io_normalizewechatmplistitem",
-      "utils_tikhub_io_th_bilibili",
-      "utils_tikhub_io_th_douyin",
-      "utils_tikhub_io_th_douyin_billboard",
-      "utils_tikhub_io_th_tiktok",
-      "utils_tikhub_io_th_twitter",
-      "utils_tikhub_io_th_wechat_channels",
-      "utils_tikhub_io_th_wechat_media",
-      "utils_tikhub_io_th_xiaohongshu",
-      "utils_tikhub_io_th_youtube",
-      "utils_tikhub_io_tikhubrequest"
+      "test_applifecycle_test",
+      "test_applifecycle_test_close",
+      "test_applifecycle_test_createresponse",
+      "test_applifecycle_test_error",
+      "test_applifecycle_test_log",
+      "test_applifecycle_test_ping",
+      "utils_applifecycle",
+      "utils_applifecycle_creategracefulshutdown",
+      "utils_applifecycle_createhealthhandler",
+      "utils_applifecycle_createreadinesshandler"
     ],
     "1": [
       "axios",
@@ -109,86 +99,44 @@
       "stream_throttle"
     ],
     "2": [
-      "routes_navigationroutes",
-      "routes_navigationroutes_parseendpoint",
-      "routes_navigationroutes_router",
-      "routes_navigationroutes_servicecards",
-      "routes_navigationroutes_servicecategories",
-      "routes_navigationroutes_servicestats",
-      "routes_navigationroutes_sitemapcategoryitems",
-      "routes_navigationroutes_sitemappageitems",
-      "routes_navigationroutes_xmlescape",
       "utils_bazi",
       "utils_bazi_calc_ba_zi",
       "utils_bazi_calc_cang_gan",
       "utils_bazi_calc_zi_wei",
       "utils_bazi_points",
-      "utils_netdiskapi",
-      "utils_netdiskapi_netdiskapi",
+      "utils_commonutils",
+      "utils_commonutils_commonutils",
+      "utils_commonutils_config",
       "utils_qwether",
       "utils_qwether_isvaliddate",
       "utils_qwether_qweather_tool",
       "utils_qwether_qweatherfetch",
-      "utils_redisclient",
-      "utils_redisclient_redis",
-      "utils_thirdparrtyapi_aitoken",
-      "utils_thirdparrtyapi_aitoken_aitoken",
-      "utils_thirdparrtyapi_aitoken_gpt_image_edit_max_retries",
-      "utils_thirdparrtyapi_aitoken_gpt_image_edit_retry_base_delay_ms",
+      "utils_tavily",
+      "utils_tavily_ad_constants",
+      "utils_tavily_appendadmessage",
+      "utils_tavily_tv_search",
       "utils_thirdparrtyapi_coze",
       "utils_thirdparrtyapi_coze_config",
       "utils_thirdparrtyapi_coze_coze",
       "utils_thirdparrtyapi_coze_timestamptodatetime",
-      "utils_thirdparrtyapi_cozecom",
-      "utils_thirdparrtyapi_cozecom_config",
-      "utils_thirdparrtyapi_cozecom_cozecom",
-      "utils_thirdparrtyapi_cozecom_timestamptodatetime",
       "utils_thirdpartyused",
       "utils_thirdpartyused_request_type",
       "utils_thirdpartyused_thirdpartyused",
       "utils_unkey",
-      "utils_unkey_unkey"
+      "utils_unkey_unkey",
+      "utils_volcengine_io",
+      "utils_volcengine_io_decodewebsearchresponse",
+      "utils_volcengine_io_normalizewebsearcheventframes",
+      "utils_volcengine_io_normalizewebsearchpayload",
+      "utils_volcengine_io_normalizewebsearchresult",
+      "utils_volcengine_io_safejsonparse",
+      "utils_volcengine_io_toboolean",
+      "utils_volcengine_io_tonumber",
+      "utils_volcengine_io_ve_contents_generations_tasks",
+      "utils_volcengine_io_ve_seedream_5_0_lite",
+      "utils_volcengine_io_ve_web_search"
     ],
     "3": [
-      "utils_thirdparrtyapi_browserless",
-      "utils_thirdparrtyapi_browserless_browser_session_sweep_interval_ms",
-      "utils_thirdparrtyapi_browserless_browser_session_ttl_ms",
-      "utils_thirdparrtyapi_browserless_browserless",
-      "utils_thirdparrtyapi_browserless_browsersessionsweeper",
-      "utils_thirdparrtyapi_browserless_closebrowsersession",
-      "utils_thirdparrtyapi_browserless_dirname",
-      "utils_thirdparrtyapi_browserless_disableloadmedia",
-      "utils_thirdparrtyapi_browserless_doactions",
-      "utils_thirdparrtyapi_browserless_filename",
-      "utils_thirdparrtyapi_browserless_generateconnectionid",
-      "utils_thirdparrtyapi_browserless_getqingguoproxy",
-      "utils_thirdparrtyapi_browserless_limit",
-      "utils_thirdparrtyapi_browserless_puppeteer_connect",
-      "utils_thirdparrtyapi_browserless_safelyhandlerequestinterception",
-      "utils_thirdparrtyapi_browserless_sweepstalebrowsersessions",
-      "utils_thirdparrtyapi_filetool",
-      "utils_thirdparrtyapi_filetool_filetool",
-      "utils_tool",
-      "utils_tool_dirname",
-      "utils_tool_download_max_retries",
-      "utils_tool_download_parallel_chunk_size",
-      "utils_tool_download_parallel_concurrency",
-      "utils_tool_download_parallel_min_size",
-      "utils_tool_download_rate_limit",
-      "utils_tool_download_retry_base_delay",
-      "utils_tool_download_stream_hwm",
-      "utils_tool_download_timeout",
-      "utils_tool_downloadaxios",
-      "utils_tool_downloadhttpagent",
-      "utils_tool_downloadhttpsagent",
-      "utils_tool_execpromise",
-      "utils_tool_filename",
-      "utils_tool_parseenvint",
-      "utils_whisperapi",
-      "utils_whisperapi_openai",
-      "utils_whisperapi_whisperapi"
-    ],
-    "4": [
       "test_staticzipdeployment_test",
       "test_staticzipdeployment_test_createvalidartifact",
       "test_staticzipdeployment_test_sha256",
@@ -211,7 +159,7 @@
       "utils_staticzipdeployment_validateextractedartifact",
       "utils_staticzipdeployment_validatezipmetadata"
     ],
-    "5": [
+    "4": [
       "utils_apiaccess",
       "utils_apiaccess_createapiaccesshelpers",
       "utils_loadenv",
@@ -233,7 +181,65 @@
       "utils_thirdparrtyapi_evolink_ai_sleep",
       "utils_thirdparrtyapi_evolink_ai_verifyapiaccess_consumeapicredits"
     ],
+    "5": [
+      "utils_tool",
+      "utils_tool_dirname",
+      "utils_tool_download_max_retries",
+      "utils_tool_download_parallel_chunk_size",
+      "utils_tool_download_parallel_concurrency",
+      "utils_tool_download_parallel_min_size",
+      "utils_tool_download_rate_limit",
+      "utils_tool_download_retry_base_delay",
+      "utils_tool_download_stream_hwm",
+      "utils_tool_download_timeout",
+      "utils_tool_downloadaxios",
+      "utils_tool_downloadhttpagent",
+      "utils_tool_downloadhttpsagent",
+      "utils_tool_execpromise",
+      "utils_tool_filename",
+      "utils_tool_parseenvint",
+      "utils_whisperapi",
+      "utils_whisperapi_openai",
+      "utils_whisperapi_whisperapi"
+    ],
     "6": [
+      "utils_thirdparrtyapi_browserless",
+      "utils_thirdparrtyapi_browserless_browser_session_sweep_interval_ms",
+      "utils_thirdparrtyapi_browserless_browser_session_ttl_ms",
+      "utils_thirdparrtyapi_browserless_browserless",
+      "utils_thirdparrtyapi_browserless_browsersessionsweeper",
+      "utils_thirdparrtyapi_browserless_closebrowsersession",
+      "utils_thirdparrtyapi_browserless_dirname",
+      "utils_thirdparrtyapi_browserless_disableloadmedia",
+      "utils_thirdparrtyapi_browserless_doactions",
+      "utils_thirdparrtyapi_browserless_filename",
+      "utils_thirdparrtyapi_browserless_generateconnectionid",
+      "utils_thirdparrtyapi_browserless_getqingguoproxy",
+      "utils_thirdparrtyapi_browserless_limit",
+      "utils_thirdparrtyapi_browserless_puppeteer_connect",
+      "utils_thirdparrtyapi_browserless_safelyhandlerequestinterception",
+      "utils_thirdparrtyapi_browserless_sweepstalebrowsersessions",
+      "utils_thirdparrtyapi_filetool",
+      "utils_thirdparrtyapi_filetool_filetool"
+    ],
+    "7": [
+      "test_wechatuniversalsearch_test",
+      "test_wechatuniversalsearch_test_createresponse",
+      "utils_tikhub_io",
+      "utils_tikhub_io_normalizewechatarticledetail",
+      "utils_tikhub_io_normalizewechatmplistitem",
+      "utils_tikhub_io_th_bilibili",
+      "utils_tikhub_io_th_douyin",
+      "utils_tikhub_io_th_douyin_billboard",
+      "utils_tikhub_io_th_tiktok",
+      "utils_tikhub_io_th_twitter",
+      "utils_tikhub_io_th_wechat_channels",
+      "utils_tikhub_io_th_wechat_media",
+      "utils_tikhub_io_th_xiaohongshu",
+      "utils_tikhub_io_th_youtube",
+      "utils_tikhub_io_tikhubrequest"
+    ],
+    "8": [
       "utils_customerror",
       "utils_customerror_baseerror",
       "utils_customerror_baseerror_constructor",
@@ -250,7 +256,7 @@
       "utils_customerror_validationerror",
       "utils_customerror_validationerror_constructor"
     ],
-    "7": [
+    "9": [
       "utils_networkanalytics",
       "utils_networkanalytics_buildtimeline",
       "utils_networkanalytics_collectlastlines",
@@ -267,7 +273,7 @@
       "utils_networkanalytics_tofinitenumber",
       "utils_networkanalytics_topentries"
     ],
-    "8": [
+    "10": [
       "any",
       "argumentparser",
       "skills_twitterwebapi_scripts_twitter_api",
@@ -283,7 +289,23 @@
       "skills_twitterwebapi_scripts_twitter_api_run_detail",
       "skills_twitterwebapi_scripts_twitter_api_run_search"
     ],
-    "9": [
+    "11": [
+      "routes_navigationroutes",
+      "routes_navigationroutes_parseendpoint",
+      "routes_navigationroutes_router",
+      "routes_navigationroutes_servicecards",
+      "routes_navigationroutes_servicecategories",
+      "routes_navigationroutes_servicestats",
+      "routes_navigationroutes_sitemapcategoryitems",
+      "routes_navigationroutes_sitemappageitems",
+      "routes_navigationroutes_xmlescape",
+      "utils_thirdparrtyapi_aitoken",
+      "utils_thirdparrtyapi_aitoken_aitoken",
+      "utils_thirdparrtyapi_aitoken_gpt_image_edit_max_retries",
+      "utils_thirdparrtyapi_aitoken_gpt_image_edit_retry_base_delay_ms",
+      "utils_tool_tool"
+    ],
+    "12": [
       "utils_axiosinterceptors",
       "utils_axiosinterceptors_attachaxiosratelimitlogger",
       "utils_networklogger",
@@ -298,21 +320,7 @@
       "utils_networklogger_writetofile",
       "utils_networklogger_writetoredis"
     ],
-    "10": [
-      "utils_tool_tool",
-      "utils_volcengine_io",
-      "utils_volcengine_io_decodewebsearchresponse",
-      "utils_volcengine_io_normalizewebsearcheventframes",
-      "utils_volcengine_io_normalizewebsearchpayload",
-      "utils_volcengine_io_normalizewebsearchresult",
-      "utils_volcengine_io_safejsonparse",
-      "utils_volcengine_io_toboolean",
-      "utils_volcengine_io_tonumber",
-      "utils_volcengine_io_ve_contents_generations_tasks",
-      "utils_volcengine_io_ve_seedream_5_0_lite",
-      "utils_volcengine_io_ve_web_search"
-    ],
-    "11": [
+    "13": [
       "package",
       "package_author",
       "package_description",
@@ -325,7 +333,7 @@
       "package_type",
       "package_version"
     ],
-    "12": [
+    "14": [
       "scripts_network_log_analyze",
       "scripts_network_log_analyze_analyze",
       "scripts_network_log_analyze_default_file",
@@ -338,7 +346,26 @@
       "scripts_network_log_analyze_topentries",
       "scripts_network_log_analyze_topslowrequests"
     ],
-    "13": [
+    "15": [
+      "utils_netdiskapi",
+      "utils_netdiskapi_netdiskapi",
+      "utils_redisclient",
+      "utils_redisclient_redis",
+      "utils_thirdparrtyapi_cozecom",
+      "utils_thirdparrtyapi_cozecom_config",
+      "utils_thirdparrtyapi_cozecom_cozecom",
+      "utils_thirdparrtyapi_cozecom_timestamptodatetime"
+    ],
+    "16": [
+      "start",
+      "start_backend_port_for",
+      "start_cleanup_failure",
+      "start_read_active_color",
+      "start_restore_nginx_backend",
+      "start_sh__entry",
+      "start_write_backend"
+    ],
+    "17": [
       "skills_douyin_billboard_fetch_hot_rise_list_scripts_fetch_hot_rise_list",
       "skills_douyin_billboard_fetch_hot_rise_list_scripts_fetch_hot_rise_list_fetch_hot_rise_list",
       "skills_douyin_billboard_fetch_hot_rise_list_scripts_fetch_hot_rise_list_get_api_key",
@@ -346,7 +373,7 @@
       "skills_douyin_billboard_fetch_hot_rise_list_scripts_fetch_hot_rise_list_print_results",
       "skills_douyin_billboard_fetch_hot_rise_list_scripts_fetch_hot_rise_list_rationale_23"
     ],
-    "14": [
+    "18": [
       "skills_google_search_web_scripts_google_search",
       "skills_google_search_web_scripts_google_search_get_api_key",
       "skills_google_search_web_scripts_google_search_google_search",
@@ -354,7 +381,7 @@
       "skills_google_search_web_scripts_google_search_print_results",
       "skills_google_search_web_scripts_google_search_rationale_23"
     ],
-    "15": [
+    "19": [
       "skills_volcengine_web_search_scripts_web_search",
       "skills_volcengine_web_search_scripts_web_search_get_api_key",
       "skills_volcengine_web_search_scripts_web_search_main",
@@ -362,113 +389,111 @@
       "skills_volcengine_web_search_scripts_web_search_print_results",
       "skills_volcengine_web_search_scripts_web_search_web_search"
     ],
-    "16": [
+    "20": [
       "test_deploymentroute_test",
       "test_deploymentroute_test_createresponse",
       "utils_deploymentroute",
       "utils_deploymentroute_createdeploymenthandler"
     ],
-    "17": [
+    "21": [
       "utils_htmlcontent",
       "utils_htmlcontent_extract_html_conent",
       "utils_htmlcontent_extract_html_conent_standard",
       "utils_htmlcontent_htmltoqueryselector"
     ],
-    "18": [
+    "22": [
       "utils_thirdparrtyapi_hermes_agent",
       "utils_thirdparrtyapi_hermes_agent_hermes_default_timeout_ms",
       "utils_thirdparrtyapi_hermes_agent_hermesagent",
       "utils_thirdparrtyapi_hermes_agent_normalizepayload"
     ],
-    "19": [
-      "start",
-      "start_compose",
-      "start_sh__entry"
-    ],
-    "20": [
+    "23": [
       "utils_thirdparrtyapi_aimlapi",
       "utils_thirdparrtyapi_aimlapi_aimlapi",
       "utils_thirdparrtyapi_aimlapi_api"
     ],
-    "21": [
+    "24": [
       "utils_thirdparrtyapi_cloudflare",
       "utils_thirdparrtyapi_cloudflare_cloudflareapi",
       "utils_thirdparrtyapi_cloudflare_whispermaxfilebytes"
     ],
-    "22": [
+    "25": [
       "utils_thirdparrtyapi_lemonfoxai",
       "utils_thirdparrtyapi_lemonfoxai_lemonfoxai",
       "utils_thirdparrtyapi_lemonfoxai_openai"
     ],
-    "23": [
+    "26": [
       "server",
       "server_sh__entry"
     ],
-    "24": [
+    "27": [
       "skills_douyin_transcribe_api_scripts_transcribe_douyin",
       "skills_douyin_transcribe_api_scripts_transcribe_douyin_sh__entry"
     ],
-    "25": [
+    "28": [
       "start_lite",
       "start_lite_sh__entry"
     ],
-    "26": [
+    "29": [
       "utils_search1api",
       "utils_search1api_search1api"
     ],
-    "27": [
+    "30": [
       "utils_thirdparrtyapi_feishu",
       "utils_thirdparrtyapi_feishu_feishu"
     ],
-    "28": [
+    "31": [
       "utils_thirdparrtyapi_firecrawl",
       "utils_thirdparrtyapi_firecrawl_firecrawltool"
     ],
-    "29": [
+    "32": [
       "utils_thirdparrtyapi_tencentapi",
       "utils_thirdparrtyapi_tencentapi_tencentapi"
     ],
-    "30": [
+    "33": [
       "utils_zyte",
       "utils_zyte_zyte"
     ],
-    "31": [
+    "34": [
       "pdf2images"
     ]
   },
   "cohesion": {
-    "0": 0.059322033898305086,
+    "0": 0.07183673469387755,
     "1": 0.046511627906976744,
-    "2": 0.07152496626180836,
-    "3": 0.06456456456456457,
-    "4": 0.22380952380952382,
-    "5": 0.11052631578947368,
-    "6": 0.13333333333333333,
-    "7": 0.2857142857142857,
-    "8": 0.32967032967032966,
-    "9": 0.32051282051282054,
-    "10": 0.24242424242424243,
-    "11": 0.18181818181818182,
-    "12": 0.32727272727272727,
-    "13": 0.5333333333333333,
-    "14": 0.5333333333333333,
-    "15": 0.6,
-    "16": 0.6666666666666666,
-    "17": 0.6666666666666666,
-    "18": 0.5,
-    "19": 1.0,
+    "2": 0.0873015873015873,
+    "3": 0.22380952380952382,
+    "4": 0.11052631578947368,
+    "5": 0.1111111111111111,
+    "6": 0.13071895424836602,
+    "7": 0.14285714285714285,
+    "8": 0.13333333333333333,
+    "9": 0.2857142857142857,
+    "10": 0.32967032967032966,
+    "11": 0.15384615384615385,
+    "12": 0.32051282051282054,
+    "13": 0.18181818181818182,
+    "14": 0.32727272727272727,
+    "15": 0.32142857142857145,
+    "16": 0.38095238095238093,
+    "17": 0.5333333333333333,
+    "18": 0.5333333333333333,
+    "19": 0.6,
     "20": 0.6666666666666666,
     "21": 0.6666666666666666,
-    "22": 0.6666666666666666,
-    "23": 1.0,
-    "24": 1.0,
-    "25": 1.0,
+    "22": 0.5,
+    "23": 0.6666666666666666,
+    "24": 0.6666666666666666,
+    "25": 0.6666666666666666,
     "26": 1.0,
     "27": 1.0,
     "28": 1.0,
     "29": 1.0,
     "30": 1.0,
-    "31": 1.0
+    "31": 1.0,
+    "32": 1.0,
+    "33": 1.0,
+    "34": 1.0
   },
   "gods": [
     {
@@ -487,11 +512,6 @@
       "degree": 10
     },
     {
-      "id": "utils_commonutils_commonutils",
-      "label": "commonUtils",
-      "degree": 10
-    },
-    {
       "id": "utils_staticzipdeployment_deploystaticzip",
       "label": "deployStaticZip()",
       "degree": 9
@@ -499,6 +519,11 @@
     {
       "id": "utils_unkey_unkey",
       "label": "unkey",
+      "degree": 9
+    },
+    {
+      "id": "utils_commonutils_commonutils",
+      "label": "commonUtils",
       "degree": 9
     },
     {
@@ -523,6 +548,17 @@
     }
   ],
   "surprises": [
+    {
+      "source": "extract_pdf_url()",
+      "target": "error()",
+      "source_files": [
+        "index.js",
+        "test/appLifecycle.test.js"
+      ],
+      "confidence": "INFERRED",
+      "relation": "indirect_call",
+      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories"
+    },
     {
       "source": "attachAxiosRateLimitLogger()",
       "target": "logAxiosError()",
@@ -557,41 +593,8 @@
       "why": "cross-file semantic connection"
     }
   ],
-  "questions": [
-    {
-      "type": "bridge_node",
-      "question": "Why does `redis` connect `navigationRoutes.js` to `networkLogger.js`, `tool.js`, `evolink.ai.js`, `networkAnalytics.js`?",
-      "why": "High betweenness centrality (0.049) - this node is a cross-community bridge."
-    },
-    {
-      "type": "bridge_node",
-      "question": "Why does `commonUtils` connect `index.js` to `navigationRoutes.js`, `volcengine.io.js`, `evolink.ai.js`?",
-      "why": "High betweenness centrality (0.036) - this node is a cross-community bridge."
-    },
-    {
-      "type": "bridge_node",
-      "question": "Why does `dependencies` connect `dependencies` to `package.json`?",
-      "why": "High betweenness centrality (0.020) - this node is a cross-community bridge."
-    },
-    {
-      "type": "isolated_nodes",
-      "question": "What connects `name`, `type`, `version` to the rest of the system?",
-      "why": "110 weakly-connected nodes found - possible documentation gaps or missing edges."
-    },
-    {
-      "type": "low_cohesion",
-      "question": "Should `index.js` be split into smaller, more focused modules?",
-      "why": "Cohesion score 0.059322033898305086 - nodes in this community are weakly interconnected."
-    },
-    {
-      "type": "low_cohesion",
-      "question": "Should `dependencies` be split into smaller, more focused modules?",
-      "why": "Cohesion score 0.046511627906976744 - nodes in this community are weakly interconnected."
-    },
-    {
-      "type": "low_cohesion",
-      "question": "Should `navigationRoutes.js` be split into smaller, more focused modules?",
-      "why": "Cohesion score 0.07152496626180836 - nodes in this community are weakly interconnected."
-    }
-  ]
+  "tokens": {
+    "input": 0,
+    "output": 0
+  }
 }

@@ -1,13 +1,13 @@
 {
   "index.js": {
-    "mtime": 1784274658.4310696,
-    "ast_hash": "9f1b6781c82ba0b5ebb7621c48481985",
-    "semantic_hash": "9f1b6781c82ba0b5ebb7621c48481985"
+    "mtime": 1784277140.3943164,
+    "ast_hash": "7508500c0d763de0076a378391f47246",
+    "semantic_hash": "7508500c0d763de0076a378391f47246"
   },
   "package.json": {
-    "mtime": 1778133120.7920897,
-    "ast_hash": "3ac9ab68e56c5a21610df20742fc54ab",
-    "semantic_hash": "3ac9ab68e56c5a21610df20742fc54ab"
+    "mtime": 1784277544.8359005,
+    "ast_hash": "3bf7e77280106be539db1b1cc44de708",
+    "semantic_hash": "3bf7e77280106be539db1b1cc44de708"
   },
   "pdf2images.py": {
     "mtime": 1752375435.551616,
@@ -55,9 +55,9 @@
     "semantic_hash": "f2d42d7a0d289b7ec09273594ab0ca0c"
   },
   "start.sh": {
-    "mtime": 1783696850.521091,
-    "ast_hash": "1ee55b951168cc7d3f9cb61aea197ff4",
-    "semantic_hash": "1ee55b951168cc7d3f9cb61aea197ff4"
+    "mtime": 1784278423.1471648,
+    "ast_hash": "38fbc3c05f0e1be6f29c1ef106d3bc8f",
+    "semantic_hash": "38fbc3c05f0e1be6f29c1ef106d3bc8f"
   },
   "start_lite.sh": {
     "mtime": 1752375435.552616,
@@ -313,5 +313,15 @@
     "mtime": 1784274781.5542846,
     "ast_hash": "350ab418f25efbc0636a8c6cb7c9dfdc",
     "semantic_hash": "350ab418f25efbc0636a8c6cb7c9dfdc"
+  },
+  "test/appLifecycle.test.js": {
+    "mtime": 1784277136.4083107,
+    "ast_hash": "52290331dd979da573e29e5534681053",
+    "semantic_hash": "52290331dd979da573e29e5534681053"
+  },
+  "utils/appLifecycle.js": {
+    "mtime": 1784277112.5662754,
+    "ast_hash": "e40d7b18af695ba4d0e65173dffe9da6",
+    "semantic_hash": "e40d7b18af695ba4d0e65173dffe9da6"
   }
 }
