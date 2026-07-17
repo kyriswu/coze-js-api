@@ -1,5 +1,13 @@
 # Blue/Green Deployment Implementation Plan
 
+## Seedance Ten-Minute Task Timeouts — 2026-07-17
+
+**Goal:** Allow both upstream Seedance task creation and task polling calls to wait for 10 minutes without retries.
+
+- [x] Confirm the same fixed 600,000ms timeout applies to both operations.
+- [ ] Add a shared timeout constant to both upstream calls.
+- [ ] Update delivery records; run syntax/diff checks and refresh Graphify only.
+
 ## Seedance Reference Media URL Validation — 2026-07-17
 
 **Goal:** Before upstream task creation, safely confirm every Seedance image/video/audio reference URL is public and reachable; reject unsafe or inaccessible material with a specific, non-sensitive reason.
