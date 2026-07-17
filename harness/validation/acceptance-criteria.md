@@ -1,5 +1,12 @@
 # Acceptance Criteria
 
+## 2026-07-17 · Shared Lite-Chat Redis Migration
+
+- [x] 应用通过环境变量连接 `lite-chat-redis` 的隔离 DB 1，不再依赖 Compose `my-redis` 服务。
+- [x] 旧 DB 0 数据已在线复制到 DB 1 并保留 TTL；迁移期间的并发写入缺口已明确接受。
+- [x] 公共 Redis 管理路由已删除，不能借本应用读写或枚举共享 Redis。
+- [x] green 已切为公网 active 且 `/readyz`、两个 HTTPS 首页均通过；旧 Redis 已停止并保留回退 volume。
+
 ## 2026-07-17 · Blue/Green Deployment
 
 - [x] 应用镜像包含生产依赖与源码；运行时未挂载宿主源码或依赖目录。

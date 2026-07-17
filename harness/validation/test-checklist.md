@@ -1,5 +1,13 @@
 # Test Checklist
 
+## 2026-07-17 · Shared Lite-Chat Redis Migration
+
+- [x] Redis 配置单测：显式 host/DB、默认兼容和可选凭据均已覆盖。
+- [x] 已移除公开 Redis 管理路由，避免共享服务的任意读写/枚举/删除暴露。
+- [x] 在线复制完成：源 DB 0 与目标 DB 1 在复制完成时均为 8,069 keys，TTL 聚合一致；并发写入窗口已接受。
+- [x] green 已使用共享 DB 1 启动并通过 health/readiness；两个公网 HTTPS 入口与 `/readyz` 均为 HTTP 200。
+- [x] blue 和旧项目 Redis 已停止；旧 Redis volume 未删除，保留回退能力。
+
 ## 2026-07-17 · GPT-Image-2 Atomic Credit Charge
 
 - [x] 原子扣减单测：非零 cost、余额不足拒绝和工厂封装均已覆盖。

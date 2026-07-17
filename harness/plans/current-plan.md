@@ -4,10 +4,10 @@
 
 **Goal:** Retire the project-owned Redis container without public downtime by using `lite-chat-redis` on the existing Docker network and isolated DB 1. Online-copy data may miss concurrent writes, as accepted.
 
-- [ ] Remove public Redis administration routes and add focused regression coverage.
-- [ ] Make Redis connection settings environment-driven; update Compose to use `lite-chat-redis` DB 1 without `my-redis`.
-- [ ] Attach the existing Redis container to `my-net`, online-copy current data with TTL preservation, and cut over via the existing blue/green flow.
-- [ ] Verify readiness, Redis state, application endpoints, documentation, and Graphify; retain old Redis as rollback backup until verification completes.
+- [x] Remove public Redis administration routes and add focused regression coverage.
+- [x] Make Redis connection settings environment-driven; update Compose to use `lite-chat-redis` DB 1 without `my-redis`.
+- [x] Attach the existing Redis container to `my-net`, online-copy current data with TTL preservation, and cut over via the existing blue/green flow.
+- [x] Verify readiness, Redis state, application endpoints, documentation, and Graphify; retain old Redis as rollback backup until verification completes.
 
 ---
 

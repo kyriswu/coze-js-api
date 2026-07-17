@@ -80,7 +80,6 @@
       "index_sanitizestoragepathsegment",
       "index_sanitizeuploadfilename",
       "index_sanitizeuploadsessionid",
-      "index_scankeysbypattern",
       "index_server",
       "index_shutdown",
       "index_sortfiles",
@@ -190,29 +189,6 @@
       "utils_staticzipdeployment_validatezipmetadata"
     ],
     "5": [
-      "utils_axiosinterceptors",
-      "utils_axiosinterceptors_attachaxiosratelimitlogger",
-      "utils_netdiskapi",
-      "utils_netdiskapi_netdiskapi",
-      "utils_networklogger",
-      "utils_networklogger_emit",
-      "utils_networklogger_ensurefilelogger",
-      "utils_networklogger_log_mode",
-      "utils_networklogger_logaxioserror",
-      "utils_networklogger_logaxiosrequest",
-      "utils_networklogger_loghttprequest",
-      "utils_networklogger_logratelimit",
-      "utils_networklogger_redis_events_max",
-      "utils_networklogger_writetofile",
-      "utils_networklogger_writetoredis",
-      "utils_redisclient",
-      "utils_redisclient_redis",
-      "utils_thirdparrtyapi_cozecom",
-      "utils_thirdparrtyapi_cozecom_config",
-      "utils_thirdparrtyapi_cozecom_cozecom",
-      "utils_thirdparrtyapi_cozecom_timestamptodatetime"
-    ],
-    "6": [
       "routes_navigationroutes",
       "routes_navigationroutes_parseendpoint",
       "routes_navigationroutes_router",
@@ -232,7 +208,7 @@
       "utils_thirdparrtyapi_aitoken_gpt_image_edit_max_retries",
       "utils_thirdparrtyapi_aitoken_gpt_image_edit_retry_base_delay_ms"
     ],
-    "7": [
+    "6": [
       "utils_loadenv",
       "utils_loadenv_dirname",
       "utils_loadenv_envfilepath",
@@ -252,7 +228,7 @@
       "utils_thirdparrtyapi_evolink_ai_sleep",
       "utils_thirdparrtyapi_evolink_ai_verifyapiaccess_consumeapicredits"
     ],
-    "8": [
+    "7": [
       "test_wechatuniversalsearch_test",
       "test_wechatuniversalsearch_test_createresponse",
       "utils_tikhub_io",
@@ -269,7 +245,7 @@
       "utils_tikhub_io_th_youtube",
       "utils_tikhub_io_tikhubrequest"
     ],
-    "9": [
+    "8": [
       "utils_customerror",
       "utils_customerror_baseerror",
       "utils_customerror_baseerror_constructor",
@@ -286,7 +262,7 @@
       "utils_customerror_validationerror",
       "utils_customerror_validationerror_constructor"
     ],
-    "10": [
+    "9": [
       "utils_networkanalytics",
       "utils_networkanalytics_buildtimeline",
       "utils_networkanalytics_collectlastlines",
@@ -303,7 +279,7 @@
       "utils_networkanalytics_tofinitenumber",
       "utils_networkanalytics_topentries"
     ],
-    "11": [
+    "10": [
       "any",
       "argumentparser",
       "skills_twitterwebapi_scripts_twitter_api",
@@ -319,7 +295,37 @@
       "skills_twitterwebapi_scripts_twitter_api_run_detail",
       "skills_twitterwebapi_scripts_twitter_api_run_search"
     ],
+    "11": [
+      "test_redisconfig_test",
+      "utils_netdiskapi",
+      "utils_netdiskapi_netdiskapi",
+      "utils_redisclient",
+      "utils_redisclient_redis",
+      "utils_redisclient_redisoptions",
+      "utils_redisconfig",
+      "utils_redisconfig_getredisconnectionoptions",
+      "utils_redisconfig_parseinteger",
+      "utils_thirdparrtyapi_cozecom",
+      "utils_thirdparrtyapi_cozecom_config",
+      "utils_thirdparrtyapi_cozecom_cozecom",
+      "utils_thirdparrtyapi_cozecom_timestamptodatetime"
+    ],
     "12": [
+      "utils_axiosinterceptors",
+      "utils_axiosinterceptors_attachaxiosratelimitlogger",
+      "utils_networklogger",
+      "utils_networklogger_emit",
+      "utils_networklogger_ensurefilelogger",
+      "utils_networklogger_log_mode",
+      "utils_networklogger_logaxioserror",
+      "utils_networklogger_logaxiosrequest",
+      "utils_networklogger_loghttprequest",
+      "utils_networklogger_logratelimit",
+      "utils_networklogger_redis_events_max",
+      "utils_networklogger_writetofile",
+      "utils_networklogger_writetoredis"
+    ],
+    "13": [
       "package",
       "package_author",
       "package_description",
@@ -332,7 +338,7 @@
       "package_type",
       "package_version"
     ],
-    "13": [
+    "14": [
       "scripts_network_log_analyze",
       "scripts_network_log_analyze_analyze",
       "scripts_network_log_analyze_default_file",
@@ -345,7 +351,7 @@
       "scripts_network_log_analyze_topentries",
       "scripts_network_log_analyze_topslowrequests"
     ],
-    "14": [
+    "15": [
       "test_applifecycle_test",
       "test_applifecycle_test_close",
       "test_applifecycle_test_createresponse",
@@ -357,7 +363,7 @@
       "utils_applifecycle_createhealthhandler",
       "utils_applifecycle_createreadinesshandler"
     ],
-    "15": [
+    "16": [
       "start",
       "start_backend_port_for",
       "start_cleanup_failure",
@@ -368,7 +374,7 @@
       "start_verify_nginx_candidate",
       "start_write_backend"
     ],
-    "16": [
+    "17": [
       "skills_douyin_billboard_fetch_hot_rise_list_scripts_fetch_hot_rise_list",
       "skills_douyin_billboard_fetch_hot_rise_list_scripts_fetch_hot_rise_list_fetch_hot_rise_list",
       "skills_douyin_billboard_fetch_hot_rise_list_scripts_fetch_hot_rise_list_get_api_key",
@@ -376,7 +382,7 @@
       "skills_douyin_billboard_fetch_hot_rise_list_scripts_fetch_hot_rise_list_print_results",
       "skills_douyin_billboard_fetch_hot_rise_list_scripts_fetch_hot_rise_list_rationale_23"
     ],
-    "17": [
+    "18": [
       "skills_google_search_web_scripts_google_search",
       "skills_google_search_web_scripts_google_search_get_api_key",
       "skills_google_search_web_scripts_google_search_google_search",
@@ -384,7 +390,7 @@
       "skills_google_search_web_scripts_google_search_print_results",
       "skills_google_search_web_scripts_google_search_rationale_23"
     ],
-    "18": [
+    "19": [
       "skills_volcengine_web_search_scripts_web_search",
       "skills_volcengine_web_search_scripts_web_search_get_api_key",
       "skills_volcengine_web_search_scripts_web_search_main",
@@ -392,114 +398,118 @@
       "skills_volcengine_web_search_scripts_web_search_print_results",
       "skills_volcengine_web_search_scripts_web_search_web_search"
     ],
-    "19": [
+    "20": [
       "test_deploymentroute_test",
       "test_deploymentroute_test_createresponse",
       "utils_deploymentroute",
       "utils_deploymentroute_createdeploymenthandler"
     ],
-    "20": [
+    "21": [
       "utils_htmlcontent",
       "utils_htmlcontent_extract_html_conent",
       "utils_htmlcontent_extract_html_conent_standard",
       "utils_htmlcontent_htmltoqueryselector"
     ],
-    "21": [
+    "22": [
       "utils_thirdparrtyapi_hermes_agent",
       "utils_thirdparrtyapi_hermes_agent_hermes_default_timeout_ms",
       "utils_thirdparrtyapi_hermes_agent_hermesagent",
       "utils_thirdparrtyapi_hermes_agent_normalizepayload"
     ],
-    "22": [
+    "23": [
       "utils_thirdparrtyapi_aimlapi",
       "utils_thirdparrtyapi_aimlapi_aimlapi",
       "utils_thirdparrtyapi_aimlapi_api"
     ],
-    "23": [
+    "24": [
       "utils_thirdparrtyapi_cloudflare",
       "utils_thirdparrtyapi_cloudflare_cloudflareapi",
       "utils_thirdparrtyapi_cloudflare_whispermaxfilebytes"
     ],
-    "24": [
+    "25": [
       "utils_thirdparrtyapi_lemonfoxai",
       "utils_thirdparrtyapi_lemonfoxai_lemonfoxai",
       "utils_thirdparrtyapi_lemonfoxai_openai"
     ],
-    "25": [
+    "26": [
       "scripts_cleanup_stopped_app_containers",
       "scripts_cleanup_stopped_app_containers_sh__entry"
     ],
-    "26": [
+    "27": [
+      "scripts_migrate_redis_to_lite_chat",
+      "scripts_migrate_redis_to_lite_chat_sh__entry"
+    ],
+    "28": [
       "server",
       "server_sh__entry"
     ],
-    "27": [
+    "29": [
       "skills_douyin_transcribe_api_scripts_transcribe_douyin",
       "skills_douyin_transcribe_api_scripts_transcribe_douyin_sh__entry"
     ],
-    "28": [
+    "30": [
       "start_lite",
       "start_lite_sh__entry"
     ],
-    "29": [
+    "31": [
       "test_cleanupstoppedcontainers_test",
       "test_cleanupstoppedcontainers_test_reporoot"
     ],
-    "30": [
+    "32": [
       "test_startscript_test",
       "test_startscript_test_script"
     ],
-    "31": [
+    "33": [
       "utils_search1api",
       "utils_search1api_search1api"
     ],
-    "32": [
+    "34": [
       "utils_thirdparrtyapi_feishu",
       "utils_thirdparrtyapi_feishu_feishu"
     ],
-    "33": [
+    "35": [
       "utils_thirdparrtyapi_firecrawl",
       "utils_thirdparrtyapi_firecrawl_firecrawltool"
     ],
-    "34": [
+    "36": [
       "utils_thirdparrtyapi_tencentapi",
       "utils_thirdparrtyapi_tencentapi_tencentapi"
     ],
-    "35": [
+    "37": [
       "utils_zyte",
       "utils_zyte_zyte"
     ],
-    "36": [
+    "38": [
       "pdf2images"
     ]
   },
   "cohesion": {
     "0": 0.046511627906976744,
-    "1": 0.09102564102564102,
+    "1": 0.09446693657219973,
     "2": 0.08408408408408409,
     "3": 0.06456456456456457,
     "4": 0.22380952380952382,
-    "5": 0.17142857142857143,
-    "6": 0.13725490196078433,
-    "7": 0.11764705882352941,
-    "8": 0.14285714285714285,
-    "9": 0.13333333333333333,
-    "10": 0.2857142857142857,
-    "11": 0.32967032967032966,
-    "12": 0.18181818181818182,
-    "13": 0.32727272727272727,
-    "14": 0.26666666666666666,
-    "15": 0.3611111111111111,
-    "16": 0.5333333333333333,
+    "5": 0.13725490196078433,
+    "6": 0.11764705882352941,
+    "7": 0.14285714285714285,
+    "8": 0.13333333333333333,
+    "9": 0.2857142857142857,
+    "10": 0.32967032967032966,
+    "11": 0.21794871794871795,
+    "12": 0.32051282051282054,
+    "13": 0.18181818181818182,
+    "14": 0.32727272727272727,
+    "15": 0.26666666666666666,
+    "16": 0.3611111111111111,
     "17": 0.5333333333333333,
-    "18": 0.6,
-    "19": 0.6666666666666666,
+    "18": 0.5333333333333333,
+    "19": 0.6,
     "20": 0.6666666666666666,
-    "21": 0.5,
-    "22": 0.6666666666666666,
+    "21": 0.6666666666666666,
+    "22": 0.5,
     "23": 0.6666666666666666,
     "24": 0.6666666666666666,
-    "25": 1.0,
+    "25": 0.6666666666666666,
     "26": 1.0,
     "27": 1.0,
     "28": 1.0,
@@ -510,7 +520,9 @@
     "33": 1.0,
     "34": 1.0,
     "35": 1.0,
-    "36": 1.0
+    "36": 1.0,
+    "37": 1.0,
+    "38": 1.0
   },
   "gods": [
     {
@@ -521,7 +533,7 @@
     {
       "id": "utils_redisclient_redis",
       "label": "redis",
-      "degree": 10
+      "degree": 11
     },
     {
       "id": "utils_staticzipdeployment_reject",

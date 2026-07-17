@@ -10,9 +10,8 @@ services:
       - "127.0.0.1:3003:3000"
     environment:
       NODE_ENV: online
-    depends_on:
-      my-redis:
-        condition: service_started
+      REDIS_HOST: lite-chat-redis
+      REDIS_DB: 1
     networks:
       - my-net
     restart: unless-stopped
@@ -36,9 +35,8 @@ services:
       - "127.0.0.1:3004:3000"
     environment:
       NODE_ENV: online
-    depends_on:
-      my-redis:
-        condition: service_started
+      REDIS_HOST: lite-chat-redis
+      REDIS_DB: 1
     networks:
       - my-net
     restart: unless-stopped
@@ -50,22 +48,6 @@ services:
       timeout: 3s
       retries: 6
       start_period: 20s
-
-  my-redis:
-    image: redis:latest
-    volumes:
-      - redis-data:/data
-    networks:
-      - my-net
-    restart: always
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 3s
-      retries: 6
-
-volumes:
-  redis-data:
 
 networks:
   my-net:

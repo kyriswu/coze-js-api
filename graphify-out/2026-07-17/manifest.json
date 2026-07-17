@@ -1,8 +1,8 @@
 {
   "index.js": {
-    "mtime": 1784280862.9305224,
-    "ast_hash": "192fef67641f9a8c2169dae4625e53d0",
-    "semantic_hash": "192fef67641f9a8c2169dae4625e53d0"
+    "mtime": 1784282139.7575963,
+    "ast_hash": "d899d6d137b7beb05b53a1cad7adc892",
+    "semantic_hash": "d899d6d137b7beb05b53a1cad7adc892"
   },
   "package.json": {
     "mtime": 1784277544.8359005,
@@ -175,9 +175,9 @@
     "semantic_hash": "459cc3f07cd5e257e082b7cf1a6fb539"
   },
   "utils/redisClient.js": {
-    "mtime": 1749493547.0007784,
-    "ast_hash": "065c501c1a3f338a90c681873a277f2a",
-    "semantic_hash": "065c501c1a3f338a90c681873a277f2a"
+    "mtime": 1784282149.5416057,
+    "ast_hash": "af836ea7c917677a2f5b3294335246cb",
+    "semantic_hash": "af836ea7c917677a2f5b3294335246cb"
   },
   "utils/search1api.js": {
     "mtime": 1768473846.4557896,
@@ -343,5 +343,20 @@
     "mtime": 1784280863.6345222,
     "ast_hash": "392df1ba24af8da9c46451a26e3b297e",
     "semantic_hash": "392df1ba24af8da9c46451a26e3b297e"
+  },
+  "scripts/migrate-redis-to-lite-chat.sh": {
+    "mtime": 1784282376.3388274,
+    "ast_hash": "5dfa2d9d213a0a6b28f35b5384fde2af",
+    "semantic_hash": "5dfa2d9d213a0a6b28f35b5384fde2af"
+  },
+  "test/redisConfig.test.js": {
+    "mtime": 1784282101.4535592,
+    "ast_hash": "4004c91f1d0f9b45f121c966205223d2",
+    "semantic_hash": "4004c91f1d0f9b45f121c966205223d2"
+  },
+  "utils/redisConfig.js": {
+    "mtime": 1784282139.1065958,
+    "ast_hash": "4613120bd1307df938430dde2136162f",
+    "semantic_hash": "4613120bd1307df938430dde2136162f"
   }
 }

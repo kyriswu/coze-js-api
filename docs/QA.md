@@ -1,6 +1,29 @@
 # QA
 
 ## Iteration
+2026-07-17 / shared-lite-chat-redis-migration
+
+## Test Matrix
+| Case ID | Step | Expected | Actual | Status |
+|---|---|---|---|---|
+| QA-RM-01 | `node --test test/redisConfig.test.js` | 显式共享 Redis 配置使用 `lite-chat-redis` 与 DB 1；默认值兼容 | 3 passed, 0 failed | pass |
+| QA-RM-02 | `npm test`、语法检查、`docker compose config --quiet`、`git diff --check` | 全量回归、配置和语法有效 | 21 passed, 0 failed；其余命令成功 | pass |
+| QA-RM-03 | 在线复制 Redis DB 0 → DB 1 | 复制保持 key 数与 TTL；允许并发写入缺口 | 复制完成时源/目标均为 8,069 keys、1,463 个带 TTL；切流前目标因自然过期为 8,065 keys | pass |
+| QA-RM-04 | 启动 green、`/readyz`、两个 HTTPS vhost | green 使用共享 Redis 且公网不中断 | green env 为 `REDIS_HOST=lite-chat-redis`、`REDIS_DB=1`；green healthy；两个首页及 `/readyz` 均 HTTP 200 | pass |
+| QA-RM-05 | 停止 blue 与旧 Redis | 不影响 green，旧 Redis保留回退材料 | green continued healthy；blue 和 `coze-js-api-my-redis-1` 均已 exited，旧 volume 未删除 | pass |
+
+## Manual Checks
+- `lite-chat-redis` 已在运行时接入 `coze-js-api_my-net`。该连接在容器重启后仍有效；若容器被重建，需要再次执行网络接入。
+- 旧 Redis 通过 `MIGRATE ... COPY REPLACE` 在线复制到目标 DB 1，保留源数据和 TTL。复制期间的并发写入不回放，符合已确认的可接受窗口。
+- `/redis/get_string`、`/redis/set_string`、`/redis/keys`、`/redis/del_keys` 与 `/redis/del` 已从应用路由移除。
+
+## Final QA Verdict
+- [x] pass
+- [ ] conditional pass
+- [ ] fail
+
+
+## Iteration
 2026-07-17 / gpt-image-2-atomic-credit-charge
 
 ## Test Matrix

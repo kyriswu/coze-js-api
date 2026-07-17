@@ -1,5 +1,30 @@
 # RELEASE
 
+## Infrastructure Change
+2026-07-17 / shared-lite-chat-redis-migration
+
+### Summary
+项目专属 Redis 已下线，应用无中断切换为本机 `lite-chat-redis` 的隔离 DB 1。
+
+### What Changed
+- `utils/redisClient.js` 改为读取 `REDIS_HOST`、`REDIS_PORT`、`REDIS_DB` 及可选凭据；线上 Compose 为两个 app color 设置 `lite-chat-redis` 和 DB 1。
+- Compose 移除 `my-redis` 服务、依赖和 volume 声明。
+- 删除五个公开 Redis 管理路由，避免共享 Redis 被本应用接口任意读取、枚举或删除。
+- 新增在线迁移脚本，使用 Redis `MIGRATE COPY REPLACE` 将 key 与 TTL 复制到目标 DB。
+
+### Live Migration Evidence
+- `lite-chat-redis` 已连接至 `coze-js-api_my-net`；原服务数据在线复制到 DB 1。
+- green 在共享 Redis DB 1 上通过健康检查后切流；两个 HTTPS 首页与 `/readyz` 均实测 HTTP 200。
+- blue 与旧项目 Redis 已停止；旧 Redis 的 Docker volume 保留为回退备份。
+
+### Operational Note
+运行时额外网络连接可跨容器重启保留；若 `lite-chat-redis` 被重建，必须重新接入 `coze-js-api_my-net`。
+
+### Rollback Notes
+1. 启动 `coze-js-api-my-redis-1`，并将候选 app 的 `REDIS_HOST` 改回 `my-redis`、`REDIS_DB` 改为 `0`。
+2. 先验证候选 `/readyz`，再按既有 Nginx 原子切换流程切回该候选。
+3. 不要删除旧 Redis volume，直到回退窗口结束。
+
 ## Security Fix
 2026-07-17 / gpt-image-2-atomic-credit-charge
 
