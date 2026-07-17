@@ -5,9 +5,9 @@
 **Goal:** Settle successful Seedance tasks from actual upstream completion tokens while returning the video with an explicit outstanding-balance state when the key cannot cover final settlement.
 
 - [x] Confirm upstream completion-token field, rate, rounding, task ownership, and insufficient-balance policy.
-- [ ] Record task ownership with a key digest; require the owner key for polling.
-- [ ] Calculate and idempotently settle successful task usage; return outstanding settlement metadata without hiding the video.
-- [ ] Update API documentation and delivery records; run syntax/diff checks and refresh Graphify only (per requested validation scope).
+- [x] Record task ownership with a key digest; require the owner key for polling.
+- [x] Calculate and idempotently settle successful task usage; return outstanding settlement metadata without hiding the video.
+- [x] Update API documentation and delivery records; run syntax/diff checks and refresh Graphify only (per requested validation scope).
 
 ## Volcengine Task Timeout Handling — 2026-07-17
 

@@ -1,7 +1,9 @@
 import axios from 'axios';
+import { createHash } from 'node:crypto';
 import unkey from './unkey.js';
 import commonUtils from './commonUtils.js';
 import tool from './tool.js';
+import redis from './redisClient.js';
 
 const unkey_api_id = 'api_413Kmmitqy3qaDo4';
 const ark_base_url = process.env.ARK_BASE_URL || 'https://ark.cn-beijing.volces.com';
@@ -9,6 +11,11 @@ const ARK_API_KEY = 'f76941d3-dda6-4455-89bd-484276d6465a';
 const seedream_5_0_lite_model = 'doubao-seedream-5-0-260128';
 const web_search_url = process.env.VOLCENGINE_WEB_SEARCH_URL || 'https://open.feedcoopapi.com/search_api/web_search';
 const WEB_SEARCH_API_KEY = process.env.VOLCENGINE_WEB_SEARCH_API_KEY || 'jkiqnoKdvFKU0EFAkhdIEjdUioA5qyEn';
+const SEEDANCE_TASK_TTL_SECONDS = 60 * 60 * 24 * 30;
+const SEEDANCE_SETTLEMENT_LOCK_SECONDS = 60;
+const SEEDANCE_CREDITS_PER_YUAN = 20;
+const SEEDANCE_PRICE_PER_MILLION_TOKENS = 46;
+const SEEDANCE_FIXED_CREDITS = 10;
 
 function toBoolean(value) {
     if (typeof value === 'boolean') {
@@ -46,6 +53,79 @@ function safeJsonParse(value) {
         return JSON.parse(value);
     } catch (error) {
         return value;
+    }
+}
+
+function getSeedanceTaskOwnerKey(taskId) {
+    return `seedance:task-owner:${taskId}`;
+}
+
+function getSeedanceSettlementKey(taskId) {
+    return `seedance:task-settlement:${taskId}`;
+}
+
+function getSeedanceSettlementLockKey(taskId) {
+    return `seedance:task-settlement-lock:${taskId}`;
+}
+
+function hashApiKey(apiKey) {
+    return createHash('sha256').update(apiKey).digest('hex');
+}
+
+function getSeedanceCompletionTokens(task) {
+    const tokens = Number(task?.usage?.completion_tokens);
+    return Number.isFinite(tokens) && tokens > 0 ? tokens : null;
+}
+
+function calculateSeedanceCreditCost(completionTokens) {
+    return Math.ceil((completionTokens * SEEDANCE_PRICE_PER_MILLION_TOKENS * SEEDANCE_CREDITS_PER_YUAN) / 1_000_000) + SEEDANCE_FIXED_CREDITS;
+}
+
+function parseSettlementState(value) {
+    if (typeof value !== 'string') return null;
+    const [status, rawCredits] = value.split(':');
+    const credits = Number(rawCredits);
+    return (status === 'charged' || status === 'outstanding') && Number.isInteger(credits) && credits > 0
+        ? { status, credits }
+        : null;
+}
+
+async function settleSeedanceTask({ taskId, apiKey, completionTokens, currentRemaining }) {
+    const credits = calculateSeedanceCreditCost(completionTokens);
+    const settlementKey = getSeedanceSettlementKey(taskId);
+    const settlementLockKey = getSeedanceSettlementLockKey(taskId);
+    const existing = parseSettlementState(await redis.get(settlementKey));
+    if (existing?.status === 'charged') {
+        return { ...existing, remaining: null };
+    }
+
+    if (Number(currentRemaining) < credits) {
+        await redis.set(settlementKey, `outstanding:${credits}`, 'EX', SEEDANCE_TASK_TTL_SECONDS);
+        return { status: 'outstanding', credits, remaining: currentRemaining };
+    }
+
+    const lockAcquired = await redis.set(settlementLockKey, '1', 'EX', SEEDANCE_SETTLEMENT_LOCK_SECONDS, 'NX');
+    if (!lockAcquired) {
+        return { status: 'pending', credits, remaining: currentRemaining };
+    }
+
+    try {
+        const result = await unkey.verifyKey(unkey_api_id, apiKey, credits, {
+            platform: 'volcengine',
+            action: 'contents_generations_tasks_settlement',
+            task_id: taskId
+        });
+        const remaining = result?.remaining;
+        if (result?.valid) {
+            await redis.set(settlementKey, `charged:${credits}`, 'EX', SEEDANCE_TASK_TTL_SECONDS);
+            return { status: 'charged', credits, remaining };
+        }
+
+        await redis.set(settlementKey, `outstanding:${credits}`, 'EX', SEEDANCE_TASK_TTL_SECONDS);
+        return { status: 'outstanding', credits, remaining };
+    } catch (error) {
+        await redis.del(settlementLockKey);
+        throw error;
     }
 }
 
@@ -491,6 +571,12 @@ export const ve_contents_generations_tasks = {
                 }
             );
 
+            const taskId = response.data?.id || response.data?.task_id;
+            if (!taskId) {
+                throw new Error('upstream task response missing task ID');
+            }
+            await redis.set(getSeedanceTaskOwnerKey(taskId), hashApiKey(api_key), 'EX', SEEDANCE_TASK_TTL_SECONDS);
+
             return res.send({
                 code: 200,
                 msg: '创建视频生成任务成功',
@@ -509,14 +595,32 @@ export const ve_contents_generations_tasks = {
         }
     },
 
-    // 视频生成任务查询（无本地 api_key 校验）
+    // 视频生成任务查询及成功任务结算
     get_task: async function (req, res) {
         const taskId = (req.params && req.params.task_id) || (req.query && req.query.task_id) || (req.body && req.body.task_id);
         if (!taskId) {
             return res.send({ code: -1, msg: 'task_id is required' });
         }
 
+        const api_key = (req.query && req.query.api_key) || (req.body && req.body.api_key);
+        if (!api_key) {
+            return res.send({ code: -1, msg: commonUtils.MESSAGE.TOKEN_EMPTY });
+        }
+
         try {
+            const taskOwner = await redis.get(getSeedanceTaskOwnerKey(taskId));
+            if (!taskOwner || taskOwner !== hashApiKey(api_key)) {
+                return res.send({ code: -1, msg: commonUtils.MESSAGE.TOKEN_EXPIRED });
+            }
+
+            const { valid, remaining: currentRemaining } = await unkey.verifyKey(unkey_api_id, api_key, 0, {
+                platform: 'volcengine',
+                action: 'contents_generations_tasks_get'
+            });
+            if (!valid) {
+                return res.send({ code: -1, msg: commonUtils.MESSAGE.TOKEN_EXPIRED });
+            }
+
             const response = await axios.get(
                 `${ark_base_url}/api/v3/contents/generations/tasks/${encodeURIComponent(taskId)}`,
                 {
@@ -528,10 +632,24 @@ export const ve_contents_generations_tasks = {
                 }
             );
 
+            let settlement;
+            if (response.data?.status === 'succeeded') {
+                const completionTokens = getSeedanceCompletionTokens(response.data);
+                if (completionTokens !== null) {
+                    settlement = await settleSeedanceTask({
+                        taskId,
+                        apiKey: api_key,
+                        completionTokens,
+                        currentRemaining
+                    });
+                }
+            }
+
             return res.send({
                 code: 200,
-                msg: '查询视频生成任务成功',
-                data: response.data
+                msg: settlement?.status === 'outstanding' ? '查询视频生成任务成功，当前任务欠费' : '查询视频生成任务成功',
+                data: response.data,
+                ...(settlement && { settlement })
             });
         } catch (error) {
             const detail = error.response ? error.response.data : error.message;

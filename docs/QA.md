@@ -1,6 +1,26 @@
 # QA
 
 ## Iteration
+2026-07-17 / seedance-2-token-billing
+
+## Test Matrix
+| Case ID | Step | Expected | Actual | Status |
+|---|---|---|---|---|
+| QA-STB-01 | `node --check utils/volcengine.io.js`、`node --check routes/navigationRoutes.js`、`git diff --check` | 任务归属、终态结算和文档代码均可解析，差异格式有效 | 成功 | pass |
+| QA-STB-02 | 自动化测试与真实上游联调 | 未执行，按本次明确要求仅做语法检查 | 未执行 | not run |
+
+## Manual Checks
+- 成功终态只从上游 `data.usage.completion_tokens` 计算最终扣除积分；失败任务和未返回有效用量的任务不结算。
+- 任务创建后仅保存 API Key 的 SHA-256 摘要；轮询必须提供同一 API Key，且重复轮询通过 Redis 结算状态避免重复扣款。
+- 余额不足时，成功视频及上游数据保持返回，并在本地 `settlement` 中标记 `outstanding`。
+
+## Final QA Verdict
+- [ ] pass
+- [x] conditional pass
+- [ ] fail
+
+
+## Iteration
 2026-07-17 / seedance-2-video-api-documentation
 
 ## Test Matrix

@@ -88,45 +88,6 @@
       "index_zyteextract"
     ],
     "2": [
-      "utils_bazi",
-      "utils_bazi_calc_ba_zi",
-      "utils_bazi_calc_cang_gan",
-      "utils_bazi_calc_zi_wei",
-      "utils_bazi_points",
-      "utils_commonutils",
-      "utils_commonutils_commonutils",
-      "utils_commonutils_config",
-      "utils_qwether",
-      "utils_qwether_isvaliddate",
-      "utils_qwether_qweather_tool",
-      "utils_qwether_qweatherfetch",
-      "utils_tavily",
-      "utils_tavily_ad_constants",
-      "utils_tavily_appendadmessage",
-      "utils_tavily_tv_search",
-      "utils_thirdparrtyapi_coze",
-      "utils_thirdparrtyapi_coze_config",
-      "utils_thirdparrtyapi_coze_coze",
-      "utils_thirdparrtyapi_coze_timestamptodatetime",
-      "utils_thirdpartyused",
-      "utils_thirdpartyused_request_type",
-      "utils_thirdpartyused_thirdpartyused",
-      "utils_tool_tool",
-      "utils_unkey",
-      "utils_unkey_unkey",
-      "utils_volcengine_io",
-      "utils_volcengine_io_decodewebsearchresponse",
-      "utils_volcengine_io_normalizewebsearcheventframes",
-      "utils_volcengine_io_normalizewebsearchpayload",
-      "utils_volcengine_io_normalizewebsearchresult",
-      "utils_volcengine_io_safejsonparse",
-      "utils_volcengine_io_toboolean",
-      "utils_volcengine_io_tonumber",
-      "utils_volcengine_io_ve_contents_generations_tasks",
-      "utils_volcengine_io_ve_seedream_5_0_lite",
-      "utils_volcengine_io_ve_web_search"
-    ],
-    "3": [
       "utils_thirdparrtyapi_browserless",
       "utils_thirdparrtyapi_browserless_browser_session_sweep_interval_ms",
       "utils_thirdparrtyapi_browserless_browser_session_ttl_ms",
@@ -161,11 +122,12 @@
       "utils_tool_execpromise",
       "utils_tool_filename",
       "utils_tool_parseenvint",
+      "utils_tool_tool",
       "utils_whisperapi",
       "utils_whisperapi_openai",
       "utils_whisperapi_whisperapi"
     ],
-    "4": [
+    "3": [
       "test_apiaccess_test",
       "test_apiaccess_test_verifykey",
       "utils_apiaccess",
@@ -194,6 +156,33 @@
       "utils_thirdparrtyapi_evolink_ai_sleep",
       "utils_thirdparrtyapi_evolink_ai_verifyapiaccess_consumeapicredits"
     ],
+    "4": [
+      "utils_bazi",
+      "utils_bazi_calc_ba_zi",
+      "utils_bazi_calc_cang_gan",
+      "utils_bazi_calc_zi_wei",
+      "utils_bazi_points",
+      "utils_commonutils",
+      "utils_commonutils_commonutils",
+      "utils_commonutils_config",
+      "utils_qwether",
+      "utils_qwether_isvaliddate",
+      "utils_qwether_qweather_tool",
+      "utils_qwether_qweatherfetch",
+      "utils_tavily",
+      "utils_tavily_ad_constants",
+      "utils_tavily_appendadmessage",
+      "utils_tavily_tv_search",
+      "utils_thirdparrtyapi_coze",
+      "utils_thirdparrtyapi_coze_config",
+      "utils_thirdparrtyapi_coze_coze",
+      "utils_thirdparrtyapi_coze_timestamptodatetime",
+      "utils_thirdpartyused",
+      "utils_thirdpartyused_request_type",
+      "utils_thirdpartyused_thirdpartyused",
+      "utils_unkey",
+      "utils_unkey_unkey"
+    ],
     "5": [
       "test_staticzipdeployment_test",
       "test_staticzipdeployment_test_createvalidartifact",
@@ -218,6 +207,27 @@
       "utils_staticzipdeployment_validatezipmetadata"
     ],
     "6": [
+      "utils_volcengine_io",
+      "utils_volcengine_io_calculateseedancecreditcost",
+      "utils_volcengine_io_decodewebsearchresponse",
+      "utils_volcengine_io_getseedancecompletiontokens",
+      "utils_volcengine_io_getseedancesettlementkey",
+      "utils_volcengine_io_getseedancesettlementlockkey",
+      "utils_volcengine_io_getseedancetaskownerkey",
+      "utils_volcengine_io_hashapikey",
+      "utils_volcengine_io_normalizewebsearcheventframes",
+      "utils_volcengine_io_normalizewebsearchpayload",
+      "utils_volcengine_io_normalizewebsearchresult",
+      "utils_volcengine_io_parsesettlementstate",
+      "utils_volcengine_io_safejsonparse",
+      "utils_volcengine_io_settleseedancetask",
+      "utils_volcengine_io_toboolean",
+      "utils_volcengine_io_tonumber",
+      "utils_volcengine_io_ve_contents_generations_tasks",
+      "utils_volcengine_io_ve_seedream_5_0_lite",
+      "utils_volcengine_io_ve_web_search"
+    ],
+    "7": [
       "test_wechatuniversalsearch_test",
       "test_wechatuniversalsearch_test_createresponse",
       "utils_tikhub_io",
@@ -234,7 +244,7 @@
       "utils_tikhub_io_th_youtube",
       "utils_tikhub_io_tikhubrequest"
     ],
-    "7": [
+    "8": [
       "utils_customerror",
       "utils_customerror_baseerror",
       "utils_customerror_baseerror_constructor",
@@ -251,7 +261,7 @@
       "utils_customerror_validationerror",
       "utils_customerror_validationerror_constructor"
     ],
-    "8": [
+    "9": [
       "utils_networkanalytics",
       "utils_networkanalytics_buildtimeline",
       "utils_networkanalytics_collectlastlines",
@@ -268,7 +278,7 @@
       "utils_networkanalytics_tofinitenumber",
       "utils_networkanalytics_topentries"
     ],
-    "9": [
+    "10": [
       "any",
       "argumentparser",
       "skills_twitterwebapi_scripts_twitter_api",
@@ -284,7 +294,7 @@
       "skills_twitterwebapi_scripts_twitter_api_run_detail",
       "skills_twitterwebapi_scripts_twitter_api_run_search"
     ],
-    "10": [
+    "11": [
       "test_redisconfig_test",
       "utils_netdiskapi",
       "utils_netdiskapi_netdiskapi",
@@ -299,7 +309,7 @@
       "utils_thirdparrtyapi_cozecom_cozecom",
       "utils_thirdparrtyapi_cozecom_timestamptodatetime"
     ],
-    "11": [
+    "12": [
       "utils_axiosinterceptors",
       "utils_axiosinterceptors_attachaxiosratelimitlogger",
       "utils_networklogger",
@@ -314,7 +324,7 @@
       "utils_networklogger_writetofile",
       "utils_networklogger_writetoredis"
     ],
-    "12": [
+    "13": [
       "package",
       "package_author",
       "package_description",
@@ -327,7 +337,7 @@
       "package_type",
       "package_version"
     ],
-    "13": [
+    "14": [
       "scripts_network_log_analyze",
       "scripts_network_log_analyze_analyze",
       "scripts_network_log_analyze_default_file",
@@ -340,7 +350,7 @@
       "scripts_network_log_analyze_topentries",
       "scripts_network_log_analyze_topslowrequests"
     ],
-    "14": [
+    "15": [
       "test_applifecycle_test",
       "test_applifecycle_test_close",
       "test_applifecycle_test_createresponse",
@@ -352,7 +362,7 @@
       "utils_applifecycle_createhealthhandler",
       "utils_applifecycle_createreadinesshandler"
     ],
-    "15": [
+    "16": [
       "routes_navigationroutes",
       "routes_navigationroutes_parseendpoint",
       "routes_navigationroutes_router",
@@ -363,7 +373,7 @@
       "routes_navigationroutes_sitemappageitems",
       "routes_navigationroutes_xmlescape"
     ],
-    "16": [
+    "17": [
       "start",
       "start_backend_port_for",
       "start_cleanup_failure",
@@ -374,7 +384,7 @@
       "start_verify_nginx_candidate",
       "start_write_backend"
     ],
-    "17": [
+    "18": [
       "skills_douyin_billboard_fetch_hot_rise_list_scripts_fetch_hot_rise_list",
       "skills_douyin_billboard_fetch_hot_rise_list_scripts_fetch_hot_rise_list_fetch_hot_rise_list",
       "skills_douyin_billboard_fetch_hot_rise_list_scripts_fetch_hot_rise_list_get_api_key",
@@ -382,7 +392,7 @@
       "skills_douyin_billboard_fetch_hot_rise_list_scripts_fetch_hot_rise_list_print_results",
       "skills_douyin_billboard_fetch_hot_rise_list_scripts_fetch_hot_rise_list_rationale_23"
     ],
-    "18": [
+    "19": [
       "skills_google_search_web_scripts_google_search",
       "skills_google_search_web_scripts_google_search_get_api_key",
       "skills_google_search_web_scripts_google_search_google_search",
@@ -390,7 +400,7 @@
       "skills_google_search_web_scripts_google_search_print_results",
       "skills_google_search_web_scripts_google_search_rationale_23"
     ],
-    "19": [
+    "20": [
       "skills_volcengine_web_search_scripts_web_search",
       "skills_volcengine_web_search_scripts_web_search_get_api_key",
       "skills_volcengine_web_search_scripts_web_search_main",
@@ -398,119 +408,119 @@
       "skills_volcengine_web_search_scripts_web_search_print_results",
       "skills_volcengine_web_search_scripts_web_search_web_search"
     ],
-    "20": [
+    "21": [
       "test_deploymentroute_test",
       "test_deploymentroute_test_createresponse",
       "utils_deploymentroute",
       "utils_deploymentroute_createdeploymenthandler"
     ],
-    "21": [
+    "22": [
       "utils_htmlcontent",
       "utils_htmlcontent_extract_html_conent",
       "utils_htmlcontent_extract_html_conent_standard",
       "utils_htmlcontent_htmltoqueryselector"
     ],
-    "22": [
+    "23": [
       "utils_thirdparrtyapi_hermes_agent",
       "utils_thirdparrtyapi_hermes_agent_hermes_default_timeout_ms",
       "utils_thirdparrtyapi_hermes_agent_hermesagent",
       "utils_thirdparrtyapi_hermes_agent_normalizepayload"
     ],
-    "23": [
+    "24": [
       "utils_thirdparrtyapi_aimlapi",
       "utils_thirdparrtyapi_aimlapi_aimlapi",
       "utils_thirdparrtyapi_aimlapi_api"
     ],
-    "24": [
+    "25": [
       "utils_thirdparrtyapi_cloudflare",
       "utils_thirdparrtyapi_cloudflare_cloudflareapi",
       "utils_thirdparrtyapi_cloudflare_whispermaxfilebytes"
     ],
-    "25": [
+    "26": [
       "utils_thirdparrtyapi_lemonfoxai",
       "utils_thirdparrtyapi_lemonfoxai_lemonfoxai",
       "utils_thirdparrtyapi_lemonfoxai_openai"
     ],
-    "26": [
+    "27": [
       "scripts_cleanup_stopped_app_containers",
       "scripts_cleanup_stopped_app_containers_sh__entry"
     ],
-    "27": [
+    "28": [
       "scripts_migrate_redis_to_lite_chat",
       "scripts_migrate_redis_to_lite_chat_sh__entry"
     ],
-    "28": [
+    "29": [
       "server",
       "server_sh__entry"
     ],
-    "29": [
+    "30": [
       "skills_douyin_transcribe_api_scripts_transcribe_douyin",
       "skills_douyin_transcribe_api_scripts_transcribe_douyin_sh__entry"
     ],
-    "30": [
+    "31": [
       "start_lite",
       "start_lite_sh__entry"
     ],
-    "31": [
+    "32": [
       "test_cleanupstoppedcontainers_test",
       "test_cleanupstoppedcontainers_test_reporoot"
     ],
-    "32": [
+    "33": [
       "test_startscript_test",
       "test_startscript_test_script"
     ],
-    "33": [
+    "34": [
       "utils_search1api",
       "utils_search1api_search1api"
     ],
-    "34": [
+    "35": [
       "utils_thirdparrtyapi_feishu",
       "utils_thirdparrtyapi_feishu_feishu"
     ],
-    "35": [
+    "36": [
       "utils_thirdparrtyapi_firecrawl",
       "utils_thirdparrtyapi_firecrawl_firecrawltool"
     ],
-    "36": [
+    "37": [
       "utils_thirdparrtyapi_tencentapi",
       "utils_thirdparrtyapi_tencentapi_tencentapi"
     ],
-    "37": [
+    "38": [
       "utils_zyte",
       "utils_zyte_zyte"
     ],
-    "38": [
+    "39": [
       "pdf2images"
     ]
   },
   "cohesion": {
     "0": 0.046511627906976744,
     "1": 0.09446693657219973,
-    "2": 0.08408408408408409,
-    "3": 0.06456456456456457,
-    "4": 0.08831908831908832,
+    "2": 0.06401137980085349,
+    "3": 0.08831908831908832,
+    "4": 0.12,
     "5": 0.22380952380952382,
-    "6": 0.14285714285714285,
-    "7": 0.13333333333333333,
-    "8": 0.2857142857142857,
-    "9": 0.32967032967032966,
-    "10": 0.21794871794871795,
-    "11": 0.32051282051282054,
-    "12": 0.18181818181818182,
-    "13": 0.32727272727272727,
-    "14": 0.26666666666666666,
-    "15": 0.2222222222222222,
-    "16": 0.3611111111111111,
-    "17": 0.5333333333333333,
+    "6": 0.15789473684210525,
+    "7": 0.14285714285714285,
+    "8": 0.13333333333333333,
+    "9": 0.2857142857142857,
+    "10": 0.32967032967032966,
+    "11": 0.21794871794871795,
+    "12": 0.32051282051282054,
+    "13": 0.18181818181818182,
+    "14": 0.32727272727272727,
+    "15": 0.26666666666666666,
+    "16": 0.2222222222222222,
+    "17": 0.3611111111111111,
     "18": 0.5333333333333333,
-    "19": 0.6,
-    "20": 0.6666666666666666,
+    "19": 0.5333333333333333,
+    "20": 0.6,
     "21": 0.6666666666666666,
-    "22": 0.5,
-    "23": 0.6666666666666666,
+    "22": 0.6666666666666666,
+    "23": 0.5,
     "24": 0.6666666666666666,
     "25": 0.6666666666666666,
-    "26": 1.0,
+    "26": 0.6666666666666666,
     "27": 1.0,
     "28": 1.0,
     "29": 1.0,
@@ -522,7 +532,8 @@
     "35": 1.0,
     "36": 1.0,
     "37": 1.0,
-    "38": 1.0
+    "38": 1.0,
+    "39": 1.0
   },
   "gods": [
     {
@@ -548,16 +559,11 @@
     {
       "id": "utils_commonutils_commonutils",
       "label": "commonUtils",
-      "degree": 9
+      "degree": 8
     },
     {
       "id": "utils_networklogger_emit",
       "label": "emit()",
-      "degree": 7
-    },
-    {
-      "id": "utils_unkey_unkey",
-      "label": "unkey",
       "degree": 7
     },
     {
@@ -573,6 +579,11 @@
     {
       "id": "utils_staticzipdeployment_resolvetrustedzippath",
       "label": "resolveTrustedZipPath()",
+      "degree": 6
+    },
+    {
+      "id": "utils_staticzipdeployment_runarchivecommand",
+      "label": "runArchiveCommand()",
       "degree": 6
     }
   ],

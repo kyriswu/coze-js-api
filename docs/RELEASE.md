@@ -1,5 +1,20 @@
 # RELEASE
 
+## Billing Change
+2026-07-17 / seedance-2-token-billing
+
+### Summary
+Seedance 2.0 成功任务现按火山方舟返回的实际完成 token 结算项目积分。
+
+### API / Behavior
+- 创建任务成功后，服务仅在 Redis 中保存调用 API Key 的 SHA-256 摘要；查询任务必须携带创建时相同的 `api_key`。
+- 上游 `status=succeeded` 且具有 `usage.completion_tokens` 时，查询响应增加 `settlement`，其中给出最终扣除积分和 `charged`、`outstanding` 或短暂的 `pending` 状态。
+- 余额不足不会隐藏已经成功生成的视频；响应仍返回上游视频数据，并将 `settlement.status` 标为 `outstanding`。
+- 失败任务或缺少有效 completion-token 用量的成功响应不会扣积分。
+
+### Rollback Notes
+- 回退 `utils/volcengine.io.js` 的任务归属和结算逻辑后，查询接口可恢复为原先无需 API Key 的转发行为，但已完成任务将不再进行本地结算。
+
 ## Documentation
 2026-07-17 / seedance-2-video-api-documentation
 
