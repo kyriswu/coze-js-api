@@ -1,5 +1,14 @@
 # Blue/Green Deployment Implementation Plan
 
+## Seedance 2.0 Video API Documentation — 2026-07-17
+
+**Goal:** Publish a public usage page for the existing Volcengine Seedance 2.0 task creation and polling wrapper.
+
+- [ ] Add the documentation route, template data, and navigation link without changing API behavior.
+- [ ] Verify syntax, route rendering conventions, documentation records, and Graphify output.
+
+---
+
 ## Shared Lite-Chat Redis Migration — 2026-07-17
 
 **Goal:** Retire the project-owned Redis container without public downtime by using `lite-chat-redis` on the existing Docker network and isolated DB 1. Online-copy data may miss concurrent writes, as accepted.
