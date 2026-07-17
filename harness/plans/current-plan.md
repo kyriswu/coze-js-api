@@ -1,5 +1,22 @@
 # Blue/Green Deployment Implementation Plan
 
+## Seedance 2.0 Actual Token Billing — 2026-07-17
+
+**Goal:** Settle successful Seedance tasks from actual upstream completion tokens while returning the video with an explicit outstanding-balance state when the key cannot cover final settlement.
+
+- [x] Confirm upstream completion-token field, rate, rounding, task ownership, and insufficient-balance policy.
+- [ ] Record task ownership with a key digest; require the owner key for polling.
+- [ ] Calculate and idempotently settle successful task usage; return outstanding settlement metadata without hiding the video.
+- [ ] Update API documentation and delivery records; run syntax/diff checks and refresh Graphify only (per requested validation scope).
+
+## Volcengine Task Timeout Handling — 2026-07-17
+
+**Goal:** Raise Volcengine content-generation task upstream timeouts to five minutes and make timeout failures actionable without risking duplicate task creation.
+
+- [ ] Add a validated `VOLCENGINE_TASK_TIMEOUT_MS` configuration (default 300,000 ms) shared by create and query calls.
+- [ ] Return HTTP 504 for Axios timeouts, retain the existing response envelope, and add payload-free diagnostic logging.
+- [ ] Add focused tests; run regression, syntax, diff, documentation, and Graphify verification.
+
 ## Seedance 2.0 Video API Documentation — 2026-07-17
 
 **Goal:** Publish a public usage page for the existing Volcengine Seedance 2.0 task creation and polling wrapper.
