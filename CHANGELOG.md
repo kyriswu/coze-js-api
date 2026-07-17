@@ -8,6 +8,7 @@
 ### Changed
 - 容器镜像在构建阶段通过 `npm ci --omit=dev` 固化应用与依赖；运行时仅挂载 `downloads` 持久目录。
 - 应用发布由单实例强制重建调整为 loopback-only 的 `app-blue`/`app-green` 切换，完成后停止旧实例。
+- 切流后新增回归保护：候选先被标记为承载流量，连续 3 次经本机 Nginx `/readyz` 验证后才排空旧色；状态落盘或验证失败时自动恢复先前 backend。
 
 ## 2026-07-17
 

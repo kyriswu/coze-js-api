@@ -14,9 +14,10 @@
 
 **Smallest safe slice:** Add a regression test for these two ordering invariants; after reload, mark the candidate as traffic-serving before any fallible state persistence; then verify Nginx routes to its `/readyz`. On failure, atomically restore the prior include and retain the old color. Start drain only after this verification succeeds.
 
-- [ ] Add failing deployment-script regression test and implement the ordered rollback guard.
-- [ ] Execute a live `blue → green` cutover to prove the post-switch validation and drain ordering.
-- [ ] Update QA/Release/Graphify evidence for the follow-up.
+- [x] Add failing deployment-script regression test and implement the ordered rollback guard.
+- [x] Execute a live `blue → green` cutover to prove the post-switch validation and drain ordering.
+- [x] Update QA/Release/validation/CHANGELOG evidence for the follow-up.
+- [ ] Refresh Graphify after the evidence commit.
 
 ## Completion Status — 2026-07-17
 
