@@ -4,6 +4,7 @@
 
 ### Added
 - 新增蓝绿发布能力：`/healthz`、Redis 驱动的 `/readyz`、SIGTERM/SIGINT 优雅排空、候选实例验证和 Nginx 原子后端切换。
+- 新增受范围约束的 stopped-container 清理脚本及 systemd timer：仅删除本项目超过 24 小时的已退出 `app`/`app-blue`/`app-green` 容器。
 
 ### Changed
 - 容器镜像在构建阶段通过 `npm ci --omit=dev` 固化应用与依赖；运行时仅挂载 `downloads` 持久目录。

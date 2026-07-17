@@ -1,0 +1,10 @@
+[Unit]
+Description=Run coze-js-api stopped-container cleanup hourly
+
+[Timer]
+OnCalendar=hourly
+Persistent=true
+Unit=coze-js-api-container-cleanup.service
+
+[Install]
+WantedBy=timers.target

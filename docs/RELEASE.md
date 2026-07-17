@@ -12,6 +12,7 @@
 - Compose 定义 profile 服务 `app-blue`/`app-green`，映射为 `127.0.0.1:3003` 与 `127.0.0.1:3004`。3001/3002 被宿主无关进程占用，故未使用以避免影响它们。
 - 两个 Nginx vhost 共用 `include /etc/nginx/coze-js-api/active-backend.conf`；`start.sh` 仅在候选 healthy、`/readyz` 成功和 `nginx -t` 成功后通过临时文件 + `mv` 修改 active backend 并 reload。
 - `start.sh` 失败时停止候选而不改 Nginx；reload 成功后立即把候选标记为承载流量，随后连续 3 次经本机 Nginx `/readyz` 验证。状态持久化或 post-switch 验证失败时，脚本恢复先前 backend；仅验证成功后才后台排空旧色。
+- `scripts/cleanup-stopped-app-containers.sh` 与 `coze-js-api-container-cleanup.timer` 每小时检查一次；仅删除本项目 `app`/`app-blue`/`app-green` 中已退出且超过 24 小时的容器。它与 `start.sh` 共用部署锁，不会使用全局 Docker prune，也不会删除 Redis 或其他项目容器。
 
 ### Live Deployment Evidence
 - 首次候选 blue 已健康，active backend 为 `server 127.0.0.1:3003;`。

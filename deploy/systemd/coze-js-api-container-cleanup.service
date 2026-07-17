@@ -1,0 +1,9 @@
+[Unit]
+Description=Remove expired stopped coze-js-api application containers
+Requires=docker.service
+After=docker.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=/root/coze-js-api
+ExecStart=/root/coze-js-api/scripts/cleanup-stopped-app-containers.sh

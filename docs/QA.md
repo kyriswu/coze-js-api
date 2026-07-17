@@ -13,6 +13,7 @@
 | QA-BG-05 | 本地 `/readyz`、两个 HTTPS 入口 | active 实例就绪，公网不中断 | `/readyz` 返回 `{"status":"ready"}`；`coze-js-api.devtool.uk` 与 `coze-js-api-noproxy.devtool.uk` 均为 HTTP 200 | pass |
 | QA-BG-06 | legacy 排空后清理 | 不再保留旧实例或 3000 监听 | 无活跃 TCP 连接后 legacy exit 143 / `restart=no`；3000 无监听，blue 仍 healthy | pass |
 | QA-BG-07 | post-switch rollback guard + `blue → green` 真实切流 | 新 upstream 必须经 Nginx 验证后才 drain 旧色 | 回归测试先 RED 后 GREEN；green 切至 `127.0.0.1:3004` 后，连续 3 次本机 Nginx `/readyz` 通过；blue 优雅退出 exit 0；两个 HTTPS vhost 的 `/` 与 `/readyz` 均为 200 | pass |
+| QA-BG-08 | stopped-container 自动清理 | 仅清理本项目超过 24 小时的 exited app 容器，不影响 Redis/运行中服务 | 新增行为测试；systemd timer 已 `enabled`/`active`，首次真实运行 exit 0 且删除 0 个（旧容器尚未满 24 小时） | pass |
 
 ## Command Evidence
 ```bash

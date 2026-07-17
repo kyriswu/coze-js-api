@@ -18,6 +18,7 @@
 - [x] Execute a live `blue → green` cutover to prove the post-switch validation and drain ordering.
 - [x] Update QA/Release/validation/CHANGELOG evidence for the follow-up.
 - [x] Refresh Graphify after the evidence commit (`90e9f02c` baseline; graph JSON/report/HTML regenerated).
+- [x] Add a scoped 24-hour stopped-container cleanup script, test, and enabled systemd timer; first live run removed 0 not-yet-expired containers.
 
 ## Completion Status — 2026-07-17
 
