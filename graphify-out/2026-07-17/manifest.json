@@ -15,9 +15,9 @@
     "semantic_hash": "1cb4158fbf03d4411e9b67b931848e56"
   },
   "routes/navigationRoutes.js": {
-    "mtime": 1783769906.452341,
-    "ast_hash": "9f9efa5833b6e0578c3d882ba17f32a4",
-    "semantic_hash": "9f9efa5833b6e0578c3d882ba17f32a4"
+    "mtime": 1784287716.2635355,
+    "ast_hash": "1c9065f6ddc62b57ceba5ad356364179",
+    "semantic_hash": "1c9065f6ddc62b57ceba5ad356364179"
   },
   "scripts/network-log-analyze.mjs": {
     "mtime": 1782988747.1796322,
@@ -358,5 +358,10 @@
     "mtime": 1784282139.1065958,
     "ast_hash": "4613120bd1307df938430dde2136162f",
     "semantic_hash": "4613120bd1307df938430dde2136162f"
+  },
+  "views/api-doc-seedance-2-video.ejs": {
+    "mtime": 1784287716.548536,
+    "ast_hash": "b0abccd7bc125d33948beea1d605335f",
+    "semantic_hash": "b0abccd7bc125d33948beea1d605335f"
   }
 }

@@ -1,5 +1,11 @@
 # Acceptance Criteria
 
+## 2026-07-17 · Seedance 2.0 Video API Documentation
+
+- [x] 新增站内公开文档路由，准确覆盖创建和查询任务入口。
+- [x] 站点导航和 sitemap 包含文档入口。
+- [ ] 文档已通过公网 HTTP 验证并可分享链接。
+
 ## 2026-07-17 · Shared Lite-Chat Redis Migration
 
 - [x] 应用通过环境变量连接 `lite-chat-redis` 的隔离 DB 1，不再依赖 Compose `my-redis` 服务。

@@ -1,5 +1,19 @@
 # RELEASE
 
+## Documentation
+2026-07-17 / seedance-2-video-api-documentation
+
+### Summary
+新增 Seedance 2.0 视频生成公开使用文档，便于直接调用已存在的火山方舟任务封装。
+
+### What Changed
+- 新增 `GET /docs/volcengine/seedance-2-0`，说明创建任务、首帧参考图、参考媒体与轮询方式。
+- 首页服务导航新增该文档入口，并将页面加入 sitemap。
+- 文档明确本地 `code/msg/data` 包装和上游任务对象透传行为。
+
+### API / Behavior
+- 不改变 `POST /volcengine/contents/generations/tasks` 或 `GET /volcengine/contents/generations/tasks/:task_id` 的实现和响应。
+
 ## Infrastructure Change
 2026-07-17 / shared-lite-chat-redis-migration
 

@@ -1,5 +1,11 @@
 # Test Checklist
 
+## 2026-07-17 · Seedance 2.0 Video API Documentation
+
+- [x] 文档路由与应用入口语法检查通过。
+- [x] 全量 Node 测试：`npm test`，21 passed / 0 failed。
+- [ ] 公网文档页 HTTP 验证。
+
 ## 2026-07-17 · Shared Lite-Chat Redis Migration
 
 - [x] Redis 配置单测：显式 host/DB、默认兼容和可选凭据均已覆盖。

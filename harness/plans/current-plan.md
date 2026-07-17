@@ -4,7 +4,7 @@
 
 **Goal:** Publish a public usage page for the existing Volcengine Seedance 2.0 task creation and polling wrapper.
 
-- [ ] Add the documentation route, template data, and navigation link without changing API behavior.
+- [x] Add the documentation route, template data, and navigation link without changing API behavior.
 - [ ] Verify syntax, route rendering conventions, documentation records, and Graphify output.
 
 ---

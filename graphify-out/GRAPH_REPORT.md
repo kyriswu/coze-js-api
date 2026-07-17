@@ -4,12 +4,12 @@
 - cluster-only mode — file stats not available
 
 ## Summary
-- 404 nodes · 573 edges · 39 communities (21 shown, 18 thin omitted)
+- 404 nodes · 565 edges · 39 communities (21 shown, 18 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 1 edges (avg confidence: 0.5)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `896feaed`
+- Built from commit: `b7eefc54`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -18,9 +18,8 @@
 - index.js
 - volcengine.io.js
 - tool.js
-- staticZipDeployment.js
-- navigationRoutes.js
 - evolink.ai.js
+- staticZipDeployment.js
 - tikhub.io.js
 - CustomError.js
 - networkAnalytics.js
@@ -30,6 +29,7 @@
 - package.json
 - network-log-analyze.mjs
 - appLifecycle.test.js
+- navigationRoutes.js
 - start.sh
 - fetch_hot_rise_list.py
 - google_search.py
@@ -55,12 +55,12 @@
 
 ## God Nodes (most connected - your core abstractions)
 1. `getNetworkDashboardMetrics()` - 11 edges
-2. `redis` - 11 edges
-3. `reject()` - 10 edges
+2. `reject()` - 10 edges
+3. `redis` - 10 edges
 4. `deployStaticZip()` - 9 edges
 5. `commonUtils` - 9 edges
-6. `unkey` - 8 edges
-7. `emit()` - 7 edges
+6. `emit()` - 7 edges
+7. `unkey` - 7 edges
 8. `listDownloadFiles()` - 7 edges
 9. `analyze()` - 6 edges
 10. `resolveTrustedZipPath()` - 6 edges
@@ -94,53 +94,53 @@ Nodes (24): calc_ba_zi, calc_zi_wei, points, commonUtils, CONFIG, qweather_tool,
 Cohesion: 0.06
 Nodes (28): BROWSER_SESSION_SWEEP_INTERVAL_MS, BROWSER_SESSION_TTL_MS, browserless, browserSessionSweeper, closeBrowserSession(), __dirname, disableLoadMedia(), __filename (+20 more)
 
-### Community 4 - "staticZipDeployment.js"
+### Community 4 - "evolink.ai.js"
+Cohesion: 0.09
+Nodes (13): chargeApiCredits(), createApiAccessHelpers(), __dirname, envFilePath, __filename, aitoken, GPT_IMAGE_EDIT_MAX_RETRIES, GPT_IMAGE_EDIT_RETRY_BASE_DELAY_MS (+5 more)
+
+### Community 5 - "staticZipDeployment.js"
 Cohesion: 0.22
 Nodes (17): createValidArtifact(), sha256(), ALLOWED_STATIC_EXTENSIONS, assertReleaseRelativeStaticPaths(), assertWithin(), DeploymentRejected, deployStaticZip(), execFile (+9 more)
 
-### Community 5 - "navigationRoutes.js"
-Cohesion: 0.14
-Nodes (11): router, serviceCards, serviceCategories, serviceStats, sitemapCategoryItems, sitemapPageItems, chargeApiCredits(), createApiAccessHelpers() (+3 more)
-
-### Community 6 - "evolink.ai.js"
-Cohesion: 0.12
-Nodes (8): __dirname, envFilePath, __filename, ensureApiKey(), evolink, FINAL_STATUSES, getAxiosConfig(), { verifyApiAccess, consumeApiCredits }
-
-### Community 7 - "tikhub.io.js"
+### Community 6 - "tikhub.io.js"
 Cohesion: 0.14
 Nodes (9): th_bilibili, th_douyin, th_douyin_billboard, th_tiktok, th_twitter, th_wechat_channels, th_wechat_media, th_xiaohongshu (+1 more)
 
-### Community 8 - "CustomError.js"
+### Community 7 - "CustomError.js"
 Cohesion: 0.13
 Nodes (7): BaseError, FileOperationError, InvalidApiKeyError, NotFoundError, QuotaExceededError, RateLimitError, ValidationError
 
-### Community 9 - "networkAnalytics.js"
+### Community 8 - "networkAnalytics.js"
 Cohesion: 0.29
 Nodes (14): buildTimeline(), collectLastLines(), DEFAULT_SCAN_LIMIT, getNetworkDashboardMetrics(), incMap(), matchFilters(), minuteStart(), normalizeMethod() (+6 more)
 
-### Community 10 - "twitter_api.py"
+### Community 9 - "twitter_api.py"
 Cohesion: 0.33
 Nodes (13): Any, ArgumentParser, build_parser(), get_api_key(), main(), normalize_detail(), normalize_search(), pick_first() (+5 more)
 
-### Community 11 - "redisClient.js"
+### Community 10 - "redisClient.js"
 Cohesion: 0.22
 Nodes (7): netdiskapi, redis, redisOptions, getRedisConnectionOptions(), parseInteger(), config, cozecom
 
-### Community 12 - "networkLogger.js"
+### Community 11 - "networkLogger.js"
 Cohesion: 0.32
 Nodes (11): attachAxiosRateLimitLogger(), emit(), ensureFileLogger(), LOG_MODE, logAxiosError(), logAxiosRequest(), logHttpRequest(), logRateLimit() (+3 more)
 
-### Community 13 - "package.json"
+### Community 12 - "package.json"
 Cohesion: 0.18
 Nodes (10): author, description, keywords, license, main, name, scripts, test (+2 more)
 
-### Community 14 - "network-log-analyze.mjs"
+### Community 13 - "network-log-analyze.mjs"
 Cohesion: 0.33
 Nodes (10): analyze(), DEFAULT_FILE, inc(), main(), parseArgs(), printHelp(), printHuman(), statusClass() (+2 more)
 
-### Community 15 - "appLifecycle.test.js"
+### Community 14 - "appLifecycle.test.js"
 Cohesion: 0.27
 Nodes (3): createGracefulShutdown(), createHealthHandler(), createReadinessHandler()
+
+### Community 15 - "navigationRoutes.js"
+Cohesion: 0.22
+Nodes (6): router, serviceCards, serviceCategories, serviceStats, sitemapCategoryItems, sitemapPageItems
 
 ### Community 16 - "start.sh"
 Cohesion: 0.36
@@ -159,21 +159,21 @@ Cohesion: 0.60
 Nodes (5): get_api_key(), main(), parse_bool(), print_results(), web_search()
 
 ## Knowledge Gaps
-- **124 isolated node(s):** `router`, `serviceCategories`, `serviceCards`, `serviceStats`, `sitemapPageItems` (+119 more)
+- **125 isolated node(s):** `DEFAULT_FILE`, `server.sh script`, `transcribe_douyin.sh script`, `start_lite.sh script`, `api` (+120 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **18 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `redis` connect `redisClient.js` to `index.js`, `volcengine.io.js`, `tool.js`, `navigationRoutes.js`, `evolink.ai.js`, `networkAnalytics.js`, `networkLogger.js`?**
-  _High betweenness centrality (0.071) - this node is a cross-community bridge._
+- **Why does `redis` connect `redisClient.js` to `index.js`, `volcengine.io.js`, `tool.js`, `evolink.ai.js`, `networkAnalytics.js`, `networkLogger.js`?**
+  _High betweenness centrality (0.066) - this node is a cross-community bridge._
 - **Why does `dependencies` connect `dependencies` to `package.json`?**
   _High betweenness centrality (0.017) - this node is a cross-community bridge._
 - **Why does `commonUtils` connect `volcengine.io.js` to `evolink.ai.js`, `tikhub.io.js`?**
-  _High betweenness centrality (0.015) - this node is a cross-community bridge._
-- **What connects `router`, `serviceCategories`, `serviceCards` to the rest of the system?**
-  _124 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _High betweenness centrality (0.016) - this node is a cross-community bridge._
+- **What connects `DEFAULT_FILE`, `server.sh script`, `transcribe_douyin.sh script` to the rest of the system?**
+  _125 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `dependencies` be split into smaller, more focused modules?**
   _Cohesion score 0.046511627906976744 - nodes in this community are weakly interconnected._
 - **Should `index.js` be split into smaller, more focused modules?**

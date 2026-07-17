@@ -1,6 +1,25 @@
 # QA
 
 ## Iteration
+2026-07-17 / seedance-2-video-api-documentation
+
+## Test Matrix
+| Case ID | Step | Expected | Actual | Status |
+|---|---|---|---|---|
+| QA-SD-01 | `node --check routes/navigationRoutes.js`、`node --check index.js`、`git diff --check` | 文档路由、应用入口和差异格式有效 | 均成功 | pass |
+| QA-SD-02 | `npm test` | 既有回归不受文档页影响 | 21 passed, 0 failed | pass |
+
+## Manual Checks
+- 文档页复用现有 API 文档模板，准确说明 `POST /volcengine/contents/generations/tasks` 与 `GET /volcengine/contents/generations/tasks/:task_id`。
+- 示例仅使用占位 API Key 和示例媒体 URL，不包含实际凭据或敏感载荷。
+
+## Final QA Verdict
+- [x] pass
+- [ ] conditional pass
+- [ ] fail
+
+
+## Iteration
 2026-07-17 / shared-lite-chat-redis-migration
 
 ## Test Matrix

@@ -59,111 +59,12 @@
       "id": "pdf2images"
     },
     {
-      "label": "navigationRoutes.js",
-      "file_type": "code",
-      "source_file": "routes/navigationRoutes.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "community": 5,
-      "norm_label": "navigationroutes.js",
-      "community_name": "navigationRoutes.js",
-      "id": "routes_navigationroutes"
-    },
-    {
-      "label": "router",
-      "file_type": "code",
-      "source_file": "routes/navigationRoutes.js",
-      "source_location": "L7",
-      "_origin": "ast",
-      "community": 5,
-      "norm_label": "router",
-      "community_name": "navigationRoutes.js",
-      "id": "routes_navigationroutes_router"
-    },
-    {
-      "label": "serviceCategories",
-      "file_type": "code",
-      "source_file": "routes/navigationRoutes.js",
-      "source_location": "L9",
-      "_origin": "ast",
-      "community": 5,
-      "norm_label": "servicecategories",
-      "community_name": "navigationRoutes.js",
-      "id": "routes_navigationroutes_servicecategories"
-    },
-    {
-      "label": "serviceCards",
-      "file_type": "code",
-      "source_file": "routes/navigationRoutes.js",
-      "source_location": "L20",
-      "_origin": "ast",
-      "community": 5,
-      "norm_label": "servicecards",
-      "community_name": "navigationRoutes.js",
-      "id": "routes_navigationroutes_servicecards"
-    },
-    {
-      "label": "serviceStats",
-      "file_type": "code",
-      "source_file": "routes/navigationRoutes.js",
-      "source_location": "L374",
-      "_origin": "ast",
-      "community": 5,
-      "norm_label": "servicestats",
-      "community_name": "navigationRoutes.js",
-      "id": "routes_navigationroutes_servicestats"
-    },
-    {
-      "label": "xmlEscape()",
-      "file_type": "code",
-      "source_file": "routes/navigationRoutes.js",
-      "source_location": "L381",
-      "_origin": "ast",
-      "community": 5,
-      "norm_label": "xmlescape()",
-      "community_name": "navigationRoutes.js",
-      "id": "routes_navigationroutes_xmlescape"
-    },
-    {
-      "label": "parseEndpoint()",
-      "file_type": "code",
-      "source_file": "routes/navigationRoutes.js",
-      "source_location": "L388",
-      "_origin": "ast",
-      "community": 5,
-      "norm_label": "parseendpoint()",
-      "community_name": "navigationRoutes.js",
-      "id": "routes_navigationroutes_parseendpoint"
-    },
-    {
-      "label": "sitemapPageItems",
-      "file_type": "code",
-      "source_file": "routes/navigationRoutes.js",
-      "source_location": "L396",
-      "_origin": "ast",
-      "community": 5,
-      "norm_label": "sitemappageitems",
-      "community_name": "navigationRoutes.js",
-      "id": "routes_navigationroutes_sitemappageitems"
-    },
-    {
-      "label": "sitemapCategoryItems",
-      "file_type": "code",
-      "source_file": "routes/navigationRoutes.js",
-      "source_location": "L414",
-      "_origin": "ast",
-      "community": 5,
-      "norm_label": "sitemapcategoryitems",
-      "community_name": "navigationRoutes.js",
-      "id": "routes_navigationroutes_sitemapcategoryitems"
-    },
-    {
       "label": "network-log-analyze.mjs",
       "file_type": "code",
       "source_file": "scripts/network-log-analyze.mjs",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 14,
+      "community": 13,
       "norm_label": "network-log-analyze.mjs",
       "community_name": "network-log-analyze.mjs",
       "id": "scripts_network_log_analyze"
@@ -174,7 +75,7 @@
       "source_file": "scripts/network-log-analyze.mjs",
       "source_location": "L5",
       "_origin": "ast",
-      "community": 14,
+      "community": 13,
       "norm_label": "default_file",
       "community_name": "network-log-analyze.mjs",
       "id": "scripts_network_log_analyze_default_file"
@@ -185,7 +86,7 @@
       "source_file": "scripts/network-log-analyze.mjs",
       "source_location": "L7",
       "_origin": "ast",
-      "community": 14,
+      "community": 13,
       "norm_label": "parseargs()",
       "community_name": "network-log-analyze.mjs",
       "id": "scripts_network_log_analyze_parseargs"
@@ -196,7 +97,7 @@
       "source_file": "scripts/network-log-analyze.mjs",
       "source_location": "L34",
       "_origin": "ast",
-      "community": 14,
+      "community": 13,
       "norm_label": "printhelp()",
       "community_name": "network-log-analyze.mjs",
       "id": "scripts_network_log_analyze_printhelp"
@@ -207,7 +108,7 @@
       "source_file": "scripts/network-log-analyze.mjs",
       "source_location": "L49",
       "_origin": "ast",
-      "community": 14,
+      "community": 13,
       "norm_label": "inc()",
       "community_name": "network-log-analyze.mjs",
       "id": "scripts_network_log_analyze_inc"
@@ -218,7 +119,7 @@
       "source_file": "scripts/network-log-analyze.mjs",
       "source_location": "L54",
       "_origin": "ast",
-      "community": 14,
+      "community": 13,
       "norm_label": "topentries()",
       "community_name": "network-log-analyze.mjs",
       "id": "scripts_network_log_analyze_topentries"
@@ -229,7 +130,7 @@
       "source_file": "scripts/network-log-analyze.mjs",
       "source_location": "L61",
       "_origin": "ast",
-      "community": 14,
+      "community": 13,
       "norm_label": "topslowrequests()",
       "community_name": "network-log-analyze.mjs",
       "id": "scripts_network_log_analyze_topslowrequests"
@@ -240,7 +141,7 @@
       "source_file": "scripts/network-log-analyze.mjs",
       "source_location": "L67",
       "_origin": "ast",
-      "community": 14,
+      "community": 13,
       "norm_label": "statusclass()",
       "community_name": "network-log-analyze.mjs",
       "id": "scripts_network_log_analyze_statusclass"
@@ -251,7 +152,7 @@
       "source_file": "scripts/network-log-analyze.mjs",
       "source_location": "L77",
       "_origin": "ast",
-      "community": 14,
+      "community": 13,
       "norm_label": "analyze()",
       "community_name": "network-log-analyze.mjs",
       "id": "scripts_network_log_analyze_analyze"
@@ -262,7 +163,7 @@
       "source_file": "scripts/network-log-analyze.mjs",
       "source_location": "L183",
       "_origin": "ast",
-      "community": 14,
+      "community": 13,
       "norm_label": "printhuman()",
       "community_name": "network-log-analyze.mjs",
       "id": "scripts_network_log_analyze_printhuman"
@@ -273,7 +174,7 @@
       "source_file": "scripts/network-log-analyze.mjs",
       "source_location": "L213",
       "_origin": "ast",
-      "community": 14,
+      "community": 13,
       "norm_label": "main()",
       "community_name": "network-log-analyze.mjs",
       "id": "scripts_network_log_analyze_main"
@@ -476,7 +377,7 @@
       "source_file": "skills/twitterwebapi/scripts/twitter_api.py",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 10,
+      "community": 9,
       "norm_label": "twitter_api.py",
       "community_name": "twitter_api.py",
       "id": "skills_twitterwebapi_scripts_twitter_api"
@@ -487,7 +388,7 @@
       "source_file": "skills/twitterwebapi/scripts/twitter_api.py",
       "source_location": "L22",
       "_origin": "ast",
-      "community": 10,
+      "community": 9,
       "norm_label": "get_api_key()",
       "community_name": "twitter_api.py",
       "id": "skills_twitterwebapi_scripts_twitter_api_get_api_key"
@@ -498,7 +399,7 @@
       "source_file": "skills/twitterwebapi/scripts/twitter_api.py",
       "source_location": "L27",
       "_origin": "ast",
-      "community": 10,
+      "community": 9,
       "norm_label": "post_json()",
       "community_name": "twitter_api.py",
       "id": "skills_twitterwebapi_scripts_twitter_api_post_json"
@@ -509,7 +410,7 @@
       "source_file": "",
       "source_location": "",
       "_origin": "ast",
-      "community": 10,
+      "community": 9,
       "norm_label": "any",
       "community_name": "twitter_api.py",
       "id": "any"
@@ -520,7 +421,7 @@
       "source_file": "skills/twitterwebapi/scripts/twitter_api.py",
       "source_location": "L47",
       "_origin": "ast",
-      "community": 10,
+      "community": 9,
       "norm_label": "pick_first()",
       "community_name": "twitter_api.py",
       "id": "skills_twitterwebapi_scripts_twitter_api_pick_first"
@@ -531,7 +432,7 @@
       "source_file": "skills/twitterwebapi/scripts/twitter_api.py",
       "source_location": "L54",
       "_origin": "ast",
-      "community": 10,
+      "community": 9,
       "norm_label": "normalize_detail()",
       "community_name": "twitter_api.py",
       "id": "skills_twitterwebapi_scripts_twitter_api_normalize_detail"
@@ -542,7 +443,7 @@
       "source_file": "skills/twitterwebapi/scripts/twitter_api.py",
       "source_location": "L71",
       "_origin": "ast",
-      "community": 10,
+      "community": 9,
       "norm_label": "normalize_search()",
       "community_name": "twitter_api.py",
       "id": "skills_twitterwebapi_scripts_twitter_api_normalize_search"
@@ -553,7 +454,7 @@
       "source_file": "skills/twitterwebapi/scripts/twitter_api.py",
       "source_location": "L97",
       "_origin": "ast",
-      "community": 10,
+      "community": 9,
       "norm_label": "print_detail_result()",
       "community_name": "twitter_api.py",
       "id": "skills_twitterwebapi_scripts_twitter_api_print_detail_result"
@@ -564,7 +465,7 @@
       "source_file": "skills/twitterwebapi/scripts/twitter_api.py",
       "source_location": "L120",
       "_origin": "ast",
-      "community": 10,
+      "community": 9,
       "norm_label": "print_search_result()",
       "community_name": "twitter_api.py",
       "id": "skills_twitterwebapi_scripts_twitter_api_print_search_result"
@@ -575,7 +476,7 @@
       "source_file": "skills/twitterwebapi/scripts/twitter_api.py",
       "source_location": "L152",
       "_origin": "ast",
-      "community": 10,
+      "community": 9,
       "norm_label": "run_detail()",
       "community_name": "twitter_api.py",
       "id": "skills_twitterwebapi_scripts_twitter_api_run_detail"
@@ -586,7 +487,7 @@
       "source_file": "skills/twitterwebapi/scripts/twitter_api.py",
       "source_location": "L164",
       "_origin": "ast",
-      "community": 10,
+      "community": 9,
       "norm_label": "run_search()",
       "community_name": "twitter_api.py",
       "id": "skills_twitterwebapi_scripts_twitter_api_run_search"
@@ -597,7 +498,7 @@
       "source_file": "skills/twitterwebapi/scripts/twitter_api.py",
       "source_location": "L178",
       "_origin": "ast",
-      "community": 10,
+      "community": 9,
       "norm_label": "build_parser()",
       "community_name": "twitter_api.py",
       "id": "skills_twitterwebapi_scripts_twitter_api_build_parser"
@@ -608,7 +509,7 @@
       "source_file": "",
       "source_location": "",
       "_origin": "ast",
-      "community": 10,
+      "community": 9,
       "norm_label": "argumentparser",
       "community_name": "twitter_api.py",
       "id": "argumentparser"
@@ -619,7 +520,7 @@
       "source_file": "skills/twitterwebapi/scripts/twitter_api.py",
       "source_location": "L199",
       "_origin": "ast",
-      "community": 10,
+      "community": 9,
       "norm_label": "main()",
       "community_name": "twitter_api.py",
       "id": "skills_twitterwebapi_scripts_twitter_api_main"
@@ -726,7 +627,7 @@
       "source_file": "test/staticZipDeployment.test.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "staticzipdeployment.test.js",
       "community_name": "staticZipDeployment.js",
       "id": "test_staticzipdeployment_test"
@@ -737,7 +638,7 @@
       "source_file": "test/staticZipDeployment.test.js",
       "source_location": "L12",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "sha256()",
       "community_name": "staticZipDeployment.js",
       "id": "test_staticzipdeployment_test_sha256"
@@ -748,7 +649,7 @@
       "source_file": "test/staticZipDeployment.test.js",
       "source_location": "L14",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "createvalidartifact()",
       "community_name": "staticZipDeployment.js",
       "id": "test_staticzipdeployment_test_createvalidartifact"
@@ -759,7 +660,7 @@
       "source_file": "utils/CustomError.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 8,
+      "community": 7,
       "norm_label": "customerror.js",
       "community_name": "CustomError.js",
       "id": "utils_customerror"
@@ -770,7 +671,7 @@
       "source_file": "utils/CustomError.js",
       "source_location": "L2",
       "_origin": "ast",
-      "community": 8,
+      "community": 7,
       "norm_label": "baseerror",
       "community_name": "CustomError.js",
       "id": "utils_customerror_baseerror"
@@ -781,7 +682,7 @@
       "source_file": "utils/CustomError.js",
       "source_location": "L3",
       "_origin": "ast",
-      "community": 8,
+      "community": 7,
       "norm_label": ".constructor()",
       "community_name": "CustomError.js",
       "id": "utils_customerror_baseerror_constructor"
@@ -792,7 +693,7 @@
       "source_file": "utils/CustomError.js",
       "source_location": "L11",
       "_origin": "ast",
-      "community": 8,
+      "community": 7,
       "norm_label": "quotaexceedederror",
       "community_name": "CustomError.js",
       "id": "utils_customerror_quotaexceedederror"
@@ -803,7 +704,7 @@
       "source_file": "utils/CustomError.js",
       "source_location": "L12",
       "_origin": "ast",
-      "community": 8,
+      "community": 7,
       "norm_label": ".constructor()",
       "community_name": "CustomError.js",
       "id": "utils_customerror_quotaexceedederror_constructor"
@@ -814,7 +715,7 @@
       "source_file": "utils/CustomError.js",
       "source_location": "L19",
       "_origin": "ast",
-      "community": 8,
+      "community": 7,
       "norm_label": "invalidapikeyerror",
       "community_name": "CustomError.js",
       "id": "utils_customerror_invalidapikeyerror"
@@ -825,7 +726,7 @@
       "source_file": "utils/CustomError.js",
       "source_location": "L20",
       "_origin": "ast",
-      "community": 8,
+      "community": 7,
       "norm_label": ".constructor()",
       "community_name": "CustomError.js",
       "id": "utils_customerror_invalidapikeyerror_constructor"
@@ -836,7 +737,7 @@
       "source_file": "utils/CustomError.js",
       "source_location": "L27",
       "_origin": "ast",
-      "community": 8,
+      "community": 7,
       "norm_label": "validationerror",
       "community_name": "CustomError.js",
       "id": "utils_customerror_validationerror"
@@ -847,7 +748,7 @@
       "source_file": "utils/CustomError.js",
       "source_location": "L28",
       "_origin": "ast",
-      "community": 8,
+      "community": 7,
       "norm_label": ".constructor()",
       "community_name": "CustomError.js",
       "id": "utils_customerror_validationerror_constructor"
@@ -858,7 +759,7 @@
       "source_file": "utils/CustomError.js",
       "source_location": "L35",
       "_origin": "ast",
-      "community": 8,
+      "community": 7,
       "norm_label": "notfounderror",
       "community_name": "CustomError.js",
       "id": "utils_customerror_notfounderror"
@@ -869,7 +770,7 @@
       "source_file": "utils/CustomError.js",
       "source_location": "L36",
       "_origin": "ast",
-      "community": 8,
+      "community": 7,
       "norm_label": ".constructor()",
       "community_name": "CustomError.js",
       "id": "utils_customerror_notfounderror_constructor"
@@ -880,7 +781,7 @@
       "source_file": "utils/CustomError.js",
       "source_location": "L43",
       "_origin": "ast",
-      "community": 8,
+      "community": 7,
       "norm_label": "ratelimiterror",
       "community_name": "CustomError.js",
       "id": "utils_customerror_ratelimiterror"
@@ -891,7 +792,7 @@
       "source_file": "utils/CustomError.js",
       "source_location": "L44",
       "_origin": "ast",
-      "community": 8,
+      "community": 7,
       "norm_label": ".constructor()",
       "community_name": "CustomError.js",
       "id": "utils_customerror_ratelimiterror_constructor"
@@ -902,7 +803,7 @@
       "source_file": "utils/CustomError.js",
       "source_location": "L52",
       "_origin": "ast",
-      "community": 8,
+      "community": 7,
       "norm_label": "fileoperationerror",
       "community_name": "CustomError.js",
       "id": "utils_customerror_fileoperationerror"
@@ -913,7 +814,7 @@
       "source_file": "utils/CustomError.js",
       "source_location": "L53",
       "_origin": "ast",
-      "community": 8,
+      "community": 7,
       "norm_label": ".constructor()",
       "community_name": "CustomError.js",
       "id": "utils_customerror_fileoperationerror_constructor"
@@ -1210,7 +1111,7 @@
       "source_file": "utils/ThirdParrtyApi/cozecom.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 11,
+      "community": 10,
       "norm_label": "cozecom.js",
       "community_name": "redisClient.js",
       "id": "utils_thirdparrtyapi_cozecom"
@@ -1221,7 +1122,7 @@
       "source_file": "utils/ThirdParrtyApi/cozecom.js",
       "source_location": "L6",
       "_origin": "ast",
-      "community": 11,
+      "community": 10,
       "norm_label": "config",
       "community_name": "redisClient.js",
       "id": "utils_thirdparrtyapi_cozecom_config"
@@ -1232,7 +1133,7 @@
       "source_file": "utils/ThirdParrtyApi/cozecom.js",
       "source_location": "L26",
       "_origin": "ast",
-      "community": 11,
+      "community": 10,
       "norm_label": "timestamptodatetime()",
       "community_name": "redisClient.js",
       "id": "utils_thirdparrtyapi_cozecom_timestamptodatetime"
@@ -1243,7 +1144,7 @@
       "source_file": "utils/ThirdParrtyApi/cozecom.js",
       "source_location": "L33",
       "_origin": "ast",
-      "community": 11,
+      "community": 10,
       "norm_label": "cozecom",
       "community_name": "redisClient.js",
       "id": "utils_thirdparrtyapi_cozecom_cozecom"
@@ -1254,7 +1155,7 @@
       "source_file": "utils/ThirdParrtyApi/evolink.ai.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 6,
+      "community": 4,
       "norm_label": "evolink.ai.js",
       "community_name": "evolink.ai.js",
       "id": "utils_thirdparrtyapi_evolink_ai"
@@ -1265,7 +1166,7 @@
       "source_file": "utils/ThirdParrtyApi/evolink.ai.js",
       "source_location": "L15",
       "_origin": "ast",
-      "community": 6,
+      "community": 4,
       "norm_label": "final_statuses",
       "community_name": "evolink.ai.js",
       "id": "utils_thirdparrtyapi_evolink_ai_final_statuses"
@@ -1276,7 +1177,7 @@
       "source_file": "utils/ThirdParrtyApi/evolink.ai.js",
       "source_location": "L18",
       "_origin": "ast",
-      "community": 6,
+      "community": 4,
       "norm_label": "{ verifyapiaccess, consumeapicredits }",
       "community_name": "evolink.ai.js",
       "id": "utils_thirdparrtyapi_evolink_ai_verifyapiaccess_consumeapicredits"
@@ -1287,7 +1188,7 @@
       "source_file": "utils/ThirdParrtyApi/evolink.ai.js",
       "source_location": "L27",
       "_origin": "ast",
-      "community": 6,
+      "community": 4,
       "norm_label": "ensureapikey()",
       "community_name": "evolink.ai.js",
       "id": "utils_thirdparrtyapi_evolink_ai_ensureapikey"
@@ -1298,7 +1199,7 @@
       "source_file": "utils/ThirdParrtyApi/evolink.ai.js",
       "source_location": "L37",
       "_origin": "ast",
-      "community": 6,
+      "community": 4,
       "norm_label": "sleep()",
       "community_name": "evolink.ai.js",
       "id": "utils_thirdparrtyapi_evolink_ai_sleep"
@@ -1309,7 +1210,7 @@
       "source_file": "utils/ThirdParrtyApi/evolink.ai.js",
       "source_location": "L41",
       "_origin": "ast",
-      "community": 6,
+      "community": 4,
       "norm_label": "getaxiosconfig()",
       "community_name": "evolink.ai.js",
       "id": "utils_thirdparrtyapi_evolink_ai_getaxiosconfig"
@@ -1320,7 +1221,7 @@
       "source_file": "utils/ThirdParrtyApi/evolink.ai.js",
       "source_location": "L51",
       "_origin": "ast",
-      "community": 6,
+      "community": 4,
       "norm_label": "normalizepositivenumber()",
       "community_name": "evolink.ai.js",
       "id": "utils_thirdparrtyapi_evolink_ai_normalizepositivenumber"
@@ -1331,7 +1232,7 @@
       "source_file": "utils/ThirdParrtyApi/evolink.ai.js",
       "source_location": "L56",
       "_origin": "ast",
-      "community": 6,
+      "community": 4,
       "norm_label": "buildrequesterror()",
       "community_name": "evolink.ai.js",
       "id": "utils_thirdparrtyapi_evolink_ai_buildrequesterror"
@@ -1342,7 +1243,7 @@
       "source_file": "utils/ThirdParrtyApi/evolink.ai.js",
       "source_location": "L68",
       "_origin": "ast",
-      "community": 6,
+      "community": 4,
       "norm_label": "buildclienterror()",
       "community_name": "evolink.ai.js",
       "id": "utils_thirdparrtyapi_evolink_ai_buildclienterror"
@@ -1353,7 +1254,7 @@
       "source_file": "utils/ThirdParrtyApi/evolink.ai.js",
       "source_location": "L75",
       "_origin": "ast",
-      "community": 6,
+      "community": 4,
       "norm_label": "getfinalimageurl()",
       "community_name": "evolink.ai.js",
       "id": "utils_thirdparrtyapi_evolink_ai_getfinalimageurl"
@@ -1364,7 +1265,7 @@
       "source_file": "utils/ThirdParrtyApi/evolink.ai.js",
       "source_location": "L83",
       "_origin": "ast",
-      "community": 6,
+      "community": 4,
       "norm_label": "getcreditused()",
       "community_name": "evolink.ai.js",
       "id": "utils_thirdparrtyapi_evolink_ai_getcreditused"
@@ -1375,7 +1276,7 @@
       "source_file": "utils/ThirdParrtyApi/evolink.ai.js",
       "source_location": "L88",
       "_origin": "ast",
-      "community": 6,
+      "community": 4,
       "norm_label": "calculatecreditcost()",
       "community_name": "evolink.ai.js",
       "id": "utils_thirdparrtyapi_evolink_ai_calculatecreditcost"
@@ -1386,7 +1287,7 @@
       "source_file": "utils/ThirdParrtyApi/evolink.ai.js",
       "source_location": "L100",
       "_origin": "ast",
-      "community": 6,
+      "community": 4,
       "norm_label": "evolink",
       "community_name": "evolink.ai.js",
       "id": "utils_thirdparrtyapi_evolink_ai_evolink"
@@ -1562,7 +1463,7 @@
       "source_file": "utils/axiosInterceptors.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 12,
+      "community": 11,
       "norm_label": "axiosinterceptors.js",
       "community_name": "networkLogger.js",
       "id": "utils_axiosinterceptors"
@@ -1573,7 +1474,7 @@
       "source_file": "utils/axiosInterceptors.js",
       "source_location": "L3",
       "_origin": "ast",
-      "community": 12,
+      "community": 11,
       "norm_label": "attachaxiosratelimitlogger()",
       "community_name": "networkLogger.js",
       "id": "utils_axiosinterceptors_attachaxiosratelimitlogger"
@@ -1683,7 +1584,7 @@
       "source_file": "utils/loadEnv.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 6,
+      "community": 4,
       "norm_label": "loadenv.js",
       "community_name": "evolink.ai.js",
       "id": "utils_loadenv"
@@ -1694,7 +1595,7 @@
       "source_file": "utils/loadEnv.js",
       "source_location": "L5",
       "_origin": "ast",
-      "community": 6,
+      "community": 4,
       "norm_label": "__filename",
       "community_name": "evolink.ai.js",
       "id": "utils_loadenv_filename"
@@ -1705,7 +1606,7 @@
       "source_file": "utils/loadEnv.js",
       "source_location": "L6",
       "_origin": "ast",
-      "community": 6,
+      "community": 4,
       "norm_label": "__dirname",
       "community_name": "evolink.ai.js",
       "id": "utils_loadenv_dirname"
@@ -1716,7 +1617,7 @@
       "source_file": "utils/loadEnv.js",
       "source_location": "L7",
       "_origin": "ast",
-      "community": 6,
+      "community": 4,
       "norm_label": "envfilepath",
       "community_name": "evolink.ai.js",
       "id": "utils_loadenv_envfilepath"
@@ -1727,7 +1628,7 @@
       "source_file": "utils/loadEnv.js",
       "source_location": "L9",
       "_origin": "ast",
-      "community": 6,
+      "community": 4,
       "norm_label": "stripwrappingquotes()",
       "community_name": "evolink.ai.js",
       "id": "utils_loadenv_stripwrappingquotes"
@@ -1738,7 +1639,7 @@
       "source_file": "utils/netdiskapi.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 11,
+      "community": 10,
       "norm_label": "netdiskapi.js",
       "community_name": "redisClient.js",
       "id": "utils_netdiskapi"
@@ -1749,7 +1650,7 @@
       "source_file": "utils/netdiskapi.js",
       "source_location": "L6",
       "_origin": "ast",
-      "community": 11,
+      "community": 10,
       "norm_label": "netdiskapi",
       "community_name": "redisClient.js",
       "id": "utils_netdiskapi_netdiskapi"
@@ -1760,7 +1661,7 @@
       "source_file": "utils/networkAnalytics.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 9,
+      "community": 8,
       "norm_label": "networkanalytics.js",
       "community_name": "networkAnalytics.js",
       "id": "utils_networkanalytics"
@@ -1771,7 +1672,7 @@
       "source_file": "utils/networkAnalytics.js",
       "source_location": "L8",
       "_origin": "ast",
-      "community": 9,
+      "community": 8,
       "norm_label": "default_scan_limit",
       "community_name": "networkAnalytics.js",
       "id": "utils_networkanalytics_default_scan_limit"
@@ -1782,7 +1683,7 @@
       "source_file": "utils/networkAnalytics.js",
       "source_location": "L13",
       "_origin": "ast",
-      "community": 9,
+      "community": 8,
       "norm_label": "tofinitenumber()",
       "community_name": "networkAnalytics.js",
       "id": "utils_networkanalytics_tofinitenumber"
@@ -1793,7 +1694,7 @@
       "source_file": "utils/networkAnalytics.js",
       "source_location": "L18",
       "_origin": "ast",
-      "community": 9,
+      "community": 8,
       "norm_label": "safestring()",
       "community_name": "networkAnalytics.js",
       "id": "utils_networkanalytics_safestring"
@@ -1804,7 +1705,7 @@
       "source_file": "utils/networkAnalytics.js",
       "source_location": "L25",
       "_origin": "ast",
-      "community": 9,
+      "community": 8,
       "norm_label": "normalizemethod()",
       "community_name": "networkAnalytics.js",
       "id": "utils_networkanalytics_normalizemethod"
@@ -1815,7 +1716,7 @@
       "source_file": "utils/networkAnalytics.js",
       "source_location": "L27",
       "_origin": "ast",
-      "community": 9,
+      "community": 8,
       "norm_label": "statusclass()",
       "community_name": "networkAnalytics.js",
       "id": "utils_networkanalytics_statusclass"
@@ -1826,7 +1727,7 @@
       "source_file": "utils/networkAnalytics.js",
       "source_location": "L37",
       "_origin": "ast",
-      "community": 9,
+      "community": 8,
       "norm_label": "minutestart()",
       "community_name": "networkAnalytics.js",
       "id": "utils_networkanalytics_minutestart"
@@ -1837,7 +1738,7 @@
       "source_file": "utils/networkAnalytics.js",
       "source_location": "L39",
       "_origin": "ast",
-      "community": 9,
+      "community": 8,
       "norm_label": "incmap()",
       "community_name": "networkAnalytics.js",
       "id": "utils_networkanalytics_incmap"
@@ -1848,7 +1749,7 @@
       "source_file": "utils/networkAnalytics.js",
       "source_location": "L44",
       "_origin": "ast",
-      "community": 9,
+      "community": 8,
       "norm_label": "topentries()",
       "community_name": "networkAnalytics.js",
       "id": "utils_networkanalytics_topentries"
@@ -1859,7 +1760,7 @@
       "source_file": "utils/networkAnalytics.js",
       "source_location": "L51",
       "_origin": "ast",
-      "community": 9,
+      "community": 8,
       "norm_label": "parserediseventline()",
       "community_name": "networkAnalytics.js",
       "id": "utils_networkanalytics_parserediseventline"
@@ -1870,7 +1771,7 @@
       "source_file": "utils/networkAnalytics.js",
       "source_location": "L72",
       "_origin": "ast",
-      "community": 9,
+      "community": 8,
       "norm_label": "collectlastlines()",
       "community_name": "networkAnalytics.js",
       "id": "utils_networkanalytics_collectlastlines"
@@ -1881,7 +1782,7 @@
       "source_file": "utils/networkAnalytics.js",
       "source_location": "L85",
       "_origin": "ast",
-      "community": 9,
+      "community": 8,
       "norm_label": "seedredisfromfileifempty()",
       "community_name": "networkAnalytics.js",
       "id": "utils_networkanalytics_seedredisfromfileifempty"
@@ -1892,7 +1793,7 @@
       "source_file": "utils/networkAnalytics.js",
       "source_location": "L106",
       "_origin": "ast",
-      "community": 9,
+      "community": 8,
       "norm_label": "buildtimeline()",
       "community_name": "networkAnalytics.js",
       "id": "utils_networkanalytics_buildtimeline"
@@ -1903,7 +1804,7 @@
       "source_file": "utils/networkAnalytics.js",
       "source_location": "L131",
       "_origin": "ast",
-      "community": 9,
+      "community": 8,
       "norm_label": "matchfilters()",
       "community_name": "networkAnalytics.js",
       "id": "utils_networkanalytics_matchfilters"
@@ -1914,7 +1815,7 @@
       "source_file": "utils/networkAnalytics.js",
       "source_location": "L158",
       "_origin": "ast",
-      "community": 9,
+      "community": 8,
       "norm_label": "getnetworkdashboardmetrics()",
       "community_name": "networkAnalytics.js",
       "id": "utils_networkanalytics_getnetworkdashboardmetrics"
@@ -1925,7 +1826,7 @@
       "source_file": "utils/networkLogger.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 12,
+      "community": 11,
       "norm_label": "networklogger.js",
       "community_name": "networkLogger.js",
       "id": "utils_networklogger"
@@ -1936,7 +1837,7 @@
       "source_file": "utils/networkLogger.js",
       "source_location": "L5",
       "_origin": "ast",
-      "community": 12,
+      "community": 11,
       "norm_label": "log_mode",
       "community_name": "networkLogger.js",
       "id": "utils_networklogger_log_mode"
@@ -1947,7 +1848,7 @@
       "source_file": "utils/networkLogger.js",
       "source_location": "L13",
       "_origin": "ast",
-      "community": 12,
+      "community": 11,
       "norm_label": "redis_events_max",
       "community_name": "networkLogger.js",
       "id": "utils_networklogger_redis_events_max"
@@ -1958,7 +1859,7 @@
       "source_file": "utils/networkLogger.js",
       "source_location": "L20",
       "_origin": "ast",
-      "community": 12,
+      "community": 11,
       "norm_label": "ensurefilelogger()",
       "community_name": "networkLogger.js",
       "id": "utils_networklogger_ensurefilelogger"
@@ -1969,7 +1870,7 @@
       "source_file": "utils/networkLogger.js",
       "source_location": "L30",
       "_origin": "ast",
-      "community": 12,
+      "community": 11,
       "norm_label": "writetofile()",
       "community_name": "networkLogger.js",
       "id": "utils_networklogger_writetofile"
@@ -1980,7 +1881,7 @@
       "source_file": "utils/networkLogger.js",
       "source_location": "L42",
       "_origin": "ast",
-      "community": 12,
+      "community": 11,
       "norm_label": "writetoredis()",
       "community_name": "networkLogger.js",
       "id": "utils_networklogger_writetoredis"
@@ -1991,7 +1892,7 @@
       "source_file": "utils/networkLogger.js",
       "source_location": "L57",
       "_origin": "ast",
-      "community": 12,
+      "community": 11,
       "norm_label": "emit()",
       "community_name": "networkLogger.js",
       "id": "utils_networklogger_emit"
@@ -2002,7 +1903,7 @@
       "source_file": "utils/networkLogger.js",
       "source_location": "L92",
       "_origin": "ast",
-      "community": 12,
+      "community": 11,
       "norm_label": "loghttprequest()",
       "community_name": "networkLogger.js",
       "id": "utils_networklogger_loghttprequest"
@@ -2013,7 +1914,7 @@
       "source_file": "utils/networkLogger.js",
       "source_location": "L99",
       "_origin": "ast",
-      "community": 12,
+      "community": 11,
       "norm_label": "logaxiosrequest()",
       "community_name": "networkLogger.js",
       "id": "utils_networklogger_logaxiosrequest"
@@ -2024,7 +1925,7 @@
       "source_file": "utils/networkLogger.js",
       "source_location": "L106",
       "_origin": "ast",
-      "community": 12,
+      "community": 11,
       "norm_label": "logaxioserror()",
       "community_name": "networkLogger.js",
       "id": "utils_networklogger_logaxioserror"
@@ -2035,7 +1936,7 @@
       "source_file": "utils/networkLogger.js",
       "source_location": "L113",
       "_origin": "ast",
-      "community": 12,
+      "community": 11,
       "norm_label": "logratelimit()",
       "community_name": "networkLogger.js",
       "id": "utils_networklogger_logratelimit"
@@ -2112,7 +2013,7 @@
       "source_file": "utils/staticZipDeployment.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "staticzipdeployment.js",
       "community_name": "staticZipDeployment.js",
       "id": "utils_staticzipdeployment"
@@ -2123,7 +2024,7 @@
       "source_file": "utils/staticZipDeployment.js",
       "source_location": "L7",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "execfile",
       "community_name": "staticZipDeployment.js",
       "id": "utils_staticzipdeployment_execfile"
@@ -2134,7 +2035,7 @@
       "source_file": "utils/staticZipDeployment.js",
       "source_location": "L13",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "trusted_upload_hosts",
       "community_name": "staticZipDeployment.js",
       "id": "utils_staticzipdeployment_trusted_upload_hosts"
@@ -2145,7 +2046,7 @@
       "source_file": "utils/staticZipDeployment.js",
       "source_location": "L14",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "allowed_static_extensions",
       "community_name": "staticZipDeployment.js",
       "id": "utils_staticzipdeployment_allowed_static_extensions"
@@ -2156,7 +2057,7 @@
       "source_file": "utils/staticZipDeployment.js",
       "source_location": "L19",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "deploymentrejected",
       "community_name": "staticZipDeployment.js",
       "id": "utils_staticzipdeployment_deploymentrejected"
@@ -2167,7 +2068,7 @@
       "source_file": "utils/staticZipDeployment.js",
       "source_location": "L20",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": ".constructor()",
       "community_name": "staticZipDeployment.js",
       "id": "utils_staticzipdeployment_deploymentrejected_constructor"
@@ -2178,7 +2079,7 @@
       "source_file": "utils/staticZipDeployment.js",
       "source_location": "L27",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "reject()",
       "community_name": "staticZipDeployment.js",
       "id": "utils_staticzipdeployment_reject"
@@ -2189,7 +2090,7 @@
       "source_file": "utils/staticZipDeployment.js",
       "source_location": "L31",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "sha256file()",
       "community_name": "staticZipDeployment.js",
       "id": "utils_staticzipdeployment_sha256file"
@@ -2200,7 +2101,7 @@
       "source_file": "utils/staticZipDeployment.js",
       "source_location": "L36",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "assertwithin()",
       "community_name": "staticZipDeployment.js",
       "id": "utils_staticzipdeployment_assertwithin"
@@ -2211,7 +2112,7 @@
       "source_file": "utils/staticZipDeployment.js",
       "source_location": "L45",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "resolvetrustedzippath()",
       "community_name": "staticZipDeployment.js",
       "id": "utils_staticzipdeployment_resolvetrustedzippath"
@@ -2222,7 +2123,7 @@
       "source_file": "utils/staticZipDeployment.js",
       "source_location": "L95",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "runarchivecommand()",
       "community_name": "staticZipDeployment.js",
       "id": "utils_staticzipdeployment_runarchivecommand"
@@ -2233,7 +2134,7 @@
       "source_file": "utils/staticZipDeployment.js",
       "source_location": "L103",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "getarchiveentries()",
       "community_name": "staticZipDeployment.js",
       "id": "utils_staticzipdeployment_getarchiveentries"
@@ -2244,7 +2145,7 @@
       "source_file": "utils/staticZipDeployment.js",
       "source_location": "L142",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "validatezipmetadata()",
       "community_name": "staticZipDeployment.js",
       "id": "utils_staticzipdeployment_validatezipmetadata"
@@ -2255,7 +2156,7 @@
       "source_file": "utils/staticZipDeployment.js",
       "source_location": "L179",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "listregularfiles()",
       "community_name": "staticZipDeployment.js",
       "id": "utils_staticzipdeployment_listregularfiles"
@@ -2266,7 +2167,7 @@
       "source_file": "utils/staticZipDeployment.js",
       "source_location": "L199",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "assertreleaserelativestaticpaths()",
       "community_name": "staticZipDeployment.js",
       "id": "utils_staticzipdeployment_assertreleaserelativestaticpaths"
@@ -2277,7 +2178,7 @@
       "source_file": "utils/staticZipDeployment.js",
       "source_location": "L219",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "validateextractedartifact()",
       "community_name": "staticZipDeployment.js",
       "id": "utils_staticzipdeployment_validateextractedartifact"
@@ -2288,7 +2189,7 @@
       "source_file": "utils/staticZipDeployment.js",
       "source_location": "L262",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "defaultverifypublicurl()",
       "community_name": "staticZipDeployment.js",
       "id": "utils_staticzipdeployment_defaultverifypublicurl"
@@ -2299,7 +2200,7 @@
       "source_file": "utils/staticZipDeployment.js",
       "source_location": "L269",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "deploystaticzip()",
       "community_name": "staticZipDeployment.js",
       "id": "utils_staticzipdeployment_deploystaticzip"
@@ -2772,7 +2673,7 @@
       "source_file": "test/wechatUniversalSearch.test.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 7,
+      "community": 6,
       "norm_label": "wechatuniversalsearch.test.js",
       "community_name": "tikhub.io.js",
       "id": "test_wechatuniversalsearch_test"
@@ -2783,7 +2684,7 @@
       "source_file": "test/wechatUniversalSearch.test.js",
       "source_location": "L7",
       "_origin": "ast",
-      "community": 7,
+      "community": 6,
       "norm_label": "createresponse()",
       "community_name": "tikhub.io.js",
       "id": "test_wechatuniversalsearch_test_createresponse"
@@ -2827,7 +2728,7 @@
       "source_file": "utils/tikhub.io.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 7,
+      "community": 6,
       "norm_label": "tikhub.io.js",
       "community_name": "tikhub.io.js",
       "id": "utils_tikhub_io"
@@ -2838,7 +2739,7 @@
       "source_file": "utils/tikhub.io.js",
       "source_location": "L14",
       "_origin": "ast",
-      "community": 7,
+      "community": 6,
       "norm_label": "th_youtube",
       "community_name": "tikhub.io.js",
       "id": "utils_tikhub_io_th_youtube"
@@ -2849,7 +2750,7 @@
       "source_file": "utils/tikhub.io.js",
       "source_location": "L110",
       "_origin": "ast",
-      "community": 7,
+      "community": 6,
       "norm_label": "th_bilibili",
       "community_name": "tikhub.io.js",
       "id": "utils_tikhub_io_th_bilibili"
@@ -2860,7 +2761,7 @@
       "source_file": "utils/tikhub.io.js",
       "source_location": "L376",
       "_origin": "ast",
-      "community": 7,
+      "community": 6,
       "norm_label": "th_xiaohongshu",
       "community_name": "tikhub.io.js",
       "id": "utils_tikhub_io_th_xiaohongshu"
@@ -2871,7 +2772,7 @@
       "source_file": "utils/tikhub.io.js",
       "source_location": "L634",
       "_origin": "ast",
-      "community": 7,
+      "community": 6,
       "norm_label": "tikhubrequest()",
       "community_name": "tikhub.io.js",
       "id": "utils_tikhub_io_tikhubrequest"
@@ -2882,7 +2783,7 @@
       "source_file": "utils/tikhub.io.js",
       "source_location": "L645",
       "_origin": "ast",
-      "community": 7,
+      "community": 6,
       "norm_label": "normalizewechatarticledetail()",
       "community_name": "tikhub.io.js",
       "id": "utils_tikhub_io_normalizewechatarticledetail"
@@ -2893,7 +2794,7 @@
       "source_file": "utils/tikhub.io.js",
       "source_location": "L655",
       "_origin": "ast",
-      "community": 7,
+      "community": 6,
       "norm_label": "normalizewechatmplistitem()",
       "community_name": "tikhub.io.js",
       "id": "utils_tikhub_io_normalizewechatmplistitem"
@@ -2904,7 +2805,7 @@
       "source_file": "utils/tikhub.io.js",
       "source_location": "L702",
       "_origin": "ast",
-      "community": 7,
+      "community": 6,
       "norm_label": "th_wechat_media",
       "community_name": "tikhub.io.js",
       "id": "utils_tikhub_io_th_wechat_media"
@@ -2915,7 +2816,7 @@
       "source_file": "utils/tikhub.io.js",
       "source_location": "L1021",
       "_origin": "ast",
-      "community": 7,
+      "community": 6,
       "norm_label": "th_wechat_channels",
       "community_name": "tikhub.io.js",
       "id": "utils_tikhub_io_th_wechat_channels"
@@ -2926,7 +2827,7 @@
       "source_file": "utils/tikhub.io.js",
       "source_location": "L1084",
       "_origin": "ast",
-      "community": 7,
+      "community": 6,
       "norm_label": "th_douyin",
       "community_name": "tikhub.io.js",
       "id": "utils_tikhub_io_th_douyin"
@@ -2937,7 +2838,7 @@
       "source_file": "utils/tikhub.io.js",
       "source_location": "L1515",
       "_origin": "ast",
-      "community": 7,
+      "community": 6,
       "norm_label": "th_tiktok",
       "community_name": "tikhub.io.js",
       "id": "utils_tikhub_io_th_tiktok"
@@ -2948,7 +2849,7 @@
       "source_file": "utils/tikhub.io.js",
       "source_location": "L1757",
       "_origin": "ast",
-      "community": 7,
+      "community": 6,
       "norm_label": "th_twitter",
       "community_name": "tikhub.io.js",
       "id": "utils_tikhub_io_th_twitter"
@@ -2959,7 +2860,7 @@
       "source_file": "utils/tikhub.io.js",
       "source_location": "L1855",
       "_origin": "ast",
-      "community": 7,
+      "community": 6,
       "norm_label": "th_douyin_billboard",
       "community_name": "tikhub.io.js",
       "id": "utils_tikhub_io_th_douyin_billboard"
@@ -2970,7 +2871,7 @@
       "source_file": "package.json",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 13,
+      "community": 12,
       "norm_label": "package.json",
       "community_name": "package.json",
       "id": "package"
@@ -2981,7 +2882,7 @@
       "source_file": "package.json",
       "source_location": "L2",
       "_origin": "ast",
-      "community": 13,
+      "community": 12,
       "norm_label": "name",
       "community_name": "package.json",
       "id": "package_name"
@@ -2992,7 +2893,7 @@
       "source_file": "package.json",
       "source_location": "L3",
       "_origin": "ast",
-      "community": 13,
+      "community": 12,
       "norm_label": "type",
       "community_name": "package.json",
       "id": "package_type"
@@ -3003,7 +2904,7 @@
       "source_file": "package.json",
       "source_location": "L4",
       "_origin": "ast",
-      "community": 13,
+      "community": 12,
       "norm_label": "version",
       "community_name": "package.json",
       "id": "package_version"
@@ -3014,7 +2915,7 @@
       "source_file": "package.json",
       "source_location": "L5",
       "_origin": "ast",
-      "community": 13,
+      "community": 12,
       "norm_label": "main",
       "community_name": "package.json",
       "id": "package_main"
@@ -3025,7 +2926,7 @@
       "source_file": "package.json",
       "source_location": "L6",
       "_origin": "ast",
-      "community": 13,
+      "community": 12,
       "norm_label": "scripts",
       "community_name": "package.json",
       "id": "package_scripts"
@@ -3036,7 +2937,7 @@
       "source_file": "package.json",
       "source_location": "L7",
       "_origin": "ast",
-      "community": 13,
+      "community": 12,
       "norm_label": "test",
       "community_name": "package.json",
       "id": "package_scripts_test"
@@ -3047,7 +2948,7 @@
       "source_file": "package.json",
       "source_location": "L9",
       "_origin": "ast",
-      "community": 13,
+      "community": 12,
       "norm_label": "keywords",
       "community_name": "package.json",
       "id": "package_keywords"
@@ -3058,7 +2959,7 @@
       "source_file": "package.json",
       "source_location": "L10",
       "_origin": "ast",
-      "community": 13,
+      "community": 12,
       "norm_label": "author",
       "community_name": "package.json",
       "id": "package_author"
@@ -3069,7 +2970,7 @@
       "source_file": "package.json",
       "source_location": "L11",
       "_origin": "ast",
-      "community": 13,
+      "community": 12,
       "norm_label": "license",
       "community_name": "package.json",
       "id": "package_license"
@@ -3080,7 +2981,7 @@
       "source_file": "package.json",
       "source_location": "L12",
       "_origin": "ast",
-      "community": 13,
+      "community": 12,
       "norm_label": "description",
       "community_name": "package.json",
       "id": "package_description"
@@ -3575,7 +3476,7 @@
       "source_file": "test/appLifecycle.test.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 15,
+      "community": 14,
       "norm_label": "applifecycle.test.js",
       "community_name": "appLifecycle.test.js",
       "id": "test_applifecycle_test"
@@ -3586,7 +3487,7 @@
       "source_file": "test/appLifecycle.test.js",
       "source_location": "L10",
       "_origin": "ast",
-      "community": 15,
+      "community": 14,
       "norm_label": "createresponse()",
       "community_name": "appLifecycle.test.js",
       "id": "test_applifecycle_test_createresponse"
@@ -3597,7 +3498,7 @@
       "source_file": "test/appLifecycle.test.js",
       "source_location": "L39",
       "_origin": "ast",
-      "community": 15,
+      "community": 14,
       "norm_label": "ping()",
       "community_name": "appLifecycle.test.js",
       "id": "test_applifecycle_test_ping"
@@ -3608,7 +3509,7 @@
       "source_file": "test/appLifecycle.test.js",
       "source_location": "L61",
       "_origin": "ast",
-      "community": 15,
+      "community": 14,
       "norm_label": "error()",
       "community_name": "appLifecycle.test.js",
       "id": "test_applifecycle_test_error"
@@ -3619,7 +3520,7 @@
       "source_file": "test/appLifecycle.test.js",
       "source_location": "L76",
       "_origin": "ast",
-      "community": 15,
+      "community": 14,
       "norm_label": "close()",
       "community_name": "appLifecycle.test.js",
       "id": "test_applifecycle_test_close"
@@ -3630,7 +3531,7 @@
       "source_file": "test/appLifecycle.test.js",
       "source_location": "L83",
       "_origin": "ast",
-      "community": 15,
+      "community": 14,
       "norm_label": "log()",
       "community_name": "appLifecycle.test.js",
       "id": "test_applifecycle_test_log"
@@ -3641,7 +3542,7 @@
       "source_file": "utils/appLifecycle.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 15,
+      "community": 14,
       "norm_label": "applifecycle.js",
       "community_name": "appLifecycle.test.js",
       "id": "utils_applifecycle"
@@ -3652,7 +3553,7 @@
       "source_file": "utils/appLifecycle.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 15,
+      "community": 14,
       "norm_label": "createhealthhandler()",
       "community_name": "appLifecycle.test.js",
       "id": "utils_applifecycle_createhealthhandler"
@@ -3663,7 +3564,7 @@
       "source_file": "utils/appLifecycle.js",
       "source_location": "L7",
       "_origin": "ast",
-      "community": 15,
+      "community": 14,
       "norm_label": "createreadinesshandler()",
       "community_name": "appLifecycle.test.js",
       "id": "utils_applifecycle_createreadinesshandler"
@@ -3674,7 +3575,7 @@
       "source_file": "utils/appLifecycle.js",
       "source_location": "L19",
       "_origin": "ast",
-      "community": 15,
+      "community": 14,
       "norm_label": "creategracefulshutdown()",
       "community_name": "appLifecycle.test.js",
       "id": "utils_applifecycle_creategracefulshutdown"
@@ -3894,9 +3795,9 @@
       "source_file": "test/apiAccess.test.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 5,
+      "community": 4,
       "norm_label": "apiaccess.test.js",
-      "community_name": "navigationRoutes.js",
+      "community_name": "evolink.ai.js",
       "id": "test_apiaccess_test"
     },
     {
@@ -3905,9 +3806,9 @@
       "source_file": "test/apiAccess.test.js",
       "source_location": "L8",
       "_origin": "ast",
-      "community": 5,
+      "community": 4,
       "norm_label": "verifykey()",
-      "community_name": "navigationRoutes.js",
+      "community_name": "evolink.ai.js",
       "id": "test_apiaccess_test_verifykey"
     },
     {
@@ -3916,9 +3817,9 @@
       "source_file": "utils/ThirdParrtyApi/aitoken.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 5,
+      "community": 4,
       "norm_label": "aitoken.js",
-      "community_name": "navigationRoutes.js",
+      "community_name": "evolink.ai.js",
       "id": "utils_thirdparrtyapi_aitoken"
     },
     {
@@ -3927,9 +3828,9 @@
       "source_file": "utils/ThirdParrtyApi/aitoken.js",
       "source_location": "L12",
       "_origin": "ast",
-      "community": 5,
+      "community": 4,
       "norm_label": "gpt_image_edit_max_retries",
-      "community_name": "navigationRoutes.js",
+      "community_name": "evolink.ai.js",
       "id": "utils_thirdparrtyapi_aitoken_gpt_image_edit_max_retries"
     },
     {
@@ -3938,9 +3839,9 @@
       "source_file": "utils/ThirdParrtyApi/aitoken.js",
       "source_location": "L13",
       "_origin": "ast",
-      "community": 5,
+      "community": 4,
       "norm_label": "gpt_image_edit_retry_base_delay_ms",
-      "community_name": "navigationRoutes.js",
+      "community_name": "evolink.ai.js",
       "id": "utils_thirdparrtyapi_aitoken_gpt_image_edit_retry_base_delay_ms"
     },
     {
@@ -3949,9 +3850,9 @@
       "source_file": "utils/ThirdParrtyApi/aitoken.js",
       "source_location": "L15",
       "_origin": "ast",
-      "community": 5,
+      "community": 4,
       "norm_label": "aitoken",
-      "community_name": "navigationRoutes.js",
+      "community_name": "evolink.ai.js",
       "id": "utils_thirdparrtyapi_aitoken_aitoken"
     },
     {
@@ -3960,9 +3861,9 @@
       "source_file": "utils/apiAccess.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 5,
+      "community": 4,
       "norm_label": "apiaccess.js",
-      "community_name": "navigationRoutes.js",
+      "community_name": "evolink.ai.js",
       "id": "utils_apiaccess"
     },
     {
@@ -3971,9 +3872,9 @@
       "source_file": "utils/apiAccess.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 5,
+      "community": 4,
       "norm_label": "chargeapicredits()",
-      "community_name": "navigationRoutes.js",
+      "community_name": "evolink.ai.js",
       "id": "utils_apiaccess_chargeapicredits"
     },
     {
@@ -3982,9 +3883,9 @@
       "source_file": "utils/apiAccess.js",
       "source_location": "L13",
       "_origin": "ast",
-      "community": 5,
+      "community": 4,
       "norm_label": "createapiaccesshelpers()",
-      "community_name": "navigationRoutes.js",
+      "community_name": "evolink.ai.js",
       "id": "utils_apiaccess_createapiaccesshelpers"
     },
     {
@@ -3995,8 +3896,8 @@
       "_origin": "ast",
       "community": 1,
       "norm_label": "index.js",
-      "id": "index",
-      "community_name": "index.js"
+      "community_name": "index.js",
+      "id": "index"
     },
     {
       "label": "__filename",
@@ -4006,8 +3907,8 @@
       "_origin": "ast",
       "community": 1,
       "norm_label": "__filename",
-      "id": "index_filename",
-      "community_name": "index.js"
+      "community_name": "index.js",
+      "id": "index_filename"
     },
     {
       "label": "__dirname",
@@ -4017,8 +3918,8 @@
       "_origin": "ast",
       "community": 1,
       "norm_label": "__dirname",
-      "id": "index_dirname",
-      "community_name": "index.js"
+      "community_name": "index.js",
+      "id": "index_dirname"
     },
     {
       "label": "app",
@@ -4028,8 +3929,8 @@
       "_origin": "ast",
       "community": 1,
       "norm_label": "app",
-      "id": "index_app",
-      "community_name": "index.js"
+      "community_name": "index.js",
+      "id": "index_app"
     },
     {
       "label": "downloadsDir",
@@ -4039,8 +3940,8 @@
       "_origin": "ast",
       "community": 1,
       "norm_label": "downloadsdir",
-      "id": "index_downloadsdir",
-      "community_name": "index.js"
+      "community_name": "index.js",
+      "id": "index_downloadsdir"
     },
     {
       "label": "agent",
@@ -4050,8 +3951,8 @@
       "_origin": "ast",
       "community": 1,
       "norm_label": "agent",
-      "id": "index_agent",
-      "community_name": "index.js"
+      "community_name": "index.js",
+      "id": "index_agent"
     },
     {
       "label": "{\n    canSearchGoogle,\n    canUseHtmlParse,\n    dailyUse,\n    verifyApiAccess,\n    consumeApiCredits,\n    chargeApiCreditsAtomically,\n}",
@@ -4061,8 +3962,8 @@
       "_origin": "ast",
       "community": 1,
       "norm_label": "{\n    cansearchgoogle,\n    canusehtmlparse,\n    dailyuse,\n    verifyapiaccess,\n    consumeapicredits,\n    chargeapicreditsatomically,\n}",
-      "id": "index_cansearchgoogle_canusehtmlparse_dailyuse_verifyapiaccess_consumeapicredits_chargeapicreditsatomically",
-      "community_name": "index.js"
+      "community_name": "index.js",
+      "id": "index_cansearchgoogle_canusehtmlparse_dailyuse_verifyapiaccess_consumeapicredits_chargeapicreditsatomically"
     },
     {
       "label": "zyteExtract()",
@@ -4072,8 +3973,8 @@
       "_origin": "ast",
       "community": 1,
       "norm_label": "zyteextract()",
-      "id": "index_zyteextract",
-      "community_name": "index.js"
+      "community_name": "index.js",
+      "id": "index_zyteextract"
     },
     {
       "label": "extract_pdf_url()",
@@ -4083,8 +3984,8 @@
       "_origin": "ast",
       "community": 1,
       "norm_label": "extract_pdf_url()",
-      "id": "index_extract_pdf_url",
-      "community_name": "index.js"
+      "community_name": "index.js",
+      "id": "index_extract_pdf_url"
     },
     {
       "label": "validateUrl()",
@@ -4094,8 +3995,8 @@
       "_origin": "ast",
       "community": 1,
       "norm_label": "validateurl()",
-      "id": "index_validateurl",
-      "community_name": "index.js"
+      "community_name": "index.js",
+      "id": "index_validateurl"
     },
     {
       "label": "downloadPdf()",
@@ -4105,8 +4006,8 @@
       "_origin": "ast",
       "community": 1,
       "norm_label": "downloadpdf()",
-      "id": "index_downloadpdf",
-      "community_name": "index.js"
+      "community_name": "index.js",
+      "id": "index_downloadpdf"
     },
     {
       "label": "persistentDownloadsDir",
@@ -4116,8 +4017,8 @@
       "_origin": "ast",
       "community": 1,
       "norm_label": "persistentdownloadsdir",
-      "id": "index_persistentdownloadsdir",
-      "community_name": "index.js"
+      "community_name": "index.js",
+      "id": "index_persistentdownloadsdir"
     },
     {
       "label": "uploadChunksDir",
@@ -4127,8 +4028,8 @@
       "_origin": "ast",
       "community": 1,
       "norm_label": "uploadchunksdir",
-      "id": "index_uploadchunksdir",
-      "community_name": "index.js"
+      "community_name": "index.js",
+      "id": "index_uploadchunksdir"
     },
     {
       "label": "fileTransferStorageMap",
@@ -4138,8 +4039,8 @@
       "_origin": "ast",
       "community": 1,
       "norm_label": "filetransferstoragemap",
-      "id": "index_filetransferstoragemap",
-      "community_name": "index.js"
+      "community_name": "index.js",
+      "id": "index_filetransferstoragemap"
     },
     {
       "label": "sanitizeStoragePathSegment()",
@@ -4149,8 +4050,8 @@
       "_origin": "ast",
       "community": 1,
       "norm_label": "sanitizestoragepathsegment()",
-      "id": "index_sanitizestoragepathsegment",
-      "community_name": "index.js"
+      "community_name": "index.js",
+      "id": "index_sanitizestoragepathsegment"
     },
     {
       "label": "normalizeFileTransferStorage()",
@@ -4160,8 +4061,8 @@
       "_origin": "ast",
       "community": 1,
       "norm_label": "normalizefiletransferstorage()",
-      "id": "index_normalizefiletransferstorage",
-      "community_name": "index.js"
+      "community_name": "index.js",
+      "id": "index_normalizefiletransferstorage"
     },
     {
       "label": "getFileTransferStorageConfig()",
@@ -4171,8 +4072,8 @@
       "_origin": "ast",
       "community": 1,
       "norm_label": "getfiletransferstorageconfig()",
-      "id": "index_getfiletransferstorageconfig",
-      "community_name": "index.js"
+      "community_name": "index.js",
+      "id": "index_getfiletransferstorageconfig"
     },
     {
       "label": "buildStorageRelativePath()",
@@ -4182,8 +4083,8 @@
       "_origin": "ast",
       "community": 1,
       "norm_label": "buildstoragerelativepath()",
-      "id": "index_buildstoragerelativepath",
-      "community_name": "index.js"
+      "community_name": "index.js",
+      "id": "index_buildstoragerelativepath"
     },
     {
       "label": "buildTrackedFileKey()",
@@ -4193,8 +4094,8 @@
       "_origin": "ast",
       "community": 1,
       "norm_label": "buildtrackedfilekey()",
-      "id": "index_buildtrackedfilekey",
-      "community_name": "index.js"
+      "community_name": "index.js",
+      "id": "index_buildtrackedfilekey"
     },
     {
       "label": "getFilePublicUrl()",
@@ -4204,8 +4105,8 @@
       "_origin": "ast",
       "community": 1,
       "norm_label": "getfilepublicurl()",
-      "id": "index_getfilepublicurl",
-      "community_name": "index.js"
+      "community_name": "index.js",
+      "id": "index_getfilepublicurl"
     },
     {
       "label": "buildFileAccessCountKey()",
@@ -4215,8 +4116,8 @@
       "_origin": "ast",
       "community": 1,
       "norm_label": "buildfileaccesscountkey()",
-      "id": "index_buildfileaccesscountkey",
-      "community_name": "index.js"
+      "community_name": "index.js",
+      "id": "index_buildfileaccesscountkey"
     },
     {
       "label": "buildFileAccessHourKey()",
@@ -4226,8 +4127,8 @@
       "_origin": "ast",
       "community": 1,
       "norm_label": "buildfileaccesshourkey()",
-      "id": "index_buildfileaccesshourkey",
-      "community_name": "index.js"
+      "community_name": "index.js",
+      "id": "index_buildfileaccesshourkey"
     },
     {
       "label": "formatHourId()",
@@ -4237,8 +4138,8 @@
       "_origin": "ast",
       "community": 1,
       "norm_label": "formathourid()",
-      "id": "index_formathourid",
-      "community_name": "index.js"
+      "community_name": "index.js",
+      "id": "index_formathourid"
     },
     {
       "label": "getLast24HourIds()",
@@ -4248,8 +4149,8 @@
       "_origin": "ast",
       "community": 1,
       "norm_label": "getlast24hourids()",
-      "id": "index_getlast24hourids",
-      "community_name": "index.js"
+      "community_name": "index.js",
+      "id": "index_getlast24hourids"
     },
     {
       "label": "sanitizeUploadFileName()",
@@ -4259,8 +4160,8 @@
       "_origin": "ast",
       "community": 1,
       "norm_label": "sanitizeuploadfilename()",
-      "id": "index_sanitizeuploadfilename",
-      "community_name": "index.js"
+      "community_name": "index.js",
+      "id": "index_sanitizeuploadfilename"
     },
     {
       "label": "buildSafeUploadTarget()",
@@ -4270,8 +4171,8 @@
       "_origin": "ast",
       "community": 1,
       "norm_label": "buildsafeuploadtarget()",
-      "id": "index_buildsafeuploadtarget",
-      "community_name": "index.js"
+      "community_name": "index.js",
+      "id": "index_buildsafeuploadtarget"
     },
     {
       "label": "sanitizeUploadSessionId()",
@@ -4281,8 +4182,8 @@
       "_origin": "ast",
       "community": 1,
       "norm_label": "sanitizeuploadsessionid()",
-      "id": "index_sanitizeuploadsessionid",
-      "community_name": "index.js"
+      "community_name": "index.js",
+      "id": "index_sanitizeuploadsessionid"
     },
     {
       "label": "buildChunkSessionDir()",
@@ -4292,8 +4193,8 @@
       "_origin": "ast",
       "community": 1,
       "norm_label": "buildchunksessiondir()",
-      "id": "index_buildchunksessiondir",
-      "community_name": "index.js"
+      "community_name": "index.js",
+      "id": "index_buildchunksessiondir"
     },
     {
       "label": "buildSafeExistingFilePath()",
@@ -4303,8 +4204,8 @@
       "_origin": "ast",
       "community": 1,
       "norm_label": "buildsafeexistingfilepath()",
-      "id": "index_buildsafeexistingfilepath",
-      "community_name": "index.js"
+      "community_name": "index.js",
+      "id": "index_buildsafeexistingfilepath"
     },
     {
       "label": "migrateFileAccessStats()",
@@ -4314,8 +4215,8 @@
       "_origin": "ast",
       "community": 1,
       "norm_label": "migratefileaccessstats()",
-      "id": "index_migratefileaccessstats",
-      "community_name": "index.js"
+      "community_name": "index.js",
+      "id": "index_migratefileaccessstats"
     },
     {
       "label": "listStorageFiles()",
@@ -4325,8 +4226,8 @@
       "_origin": "ast",
       "community": 1,
       "norm_label": "liststoragefiles()",
-      "id": "index_liststoragefiles",
-      "community_name": "index.js"
+      "community_name": "index.js",
+      "id": "index_liststoragefiles"
     },
     {
       "label": "listDownloadFiles()",
@@ -4336,8 +4237,8 @@
       "_origin": "ast",
       "community": 1,
       "norm_label": "listdownloadfiles()",
-      "id": "index_listdownloadfiles",
-      "community_name": "index.js"
+      "community_name": "index.js",
+      "id": "index_listdownloadfiles"
     },
     {
       "label": "getLast15DaysCreatedStats()",
@@ -4347,8 +4248,8 @@
       "_origin": "ast",
       "community": 1,
       "norm_label": "getlast15dayscreatedstats()",
-      "id": "index_getlast15dayscreatedstats",
-      "community_name": "index.js"
+      "community_name": "index.js",
+      "id": "index_getlast15dayscreatedstats"
     },
     {
       "label": "getTypeStats()",
@@ -4358,8 +4259,8 @@
       "_origin": "ast",
       "community": 1,
       "norm_label": "gettypestats()",
-      "id": "index_gettypestats",
-      "community_name": "index.js"
+      "community_name": "index.js",
+      "id": "index_gettypestats"
     },
     {
       "label": "sortFiles()",
@@ -4369,8 +4270,8 @@
       "_origin": "ast",
       "community": 1,
       "norm_label": "sortfiles()",
-      "id": "index_sortfiles",
-      "community_name": "index.js"
+      "community_name": "index.js",
+      "id": "index_sortfiles"
     },
     {
       "label": "createFileAccessTrackMiddleware()",
@@ -4380,8 +4281,8 @@
       "_origin": "ast",
       "community": 1,
       "norm_label": "createfileaccesstrackmiddleware()",
-      "id": "index_createfileaccesstrackmiddleware",
-      "community_name": "index.js"
+      "community_name": "index.js",
+      "id": "index_createfileaccesstrackmiddleware"
     },
     {
       "label": "get_doc_direct_link()",
@@ -4391,8 +4292,8 @@
       "_origin": "ast",
       "community": 1,
       "norm_label": "get_doc_direct_link()",
-      "id": "index_get_doc_direct_link",
-      "community_name": "index.js"
+      "community_name": "index.js",
+      "id": "index_get_doc_direct_link"
     },
     {
       "label": "server",
@@ -4402,8 +4303,8 @@
       "_origin": "ast",
       "community": 1,
       "norm_label": "server",
-      "id": "index_server",
-      "community_name": "index.js"
+      "community_name": "index.js",
+      "id": "index_server"
     },
     {
       "label": "shutdown",
@@ -4413,8 +4314,8 @@
       "_origin": "ast",
       "community": 1,
       "norm_label": "shutdown",
-      "id": "index_shutdown",
-      "community_name": "index.js"
+      "community_name": "index.js",
+      "id": "index_shutdown"
     },
     {
       "label": "migrate-redis-to-lite-chat.sh",
@@ -4428,8 +4329,8 @@
       "_origin": "ast",
       "community": 27,
       "norm_label": "migrate-redis-to-lite-chat.sh",
-      "id": "scripts_migrate_redis_to_lite_chat",
-      "community_name": "migrate-redis-to-lite-chat.sh"
+      "community_name": "migrate-redis-to-lite-chat.sh",
+      "id": "scripts_migrate_redis_to_lite_chat"
     },
     {
       "label": "migrate-redis-to-lite-chat.sh script",
@@ -4443,8 +4344,8 @@
       "_origin": "ast",
       "community": 27,
       "norm_label": "migrate-redis-to-lite-chat.sh script",
-      "id": "scripts_migrate_redis_to_lite_chat_sh__entry",
-      "community_name": "migrate-redis-to-lite-chat.sh"
+      "community_name": "migrate-redis-to-lite-chat.sh",
+      "id": "scripts_migrate_redis_to_lite_chat_sh__entry"
     },
     {
       "label": "redisConfig.test.js",
@@ -4452,10 +4353,10 @@
       "source_file": "test/redisConfig.test.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 11,
+      "community": 10,
       "norm_label": "redisconfig.test.js",
-      "id": "test_redisconfig_test",
-      "community_name": "redisClient.js"
+      "community_name": "redisClient.js",
+      "id": "test_redisconfig_test"
     },
     {
       "label": "redisClient.js",
@@ -4463,10 +4364,10 @@
       "source_file": "utils/redisClient.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 11,
+      "community": 10,
       "norm_label": "redisclient.js",
-      "id": "utils_redisclient",
-      "community_name": "redisClient.js"
+      "community_name": "redisClient.js",
+      "id": "utils_redisclient"
     },
     {
       "label": "redisOptions",
@@ -4474,10 +4375,10 @@
       "source_file": "utils/redisClient.js",
       "source_location": "L4",
       "_origin": "ast",
-      "community": 11,
+      "community": 10,
       "norm_label": "redisoptions",
-      "id": "utils_redisclient_redisoptions",
-      "community_name": "redisClient.js"
+      "community_name": "redisClient.js",
+      "id": "utils_redisclient_redisoptions"
     },
     {
       "label": "redis",
@@ -4485,10 +4386,10 @@
       "source_file": "utils/redisClient.js",
       "source_location": "L7",
       "_origin": "ast",
-      "community": 11,
+      "community": 10,
       "norm_label": "redis",
-      "id": "utils_redisclient_redis",
-      "community_name": "redisClient.js"
+      "community_name": "redisClient.js",
+      "id": "utils_redisclient_redis"
     },
     {
       "label": "redisConfig.js",
@@ -4496,10 +4397,10 @@
       "source_file": "utils/redisConfig.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 11,
+      "community": 10,
       "norm_label": "redisconfig.js",
-      "id": "utils_redisconfig",
-      "community_name": "redisClient.js"
+      "community_name": "redisClient.js",
+      "id": "utils_redisconfig"
     },
     {
       "label": "parseInteger()",
@@ -4507,10 +4408,10 @@
       "source_file": "utils/redisConfig.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 11,
+      "community": 10,
       "norm_label": "parseinteger()",
-      "id": "utils_redisconfig_parseinteger",
-      "community_name": "redisClient.js"
+      "community_name": "redisClient.js",
+      "id": "utils_redisconfig_parseinteger"
     },
     {
       "label": "getRedisConnectionOptions()",
@@ -4518,10 +4419,109 @@
       "source_file": "utils/redisConfig.js",
       "source_location": "L6",
       "_origin": "ast",
-      "community": 11,
+      "community": 10,
       "norm_label": "getredisconnectionoptions()",
-      "id": "utils_redisconfig_getredisconnectionoptions",
-      "community_name": "redisClient.js"
+      "community_name": "redisClient.js",
+      "id": "utils_redisconfig_getredisconnectionoptions"
+    },
+    {
+      "label": "navigationRoutes.js",
+      "file_type": "code",
+      "source_file": "routes/navigationRoutes.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 15,
+      "norm_label": "navigationroutes.js",
+      "id": "routes_navigationroutes",
+      "community_name": "navigationRoutes.js"
+    },
+    {
+      "label": "router",
+      "file_type": "code",
+      "source_file": "routes/navigationRoutes.js",
+      "source_location": "L7",
+      "_origin": "ast",
+      "community": 15,
+      "norm_label": "router",
+      "id": "routes_navigationroutes_router",
+      "community_name": "navigationRoutes.js"
+    },
+    {
+      "label": "serviceCategories",
+      "file_type": "code",
+      "source_file": "routes/navigationRoutes.js",
+      "source_location": "L9",
+      "_origin": "ast",
+      "community": 15,
+      "norm_label": "servicecategories",
+      "id": "routes_navigationroutes_servicecategories",
+      "community_name": "navigationRoutes.js"
+    },
+    {
+      "label": "serviceCards",
+      "file_type": "code",
+      "source_file": "routes/navigationRoutes.js",
+      "source_location": "L20",
+      "_origin": "ast",
+      "community": 15,
+      "norm_label": "servicecards",
+      "id": "routes_navigationroutes_servicecards",
+      "community_name": "navigationRoutes.js"
+    },
+    {
+      "label": "serviceStats",
+      "file_type": "code",
+      "source_file": "routes/navigationRoutes.js",
+      "source_location": "L383",
+      "_origin": "ast",
+      "community": 15,
+      "norm_label": "servicestats",
+      "id": "routes_navigationroutes_servicestats",
+      "community_name": "navigationRoutes.js"
+    },
+    {
+      "label": "xmlEscape()",
+      "file_type": "code",
+      "source_file": "routes/navigationRoutes.js",
+      "source_location": "L390",
+      "_origin": "ast",
+      "community": 15,
+      "norm_label": "xmlescape()",
+      "id": "routes_navigationroutes_xmlescape",
+      "community_name": "navigationRoutes.js"
+    },
+    {
+      "label": "parseEndpoint()",
+      "file_type": "code",
+      "source_file": "routes/navigationRoutes.js",
+      "source_location": "L397",
+      "_origin": "ast",
+      "community": 15,
+      "norm_label": "parseendpoint()",
+      "id": "routes_navigationroutes_parseendpoint",
+      "community_name": "navigationRoutes.js"
+    },
+    {
+      "label": "sitemapPageItems",
+      "file_type": "code",
+      "source_file": "routes/navigationRoutes.js",
+      "source_location": "L405",
+      "_origin": "ast",
+      "community": 15,
+      "norm_label": "sitemappageitems",
+      "id": "routes_navigationroutes_sitemappageitems",
+      "community_name": "navigationRoutes.js"
+    },
+    {
+      "label": "sitemapCategoryItems",
+      "file_type": "code",
+      "source_file": "routes/navigationRoutes.js",
+      "source_location": "L424",
+      "_origin": "ast",
+      "community": 15,
+      "norm_label": "sitemapcategoryitems",
+      "id": "routes_navigationroutes_sitemapcategoryitems",
+      "community_name": "navigationRoutes.js"
     }
   ],
   "links": [
@@ -4570,190 +4570,6 @@
       "confidence_score": 1.0,
       "source": "utils_deploymentroute",
       "target": "utils_deploymentroute_createdeploymenthandler"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "routes/navigationRoutes.js",
-      "source_location": "L388",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "routes_navigationroutes",
-      "target": "routes_navigationroutes_parseendpoint"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "routes/navigationRoutes.js",
-      "source_location": "L7",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "routes_navigationroutes",
-      "target": "routes_navigationroutes_router"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "routes/navigationRoutes.js",
-      "source_location": "L20",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "routes_navigationroutes",
-      "target": "routes_navigationroutes_servicecards"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "routes/navigationRoutes.js",
-      "source_location": "L9",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "routes_navigationroutes",
-      "target": "routes_navigationroutes_servicecategories"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "routes/navigationRoutes.js",
-      "source_location": "L374",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "routes_navigationroutes",
-      "target": "routes_navigationroutes_servicestats"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "routes/navigationRoutes.js",
-      "source_location": "L414",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "routes_navigationroutes",
-      "target": "routes_navigationroutes_sitemapcategoryitems"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "routes/navigationRoutes.js",
-      "source_location": "L396",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "routes_navigationroutes",
-      "target": "routes_navigationroutes_sitemappageitems"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "routes/navigationRoutes.js",
-      "source_location": "L381",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "routes_navigationroutes",
-      "target": "routes_navigationroutes_xmlescape"
-    },
-    {
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "routes/navigationRoutes.js",
-      "source_location": "L3",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "routes_navigationroutes",
-      "target": "utils_redisclient"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "routes/navigationRoutes.js",
-      "source_location": "L3",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "routes_navigationroutes",
-      "target": "utils_redisclient_redis"
-    },
-    {
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "routes/navigationRoutes.js",
-      "source_location": "L1178",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "routes_navigationroutes",
-      "target": "utils_thirdparrtyapi_aitoken"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "routes/navigationRoutes.js",
-      "source_location": "L1178",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "routes_navigationroutes",
-      "target": "utils_thirdparrtyapi_aitoken_aitoken"
-    },
-    {
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "routes/navigationRoutes.js",
-      "source_location": "L4",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "routes_navigationroutes",
-      "target": "utils_tool"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "routes/navigationRoutes.js",
-      "source_location": "L4",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "routes_navigationroutes",
-      "target": "utils_tool_tool"
-    },
-    {
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "routes/navigationRoutes.js",
-      "source_location": "L5",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "routes_navigationroutes",
-      "target": "utils_unkey"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "routes/navigationRoutes.js",
-      "source_location": "L5",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "routes_navigationroutes",
-      "target": "utils_unkey_unkey"
     },
     {
       "relation": "contains",
@@ -11080,8 +10896,96 @@
       "confidence_score": 1.0,
       "source": "utils_redisconfig_getredisconnectionoptions",
       "target": "utils_redisconfig_parseinteger"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "routes/navigationRoutes.js",
+      "source_location": "L397",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "routes_navigationroutes",
+      "target": "routes_navigationroutes_parseendpoint"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "routes/navigationRoutes.js",
+      "source_location": "L7",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "routes_navigationroutes",
+      "target": "routes_navigationroutes_router"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "routes/navigationRoutes.js",
+      "source_location": "L20",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "routes_navigationroutes",
+      "target": "routes_navigationroutes_servicecards"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "routes/navigationRoutes.js",
+      "source_location": "L9",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "routes_navigationroutes",
+      "target": "routes_navigationroutes_servicecategories"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "routes/navigationRoutes.js",
+      "source_location": "L383",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "routes_navigationroutes",
+      "target": "routes_navigationroutes_servicestats"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "routes/navigationRoutes.js",
+      "source_location": "L424",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "routes_navigationroutes",
+      "target": "routes_navigationroutes_sitemapcategoryitems"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "routes/navigationRoutes.js",
+      "source_location": "L405",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "routes_navigationroutes",
+      "target": "routes_navigationroutes_sitemappageitems"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "routes/navigationRoutes.js",
+      "source_location": "L390",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "routes_navigationroutes",
+      "target": "routes_navigationroutes_xmlescape"
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "896feaed9a071aa99b0b1b14dd34f7b3156afdab"
+  "built_at_commit": "b7eefc545496703336e76cf504b01acb54ca68b2"
 }

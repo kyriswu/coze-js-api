@@ -37,6 +37,15 @@ const serviceCards = [
         price: '按量'
     },
     {
+        title: 'Seedance 2.0 视频生成文档',
+        category: 'media',
+        icon: 'SV',
+        description: '查看 Seedance 2.0 视频生成任务创建与轮询接口的参数和示例。',
+        endpoint: 'GET /docs/volcengine/seedance-2-0',
+        badge: '文档',
+        price: '工具'
+    },
+    {
         title: 'Coze 工作流运行',
         category: 'ai',
         icon: 'WF',
@@ -398,6 +407,7 @@ const sitemapPageItems = [
     { path: '/gpt-image-2', changefreq: 'daily', priority: '0.9' },
     { path: '/video-transcript', changefreq: 'daily', priority: '0.9' },
     { path: '/file-transfer', changefreq: 'hourly', priority: '0.9' },
+    { path: '/docs/volcengine/seedance-2-0', changefreq: 'weekly', priority: '0.7' },
     { path: '/network-dashboard', changefreq: 'hourly', priority: '0.9' },
     { path: '/apikey', changefreq: 'daily', priority: '0.8' },
     { path: '/w7k2', changefreq: 'weekly', priority: '0.7' },
@@ -557,6 +567,109 @@ router.get('/docs/xiaohongshu/search_notes_v2', (req, res) => {
             title: '小红书搜索笔记接口文档 /xiaohongshu/search_notes_v2',
             description: '小红书搜索笔记接口调用示例与返回参数说明，包含 posts 与 pagination 字段解释。',
             keywords: 'xiaohongshu,search_notes_v2,API文档,curl,分页参数',
+            url: pageUrl,
+        }
+    });
+});
+
+router.get('/docs/volcengine/seedance-2-0', (req, res) => {
+    const pageUrl = `${tool.getBaseUrl(req)}${req.originalUrl}`;
+    const docBaseUrl = 'https://coze-js-api.devtool.uk';
+    const createPath = '/volcengine/contents/generations/tasks';
+
+    const doc = {
+        title: 'Seedance 2.0 视频生成 API 文档',
+        name: createPath,
+        summary: '通过本项目的火山方舟封装创建 Seedance 2.0 视频生成任务，并轮询任务状态获取上游结果。',
+        method: 'POST',
+        path: createPath,
+        upstream: '/api/v3/contents/generations/tasks',
+        cost: '创建前需有可用积分',
+        description: '创建接口会移除本地 api_key 后透传其余业务字段到火山方舟；content 与 tools 也支持以 JSON 字符串提交。创建成功后使用返回的任务 ID 请求查询接口。任务对象由上游直接透传，因此以实际 data 内容为准。',
+        requestParams: [
+            { name: 'api_key', type: 'string', required: true, desc: '本项目 API Key；创建任务前校验有效性和可用积分', example: 'uk_live_xxx' },
+            { name: 'model', type: 'string', required: true, desc: '视频生成模型名称', example: 'doubao-seedance-2-0-260128' },
+            { name: 'content', type: 'array | JSON string', required: true, desc: '输入内容；至少包含文本，可按需加入参考图、参考视频或参考音频', example: '[{"type":"text","text":"..."}]' },
+            { name: 'content[].type', type: 'string', required: true, desc: '内容类型，如 text、image_url、video_url、audio_url', example: 'text' },
+            { name: 'content[].role', type: 'string', required: false, desc: '参考媒体角色，例如 first_frame、reference_image、reference_video、reference_audio', example: 'first_frame' },
+            { name: 'generate_audio', type: 'boolean', required: false, desc: '是否生成音频，按上游模型能力处理', example: 'true' },
+            { name: 'resolution', type: 'string', required: false, desc: '目标分辨率，按模型支持的枚举传入', example: '720p' },
+            { name: 'ratio', type: 'string', required: false, desc: '画面比例，按模型支持的枚举传入', example: '16:9' },
+            { name: 'duration', type: 'number', required: false, desc: '视频时长，按模型支持范围传入', example: '5' },
+            { name: 'watermark', type: 'boolean', required: false, desc: '是否添加水印', example: 'false' },
+            { name: 'tools', type: 'array | JSON string', required: false, desc: '上游工具配置，原样透传', example: '[]' },
+        ],
+        examples: [
+            {
+                title: '创建文生视频任务',
+                code: `curl -X POST "${docBaseUrl}${createPath}" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "api_key": "uk_live_xxx",
+    "model": "doubao-seedance-2-0-260128",
+    "content": [
+      {
+        "type": "text",
+        "text": "一只猫在雨夜的霓虹街道上缓慢行走，镜头轻微跟随，氛围电影感。"
+      }
+    ],
+    "generate_audio": true,
+    "resolution": "720p",
+    "ratio": "16:9",
+    "duration": 5,
+    "watermark": false
+  }'`,
+            },
+            {
+                title: '创建带首帧参考图的视频任务',
+                code: `curl -X POST "${docBaseUrl}${createPath}" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "api_key": "uk_live_xxx",
+    "model": "doubao-seedance-2-0-260128",
+    "content": [
+      {
+        "type": "text",
+        "text": "让画面中的人物自然向前行走，保持首帧构图和服装风格。"
+      },
+      {
+        "type": "image_url",
+        "image_url": { "url": "https://example.com/first-frame.png" },
+        "role": "first_frame"
+      }
+    ],
+    "resolution": "720p",
+    "ratio": "16:9",
+    "duration": 5
+  }'`,
+            },
+            {
+                title: '轮询任务状态',
+                code: `curl "${docBaseUrl}${createPath}/<task_id>"`,
+            },
+        ],
+        responseFields: [
+            { path: 'code', type: 'number', desc: '本地业务状态码，200 表示请求已成功转发并收到上游响应' },
+            { path: 'msg', type: 'string', desc: '创建时为“创建视频生成任务成功”；查询时为“查询视频生成任务成功”' },
+            { path: 'data', type: 'object', desc: '火山方舟上游任务对象，创建响应中获取任务 ID，查询响应中查看状态和结果' },
+            { path: 'data.id / data.task_id', type: 'string', desc: '任务标识。上游字段命名以实际响应为准，轮询时作为 <task_id> 使用' },
+        ],
+        responseSample: JSON.stringify({
+            code: 200,
+            msg: '创建视频生成任务成功',
+            data: {
+                id: 'task_xxx',
+                status: 'queued'
+            }
+        }, null, 2),
+    };
+
+    res.render('api-doc-seedance-2-video', {
+        doc,
+        seo: {
+            title: 'Seedance 2.0 视频生成接口文档',
+            description: 'Seedance 2.0 视频生成任务创建与查询接口说明，包含文本、首帧参考图和轮询示例。',
+            keywords: 'Seedance 2.0,视频生成,Volcengine,火山方舟,API 文档,任务轮询',
             url: pageUrl,
         }
     });
