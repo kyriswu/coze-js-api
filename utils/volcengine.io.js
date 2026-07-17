@@ -22,6 +22,7 @@ const SEEDANCE_PRICE_PER_MILLION_TOKENS = 46;
 const SEEDANCE_FIXED_CREDITS = 10;
 const SEEDANCE_MEDIA_PROBE_TIMEOUT_MS = 10_000;
 const SEEDANCE_MEDIA_MAX_REDIRECTS = 5;
+const SEEDANCE_TASK_TIMEOUT_MS = 10 * 60 * 1000;
 const seedanceHttpAgent = new http.Agent({ lookup: lookupPublicAddress });
 const seedanceHttpsAgent = new https.Agent({ lookup: lookupPublicAddress });
 
@@ -750,7 +751,7 @@ export const ve_contents_generations_tasks = {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${ARK_API_KEY}`
                     },
-                    timeout: 30000
+                    timeout: SEEDANCE_TASK_TIMEOUT_MS
                 }
             );
 
@@ -811,7 +812,7 @@ export const ve_contents_generations_tasks = {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${ARK_API_KEY}`
                     },
-                    timeout: 30000
+                    timeout: SEEDANCE_TASK_TIMEOUT_MS
                 }
             );
 

@@ -1,6 +1,25 @@
 # QA
 
 ## Iteration
+2026-07-17 / seedance-ten-minute-task-timeouts
+
+## Test Matrix
+| Case ID | Step | Expected | Actual | Status |
+|---|---|---|---|---|
+| QA-STT-01 | `node --check utils/volcengine.io.js`、`git diff --check` | 共享的 600,000ms 超时配置可解析，差异格式有效 | 成功 | pass |
+| QA-STT-02 | 自动化测试与真实上游慢响应验证 | 未执行，按已确认范围仅做语法检查 | 未执行 | not run |
+
+## Manual Checks
+- 创建和查询的火山方舟任务 Axios 调用共用 `SEEDANCE_TASK_TIMEOUT_MS = 600000`。
+- 未添加自动重试，避免慢响应时重复创建视频任务。
+
+## Final QA Verdict
+- [ ] pass
+- [x] conditional pass
+- [ ] fail
+
+
+## Iteration
 2026-07-17 / seedance-media-url-validation
 
 ## Test Matrix

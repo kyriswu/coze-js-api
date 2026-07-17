@@ -1,5 +1,18 @@
 # RELEASE
 
+## Reliability Change
+2026-07-17 / seedance-ten-minute-task-timeouts
+
+### Summary
+Seedance 2.0 创建任务和查询任务均可等待火山方舟上游响应最长 10 分钟。
+
+### API / Behavior
+- `POST /volcengine/contents/generations/tasks` 与 `GET /volcengine/contents/generations/tasks/:task_id` 的上游 Axios 超时统一为 600,000ms。
+- 未增加自动重试，因此不会因本地超时而重复创建视频任务。
+
+### Rollback Notes
+- 将共享超时常量改回原来的 30,000ms 即可恢复旧行为，但慢响应将更容易在本地提前失败。
+
 ## Validation Change
 2026-07-17 / seedance-media-url-validation
 
