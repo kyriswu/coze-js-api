@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <% const pageSeo = (typeof seo !== 'undefined' && seo) ? seo : {}; %>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= pageSeo.title || 'DevTool 插件服务' %></title>
+  <meta name="description" content="<%= pageSeo.description || 'DevTool 插件服务中心，集中展示 AI、搜索、视频、平台数据和文件处理 API。' %>" />
+  <meta name="keywords" content="<%= pageSeo.keywords || 'DevTool,插件服务,API' %>" />
+  <meta name="robots" content="index,follow,max-image-preview:large" />
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="zh_CN" />
+  <meta property="og:title" content="<%= pageSeo.title || 'DevTool 插件服务' %>" />
+  <meta property="og:description" content="<%= pageSeo.description || 'DevTool 插件服务中心。' %>" />
+  <meta property="og:url" content="<%= pageSeo.url || '' %>" />
+
+  <style>
+    :root {
+      --page: #eaf9ff;
+      --paper: rgba(255, 255, 255, 0.7);
+      --paper-solid: #ffffff;
+      --ink: #092033;
+      --muted: #466178;
+      --faint: #7892a6;
+      --line: rgba(120, 179, 203, 0.36);
+      --line-strong: rgba(57, 136, 171, 0.46);
+      --blue: #0f6fff;
+      --blue-dark: #0b3c95;
+      --aqua: #00b8d9;
+      --mint: #16c79a;
+      --coral: #ff6f61;
+      --green: #0f9f6e;
+      --orange: #ff7a18;
+      --red: #e11d48;
+      --glass: rgba(255, 255, 255, 0.62);
+      --glass-strong: rgba(255, 255, 255, 0.82);
+      --shadow: 0 26px 80px rgba(12, 75, 112, 0.16);
+      --soft-shadow: 0 16px 42px rgba(22, 82, 119, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      position: relative;
+      isolation: isolate;
+      overflow-x: hidden;
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: "HarmonyOS Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(225, 247, 255, 0.74) 38%, rgba(236, 255, 250, 0.82) 100%),
+        radial-gradient(circle at 18% 8%, rgba(0, 184, 217, 0.28), transparent 34%),
+        radial-gradient(circle at 86% 12%, rgba(255, 111, 97, 0.2), transparent 30%),
+        linear-gradient(135deg, #eefcff 0%, #f9ffff 48%, #eafff7 100%);
+    }
+
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      inset: -22%;
+      z-index: -2;
+      pointer-events: none;
+    }
+
+    body::before {
+      background:
+        repeating-radial-gradient(ellipse at 18% 22%, rgba(8, 87, 132, 0.13) 0 2px, transparent 3px 24px),
+        repeating-radial-gradient(ellipse at 76% 18%, rgba(0, 184, 217, 0.12) 0 1px, transparent 3px 30px),
+        repeating-radial-gradient(ellipse at 45% 84%, rgba(22, 199, 154, 0.1) 0 2px, transparent 4px 28px);
+      filter: blur(0.2px);
+      opacity: 0.72;
+      transform: rotate(-8deg) scale(1.08);
+      animation: rippleDrift 18s linear infinite;
+      mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.44) 58%, rgba(0, 0, 0, 0.18));
+    }
+
+    body::after {
+      z-index: -1;
+      background:
+        linear-gradient(115deg, transparent 0 22%, rgba(255, 255, 255, 0.54) 26%, transparent 32% 100%),
+        linear-gradient(72deg, transparent 0 46%, rgba(0, 184, 217, 0.11) 50%, transparent 58% 100%),
+        radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.78), transparent 38%);
+      opacity: 0.86;
+      animation: shimmerSlide 13s ease-in-out infinite alternate;
+      mix-blend-mode: screen;
+    }
+
+    @keyframes rippleDrift {
+      0% { transform: rotate(-8deg) scale(1.08) translate3d(0, 0, 0); }
+      50% { transform: rotate(-5deg) scale(1.12) translate3d(3.5%, -2%, 0); }
+      100% { transform: rotate(-8deg) scale(1.08) translate3d(0, 0, 0); }
+    }
+
+    @keyframes shimmerSlide {
+      from { transform: translate3d(-2%, -1%, 0) skewY(-2deg); }
+      to { transform: translate3d(3%, 2%, 0) skewY(2deg); }
+    }
+
+    @keyframes floatIn {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    .shell {
+      width: min(1360px, calc(100% - 48px));
+      margin: 0 auto;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: rgba(242, 253, 255, 0.66);
+      border-bottom: 1px solid rgba(128, 188, 210, 0.34);
+      backdrop-filter: blur(22px) saturate(1.28);
+      box-shadow: 0 12px 40px rgba(20, 92, 128, 0.08);
+    }
+
+    .nav {
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: max-content;
+    }
+
+    .brand-mark {
+      width: 32px;
+      height: 32px;
+      display: grid;
+      place-items: center;
+      border-radius: 10px;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 800;
+      background: conic-gradient(from 190deg, #0f6fff, #00c2d7, #16c79a, #0f6fff);
+      box-shadow: 0 12px 28px rgba(0, 184, 217, 0.32);
+    }
+
+    .brand-name {
+      font-size: 19px;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      flex: 1;
+    }
+
+    .nav-links a {
+      color: #254358;
+      font-size: 14px;
+      font-weight: 700;
+      padding: 12px 15px;
+      border-radius: 10px;
+      transition: color 0.18s ease, background 0.18s ease;
+    }
+
+    .nav-links a:hover,
+    .nav-links a.active {
+      color: var(--blue);
+      background: rgba(255, 255, 255, 0.52);
+      box-shadow: inset 0 0 0 1px rgba(15, 111, 255, 0.12);
+    }
+
+    .nav-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-width: max-content;
+      color: #0f3850;
+      font-size: 14px;
+      font-weight: 700;
+      padding: 10px 14px;
+      border: 1px solid rgba(255, 255, 255, 0.58);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.54);
+      backdrop-filter: blur(14px);
+    }
+
+    .hero {
+      padding: 56px 0 22px;
+      animation: floatIn 0.72s ease both;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(340px, 430px);
+      gap: 36px;
+      align-items: end;
+    }
+
+    .eyebrow {
+      margin: 0 0 12px;
+      color: #087ca3;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(34px, 4.5vw, 58px);
+      line-height: 1.05;
+      letter-spacing: 0;
+      color: transparent;
+      background: linear-gradient(105deg, #071f34 0%, #075985 38%, #00a3b8 66%, #ff6f61 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      text-shadow: 0 14px 42px rgba(0, 184, 217, 0.12);
+    }
+
+    .lead {
+      max-width: 760px;
+      margin: 16px 0 0;
+      color: #456175;
+      font-size: 16px;
+      line-height: 1.9;
+    }
+
+    .search-panel {
+      padding: 14px;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.58);
+      border-radius: 22px;
+      background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.72), rgba(232, 252, 255, 0.48)),
+        rgba(255, 255, 255, 0.36);
+      box-shadow: var(--soft-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(22px) saturate(1.25);
+    }
+
+    .search-panel::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(115deg, transparent 0 34%, rgba(255, 255, 255, 0.52) 46%, transparent 58% 100%);
+      opacity: 0.62;
+      pointer-events: none;
+      transform: translateX(-38%);
+      animation: shimmerSlide 8s ease-in-out infinite alternate;
+    }
+
+    .search-box {
+      position: relative;
+    }
+
+    .search-box input {
+      width: 100%;
+      height: 48px;
+      padding: 0 48px 0 16px;
+      color: var(--ink);
+      border: 1px solid var(--line-strong);
+      border-radius: 15px;
+      background: rgba(255, 255, 255, 0.74);
+      outline: none;
+      transition: border-color 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .search-box input:focus {
+      border-color: rgba(47, 91, 255, 0.74);
+      box-shadow: 0 0 0 4px rgba(0, 184, 217, 0.12);
+    }
+
+    .search-icon {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--faint);
+      font-weight: 900;
+    }
+
+    .search-hints {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .hint {
+      color: #23546b;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 6px 9px;
+      border-radius: 999px;
+      background: rgba(230, 250, 255, 0.78);
+      border: 1px solid rgba(110, 190, 215, 0.22);
+    }
+
+    .category-rail {
+      margin-top: 28px;
+      padding: 10px;
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      border: 1px solid rgba(255, 255, 255, 0.62);
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.58);
+      box-shadow: var(--soft-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(20px) saturate(1.24);
+    }
+
+    .category-btn {
+      min-width: max-content;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #26475b;
+      border: 0;
+      border-radius: 12px;
+      padding: 11px 16px;
+      background: transparent;
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+    }
+
+    .category-btn:hover {
+      transform: translateY(-1px);
+      background: rgba(255, 255, 255, 0.48);
+    }
+
+    .category-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 99px;
+      background: var(--cat-color);
+      box-shadow: 0 0 0 4px color-mix(in srgb, var(--cat-color) 14%, transparent);
+    }
+
+    .category-btn.active {
+      color: #fff;
+      background: linear-gradient(135deg, #0f6fff, #00b8d9);
+      box-shadow: 0 14px 30px rgba(0, 184, 217, 0.28);
+    }
+
+    .category-btn.active .category-dot {
+      background: #fff;
+      box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.22);
+    }
+
+    .stats {
+      margin-top: 10px;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .stat {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      padding: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.54);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.74);
+      backdrop-filter: blur(18px) saturate(1.18);
+    }
+
+    .stat-sign {
+      width: 36px;
+      height: 36px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+      border-radius: 12px;
+      color: var(--blue);
+      font-size: 13px;
+      font-weight: 900;
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.86), rgba(208, 247, 255, 0.68));
+      box-shadow: 0 9px 22px rgba(0, 184, 217, 0.14);
+    }
+
+    .stat-value {
+      display: block;
+      font-size: 18px;
+      font-weight: 900;
+    }
+
+    .stat-label {
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .pay-notice {
+      margin: 14px 0 0;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 18px;
+      align-items: center;
+      padding: 18px 20px;
+      border: 1px solid rgba(255, 255, 255, 0.64);
+      border-radius: 20px;
+      background:
+        linear-gradient(135deg, rgba(255, 247, 237, 0.78), rgba(225, 251, 255, 0.58) 48%, rgba(255, 255, 255, 0.72)),
+        rgba(255, 255, 255, 0.44);
+      box-shadow: var(--soft-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.86);
+      backdrop-filter: blur(22px) saturate(1.18);
+    }
+
+    .pay-kicker {
+      display: inline-flex;
+      align-items: center;
+      width: fit-content;
+      margin: 0 0 7px;
+      color: #b93816;
+      font-size: 12px;
+      font-weight: 900;
+      padding: 5px 8px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.56);
+      border: 1px solid rgba(255, 111, 97, 0.22);
+    }
+
+    .pay-title {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.4;
+      letter-spacing: 0;
+    }
+
+    .pay-text {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .wechat-card {
+      min-width: 260px;
+      padding: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.72);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.68);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.84), 0 16px 34px rgba(255, 111, 97, 0.12);
+    }
+
+    .wechat-qr {
+      display: block;
+      width: 178px;
+      aspect-ratio: 1;
+      object-fit: contain;
+      margin: 0 auto 12px;
+      border-radius: 8px;
+      background: #fff;
+      border: 1px solid rgba(124, 45, 18, 0.12);
+      box-shadow: 0 12px 28px rgba(9, 32, 51, 0.08);
+    }
+
+    .wechat-card.qr-missing .wechat-qr {
+      display: none;
+    }
+
+    .qr-fallback {
+      display: none;
+      margin-bottom: 12px;
+      padding: 12px;
+      color: #9a3412;
+      font-size: 12px;
+      line-height: 1.7;
+      border: 1px dashed rgba(255, 111, 97, 0.42);
+      border-radius: 8px;
+      background: rgba(255, 247, 237, 0.8);
+    }
+
+    .wechat-card.qr-missing .qr-fallback {
+      display: block;
+    }
+
+    .wechat-label {
+      display: block;
+      color: #7c2d12;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .wechat-id {
+      display: block;
+      margin-top: 4px;
+      color: #111827;
+      font-family: "SFMono-Regular", "Consolas", monospace;
+      font-size: 18px;
+      font-weight: 900;
+    }
+
+    .wechat-note {
+      display: block;
+      margin-top: 5px;
+      color: #9a3412;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .section-head {
+      margin: 34px 0 16px;
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 18px;
+    }
+
+    .section-head h2 {
+      margin: 0;
+      font-size: 22px;
+      letter-spacing: 0;
+    }
+
+    .count {
+      color: #4a6579;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .service-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      animation: floatIn 0.82s ease both;
+    }
+
+    .service-card {
+      position: relative;
+      overflow: hidden;
+      min-height: 176px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      padding: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.62);
+      border-radius: 14px;
+      background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.72), rgba(238, 253, 255, 0.52)),
+        rgba(255, 255, 255, 0.42);
+      box-shadow: var(--soft-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.76);
+      backdrop-filter: blur(20px) saturate(1.2);
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .service-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(120deg, transparent 0 38%, rgba(255, 255, 255, 0.52) 50%, transparent 62% 100%),
+        radial-gradient(circle at 0% 0%, color-mix(in srgb, var(--cat-color) 16%, transparent), transparent 42%);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+
+    .service-card:hover {
+      transform: translateY(-5px);
+      border-color: color-mix(in srgb, var(--cat-color) 34%, rgba(255, 255, 255, 0.72));
+      box-shadow: 0 24px 56px rgba(16, 88, 126, 0.18);
+    }
+
+    .service-card:hover::before {
+      opacity: 1;
+    }
+
+    .service-top {
+      display: grid;
+      grid-template-columns: 44px minmax(0, 1fr);
+      gap: 12px;
+      align-items: center;
+    }
+
+    .service-icon {
+      width: 44px;
+      height: 44px;
+      display: grid;
+      place-items: center;
+      border-radius: 14px;
+      color: var(--cat-color);
+      font-size: 12px;
+      font-weight: 900;
+      background: color-mix(in srgb, var(--cat-color) 14%, rgba(255, 255, 255, 0.88));
+      border: 1px solid color-mix(in srgb, var(--cat-color) 22%, white);
+      box-shadow: 0 10px 22px color-mix(in srgb, var(--cat-color) 14%, transparent);
+    }
+
+    .service-title {
+      margin: 0;
+      font-size: 16px;
+      line-height: 1.35;
+      letter-spacing: 0;
+    }
+
+    .service-badge {
+      display: inline-flex;
+      width: fit-content;
+      margin-top: 5px;
+      color: var(--cat-color);
+      font-size: 12px;
+      font-weight: 800;
+      line-height: 1;
+      padding: 5px 7px;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--cat-color) 10%, white);
+    }
+
+    .service-desc {
+      min-height: 43px;
+      margin: 0;
+      color: #4b6375;
+      font-size: 13px;
+      line-height: 1.65;
+    }
+
+    .service-meta {
+      margin-top: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .endpoint {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: #29465f;
+      font-family: "SFMono-Regular", "Consolas", monospace;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 6px 8px;
+      border: 1px solid rgba(131, 178, 205, 0.38);
+      border-radius: 7px;
+      background: rgba(244, 251, 255, 0.72);
+    }
+
+    .price {
+      min-width: max-content;
+      color: #047857;
+      font-size: 12px;
+      font-weight: 900;
+      padding: 6px 8px;
+      border: 1px solid rgba(23, 167, 99, 0.28);
+      border-radius: 7px;
+      background: rgba(16, 199, 154, 0.1);
+    }
+
+    .empty {
+      display: none;
+      padding: 48px 20px;
+      text-align: center;
+      color: #486278;
+      border: 1px dashed var(--line-strong);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.56);
+      backdrop-filter: blur(18px);
+    }
+
+    .quick-panel {
+      margin: 40px auto 52px;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .quick-link {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      min-height: 78px;
+      padding: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.62);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.56);
+      box-shadow: var(--soft-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.76);
+      backdrop-filter: blur(18px) saturate(1.2);
+      transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .quick-link:hover {
+      transform: translateY(-2px);
+      border-color: rgba(0, 184, 217, 0.36);
+      box-shadow: 0 18px 42px rgba(16, 88, 126, 0.15);
+    }
+
+    .quick-icon {
+      width: 36px;
+      height: 36px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+      color: var(--blue);
+      font-size: 12px;
+      font-weight: 900;
+      border-radius: 12px;
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.86), rgba(209, 248, 255, 0.78));
+    }
+
+    .quick-title {
+      display: block;
+      font-weight: 900;
+    }
+
+    .quick-note {
+      display: block;
+      margin-top: 4px;
+      color: #506b7f;
+      font-size: 12px;
+    }
+
+    footer {
+      padding: 22px 0 34px;
+      color: #526d82;
+      font-size: 13px;
+      text-align: center;
+      border-top: 1px solid rgba(120, 179, 203, 0.28);
+      background: rgba(255, 255, 255, 0.32);
+      backdrop-filter: blur(16px);
+    }
+
+    @media (max-width: 1180px) {
+      .service-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 920px) {
+      .shell {
+        width: min(100% - 28px, 760px);
+      }
+
+      .nav {
+        height: auto;
+        padding: 12px 0;
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .nav-links {
+        width: 100%;
+        justify-content: flex-start;
+        overflow-x: auto;
+      }
+
+      .nav-action {
+        display: none;
+      }
+
+      .hero-grid {
+        grid-template-columns: 1fr;
+        gap: 24px;
+      }
+
+      .stats,
+      .quick-panel {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .pay-notice {
+        grid-template-columns: 1fr;
+      }
+
+      .wechat-card {
+        min-width: 0;
+      }
+
+      .service-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 620px) {
+      .shell {
+        width: min(100% - 22px, 520px);
+      }
+
+      .hero {
+        padding-top: 28px;
+      }
+
+      h1 {
+        font-size: 33px;
+      }
+
+      .lead {
+        font-size: 14px;
+      }
+
+      .stats,
+      .service-grid,
+      .quick-panel {
+        grid-template-columns: 1fr;
+      }
+
+      .section-head {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .service-desc {
+        min-height: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <nav class="shell nav" aria-label="主导航">
+      <a class="brand" href="/">
+        <span class="brand-mark">D</span>
+        <span class="brand-name">DevTool 插件服务</span>
+      </a>
+      <div class="nav-links">
+        <a class="active" href="#services">插件服务</a>
+        <a href="/plugin">文档中心</a>
+        <a href="/wiki">接入指南</a>
+        <a href="/vip">价格说明</a>
+        <a href="/apikey">额度查询</a>
+        <a href="/video-transcript">视频文案</a>
+        <a href="/gpt-image-2">图片生成</a>
+      </div>
+      <a class="nav-action" href="/plugin">查看文档</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="shell hero">
+      <div class="hero-grid">
+        <div>
+          <p class="eyebrow">PLUGIN API CATALOG</p>
+          <h1>插件服务中心</h1>
+          <p class="lead">精选高质量插件服务，覆盖 AI 创作、搜索解析、视频音频、平台数据、文件处理和知识查询。适合快速集成到 Coze、工作流、自动化脚本和业务系统。</p>
+        </div>
+
+        <div class="search-panel" aria-label="插件搜索">
+          <div class="search-box">
+            <input id="serviceSearch" type="search" placeholder="搜索插件服务，如：AI 写作、视频、抖音、PDF" autocomplete="off" />
+            <span class="search-icon">⌕</span>
+          </div>
+          <div class="search-hints" aria-label="热门搜索">
+            <span class="hint">视频转文字</span>
+            <span class="hint">网页解析</span>
+            <span class="hint">抖音数据</span>
+            <span class="hint">PDF</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="category-rail" role="tablist" aria-label="服务分类">
+        <% categories.forEach((category, index) => { %>
+          <button
+            class="category-btn <%= index === 0 ? 'active' : '' %>"
+            type="button"
+            role="tab"
+            aria-selected="<%= index === 0 ? 'true' : 'false' %>"
+            data-category="<%= category.id %>"
+            style="--cat-color: <%= category.accent %>;"
+          >
+            <span class="category-dot"></span>
+            <span><%= category.name %></span>
+          </button>
+        <% }) %>
+      </div>
+
+      <div class="stats" aria-label="服务概览">
+        <% stats.forEach((stat, index) => { %>
+          <div class="stat">
+            <span class="stat-sign"><%= ['API', 'CAT', 'JSON', 'URL'][index] || 'OK' %></span>
+            <span>
+              <strong class="stat-value"><%= stat.value %></strong>
+              <span class="stat-label"><%= stat.label %> · <%= stat.note %></span>
+            </span>
+          </div>
+        <% }) %>
+      </div>
+
+      <div class="pay-notice" aria-label="付费购买说明">
+        <div>
+          <span class="pay-kicker">免费版可直接试用，付费版请加微信购买额度</span>
+          <h2 class="pay-title">需要更多积分或稳定调用量？加工作人员微信开通付费版。</h2>
+          <p class="pay-text">购买指定点数套餐后即可用于本页插件服务。添加时请备注“购买插件额度”，方便快速处理。</p>
+        </div>
+        <div class="wechat-card">
+          <img
+            class="wechat-qr"
+            src="/assets/wechat-qr.png"
+            alt="工作人员微信二维码"
+            onerror="this.closest('.wechat-card').classList.add('qr-missing')"
+          />
+          <span class="qr-fallback">二维码图片待放入：<br />assets/wechat-qr.png</span>
+          <span class="wechat-label">工作人员联系方式 VX</span>
+          <span class="wechat-id">xiaowu_azt</span>
+          <span class="wechat-note">备注：购买插件额度</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="services" class="shell" aria-labelledby="servicesTitle">
+      <div class="section-head">
+        <div>
+          <h2 id="servicesTitle">全部插件服务</h2>
+        </div>
+        <div class="count"><span id="visibleCount"><%= services.length %></span> / <%= services.length %> 个服务</div>
+      </div>
+
+      <div class="service-grid" id="serviceGrid">
+        <% services.forEach((service) => {
+          const category = categories.find((item) => item.id === service.category) || categories[0];
+          const searchable = `${service.title} ${service.description} ${service.endpoint} ${service.badge}`;
+        %>
+          <article
+            class="service-card"
+            data-category="<%= service.category %>"
+            data-search="<%= searchable %>"
+            style="--cat-color: <%= category.accent %>;"
+          >
+            <div class="service-top">
+              <div class="service-icon"><%= service.icon %></div>
+              <div>
+                <h3 class="service-title"><%= service.title %></h3>
+                <span class="service-badge"><%= service.badge %></span>
+              </div>
+            </div>
+            <p class="service-desc"><%= service.description %></p>
+            <div class="service-meta">
+              <span class="endpoint" title="<%= service.endpoint %>"><%= service.endpoint %></span>
+              <span class="price"><%= service.price %></span>
+            </div>
+          </article>
+        <% }) %>
+      </div>
+
+      <div class="empty" id="emptyState">没有找到匹配的插件服务，可以换个关键词试试。</div>
+    </section>
+
+    <section class="shell quick-panel" aria-label="快捷入口">
+      <a class="quick-link" href="/plugin">
+        <span class="quick-icon">DOC</span>
+        <span>
+          <span class="quick-title">查看文档</span>
+          <span class="quick-note">快速接入指南</span>
+        </span>
+      </a>
+      <a class="quick-link" href="/apikey">
+        <span class="quick-icon">KEY</span>
+        <span>
+          <span class="quick-title">额度查询</span>
+          <span class="quick-note">检查 API Key 状态</span>
+        </span>
+      </a>
+      <a class="quick-link" href="/vip">
+        <span class="quick-icon">¥</span>
+        <span>
+          <span class="quick-title">加微信购买额度</span>
+          <span class="quick-note">VX：xiaowu_azt</span>
+        </span>
+      </a>
+      <a class="quick-link" href="/wiki">
+        <span class="quick-icon">?</span>
+        <span>
+          <span class="quick-title">帮助中心</span>
+          <span class="quick-note">常见问题与支持</span>
+        </span>
+      </a>
+    </section>
+  </main>
+
+  <footer>
+    DevTool 插件服务 · 面向 AI 工作流和自动化场景的 API 工具箱
+  </footer>
+
+  <script>
+    const categoryButtons = Array.from(document.querySelectorAll('.category-btn'));
+    const cards = Array.from(document.querySelectorAll('.service-card'));
+    const searchInput = document.getElementById('serviceSearch');
+    const visibleCount = document.getElementById('visibleCount');
+    const emptyState = document.getElementById('emptyState');
+    const title = document.getElementById('servicesTitle');
+    const categoryNames = <%- JSON.stringify(Object.fromEntries(categories.map((item) => [item.id, item.name]))) %>;
+    let activeCategory = 'all';
+
+    function normalize(value) {
+      return String(value || '').toLowerCase().trim();
+    }
+
+    function applyFilters() {
+      const keyword = normalize(searchInput.value);
+      let count = 0;
+
+      cards.forEach((card) => {
+        const matchesCategory = activeCategory === 'all' || card.dataset.category === activeCategory;
+        const matchesKeyword = !keyword || normalize(card.dataset.search).includes(keyword);
+        const visible = matchesCategory && matchesKeyword;
+        card.style.display = visible ? '' : 'none';
+        if (visible) count += 1;
+      });
+
+      visibleCount.textContent = count;
+      emptyState.style.display = count === 0 ? 'block' : 'none';
+      title.textContent = activeCategory === 'all' ? '全部插件服务' : categoryNames[activeCategory];
+    }
+
+    categoryButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        activeCategory = button.dataset.category;
+        categoryButtons.forEach((item) => {
+          const selected = item === button;
+          item.classList.toggle('active', selected);
+          item.setAttribute('aria-selected', selected ? 'true' : 'false');
+        });
+        applyFilters();
+      });
+    });
+
+    searchInput.addEventListener('input', applyFilters);
+  </script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+# Graphify-specific excludes (gitignore syntax)
+# Note: .gitignore is already respected; this file adds stricter graph-scan rules.
+
+# Keep graph output and local tool/state folders out of future scans
+graphify-out/
+.git/
+.vscode/
+
+# Large/noisy runtime or generated artifacts
+downloads/
+logs/
+coverage/
+dist/
+*.log
+
+# Dependencies and package manager stores
+node_modules/
+
+# Non-core content for code graph cache
+assets/
+docs/
+harness/
+**/*.md
+*.md
+docker-compose.yaml
+
+# Local standalone packages not needed in main API graph
+baibao-cli/
+zimujun/

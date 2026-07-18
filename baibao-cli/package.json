@@ -1,0 +1,24 @@
+{
+  "name": "baibao-cli",
+  "version": "0.1.0",
+  "description": "Baibao command-line toolbox for Coze JS API endpoints",
+  "bin": {
+    "baibao-cli": "bin/baibao-cli.js"
+  },
+  "type": "commonjs",
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "bin",
+    "README.md"
+  ],
+  "keywords": [
+    "cli",
+    "coze",
+    "whisper",
+    "redis",
+    "toolbox"
+  ],
+  "license": "MIT"
+}

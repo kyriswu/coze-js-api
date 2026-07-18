@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <% const pageSeo = (typeof seo !== 'undefined' && seo) ? seo : {}; %>
+  <% const pageVisitorCount = (typeof visitorCount !== 'undefined' && visitorCount !== null) ? visitorCount : 0; %>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= pageSeo.title || 'WorkBuddy 新手教程' %></title>
+  <meta name="description" content="<%= pageSeo.description || 'WorkBuddy 新手落地页：3步快速上手与实战场景提示词。' %>" />
+  <meta name="keywords" content="<%= pageSeo.keywords || 'WorkBuddy,AI办公,提示词' %>" />
+  <meta name="robots" content="index,follow,max-image-preview:large" />
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="zh_CN" />
+  <meta property="og:title" content="<%= pageSeo.title || 'WorkBuddy 新手教程' %>" />
+  <meta property="og:description" content="<%= pageSeo.description || 'WorkBuddy 新手落地页：3步快速上手与实战场景提示词。' %>" />
+  <meta property="og:url" content="<%= pageSeo.url || '' %>" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="<%= pageSeo.title || 'WorkBuddy 新手教程' %>" />
+  <meta name="twitter:description" content="<%= pageSeo.description || 'WorkBuddy 新手落地页：3步快速上手与实战场景提示词。' %>" />
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Noto+Sans+SC:wght@400;600&display=swap");
+
+    :root {
+      --bg-0: #060811;
+      --bg-1: #0a1430;
+      --bg-2: #13274f;
+      --cyan: #3df5ff;
+      --cyan-soft: rgba(61, 245, 255, 0.35);
+      --line: rgba(61, 245, 255, 0.8);
+      --panel: rgba(8, 20, 50, 0.72);
+      --panel-border: rgba(96, 137, 255, 0.35);
+      --text-main: #dff9ff;
+      --text-sub: #91aac7;
+      --disabled: #4c5e76;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+      color: var(--text-main);
+      background:
+        radial-gradient(circle at 85% 14%, rgba(79, 159, 255, 0.22), transparent 36%),
+        radial-gradient(circle at 12% 76%, rgba(0, 255, 230, 0.16), transparent 42%),
+        linear-gradient(145deg, var(--bg-0), var(--bg-1) 48%, var(--bg-2));
+      font-family: "Noto Sans SC", "Microsoft YaHei", sans-serif;
+      overflow-x: hidden;
+    }
+
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    body::before {
+      background:
+        linear-gradient(rgba(61, 245, 255, 0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(61, 245, 255, 0.08) 1px, transparent 1px);
+      background-size: 42px 42px;
+      mask-image: radial-gradient(circle at center, black 30%, transparent 82%);
+      opacity: 0.45;
+    }
+
+    body::after {
+      background: linear-gradient(to bottom, transparent, rgba(61, 245, 255, 0.08), transparent);
+      transform: translateY(-100%);
+      animation: scanner 5.4s linear infinite;
+      opacity: 0.8;
+    }
+
+    @keyframes scanner {
+      to {
+        transform: translateY(100%);
+      }
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 68px 16px;
+    }
+
+    .steps {
+      width: 100%;
+      max-width: 680px;
+      display: flex;
+      flex-direction: column;
+      gap: 38px;
+      padding: 34px 26px 36px;
+      border: 1px solid var(--panel-border);
+      background: linear-gradient(160deg, var(--panel), rgba(7, 17, 43, 0.52));
+      border-radius: 18px;
+      box-shadow:
+        0 0 0 1px rgba(96, 137, 255, 0.12),
+        0 24px 56px rgba(0, 0, 0, 0.45),
+        inset 0 0 80px rgba(39, 80, 163, 0.15);
+      backdrop-filter: blur(8px);
+    }
+
+    .step {
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 96px;
+      padding: 16px 24px;
+      border: 2px solid var(--line);
+      color: var(--text-main);
+      background: linear-gradient(130deg, rgba(17, 42, 88, 0.9), rgba(8, 24, 58, 0.75));
+      text-decoration: none;
+      font-family: "Orbitron", "Noto Sans SC", sans-serif;
+      font-size: 28px;
+      font-weight: 500;
+      line-height: 1.2;
+      letter-spacing: 1px;
+      text-shadow: 0 0 12px rgba(61, 245, 255, 0.4);
+      box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+        0 0 16px var(--cyan-soft);
+      transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+    }
+
+    .step-main {
+      display: block;
+    }
+
+    .step-note {
+      margin-top: 10px;
+      color: var(--text-sub);
+      font-family: "Noto Sans SC", "Microsoft YaHei", sans-serif;
+      font-size: 13px;
+      line-height: 1.6;
+      letter-spacing: 0.2px;
+      text-align: center;
+      text-shadow: none;
+    }
+
+    .step::before {
+      content: "";
+      position: absolute;
+      inset: -120% -20%;
+      background: linear-gradient(120deg, transparent 40%, rgba(255, 255, 255, 0.25) 50%, transparent 60%);
+      transform: translateX(-24%);
+      transition: transform 0.35s ease;
+      pointer-events: none;
+    }
+
+    .step:hover {
+      transform: translateY(-2px);
+      border-color: #8ffaff;
+      box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.14),
+        0 0 28px rgba(61, 245, 255, 0.52);
+    }
+
+    .step:hover::before {
+      transform: translateX(28%);
+    }
+
+    .step:active {
+      transform: translateY(0);
+    }
+
+    .step.disabled {
+      background: linear-gradient(130deg, rgba(17, 24, 45, 0.95), rgba(8, 13, 27, 0.85));
+      border-color: rgba(61, 245, 255, 0.36);
+      color: var(--text-main);
+      text-shadow: 0 0 12px rgba(61, 245, 255, 0.24);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+      pointer-events: none;
+      cursor: default;
+    }
+
+    .title {
+      margin: 0;
+      color: var(--text-sub);
+      font-size: 15px;
+      text-align: center;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      font-family: "Orbitron", "Noto Sans SC", sans-serif;
+    }
+
+    .headline {
+      margin: 2px 0 6px;
+      text-align: center;
+      font-size: 34px;
+      line-height: 1.2;
+      letter-spacing: 1px;
+      color: #eefbff;
+      font-family: "Orbitron", "Noto Sans SC", sans-serif;
+      text-shadow: 0 0 18px rgba(61, 245, 255, 0.28);
+    }
+
+    .subline {
+      margin: 0 0 10px;
+      text-align: center;
+      color: var(--text-sub);
+      font-size: 14px;
+      letter-spacing: 1px;
+    }
+
+    .panel {
+      position: relative;
+      padding: 22px 20px 20px;
+      border: 1px solid rgba(61, 245, 255, 0.24);
+      border-radius: 16px;
+      background: linear-gradient(160deg, rgba(10, 23, 54, 0.92), rgba(7, 13, 28, 0.9));
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+    }
+
+    .panel::before {
+      content: "SYSTEM CAPABILITIES";
+      position: absolute;
+      top: -10px;
+      left: 16px;
+      padding: 0 8px;
+      background: #0b1430;
+      color: rgba(143, 250, 255, 0.78);
+      font-family: "Orbitron", "Noto Sans SC", sans-serif;
+      font-size: 11px;
+      letter-spacing: 1.5px;
+    }
+
+    .panel-title {
+      margin: 0 0 12px;
+      color: #eefbff;
+      font-size: 22px;
+      font-family: "Orbitron", "Noto Sans SC", sans-serif;
+      letter-spacing: 0.6px;
+    }
+
+    .panel-copy {
+      margin: 0 0 16px;
+      color: var(--text-sub);
+      font-size: 14px;
+      line-height: 1.8;
+    }
+
+    .panel-tip {
+      margin: 0 0 18px;
+      padding: 12px 14px;
+      border: 1px solid rgba(61, 245, 255, 0.18);
+      border-radius: 12px;
+      background: rgba(61, 245, 255, 0.05);
+      color: #cfeeff;
+      font-size: 13px;
+      line-height: 1.8;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .chip {
+      padding: 8px 12px;
+      border: 1px solid rgba(61, 245, 255, 0.22);
+      border-radius: 999px;
+      color: #dff9ff;
+      background: rgba(61, 245, 255, 0.08);
+      font-size: 13px;
+      line-height: 1;
+      white-space: nowrap;
+    }
+
+    .feature-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .feature {
+      padding: 14px 14px 12px;
+      border: 1px solid rgba(96, 137, 255, 0.22);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .feature strong {
+      display: block;
+      margin-bottom: 6px;
+      color: #f2fdff;
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .feature span {
+      display: block;
+      color: var(--text-sub);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    /* ── Tab system ── */
+    .tab-bar {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .tab-btn {
+      appearance: none;
+      width: 100%;
+      background: rgba(61, 245, 255, 0.04);
+      border: 1px solid rgba(61, 245, 255, 0.2);
+      border-radius: 10px;
+      padding: 10px 12px;
+      color: var(--text-sub);
+      font-family: "Noto Sans SC", "Microsoft YaHei", sans-serif;
+      font-size: 14px;
+      cursor: pointer;
+      line-height: 1.3;
+      text-align: center;
+      transition: all 0.2s ease;
+      letter-spacing: 0.3px;
+    }
+
+    .tab-btn:hover {
+      color: #d0f6ff;
+      border-color: rgba(143, 250, 255, 0.55);
+      background: rgba(61, 245, 255, 0.1);
+      transform: translateY(-1px);
+    }
+
+    .tab-btn.active {
+      color: #031325;
+      border-color: #8ffaff;
+      background: linear-gradient(135deg, #8ffaff, #57d8ff);
+      box-shadow: 0 0 18px rgba(61, 245, 255, 0.3);
+    }
+
+    .tab-btn.is-hidden {
+      display: none;
+    }
+
+    .industry-filter {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 2px 0 14px;
+      flex-wrap: wrap;
+    }
+
+    .filter-label {
+      color: rgba(143, 250, 255, 0.8);
+      font-size: 12px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .filter-btn {
+      appearance: none;
+      border: 1px solid rgba(61, 245, 255, 0.24);
+      background: rgba(61, 245, 255, 0.06);
+      color: var(--text-sub);
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .filter-btn.active {
+      color: #041326;
+      background: #76faff;
+      border-color: #8ffaff;
+      box-shadow: 0 0 14px rgba(61, 245, 255, 0.35);
+    }
+
+    .tab-pane { display: none; }
+
+    .tab-pane.active {
+      display: block;
+      animation: fadein 0.22s ease;
+    }
+
+    @keyframes fadein {
+      from { opacity: 0; transform: translateY(5px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .pane-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .pane-title {
+      margin: 0;
+      flex: 1;
+      color: #f3fdff;
+      font-size: 20px;
+      font-family: "Orbitron", "Noto Sans SC", sans-serif;
+      letter-spacing: 0.5px;
+    }
+
+    .copy-btn {
+      appearance: none;
+      border: 1px solid rgba(61, 245, 255, 0.3);
+      background: rgba(61, 245, 255, 0.08);
+      color: #dff9ff;
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-size: 12px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+    }
+
+    .copy-btn:hover {
+      transform: translateY(-1px);
+      border-color: rgba(143, 250, 255, 0.65);
+      background: rgba(61, 245, 255, 0.14);
+    }
+
+    .case-desc {
+      margin: 0 0 16px;
+      color: var(--text-sub);
+      font-size: 14px;
+      line-height: 1.85;
+    }
+
+    .meta-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .meta-block {
+      padding: 12px 14px;
+      border: 1px solid rgba(61, 245, 255, 0.14);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .meta-label {
+      display: block;
+      margin-bottom: 6px;
+      color: rgba(143, 250, 255, 0.82);
+      font-size: 12px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .meta-text {
+      display: block;
+      color: #d8f6ff;
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .prompt-label {
+      display: block;
+      margin-bottom: 8px;
+      color: rgba(143, 250, 255, 0.7);
+      font-size: 12px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .prompt-box {
+      margin: 0;
+      padding: 14px;
+      border: 1px solid rgba(61, 245, 255, 0.18);
+      border-radius: 14px;
+      background: rgba(4, 10, 24, 0.8);
+      color: #ebfdff;
+      font-size: 13px;
+      line-height: 1.9;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    }
+
+    .page-footer {
+      margin-top: 8px;
+      text-align: center;
+      color: rgba(207, 238, 255, 0.82);
+      font-size: 13px;
+      letter-spacing: 0.5px;
+    }
+
+    .visitor-count {
+      color: #8ffaff;
+      font-family: "Orbitron", "Noto Sans SC", sans-serif;
+      font-weight: 600;
+      margin: 0 4px;
+    }
+
+    @media (max-width: 640px) {
+      .page {
+        padding: 28px 14px;
+      }
+
+      .steps {
+        max-width: 100%;
+        gap: 24px;
+        border-radius: 14px;
+        padding: 24px 14px 20px;
+      }
+
+      .step {
+        min-height: 82px;
+        font-size: 22px;
+      }
+
+      .headline {
+        font-size: 28px;
+      }
+
+      .feature-list {
+        grid-template-columns: 1fr;
+      }
+
+      .panel-title {
+        font-size: 20px;
+      }
+
+      .meta-row {
+        grid-template-columns: 1fr;
+      }
+
+      .tab-bar {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .pane-header {
+        flex-wrap: wrap;
+      }
+
+      .pane-title {
+        font-size: 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="steps" aria-label="Workbuddy 新手步骤">
+      <p class="title">Workbuddy Onboarding</p>
+      <h1 class="headline">快速接入流程</h1>
+      <p class="subline">按顺序完成步骤，即可开始体验</p>
+
+      <a class="step" href="https://t.vncps.com/7Ogc5" target="_blank" rel="noopener noreferrer">
+        1. 注册腾讯云账号
+      </a>
+
+      <a class="step" href="https://copilot.tencent.com/work/" target="_blank" rel="noopener noreferrer">
+        2. 下载 workbuddy
+      </a>
+
+      <div class="step disabled" aria-disabled="true">
+        <span class="step-main">3. 打开 WorkBuddy 开始使用</span>
+        <span class="step-note">安装完成后，手动打开客户端，选择“代码开发”或“日常办公”，然后新建你的第一个任务。</span>
+      </div>
+
+      <section class="panel" aria-label="Workbuddy 实战场景">
+        <h2 class="panel-title">4. 实战场景指南</h2>
+        <p class="panel-copy">选择下方任一场景，把提示词复制到 WorkBuddy 客户端，再把 <code style="background:rgba(61,245,255,0.1);padding:1px 5px;border-radius:4px;font-size:12px">{{变量}}</code> 替换成你自己的内容，直接运行即可。</p>
+
+        <div class="industry-filter" role="group" aria-label="按行业筛选案例">
+          <span class="filter-label">行业筛选</span>
+          <button class="filter-btn active" type="button" data-industry-filter="all">全部行业</button>
+          <button class="filter-btn" type="button" data-industry-filter="office">通用办公</button>
+          <button class="filter-btn" type="button" data-industry-filter="marketing">内容营销</button>
+          <button class="filter-btn" type="button" data-industry-filter="analysis">商业分析</button>
+          <button class="filter-btn" type="button" data-industry-filter="finance">金融服务</button>
+        </div>
+
+        <div class="tab-bar" role="tablist" aria-label="选择场景">
+          <button class="tab-btn active" role="tab" data-tab="pane-files" data-industry="office" aria-selected="true">🗂 桌面文件整理</button>
+          <button class="tab-btn" role="tab" data-tab="pane-video" data-industry="marketing" aria-selected="false">🎬 视频生成</button>
+          <button class="tab-btn" role="tab" data-tab="pane-research" data-industry="analysis" aria-selected="false">🔎 深度研究</button>
+          <button class="tab-btn" role="tab" data-tab="pane-ppt" data-industry="office" aria-selected="false">📑 幻灯片（PPT）</button>
+          <button class="tab-btn" role="tab" data-tab="pane-data" data-industry="analysis" aria-selected="false">📊 数据分析</button>
+          <button class="tab-btn" role="tab" data-tab="pane-viz" data-industry="analysis" aria-selected="false">📈 数据可视化</button>
+          <button class="tab-btn" role="tab" data-tab="pane-finance" data-industry="finance" aria-selected="false">💰 金融服务</button>
+          <button class="tab-btn" role="tab" data-tab="pane-product" data-industry="marketing" aria-selected="false">📣 产品宣发</button>
+          <button class="tab-btn" role="tab" data-tab="pane-pr" data-industry="marketing" aria-selected="false">📡 舆情监控</button>
+        </div>
+
+        <div id="pane-files" class="tab-pane active" data-industry="office" role="tabpanel">
+          <div class="pane-header">
+            <h3 class="pane-title">桌面文件整理</h3>
+            <button class="copy-btn" type="button" data-copy-target="prompt-files">复制提示词</button>
+          </div>
+          <p class="case-desc">下载文件夹杂乱？WorkBuddy 会自动识别文件类型、按主题归类，全程不删除文件，最后输出整理报告供你确认。</p>
+          <div class="meta-row">
+            <div class="meta-block">
+              <span class="meta-label">适用场景</span>
+              <span class="meta-text">桌面杂乱、下载目录混杂、票据和合同散落、多格式文件需要统一归档。</span>
+            </div>
+            <div class="meta-block">
+              <span class="meta-label">预期结果</span>
+              <span class="meta-text">自动分类文件、建立清晰目录、标记疑似重复文件，并输出整理摘要。</span>
+            </div>
+          </div>
+          <span class="prompt-label">提示词 — 复制后粘贴到 WorkBuddy 新任务</span>
+          <pre class="prompt-box" id="prompt-files">请帮我整理本地文件夹中的文件。
+
+目标文件夹：{{把这里替换为你的文件夹路径}}
+
+请按下面要求执行：
+1. 扫描该文件夹中的所有文件和子文件夹。
+2. 按文件类型和内容主题进行分类，例如：图片、视频、文档、表格、合同、发票、安装包、压缩包、其他。
+3. 如有必要，创建清晰的新目录结构，并将文件移动到对应目录。
+4. 对名称混乱的文件，按"日期 + 类型 + 简短说明"的方式进行规范命名，但不要破坏原始扩展名。
+5. 标记可能重复的文件，单独放入"疑似重复文件"目录，不要直接删除。
+6. 最后输出一份整理报告，包括：共处理多少文件、创建了哪些目录、重命名了哪些文件、发现了哪些疑似重复文件。
+
+执行原则：
+- 优先安全，不要删除文件。
+- 如果遇到无法判断分类的文件，放入"待确认"目录。
+- 先给出执行计划，再开始处理。</pre>
+        </div>
+
+        <div id="pane-video" class="tab-pane" data-industry="marketing" role="tabpanel">
+          <div class="pane-header">
+            <h3 class="pane-title">视频生成</h3>
+            <button class="copy-btn" type="button" data-copy-target="prompt-video">复制提示词</button>
+          </div>
+          <p class="case-desc">从主题到脚本、镜头设计、字幕文案一次生成，适合短视频账号持续产出内容。</p>
+          <div class="meta-row">
+            <div class="meta-block">
+              <span class="meta-label">适用场景</span>
+              <span class="meta-text">知识科普视频、产品演示视频、账号日更脚本、直播切片重制。</span>
+            </div>
+            <div class="meta-block">
+              <span class="meta-label">预期结果</span>
+              <span class="meta-text">输出完整分镜脚本、旁白文案、字幕稿、封面标题建议和发布描述。</span>
+            </div>
+          </div>
+          <span class="prompt-label">提示词 — 复制后粘贴到 WorkBuddy 新任务</span>
+          <pre class="prompt-box" id="prompt-video">请帮我生成一个可直接执行的短视频制作方案。
+
+视频主题：{{填写主题}}
+目标平台：{{抖音 / 视频号 / B站 / 小红书}}
+目标受众：{{填写人群}}
+时长要求：{{30秒 / 60秒 / 90秒}}
+表达风格：{{干货 / 叙事 / 反差 / 专业解读}}
+
+请按以下结构输出：
+1. 选题角度与核心观点（3个可选方向）。
+2. 最终脚本：开场钩子、主体内容、结尾行动引导。
+3. 分镜清单：镜头编号、画面内容、字幕、旁白、时长。
+4. 画面素材建议：实拍/截图/B-roll/图表各自使用位置。
+5. 标题与封面文案：给出5套可直接发布的版本。
+6. 发布文案和标签建议：按平台习惯输出。
+
+要求：内容要具体到可拍摄执行，不要泛泛而谈。</pre>
+        </div>
+
+        <div id="pane-research" class="tab-pane" data-industry="analysis" role="tabpanel">
+          <div class="pane-header">
+            <h3 class="pane-title">深度研究</h3>
+            <button class="copy-btn" type="button" data-copy-target="prompt-research">复制提示词</button>
+          </div>
+          <p class="case-desc">快速完成行业、竞品、方案可行性研究，自动整理结论并给出建议动作。</p>
+          <div class="meta-row">
+            <div class="meta-block">
+              <span class="meta-label">适用场景</span>
+              <span class="meta-text">行业调研、竞品研究、选题准备、方案论证、项目立项前分析。</span>
+            </div>
+            <div class="meta-block">
+              <span class="meta-label">预期结果</span>
+              <span class="meta-text">输出结构化研究报告，包含信息来源、核心结论、风险点和建议路线。</span>
+            </div>
+          </div>
+          <span class="prompt-label">提示词 — 复制后粘贴到 WorkBuddy 新任务</span>
+          <pre class="prompt-box" id="prompt-research">请围绕以下主题做一份深度研究报告。
+
+研究主题：{{填写主题}}
+研究目标：{{例如 找机会点 / 做竞品比较 / 评估可行性}}
+研究范围：{{中国 / 海外 / 某行业细分}}
+时间范围：{{近1年 / 近3年 / 自定义}}
+
+请输出：
+1. 研究框架与关键问题列表。
+2. 关键信息梳理（趋势、规模、参与者、变化驱动）。
+3. 竞品或对标对象对比（优势、劣势、差异化）。
+4. 风险与不确定性分析。
+5. 结论与建议：短期可执行动作（1-3周）+ 中期策略（1-3个月）。
+6. 150字以内管理层摘要。
+
+要求：结论必须可执行，避免空泛描述。</pre>
+        </div>
+
+        <div id="pane-ppt" class="tab-pane" data-industry="office" role="tabpanel">
+          <div class="pane-header">
+            <h3 class="pane-title">PPT 生成</h3>
+            <button class="copy-btn" type="button" data-copy-target="prompt-ppt">复制提示词</button>
+          </div>
+          <p class="case-desc">给一个主题，WorkBuddy 自动拆出目录结构、每页核心要点和配图建议，生成可直接修改的汇报初稿。</p>
+          <div class="meta-row">
+            <div class="meta-block">
+              <span class="meta-label">适用场景</span>
+              <span class="meta-text">周报月报、项目汇报、竞品分析、方案提案、培训课件、临时要 PPT。</span>
+            </div>
+            <div class="meta-block">
+              <span class="meta-label">预期结果</span>
+              <span class="meta-text">输出完整 PPT 大纲、每页标题和要点、建议图表类型，以及可直接修改的内容初稿。</span>
+            </div>
+          </div>
+          <span class="prompt-label">提示词 — 复制后粘贴到 WorkBuddy 新任务</span>
+          <pre class="prompt-box" id="prompt-ppt">我需要你帮我生成一份 PPT 内容初稿。
+
+PPT 主题：{{把这里替换成你的主题}}
+面向对象：{{老板 / 客户 / 团队 / 培训学员}}
+页数要求：{{例如 10 页左右}}
+风格要求：{{专业正式 / 简洁有说服力 / 数据驱动 / 更适合演讲}}
+
+请按下面要求输出：
+1. 先给出整份 PPT 的目录结构。
+2. 为每一页生成：页标题、3 到 5 个核心要点、建议配图或图表类型。
+3. 如果适合，请补充：开场页、问题分析、方案页、案例页、数据页、结论页、行动建议页。
+4. 如果信息不足，请基于常见商业汇报逻辑进行合理补全，但要标注哪些内容属于建议补充。
+5. 输出时尽量用可以直接复制到 PPT 里的简洁表达，不要写成大段散文。
+
+如果我后续提供参考资料，请继续基于资料优化每一页的内容。</pre>
+        </div>
+
+        <div id="pane-pr" class="tab-pane" data-industry="marketing" role="tabpanel">
+          <div class="pane-header">
+            <h3 class="pane-title">舆情监控</h3>
+            <button class="copy-btn" type="button" data-copy-target="prompt-pr">复制提示词</button>
+          </div>
+          <p class="case-desc">输入品牌名、产品名或关键词，WorkBuddy 自动搜集公开讨论，按正负面归类，输出结构化舆情报告。</p>
+          <div class="meta-row">
+            <div class="meta-block">
+              <span class="meta-label">适用场景</span>
+              <span class="meta-text">品牌监控、产品口碑追踪、活动效果观察、竞品动态关注、负面信息预警。</span>
+            </div>
+            <div class="meta-block">
+              <span class="meta-label">预期结果</span>
+              <span class="meta-text">归纳正负面观点、提炼高频问题，输出含风险提醒和建议动作的舆情报告。</span>
+            </div>
+          </div>
+          <span class="prompt-label">提示词 — 复制后粘贴到 WorkBuddy 新任务</span>
+          <pre class="prompt-box" id="prompt-pr">请帮我做一份舆情监控与分析报告。
+
+监控对象：{{品牌名 / 产品名 / 活动名 / 个人 IP 名称}}
+监控关键词：{{请填写 3 到 8 个关键词}}
+时间范围：{{最近 7 天 / 最近 30 天 / 自定义}}
+关注重点：{{例如 负面评价、用户吐槽、竞品对比、传播亮点、风险预警}}
+
+请按下面流程执行：
+1. 搜集与这些关键词相关的公开信息与讨论内容。
+2. 按正面、中性、负面进行分类。
+3. 提炼高频话题、典型观点和代表性问题。
+4. 如果存在明显风险点，请单独列出，并说明可能影响。
+5. 输出一份结构化报告，至少包含：整体概览、情绪分布、热点话题、典型反馈、风险提醒、建议动作。
+6. 最后再给我一个适合汇报的简版总结，要求 200 字以内。
+
+如果信息量较大，请优先提炼最值得关注的内容，不要只做简单罗列。</pre>
+        </div>
+
+        <div id="pane-data" class="tab-pane" data-industry="analysis" role="tabpanel">
+          <div class="pane-header">
+            <h3 class="pane-title">数据分析</h3>
+            <button class="copy-btn" type="button" data-copy-target="prompt-data">复制提示词</button>
+          </div>
+          <p class="case-desc">把业务表格或日志交给 WorkBuddy，自动完成清洗、分组、指标计算和洞察总结。</p>
+          <div class="meta-row">
+            <div class="meta-block">
+              <span class="meta-label">适用场景</span>
+              <span class="meta-text">运营周报、销售漏斗分析、用户留存分析、活动效果复盘、异常定位。</span>
+            </div>
+            <div class="meta-block">
+              <span class="meta-label">预期结果</span>
+              <span class="meta-text">输出清洗后的指标表、关键发现、异常解释与下一步优化建议。</span>
+            </div>
+          </div>
+          <span class="prompt-label">提示词 — 复制后粘贴到 WorkBuddy 新任务</span>
+          <pre class="prompt-box" id="prompt-data">请帮我做一份数据分析任务。
+
+数据来源：{{Excel/CSV路径或数据说明}}
+分析目标：{{例如 找出转化下降原因 / 找增长机会}}
+核心指标：{{GMV、转化率、留存率、客单价等}}
+分析维度：{{时间、渠道、地区、产品、用户分层}}
+
+请按以下流程输出：
+1. 先检查数据质量并列出缺失值、异常值、重复值处理策略。
+2. 计算核心指标并按维度拆解。
+3. 找出至少3个关键发现，并说明证据。
+4. 对异常点给出可能原因与验证方式。
+5. 给出可执行优化建议（短期动作 + 中期策略）。
+6. 最后给我一版适合周会汇报的摘要（200字内）。</pre>
+        </div>
+
+        <div id="pane-viz" class="tab-pane" data-industry="analysis" role="tabpanel">
+          <div class="pane-header">
+            <h3 class="pane-title">数据可视化</h3>
+            <button class="copy-btn" type="button" data-copy-target="prompt-viz">复制提示词</button>
+          </div>
+          <p class="case-desc">将复杂数据转为易读图表和仪表盘说明，方便汇报和决策沟通。</p>
+          <div class="meta-row">
+            <div class="meta-block">
+              <span class="meta-label">适用场景</span>
+              <span class="meta-text">管理层汇报、运营看板、销售复盘、项目进度追踪、月度经营分析。</span>
+            </div>
+            <div class="meta-block">
+              <span class="meta-label">预期结果</span>
+              <span class="meta-text">输出图表方案、每张图对应解读文案及演示顺序建议。</span>
+            </div>
+          </div>
+          <span class="prompt-label">提示词 — 复制后粘贴到 WorkBuddy 新任务</span>
+          <pre class="prompt-box" id="prompt-viz">请根据我的数据需求设计一套可视化方案。
+
+业务主题：{{填写主题}}
+目标受众：{{老板/管理层/业务团队}}
+可用数据字段：{{列出主要字段}}
+最想回答的问题：{{例如 哪个渠道ROI最高}}
+
+请输出：
+1. 图表清单（每张图的类型、目的、字段映射）。
+2. 推荐的看板结构（总览 -> 诊断 -> 结论）。
+3. 每张图对应的解读模板（看到什么、为什么、下一步做什么）。
+4. 需要重点高亮的阈值或预警规则。
+5. 一页“管理层版本”精简展示方案。
+
+要求：优先可读性，不要堆砌图表。</pre>
+        </div>
+
+        <div id="pane-finance" class="tab-pane" data-industry="finance" role="tabpanel">
+          <div class="pane-header">
+            <h3 class="pane-title">金融服务</h3>
+            <button class="copy-btn" type="button" data-copy-target="prompt-finance">复制提示词</button>
+          </div>
+          <p class="case-desc">快速完成财务整理、现金流概览和风险提示，适合经营管理中的日常决策支持。</p>
+          <div class="meta-row">
+            <div class="meta-block">
+              <span class="meta-label">适用场景</span>
+              <span class="meta-text">收支汇总、预算跟踪、发票票据整理、回款跟进、成本结构分析。</span>
+            </div>
+            <div class="meta-block">
+              <span class="meta-label">预期结果</span>
+              <span class="meta-text">输出经营财务摘要、现金流风险提醒、预算偏差分析及改进建议。</span>
+            </div>
+          </div>
+          <span class="prompt-label">提示词 — 复制后粘贴到 WorkBuddy 新任务</span>
+          <pre class="prompt-box" id="prompt-finance">请帮我做一份经营财务分析与风险提示。
+
+分析周期：{{本月/本季度/自定义}}
+数据来源：{{收支表、发票表、回款表、预算表}}
+关注重点：{{现金流、利润率、回款、成本控制}}
+
+请输出：
+1. 收入、成本、利润、现金流的核心结论。
+2. 与预算相比的偏差分析（超支/低于预期项）。
+3. 风险项清单（例如 回款延迟、成本异常、现金流紧张）。
+4. 每个风险项对应的建议动作与优先级。
+5. 一页管理层摘要（可直接汇报）。
+
+要求：结论客观，建议可执行。</pre>
+        </div>
+
+        <div id="pane-product" class="tab-pane" data-industry="marketing" role="tabpanel">
+          <div class="pane-header">
+            <h3 class="pane-title">产品宣发</h3>
+            <button class="copy-btn" type="button" data-copy-target="prompt-product">复制提示词</button>
+          </div>
+          <p class="case-desc">围绕一个产品卖点，快速生成多平台宣发内容矩阵与发布节奏。</p>
+          <div class="meta-row">
+            <div class="meta-block">
+              <span class="meta-label">适用场景</span>
+              <span class="meta-text">新品上线、活动预热、功能发布、品牌节点营销、私域内容运营。</span>
+            </div>
+            <div class="meta-block">
+              <span class="meta-label">预期结果</span>
+              <span class="meta-text">输出宣传主线、平台文案、内容日历、A/B 文案测试和转化引导话术。</span>
+            </div>
+          </div>
+          <span class="prompt-label">提示词 — 复制后粘贴到 WorkBuddy 新任务</span>
+          <pre class="prompt-box" id="prompt-product">请帮我制定一套产品宣发内容方案。
+
+产品名称：{{填写产品名}}
+核心卖点：{{填写3个以内核心卖点}}
+目标人群：{{填写人群}}
+宣发周期：{{7天/14天/30天}}
+发布平台：{{公众号/视频号/抖音/小红书/社群}}
+
+请输出：
+1. 宣发主线与核心信息层级（主诉求/辅助诉求/行动引导）。
+2. 多平台文案草案（每个平台至少2版）。
+3. 内容日历（每天发什么、目标是什么）。
+4. A/B 测试方案（标题、开头、CTA）。
+5. 转化追踪建议（需要记录哪些指标）。
+
+要求：语言贴近用户，不要只有品牌自嗨表达。</pre>
+        </div>
+      </section>
+
+      <footer class="page-footer" aria-label="访问统计">
+        已有 <span class="visitor-count"><%= Number(pageVisitorCount).toLocaleString('zh-CN') %></span> 人访问了本页
+      </footer>
+    </section>
+  </main>
+  <script>
+    const tabButtons = Array.from(document.querySelectorAll('.tab-btn'));
+    const tabPanes = Array.from(document.querySelectorAll('.tab-pane'));
+
+    function activateTab(targetId) {
+      tabButtons.forEach((b) => {
+        b.classList.remove('active');
+        b.setAttribute('aria-selected', 'false');
+      });
+      tabPanes.forEach((p) => p.classList.remove('active'));
+
+      const activeBtn = tabButtons.find((b) => b.getAttribute('data-tab') === targetId && !b.classList.contains('is-hidden'));
+      const activePane = tabPanes.find((p) => p.id === targetId && p.style.display !== 'none');
+      if (!activeBtn || !activePane) {
+        return;
+      }
+      activeBtn.classList.add('active');
+      activeBtn.setAttribute('aria-selected', 'true');
+      activePane.classList.add('active');
+    }
+
+    // Tab switching
+    tabButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        if (btn.classList.contains('is-hidden')) {
+          return;
+        }
+        activateTab(btn.getAttribute('data-tab'));
+      });
+    });
+
+    // Industry filtering
+    const filterButtons = Array.from(document.querySelectorAll('[data-industry-filter]'));
+    function applyIndustryFilter(mode) {
+      filterButtons.forEach((btn) => btn.classList.toggle('active', btn.getAttribute('data-industry-filter') === mode));
+
+      tabButtons.forEach((btn) => {
+        const match = mode === 'all' || btn.getAttribute('data-industry') === mode;
+        btn.classList.toggle('is-hidden', !match);
+      });
+
+      tabPanes.forEach((pane) => {
+        const match = mode === 'all' || pane.getAttribute('data-industry') === mode;
+        pane.style.display = match ? '' : 'none';
+        if (!match) pane.classList.remove('active');
+      });
+
+      const currentVisibleActive = tabButtons.find((btn) => btn.classList.contains('active') && !btn.classList.contains('is-hidden'));
+      if (currentVisibleActive) {
+        activateTab(currentVisibleActive.getAttribute('data-tab'));
+        return;
+      }
+
+      const firstVisible = tabButtons.find((btn) => !btn.classList.contains('is-hidden'));
+      if (firstVisible) {
+        activateTab(firstVisible.getAttribute('data-tab'));
+      }
+    }
+
+    filterButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        applyIndustryFilter(btn.getAttribute('data-industry-filter'));
+      });
+    });
+
+    applyIndustryFilter('all');
+
+    // Copy prompt
+    document.querySelectorAll('[data-copy-target]').forEach((button) => {
+      button.addEventListener('click', async () => {
+        const target = document.getElementById(button.getAttribute('data-copy-target'));
+        if (!target) return;
+        const originalText = button.textContent;
+        try {
+          await navigator.clipboard.writeText(target.textContent.trim());
+          button.textContent = '✓ 已复制';
+        } catch {
+          button.textContent = '复制失败';
+        }
+        window.setTimeout(() => { button.textContent = originalText; }, 1800);
+      });
+    });
+  </script>
+</body>
+</html>

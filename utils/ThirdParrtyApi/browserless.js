@@ -41,19 +41,71 @@ var PUBLIC_SESSION //长会话浏览器
 var publicSessionLock = null // 并发锁
 var GOOGLE_SESSION //谷歌搜索长会话浏览器
 var googleSessionLock = null // 并发锁
+let activeRequestCount = 0; // 新增：追踪当前正在进行的请求数
 
 var browser_map = {} //浏览器map
+
+const BROWSER_SESSION_TTL_MS = Number(process.env.BROWSER_SESSION_TTL_MS || 15 * 60 * 1000);
+const BROWSER_SESSION_SWEEP_INTERVAL_MS = Number(process.env.BROWSER_SESSION_SWEEP_INTERVAL_MS || 60 * 1000);
+
+async function closeBrowserSession(browserId, reason = 'manual') {
+    const session = browser_map[browserId];
+    if (!session) {
+        return false;
+    }
+
+    delete browser_map[browserId];
+    try {
+        if (session.browser && session.browser.isConnected()) {
+            await session.browser.close();
+        }
+    } catch (err) {
+        console.warn(`关闭浏览器会话失败(${browserId}, reason=${reason}):`, err.message || err);
+    }
+    return true;
+}
+
+async function sweepStaleBrowserSessions() {
+    const now = Date.now();
+    const ids = Object.keys(browser_map);
+    if (ids.length === 0) {
+        return;
+    }
+
+    for (const browserId of ids) {
+        const session = browser_map[browserId];
+        if (!session) {
+            continue;
+        }
+
+        const lastUsedAt = session.lastUsedAt || session.createdAt || 0;
+        if (now - lastUsedAt > BROWSER_SESSION_TTL_MS) {
+            await closeBrowserSession(browserId, 'ttl_expired');
+        }
+    }
+}
+
+const browserSessionSweeper = setInterval(() => {
+    sweepStaleBrowserSessions().catch((err) => {
+        console.warn('浏览器会话清理任务异常:', err.message || err);
+    });
+}, BROWSER_SESSION_SWEEP_INTERVAL_MS);
+if (typeof browserSessionSweeper.unref === 'function') {
+    browserSessionSweeper.unref();
+}
 
 async function puppeteer_connect(chromium_endpoint, timeout, proxy){
     try {
         let b = await puppeteer.connect({
-            browserWSEndpoint: `ws://${chromium_endpoint}/chromium?timeout=${timeout}&--proxy-server=${proxy}&--no-sandbox&--proxy-bypass-list=<-loopback>;localhost;127.0.0.1;172.17.0.1`,  // 替换为你的本地端口
+            browserWSEndpoint: `ws://${chromium_endpoint}/chromium?timeout=${timeout}&--proxy-server=${proxy}&--no-sandbox&--proxy-bypass-list=<-loopback>;localhost;127.0.0.1;172.17.0.1&--ignore-certificate-errors&--disable-web-security`,  // 替换为你的本地端口
             headless: false,  // 设置为 false 以便调试
             defaultViewport: { width: 1280, height: 800 },
             args: [
                 `--proxy-server=${proxy}`,
                 '--no-sandbox',
-                '--proxy-bypass-list=<-loopback>;localhost;127.0.0.1;172.17.0.1'  // 移除 localhost 的跳过规则
+                '--proxy-bypass-list=<-loopback>;localhost;127.0.0.1;172.17.0.1',  // 移除 localhost 的跳过规则
+                '--ignore-certificate-errors',
+                '--disable-web-security'
             ],
         });
         return b
@@ -70,6 +122,29 @@ function generateConnectionId() {
         const v = c === 'x' ? r : (r & 0x3 | 0x8);
         return v.toString(16);
     });
+}
+
+async function safelyHandleRequestInterception(request, shouldBlock) {
+    try {
+        if (typeof request.isInterceptResolutionHandled === 'function' && request.isInterceptResolutionHandled()) {
+            return;
+        }
+
+        if (shouldBlock) {
+            await request.abort();
+        } else {
+            await request.continue();
+        }
+    } catch (err) {
+        const msg = err?.message || '';
+        if (
+            msg.includes('Request Interception is not enabled') ||
+            msg.includes('Request is already handled')
+        ) {
+            return;
+        }
+        console.warn('request interception handler error:', msg || err);
+    }
 }
 
 async function getQingGuoProxy(){
@@ -125,7 +200,7 @@ async function disableLoadMedia(page){
     // 开启请求拦截
     await page.setRequestInterception(true);
 
-    page.on('request', (request) => {
+    page.on('request', async (request) => {
         const resourceType = request.resourceType();
         const url = request.url().toLowerCase();
 
@@ -135,17 +210,15 @@ async function disableLoadMedia(page){
         ];
 
         // 拦截图片、CSS、字体、媒体、favicon
-        if (
+        const shouldBlock = (
             blockedPatterns.some(pattern => url.includes(pattern)) ||
             ['image', 'stylesheet', 'font', 'media'].includes(resourceType) ||
             url.endsWith('.css') ||
             url.endsWith('.ico') ||              // favicon 文件
             url.includes('favicon')              // 例如 /favicon.png 或 favicon.ico?ver=2
-        ) {
-            request.abort();
-        } else {
-            request.continue();
-        }
+        );
+
+        await safelyHandleRequestInterception(request, shouldBlock);
     });
 }
 
@@ -284,7 +357,7 @@ const browserless = {
                     throw error
                 } else {
                     console.error('Error in chromium_content:', error);
-                    throw new Error(`出现错误：${error.message}，请检查参数是否正确，或者稍后重试。如果问题持续存在，请联系作者【B站：小吴爱折腾】。`);
+                    throw new Error(`出现错误：${error.message}，请检查参数是否正确，或者稍后重试。相关咨询、帮助及开通方式，均在 https://devtool.uk/plugin。`);
                 }
             } finally {
                 if (public_browser) {
@@ -484,7 +557,7 @@ const browserless = {
                 throw error
             } else {
                 console.error('Error in chromium_content:', error);
-                throw new Error(`出现错误：${error.message}，请检查参数是否正确，或者稍后重试。如果问题持续存在，请联系管理员【B站：小吴爱折腾】。`);
+                throw new Error(`出现错误：${error.message}，请检查参数是否正确，或者稍后重试。相关咨询、帮助及开通方式，均在 https://devtool.uk/plugin`);
             }
         } finally {
             await browser.close()
@@ -548,6 +621,7 @@ const browserless = {
             // 禁止加载媒体资源（提高渲染速度）
             await disableLoadMedia(page);
 
+            console.log(chromium_endpoint, proxy_user, proxy_pass)
             let totalBytes = 0;
 
             page.on('response', async (response) => {
@@ -616,7 +690,136 @@ await page.waitForFunction(() => {
         })
     },
 
-    extract_youtube_audio_url: async function (toolurl,videourl, opt = {}) {
+    google_search_new: async function (keyword, retryCount = 0) {
+        return limit(async () => {
+            const search_count = await redis.incr("google_search_count");
+            let page = null;
+            let browser = null;
+
+            // --- 1. 智能单例获取逻辑 ---
+            const getBrowser = async () => {
+                // 如果会话不存在或已断开，则创建
+                if (!GOOGLE_SESSION || !GOOGLE_SESSION.isConnected()) {
+                    if (!googleSessionLock) {
+                        googleSessionLock = (async () => {
+                            const chromium_endpoint = process.env.NODE_ENV === 'online' ? "172.17.0.1:8123" : "172.245.84.92:8123";
+                            const proxy = `http://${Webshare_PROXY_HOST}:${Webshare_PROXY_PORT}`;
+                            
+                            console.log("🚀 正在创建新的谷歌搜索浏览器会话...");
+                            const b = await puppeteer_connect(chromium_endpoint, TIMEOUT, proxy);
+                            
+                            b.on('disconnected', () => {
+                                console.warn('⚠️ 浏览器连接已断开');
+                                GOOGLE_SESSION = null;
+                                googleSessionLock = null;
+                            });
+                            return b;
+                        })();
+                    }
+                    GOOGLE_SESSION = await googleSessionLock;
+                }
+                return GOOGLE_SESSION;
+            };
+
+            try {
+                browser = await getBrowser();
+                activeRequestCount++; // ✅ 计数器+1
+                
+                page = await browser.newPage();
+                
+                // 设置严格的超时，防止代理资源被挂起的请求长期占用
+                page.setDefaultNavigationTimeout(150000); 
+                page.setDefaultTimeout(150000);
+
+                await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36');
+                await page.authenticate({ username: 'liyylnev-rotate', password: 'n8yufdsr2u5q' });
+                await disableLoadMedia(page);
+
+                // 流量监控优化：只在开发环境或抽样开启，减少 CPU 压力
+                let totalBytes = 0;
+                const onResponse = async (res) => {
+                    try { const buf = await res.buffer(); totalBytes += buf.length; } catch(e) {}
+                };
+                page.on('response', onResponse);
+
+                const cxList = ['c277c25def5cf420c', 'c41a0f846c1fe490c', 'f012bf6d1cf90477e', '93d449f1c4ff047bc', '10fe0d70750b2423c', '74ac2ca7f804a4408', '7660206f8e0b84ba3', '6457c8d0218494fd8', '22eb5e8ce100049f4', 'a68056744fdfe4ca6'];
+                
+                // 随机 CX 避免并发冲突
+                const selectedCx = cxList[Math.floor(Math.random() * cxList.length)];
+                const ces = `https://cse.google.com/cse?cx=${selectedCx}`;
+
+                const response = await page.goto(ces, { waitUntil: 'networkidle2' });
+                if (response.status() !== 200) throw new Error(`HTTP ${response.status()}`);
+
+                await page.waitForSelector('#gsc-i-id1');
+                await page.type('#gsc-i-id1', keyword, { delay: 50 });
+                await page.click('.gsc-search-button');
+
+                await page.waitForFunction(() => {
+                    const el = document.querySelector('div.gsc-control-wrapper-cse');
+                    return el && !el.classList.contains('gsc-loading-fade');
+                }, { timeout: 15000 });
+
+                const html = await page.content();
+                return html;
+
+            } catch (error) {
+                console.error(`❌ [Attempt ${retryCount}] 搜索失败: ${keyword} - ${error.message}`);
+                
+                if (page) {
+                    try {
+                        page.removeAllListeners();
+                        await page.close().catch(() => {});
+                    } catch (e) {}
+                    page = null; // 显式置空
+                }
+                
+                // 失败后立即释放计数器 (因为我们要开启一个新的递归请求，那个请求会再次 +1)
+                activeRequestCount--; 
+    
+                // 递归重试
+                if (retryCount < 1) {
+                    return await this.google_search_new(keyword, retryCount + 1);
+                }
+                return null;
+            } finally {
+                // --- 资源清理核心 ---
+                if (page) {
+                    activeRequestCount--; // ✅ 计数器-1 只有当 page 还没被 catch 块清理过时，才执行清理
+                    try {
+                        // 1. 先移除监听器，避免关闭拦截后旧监听器仍处理尾部请求
+                        page.removeAllListeners();
+                        // 2. 再关闭拦截器
+                        if (page.isClosed() === false) {
+                            await page.setRequestInterception(false).catch(() => {});
+                        }
+                        // 3. 关闭页面
+                        await page.close().catch(() => {});
+                    } catch (e) {}
+                    page = null; // 4. 显式解除引用，帮助 V8 GC 回收
+                }
+                // --- 2. 平滑重启逻辑 ---
+                if (search_count % 50 === 0 && GOOGLE_SESSION) {
+                    console.log(`♻️ [自动维护] 触发第 ${search_count} 次请求的资源回收...`);
+                    
+                    const oldBrowser = GOOGLE_SESSION;
+                    GOOGLE_SESSION = null;     // 立即切断新请求的入口
+                    googleSessionLock = null;  // 重置锁
+    
+                    // 30秒后杀死旧浏览器，此时旧请求应该都跑完了
+                    setTimeout(async () => {
+                        if (oldBrowser) {
+                            const pages = await oldBrowser.pages().catch(() => []);
+                            console.log(`🧹 执行清理：旧浏览器剩余 ${pages.length} 个页面，强制关闭。`);
+                            await oldBrowser.close().catch(err => console.error("旧浏览器关闭异常:", err.message));
+                        }
+                    }, 30000);
+                }
+            }
+        });
+    },
+
+    extract_youtube_audio_url: async function (toolurl, videourl, opt = {}, retryCount = 0) {
 
         let proxy_user, proxy_pass, chromium_endpoint, proxy
         let browser, page
@@ -668,7 +871,7 @@ await page.waitForFunction(() => {
             await page.authenticate({
                 username: proxy_user,
                 password: proxy_pass,
-            }); // 正式验证代理用户名密码 :contentReference[oaicite:1]{index=1}
+            });
 
             //设置cookie
             if (opt && opt.cookie) {
@@ -678,7 +881,6 @@ await page.waitForFunction(() => {
             // 禁止加载媒体资源（提高渲染速度）
             await disableLoadMedia(page);
 
-            // ...existing code...
             let getinfoResult; // 用于主流程等待 getinfo 响应
             const getinfoPromise = new Promise((resolve, reject) => {
                 getinfoResult = { resolve, reject };
@@ -700,7 +902,6 @@ await page.waitForFunction(() => {
                     }
                 }
             });
-      
 
             const response = await page.goto(toolurl, {
                 timeout: TIMEOUT,
@@ -715,43 +916,45 @@ await page.waitForFunction(() => {
 
             console.log("getinfoResult:", getinfoResult)
 
-                        // 等待 input 和 button 出现
-  await page.waitForSelector('#videoUrl');
-  await page.waitForSelector('#videoBtn');
+            // 等待 input 和 button 出现
+            await page.waitForSelector('#videoUrl');
+            await page.waitForSelector('#videoBtn');
 
-  // 在 input 中输入链接
-  const videoLink = videourl;
-  await page.click('#videoUrl', { clickCount: 3 }); // 聚焦并选中文本（如果已有）
-  await page.type('#videoUrl', videoLink); // 输入链接 :contentReference[oaicite:1]{index=1}
-    // 点击按钮提交
-  await page.click('#videoBtn');
-  await page.waitForSelector('a.js-unmask.ko-btn.btn.btn-lg.btn-primary', {timeout:120000})
+            // 在 input 中输入链接
+            const videoLink = videourl;
+            await page.click('#videoUrl', { clickCount: 3 });
+            await page.type('#videoUrl', videoLink);
 
+            // 点击按钮提交
+            await page.click('#videoBtn');
+            await page.waitForSelector('a.js-unmask.ko-btn.btn.btn-lg.btn-primary', {timeout: 120000})
 
-  // 查找 Extract Audio 对应的 <a> 标签
-  const audio_url = await page.evaluate(() => {
-    const a = Array.from(document.querySelectorAll('a.js-download.btn-success'))
-      .find(el => el.textContent.trim().includes('Extract Audio'));
+            // 查找 Extract Audio 对应的 <a> 标签
+            const audio_url = await page.evaluate(() => {
+                const a = Array.from(document.querySelectorAll('a.js-download.btn-success'))
+                    .find(el => el.textContent.trim().includes('Extract Audio'));
 
-    if (!a) return null;
-    return a.href
-  });
+                if (!a) return null;
+                return a.href
+            });
             await page.close()
 
             return audio_url
         } catch (error) {
             if (error.message && error.message.includes('net::ERR')) {
                 console.error('Extract YouTube Audio 网络连接失败:', error.message);
-                // 这里可以做额外处理，比如重试、报警等
-                return await this.extract_youtube_audio_url(toolurl,videourl) //重试
+                if (retryCount < 2) {
+                    await new Promise(resolve => setTimeout(resolve, (retryCount + 1) * 1000));
+                    return await this.extract_youtube_audio_url(toolurl, videourl, opt, retryCount + 1)
+                }
             }
             console.error('Error in chromium screen shot:', error);
             return null
         } finally {
-            if(public_browser){
+            if (public_browser) {
                 // 强制再执行一次 page.close，不考虑报错
                 try { await page.close(); } catch (e) {}
-            }else{
+            } else {
                 await browser.close()
             }
         }
@@ -965,7 +1168,9 @@ await page.waitForFunction(() => {
             browser:browser,
             proxy_user:proxy_user,
             proxy_pass:proxy_pass,
-            pages:{}
+            pages:{},
+            createdAt: Date.now(),
+            lastUsedAt: Date.now(),
         }
         
         return browserId
@@ -980,6 +1185,7 @@ await page.waitForFunction(() => {
         if (!browser_map[browserId]) {
             throw new Error(`browserId无效，请重新通过browser工具重新生成`);
         }
+        browser_map[browserId].lastUsedAt = Date.now();
 
         browser  =  browser_map[browserId].browser
 
@@ -1024,9 +1230,6 @@ await page.waitForFunction(() => {
 
             const html = await page.content();
 
-            const pageId = generateConnectionId()
-            browser_map[browserId].pages[pageId] = page
-
             return {
                 data: html
             }
@@ -1034,12 +1237,14 @@ await page.waitForFunction(() => {
             console.error('Error in chromium_content:', error);
             return null
         } finally {
-            // if(public_browser){
-            //     // 强制再执行一次 page.close，不考虑报错
-            //     try { await page.close(); } catch (e) {}
-            // }else{
-            //     await browser.close()
-            // }
+            if (browser_map[browserId]) {
+                browser_map[browserId].lastUsedAt = Date.now();
+            }
+            try {
+                if (page && !page.isClosed()) {
+                    await page.close();
+                }
+            } catch (e) {}
         }
 
     },
@@ -1126,7 +1331,7 @@ await page.waitForFunction(() => {
                 // 开启请求拦截
             await p.setRequestInterception(true);
 
-            p.on('request', (request) => {
+            p.on('request', async (request) => {
                 const resourceType = request.resourceType();
                 const url = request.url().toLowerCase();
 
@@ -1136,17 +1341,15 @@ await page.waitForFunction(() => {
                 ];
 
                 // 拦截图片、CSS、字体、媒体、favicon
-                if (
+                const shouldBlock = (
                     blockedPatterns.some(pattern => url.includes(pattern)) ||
                     ['image', 'stylesheet', 'font', 'media'].includes(resourceType) ||
                     url.endsWith('.css') ||
                     url.endsWith('.ico') ||              // favicon 文件
                     url.includes('favicon')              // 例如 /favicon.png 或 favicon.ico?ver=2
-                ) {
-                    request.abort();
-                } else {
-                    request.continue();
-                }
+                );
+
+                await safelyHandleRequestInterception(request, shouldBlock);
             });
 
                 const url = "https://kns.cnki.net/kns8s/defaultresult/index?classid=VUDIXAIY&korder=SU&kw=" + keyword
@@ -1243,7 +1446,7 @@ await page.waitForFunction(() => {
   return results;
 });
 console.log(resultList)
-const pagesData = await Promise.all(resultList.map(async (item, index) => {
+await Promise.all(resultList.map(async (item, index) => {
   const subpage = await browser.newPage();
   try {
 
@@ -1280,8 +1483,13 @@ const pagesData = await Promise.all(resultList.map(async (item, index) => {
 
   } catch (err) {
     console.error(`Failed to open ${item.href}:`, err.message);
-    await subpage.close();
     return { error: err.message };
+    } finally {
+        try {
+            if (!subpage.isClosed()) {
+                await subpage.close();
+            }
+        } catch (e) {}
   }
 }));
      
@@ -1357,7 +1565,7 @@ const pagesData = await Promise.all(resultList.map(async (item, index) => {
             // 开启请求拦截
             await page.setRequestInterception(true);
 
-            page.on('request', (request) => {
+            page.on('request', async (request) => {
                 const resourceType = request.resourceType();
                 const url = request.url().toLowerCase();
 
@@ -1367,16 +1575,14 @@ const pagesData = await Promise.all(resultList.map(async (item, index) => {
                 ];
 
                 // 拦截图片、CSS、字体、媒体、favicon
-                if (
+                const shouldBlock = (
                     blockedPatterns.some(pattern => url.includes(pattern)) ||
                     ['image', 'font', 'media'].includes(resourceType) ||
                     url.endsWith('.ico') ||              // favicon 文件
                     url.includes('favicon')              // 例如 /favicon.png 或 favicon.ico?ver=2
-                ) {
-                    request.abort();
-                } else {
-                    request.continue();
-                }
+                );
+
+                await safelyHandleRequestInterception(request, shouldBlock);
             });
 
             const response = await page.goto("https://www.vakatrip.com/", {
@@ -1424,6 +1630,36 @@ await page.waitForSelector('div.el-scrollbar', { visible : true});
                 await browser.close()
             }
         }
+    },
+    close_browser: async function (browserId) {
+        return await closeBrowserSession(browserId, 'api_close');
+    },
+    close_all_browsers: async function () {
+        const ids = Object.keys(browser_map);
+        let closed = 0;
+        for (const browserId of ids) {
+            if (await closeBrowserSession(browserId, 'api_close_all')) {
+                closed += 1;
+            }
+        }
+        return closed;
+    },
+    browser_stats: function () {
+        const now = Date.now();
+        const sessions = Object.entries(browser_map).map(([id, session]) => ({
+            id,
+            connected: !!(session.browser && session.browser.isConnected()),
+            createdAt: session.createdAt || null,
+            lastUsedAt: session.lastUsedAt || null,
+            idleMs: session.lastUsedAt ? now - session.lastUsedAt : null,
+        }));
+
+        return {
+            count: sessions.length,
+            ttlMs: BROWSER_SESSION_TTL_MS,
+            sweepIntervalMs: BROWSER_SESSION_SWEEP_INTERVAL_MS,
+            sessions,
+        };
     },
 };
 export { getQingGuoProxy, Webshare_PROXY_USER, Webshare_PROXY_PASS }

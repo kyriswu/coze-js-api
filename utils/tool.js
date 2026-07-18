@@ -3,6 +3,8 @@ import fs from 'fs';
 import { URL,fileURLToPath } from 'url';
 import { dirname } from 'path';
 import path from 'path'
+import http from 'http';
+import https from 'https';
 import { execFile } from 'child_process';
 import { exec } from 'child_process';
 import util from 'util';
@@ -21,7 +23,474 @@ const __dirname = dirname(__filename)
 // Convert exec to Promise-based function
 const execPromise = util.promisify(exec);
 
+const parseEnvInt = (value, fallback) => {
+    const num = Number.parseInt(value, 10);
+    return Number.isFinite(num) && num >= 0 ? num : fallback;
+};
+
+const DOWNLOAD_TIMEOUT = parseEnvInt(process.env.DOWNLOAD_TIMEOUT, 600000);
+const DOWNLOAD_RATE_LIMIT = parseEnvInt(process.env.DOWNLOAD_RATE_LIMIT, 0);
+const DOWNLOAD_STREAM_HWM = parseEnvInt(process.env.DOWNLOAD_STREAM_HWM, 1024 * 1024);
+const DOWNLOAD_MAX_RETRIES = parseEnvInt(process.env.DOWNLOAD_MAX_RETRIES, 3);
+const DOWNLOAD_RETRY_BASE_DELAY = parseEnvInt(process.env.DOWNLOAD_RETRY_BASE_DELAY, 800);
+const DOWNLOAD_PARALLEL_CONCURRENCY = parseEnvInt(process.env.DOWNLOAD_PARALLEL_CONCURRENCY, 4);
+const DOWNLOAD_PARALLEL_MIN_SIZE = parseEnvInt(process.env.DOWNLOAD_PARALLEL_MIN_SIZE, 20 * 1024 * 1024);
+const DOWNLOAD_PARALLEL_CHUNK_SIZE = parseEnvInt(process.env.DOWNLOAD_PARALLEL_CHUNK_SIZE, 8 * 1024 * 1024);
+
+const downloadHttpAgent = new http.Agent({
+    keepAlive: true,
+    maxSockets: 64,
+    maxFreeSockets: 16,
+    timeout: DOWNLOAD_TIMEOUT,
+});
+
+const downloadHttpsAgent = new https.Agent({
+    keepAlive: true,
+    maxSockets: 64,
+    maxFreeSockets: 16,
+    timeout: DOWNLOAD_TIMEOUT,
+});
+
+const downloadAxios = axios.create({
+    timeout: DOWNLOAD_TIMEOUT,
+    maxContentLength: Infinity,
+    maxBodyLength: Infinity,
+    httpAgent: downloadHttpAgent,
+    httpsAgent: downloadHttpsAgent,
+});
+
 const tool = {
+    createDownloadWriter: function (filepath) {
+        return fs.createWriteStream(filepath, { highWaterMark: DOWNLOAD_STREAM_HWM });
+    },
+    pipeDownloadStream: function (source, writer) {
+        if (DOWNLOAD_RATE_LIMIT > 0) {
+            const throttle = new Throttle({ rate: DOWNLOAD_RATE_LIMIT });
+            source.pipe(throttle).pipe(writer);
+            return;
+        }
+        source.pipe(writer);
+    },
+    sleep: async function (ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    },
+    getFileSizeSafe: function (filepath) {
+        try {
+            if (!fs.existsSync(filepath)) {
+                return 0;
+            }
+            return fs.statSync(filepath).size;
+        } catch (error) {
+            return 0;
+        }
+    },
+    bytesToMBNumber: function (bytes) {
+        return Number(bytes || 0) / (1024 * 1024);
+    },
+    calculateThroughputMBps: function (bytes, elapsedMs) {
+        if (!Number.isFinite(bytes) || !Number.isFinite(elapsedMs) || elapsedMs <= 0) {
+            return 0;
+        }
+        return this.bytesToMBNumber(bytes) / (elapsedMs / 1000);
+    },
+    logDownloadMetrics: function ({
+        label,
+        mode,
+        chunkCount,
+        elapsedMs,
+        bytes,
+        retried,
+    }) {
+        const safeChunkCount = Number.isFinite(chunkCount) && chunkCount > 0 ? chunkCount : 1;
+        const safeElapsedMs = Number.isFinite(elapsedMs) && elapsedMs >= 0 ? elapsedMs : 0;
+        const safeBytes = Number.isFinite(bytes) && bytes >= 0 ? bytes : 0;
+        const avgThroughput = this.calculateThroughputMBps(safeBytes, safeElapsedMs);
+        const elapsedSec = (safeElapsedMs / 1000).toFixed(2);
+        const sizeMB = this.bytesToMBNumber(safeBytes).toFixed(2);
+
+        console.log(
+            `[download-metrics] label=${label || 'unknown'} mode=${mode || 'unknown'} chunks=${safeChunkCount} retries=${retried || 0} elapsed_s=${elapsedSec} size_mb=${sizeMB} avg_mb_s=${avgThroughput.toFixed(2)}`
+        );
+    },
+    parseContentRangeTotal: function (contentRangeHeader) {
+        if (!contentRangeHeader) {
+            return null;
+        }
+
+        const match = String(contentRangeHeader).match(/\/(\d+)$/);
+        if (!match) {
+            return null;
+        }
+
+        const total = Number.parseInt(match[1], 10);
+        return Number.isFinite(total) ? total : null;
+    },
+    isByteRangeSupported: function (acceptRangesHeader) {
+        return String(acceptRangesHeader || '').toLowerCase().includes('bytes');
+    },
+    getRangeProbeMeta: async function (url, headers = {}) {
+        try {
+            const headRes = await downloadAxios({
+                method: 'head',
+                url,
+                headers,
+            });
+
+            const totalSize = Number.parseInt(headRes.headers['content-length'], 10);
+            return {
+                supported: this.isByteRangeSupported(headRes.headers['accept-ranges']),
+                totalSize: Number.isFinite(totalSize) ? totalSize : null,
+                headers: headRes.headers,
+            };
+        } catch (error) {
+            try {
+                const probeRes = await downloadAxios({
+                    method: 'get',
+                    url,
+                    responseType: 'stream',
+                    headers: {
+                        ...headers,
+                        Range: 'bytes=0-0',
+                    },
+                });
+
+                if (probeRes.data && typeof probeRes.data.destroy === 'function') {
+                    probeRes.data.destroy();
+                }
+
+                const totalSize = this.parseContentRangeTotal(probeRes.headers['content-range'])
+                    || Number.parseInt(probeRes.headers['content-length'], 10);
+                return {
+                    supported: probeRes.status === 206,
+                    totalSize: Number.isFinite(totalSize) ? totalSize : null,
+                    headers: probeRes.headers,
+                };
+            } catch (probeError) {
+                return {
+                    supported: false,
+                    totalSize: null,
+                    headers: null,
+                };
+            }
+        }
+    },
+    shouldUseParallelDownload: function (meta, headers = {}) {
+        if (!meta || !meta.supported) {
+            return false;
+        }
+        if (!Number.isFinite(meta.totalSize) || meta.totalSize <= 0) {
+            return false;
+        }
+        if (meta.totalSize < DOWNLOAD_PARALLEL_MIN_SIZE) {
+            return false;
+        }
+        if (DOWNLOAD_PARALLEL_CONCURRENCY <= 1) {
+            return false;
+        }
+        if (headers.Range) {
+            return false;
+        }
+        return true;
+    },
+    downloadRangePartOnce: async function (url, start, end, outputPath, headers = {}) {
+        const response = await downloadAxios({
+            method: 'get',
+            url,
+            responseType: 'stream',
+            headers: {
+                ...headers,
+                Range: `bytes=${start}-${end}`,
+            },
+        });
+
+        const writer = fs.createWriteStream(outputPath, { highWaterMark: DOWNLOAD_STREAM_HWM });
+        this.pipeDownloadStream(response.data, writer);
+
+        await new Promise((resolve, reject) => {
+            writer.on('finish', resolve);
+            writer.on('error', reject);
+            response.data.on('error', reject);
+        });
+
+        const expectedSize = end - start + 1;
+        const actualSize = this.getFileSizeSafe(outputPath);
+        if (actualSize !== expectedSize) {
+            throw new Error(`分片大小不一致，期望 ${expectedSize} 实际 ${actualSize}`);
+        }
+
+        return response.headers;
+    },
+    downloadRangePartWithRetry: async function (url, start, end, outputPath, headers = {}) {
+        let lastError = null;
+        const maxAttempts = DOWNLOAD_MAX_RETRIES + 1;
+
+        for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+            try {
+                return await this.downloadRangePartOnce(url, start, end, outputPath, headers);
+            } catch (error) {
+                lastError = error;
+                if (attempt >= maxAttempts) {
+                    break;
+                }
+
+                const delay = DOWNLOAD_RETRY_BASE_DELAY * (2 ** (attempt - 1));
+                console.error(`分片下载失败，准备重试（${attempt}/${maxAttempts - 1}），${delay}ms 后继续：`, error.message);
+                await this.sleep(delay);
+            }
+        }
+
+        throw lastError || new Error('分片下载失败');
+    },
+    mergePartFiles: async function (partFilePaths, outputPath) {
+        const writer = fs.createWriteStream(outputPath, {
+            flags: 'w',
+            highWaterMark: DOWNLOAD_STREAM_HWM,
+        });
+
+        for (const partPath of partFilePaths) {
+            await new Promise((resolve, reject) => {
+                const reader = fs.createReadStream(partPath, { highWaterMark: DOWNLOAD_STREAM_HWM });
+                reader.on('error', reject);
+                writer.on('error', reject);
+                reader.on('end', resolve);
+                reader.pipe(writer, { end: false });
+            });
+        }
+
+        await new Promise((resolve, reject) => {
+            writer.on('finish', resolve);
+            writer.on('error', reject);
+            writer.end();
+        });
+    },
+    downloadParallelChunks: async function (url, filepath, headers = {}, meta) {
+        const totalSize = meta.totalSize;
+        const chunkSize = Math.max(DOWNLOAD_PARALLEL_CHUNK_SIZE, Math.ceil(totalSize / DOWNLOAD_PARALLEL_CONCURRENCY));
+        const partDir = `${filepath}.parts`;
+        const mergedPartFilepath = `${filepath}.part`;
+
+        if (!fs.existsSync(partDir)) {
+            fs.mkdirSync(partDir, { recursive: true });
+        }
+
+        const ranges = [];
+        for (let start = 0, index = 0; start < totalSize; start += chunkSize, index++) {
+            const end = Math.min(start + chunkSize - 1, totalSize - 1);
+            ranges.push({
+                index,
+                start,
+                end,
+                partPath: path.join(partDir, `part_${index}.bin`),
+            });
+        }
+
+        const concurrency = Math.min(DOWNLOAD_PARALLEL_CONCURRENCY, ranges.length);
+        let responseHeaders = meta.headers || {};
+        let cursor = 0;
+        const runWorker = async () => {
+            while (true) {
+                const current = cursor;
+                cursor += 1;
+                if (current >= ranges.length) {
+                    return;
+                }
+
+                const range = ranges[current];
+                const headersFromPart = await this.downloadRangePartWithRetry(
+                    url,
+                    range.start,
+                    range.end,
+                    range.partPath,
+                    headers
+                );
+                if (!responseHeaders || Object.keys(responseHeaders).length === 0) {
+                    responseHeaders = headersFromPart;
+                }
+            }
+        };
+
+        try {
+            await Promise.all(Array.from({ length: concurrency }, () => runWorker()));
+            await this.mergePartFiles(ranges.map(item => item.partPath), mergedPartFilepath);
+
+            if (this.getFileSizeSafe(mergedPartFilepath) !== totalSize) {
+                throw new Error('合并后的文件大小校验失败');
+            }
+
+            if (fs.existsSync(filepath)) {
+                fs.unlinkSync(filepath);
+            }
+            fs.renameSync(mergedPartFilepath, filepath);
+            return {
+                status: 206,
+                mode: 'parallel-chunked',
+                chunkCount: ranges.length,
+                retries: 0,
+                headers: responseHeaders,
+                totalSize,
+                fileSize: totalSize,
+                filepath,
+            };
+        } finally {
+            if (fs.existsSync(mergedPartFilepath)) {
+                fs.unlinkSync(mergedPartFilepath);
+            }
+            if (fs.existsSync(partDir)) {
+                for (const file of fs.readdirSync(partDir)) {
+                    const partPath = path.join(partDir, file);
+                    if (fs.existsSync(partPath)) {
+                        fs.unlinkSync(partPath);
+                    }
+                }
+                fs.rmdirSync(partDir);
+            }
+        }
+    },
+    downloadToPartOnce: async function (url, filepath, headers) {
+        const partFilepath = `${filepath}.part`;
+        let existingBytes = this.getFileSizeSafe(partFilepath);
+
+        const requestHeaders = {
+            ...headers,
+        };
+        if (existingBytes > 0) {
+            requestHeaders.Range = `bytes=${existingBytes}-`;
+        }
+
+        let response;
+        try {
+            response = await downloadAxios({
+                method: 'get',
+                url,
+                responseType: 'stream',
+                headers: requestHeaders,
+            });
+        } catch (error) {
+            if (error?.response?.status === 416) {
+                if (fs.existsSync(partFilepath)) {
+                    fs.unlinkSync(partFilepath);
+                }
+            }
+            throw error;
+        }
+
+        const supportsResume = response.status === 206;
+        if (existingBytes > 0 && !supportsResume) {
+            if (fs.existsSync(partFilepath)) {
+                fs.unlinkSync(partFilepath);
+            }
+            existingBytes = 0;
+        }
+
+        const writer = fs.createWriteStream(partFilepath, {
+            flags: existingBytes > 0 && supportsResume ? 'a' : 'w',
+            highWaterMark: DOWNLOAD_STREAM_HWM,
+        });
+        this.pipeDownloadStream(response.data, writer);
+
+        await new Promise((resolve, reject) => {
+            writer.on('finish', resolve);
+            writer.on('error', reject);
+            response.data.on('error', reject);
+        });
+
+        const contentLength = Number.parseInt(response.headers['content-length'], 10);
+        const totalByRange = this.parseContentRangeTotal(response.headers['content-range']);
+        const totalSize = Number.isFinite(totalByRange)
+            ? totalByRange
+            : (Number.isFinite(contentLength)
+                ? ((existingBytes > 0 && supportsResume) ? existingBytes + contentLength : contentLength)
+                : null);
+
+        const finalSize = this.getFileSizeSafe(partFilepath);
+        if (Number.isFinite(totalSize) && totalSize > 0 && finalSize < totalSize) {
+            throw new Error(`下载未完成，已下载 ${finalSize}/${totalSize} 字节`);
+        }
+
+        return {
+            status: response.status,
+            mode: supportsResume ? 'single-stream-resume' : 'single-stream-full',
+            chunkCount: 1,
+            resumedBytes: existingBytes,
+            headers: response.headers,
+            totalSize,
+            finalSize,
+            partFilepath,
+        };
+    },
+    downloadWithResume: async function (url, filepath, headers = {}, options = {}) {
+        const { allowParallel = true, label = 'download' } = options;
+        const startMs = Date.now();
+        const hasExistingPart = this.getFileSizeSafe(`${filepath}.part`) > 0;
+        if (allowParallel && !hasExistingPart && !headers.Range) {
+            const meta = await this.getRangeProbeMeta(url, headers);
+            if (this.shouldUseParallelDownload(meta, headers)) {
+                try {
+                    console.log(`检测到支持分片下载，启用并发分片，文件大小：${this.bytesToMB(meta.totalSize)}MB`);
+                    const parallelResult = await this.downloadParallelChunks(url, filepath, headers, meta);
+                    const elapsedMs = Date.now() - startMs;
+                    this.logDownloadMetrics({
+                        label,
+                        mode: parallelResult.mode,
+                        chunkCount: parallelResult.chunkCount,
+                        elapsedMs,
+                        bytes: parallelResult.fileSize,
+                        retried: parallelResult.retries || 0,
+                    });
+                    return parallelResult;
+                } catch (parallelError) {
+                    console.error('并发分片下载失败，回退到单流断点续传：', parallelError.message);
+                }
+            }
+        }
+
+        let lastError = null;
+        const maxAttempts = DOWNLOAD_MAX_RETRIES + 1;
+        let attemptUsed = 0;
+
+        for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+            attemptUsed = attempt;
+            try {
+                const result = await this.downloadToPartOnce(url, filepath, headers);
+                if (fs.existsSync(filepath)) {
+                    fs.unlinkSync(filepath);
+                }
+                fs.renameSync(result.partFilepath, filepath);
+                const elapsedMs = Date.now() - startMs;
+                const finalSize = this.getFileSizeSafe(filepath);
+                this.logDownloadMetrics({
+                    label,
+                    mode: result.mode,
+                    chunkCount: result.chunkCount,
+                    elapsedMs,
+                    bytes: finalSize,
+                    retried: Math.max(attemptUsed - 1, 0),
+                });
+                return {
+                    status: result.status,
+                    mode: result.mode,
+                    chunkCount: result.chunkCount,
+                    retries: Math.max(attemptUsed - 1, 0),
+                    headers: result.headers,
+                    totalSize: result.totalSize,
+                    fileSize: finalSize,
+                    filepath,
+                };
+            } catch (error) {
+                lastError = error;
+                const isLastAttempt = attempt >= maxAttempts;
+                if (isLastAttempt) {
+                    break;
+                }
+
+                const delay = DOWNLOAD_RETRY_BASE_DELAY * (2 ** (attempt - 1));
+                console.error(`下载失败，准备重试（${attempt}/${maxAttempts - 1}），${delay}ms 后继续：`, error.message);
+                await this.sleep(delay);
+            }
+        }
+
+        throw lastError || new Error('下载失败');
+    },
     request_chromium: async function (url, cookie, xpath, selector, waitUntil) {
 
         if(!this.isValidUrl(url)){
@@ -29,7 +498,8 @@ const tool = {
         }
         // 增加特殊域名列表，命中则走国内代理逻辑
         const chinaDomainList = [
-            'tophub.today','qunar.com','zjedu.org','org.cn','news.cn','douyin.com','gz-cmc.com','10jqka.com.cn','sina.com.cn','gov.cn','chinamobile.com','huorong.cn','yixue99.com','xaprtc.com','com.cn','offcn.com','newrank.cn'
+            'tophub.today','qunar.com','zjedu.org','org.cn','news.cn','douyin.com','gz-cmc.com','10jqka.com.cn','sina.com.cn','gov.cn','chinamobile.com','huorong.cn','yixue99.com','xaprtc.com','com.cn','offcn.com','newrank.cn','szfcweb.com','eastmoney.com',
+            'thepaper.cn','qbitai.com','cnfin.com','agri.cn'
             // 可继续添加更多域名
         ];
         const urlObj = new URL(url);
@@ -94,7 +564,10 @@ const tool = {
                 let video_name = path.basename(videos[i]);
                 let video_path = path.join(downloadDir, video_name);
                 if (!fs.existsSync(video_path)) {
-                    throw new Error(`文件不存在: ${videos[i]}`);
+                    // 文件不在本地，先下载
+                    console.log(`文件不存在，开始下载: ${videos[i]}`);
+                    const downloaded = await this.download_video(videos[i]);
+                    video_path = downloaded.filepath;
                 }
 
                 // 注意：ffmpeg concat 格式中的路径要使用绝对路径并包裹在单引号中
@@ -184,6 +657,187 @@ const tool = {
         } catch (e) {
             return false;
         }
+    },
+    getClientIp: function (req) {
+        const xForwardedFor = req.headers['x-forwarded-for'];
+        const firstIp = typeof xForwardedFor === 'string' ? xForwardedFor.split(',')[0].trim() : '';
+        const fallbackIp = req.ip || req.socket?.remoteAddress || 'unknown';
+        return (firstIp || fallbackIp).replace('::ffff:', '');
+    },
+    getBaseUrl: function (req) {
+        const host = req.get('host');
+        const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+        return `${protocol}://${host}`;
+    },
+    getUsage: async function (key) {
+        let value = await redis.get(key);
+        if (value === null) {
+            const now = new Date();
+            const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const secondsSinceMidnight = Math.floor((now - midnight) / 1000);
+            await redis.set(key, 0, 'EX', secondsSinceMidnight);
+            value = 0;
+            console.log(`键 ${key} 不存在，已创建并初始化为 0`);
+        } else {
+            console.log(`键 ${key} 已存在，当前值为 ${value}`);
+        }
+        return value;
+    },
+    sanitizeUsageMetadata: function ({ url, selector, xpath }) {
+        const regex = /[^a-zA-Z0-9_=/.:-]/g;
+        return {
+            url: url?.replace(regex, ''),
+            selector: selector?.replace(regex, ''),
+            xpath: xpath?.replace(regex, '')
+        };
+    },
+    canUseSitemapFreeOnce: async function (key) {
+        const value = await redis.get(key);
+        if (value === null) {
+            const now = new Date();
+            const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const secondsSinceMidnight = Math.floor((now - midnight) / 1000);
+            await redis.set(key, 0, 'EX', secondsSinceMidnight);
+            return true;
+        }
+        return false;
+    },
+    canUseFreeVideoDownload: async function (key) {
+        const value = await redis.get(key);
+        const left = Number(value);
+        return Number.isFinite(left) ? left > 0 : true;
+    },
+    canUseRedisPoints: async function (key, cost = 3) {
+        const value = await redis.get(key);
+        if (value === null) return false;
+        const points = Number(value);
+        return Number.isFinite(points) && points >= cost;
+    },
+    extFromContentType: function (contentType) {
+        const type = (contentType || 'image/png').split(';')[0].trim().toLowerCase();
+        if (type === 'image/jpeg') return 'jpg';
+        if (type === 'image/webp') return 'webp';
+        if (type === 'image/gif') return 'gif';
+        if (type === 'image/bmp') return 'bmp';
+        return 'png';
+    },
+    saveBase64ImageToDownloads: async function (base64Image, prefix = 'image') {
+        if (!base64Image || typeof base64Image !== 'string') {
+            throw new Error('base64 图片数据不能为空');
+        }
+
+        let ext = 'png';
+        let pureBase64 = base64Image.trim();
+
+        const dataUrlMatch = pureBase64.match(/^data:([^;]+);base64,(.+)$/);
+        if (dataUrlMatch) {
+            const mime = dataUrlMatch[1] || 'image/png';
+            pureBase64 = dataUrlMatch[2] || '';
+            ext = this.extFromContentType(mime);
+        }
+
+        const downloadDir = path.join(__dirname, '..', 'downloads');
+        if (!fs.existsSync(downloadDir)) {
+            fs.mkdirSync(downloadDir, { recursive: true });
+        }
+
+        const fileName = `${prefix}-${Date.now()}-${process.pid}.${ext}`;
+        const filePath = path.join(downloadDir, fileName);
+        await fs.promises.writeFile(filePath, Buffer.from(pureBase64, 'base64'));
+
+        return {
+            fileName,
+            filePath
+        };
+    },
+    saveImageUrlToDownloads: async function (imageUrl, prefix = 'image', index = 0) {
+        if (!imageUrl || typeof imageUrl !== 'string') {
+            throw new Error('图片 URL 不能为空');
+        }
+
+        const response = await axios.get(imageUrl, {
+            responseType: 'arraybuffer',
+            timeout: 30000,
+        });
+        const contentType = response.headers?.['content-type'] || 'image/png';
+        if (!String(contentType).startsWith('image/')) {
+            throw new Error(`第 ${index + 1} 张图片不是有效图片资源`);
+        }
+
+        const ext = this.extFromContentType(contentType);
+        const downloadDir = path.join(__dirname, '..', 'downloads');
+        if (!fs.existsSync(downloadDir)) {
+            fs.mkdirSync(downloadDir, { recursive: true });
+        }
+
+        const fileName = `${prefix}-${Date.now()}-${process.pid}-${index}.${ext}`;
+        const filePath = path.join(downloadDir, fileName);
+        await fs.promises.writeFile(filePath, Buffer.from(response.data));
+
+        return {
+            fileName,
+            filePath,
+            contentType
+        };
+    },
+    isRetryableImageDownloadError: function (error) {
+        const code = String(error?.code || '').toUpperCase();
+        const status = Number(error?.response?.status);
+
+        if (status === 429 || status >= 500) {
+            return true;
+        }
+
+        return [
+            'ECONNABORTED',
+            'ETIMEDOUT',
+            'ECONNRESET',
+            'EAI_AGAIN',
+            'ENOTFOUND',
+            'EPIPE',
+        ].includes(code);
+    },
+    downloadImageUrlToTempFile: async function (imageUrl, index = 0) {
+        const maxAttempts = 2;
+        const retryDelayMs = 600;
+        let lastError = null;
+
+        for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+            try {
+                const response = await axios.get(imageUrl, {
+                    responseType: 'arraybuffer',
+                    timeout: 30000,
+                });
+                const contentType = response.headers?.['content-type'] || 'image/png';
+                if (!String(contentType).startsWith('image/')) {
+                    throw new Error(`第 ${index + 1} 张参考图不是有效图片资源`);
+                }
+
+                console.log(`正在下载第 ${index + 1} 张图片，URL: ${imageUrl}, Content-Type: ${contentType}`);
+
+                const ext = this.extFromContentType(contentType);
+                const downloadDir = path.join(__dirname, '..', 'downloads');
+                if (!fs.existsSync(downloadDir)) {
+                    fs.mkdirSync(downloadDir, { recursive: true });
+                }
+                const tempFile = path.join(downloadDir, `gpt-image-2-${Date.now()}-${process.pid}-${index}.${ext}`);
+                await fs.promises.writeFile(tempFile, Buffer.from(response.data));
+                return tempFile;
+            } catch (error) {
+                lastError = error;
+                const isLastAttempt = attempt >= maxAttempts;
+                const retryable = this.isRetryableImageDownloadError(error);
+
+                if (isLastAttempt || !retryable) {
+                    throw error;
+                }
+
+                console.error(`第 ${index + 1} 张图片下载失败，${retryDelayMs}ms 后重试（${attempt}/${maxAttempts - 1}）：`, error.message);
+                await this.sleep(retryDelayMs);
+            }
+        }
+
+        throw lastError || new Error(`第 ${index + 1} 张图片下载失败`);
     },
     download_image: async function (url) {
         try {
@@ -314,6 +968,164 @@ const tool = {
 
         return codecToExt[codec] || 'mp4';
     },
+    getExtensionFromContentType: function(contentType) {
+        if (!contentType) {
+            return null;
+        }
+
+        const mimeToExtension = {
+            'video/mp4': 'mp4',
+            'video/mpeg': 'mpeg',
+            'video/quicktime': 'mov',
+            'video/webm': 'webm',
+            'audio/mpeg': 'mp3',
+            'audio/mp4': 'm4a',
+            'audio/wav': 'wav',
+            'audio/x-wav': 'wav',
+            'audio/ogg': 'ogg',
+            'audio/aac': 'aac',
+            'audio/flac': 'flac',
+            'audio/webm': 'webm',
+        };
+
+        const normalized = String(contentType).toLowerCase();
+        const matchedType = Object.keys(mimeToExtension).find(type => normalized.includes(type));
+        return matchedType ? mimeToExtension[matchedType] : null;
+    },
+    getMediaInfoFromExtension: function(extension) {
+        const normalized = String(extension || '').replace(/^\./, '').toLowerCase();
+        const videoExtensions = new Set(['mp4', 'mpeg', 'mov', 'mkv', 'avi', 'flv', '3gp', '3g2']);
+        const audioExtensions = new Set(['mp3', 'm4a', 'aac', 'wav', 'flac']);
+
+        if (videoExtensions.has(normalized)) {
+            return {
+                extension: normalized,
+                is_video: true,
+                is_audio: false,
+                confident: true
+            };
+        }
+
+        if (audioExtensions.has(normalized)) {
+            return {
+                extension: normalized,
+                is_video: false,
+                is_audio: true,
+                confident: true
+            };
+        }
+
+        return {
+            extension: normalized || null,
+            is_video: false,
+            is_audio: false,
+            confident: false
+        };
+    },
+    getMediaInfoFromContentType: function(contentType) {
+        if (!contentType) {
+            return {
+                extension: null,
+                is_video: false,
+                is_audio: false,
+                confident: false
+            };
+        }
+
+        const normalized = String(contentType).toLowerCase();
+        const extension = this.getExtensionFromContentType(normalized);
+
+        if (normalized.includes('video/')) {
+            return {
+                extension: extension,
+                is_video: true,
+                is_audio: false,
+                confident: true
+            };
+        }
+
+        if (normalized.includes('audio/')) {
+            return {
+                extension: extension,
+                is_video: false,
+                is_audio: true,
+                confident: true
+            };
+        }
+
+        return {
+            extension: extension,
+            is_video: false,
+            is_audio: false,
+            confident: false
+        };
+    },
+    renameFileWithExtension: function(filepath, extension) {
+        if (!extension) {
+            return filepath;
+        }
+
+        const normalized = String(extension).replace(/^\./, '').toLowerCase();
+        const currentExtension = path.extname(filepath).replace(/^\./, '').toLowerCase();
+        if (currentExtension === normalized) {
+            return filepath;
+        }
+
+        const newPath = currentExtension
+            ? filepath.replace(/\.[^.]+$/, `.${normalized}`)
+            : `${filepath}.${normalized}`;
+
+        fs.renameSync(filepath, newPath);
+        return newPath;
+    },
+    getExtensionFromFormat: function(formatName, hasVideo) {
+        if (!formatName) {
+            return hasVideo ? 'mp4' : 'mp3';
+        }
+
+        const formats = String(formatName).split(',');
+        if (hasVideo) {
+            if (formats.includes('mp4') || formats.includes('mov') || formats.includes('3gp') || formats.includes('3g2') || formats.includes('mj2')) {
+                return 'mp4';
+            }
+            if (formats.includes('matroska')) {
+                return 'mkv';
+            }
+            if (formats.includes('webm')) {
+                return 'webm';
+            }
+            if (formats.includes('avi')) {
+                return 'avi';
+            }
+            if (formats.includes('flv')) {
+                return 'flv';
+            }
+            if (formats.includes('ogg')) {
+                return 'ogg';
+            }
+        } else {
+            if (formats.includes('mp3')) {
+                return 'mp3';
+            }
+            if (formats.includes('wav')) {
+                return 'wav';
+            }
+            if (formats.includes('ogg')) {
+                return 'ogg';
+            }
+            if (formats.includes('flac')) {
+                return 'flac';
+            }
+            if (formats.includes('aac')) {
+                return 'aac';
+            }
+            if (formats.includes('mp4') || formats.includes('mov') || formats.includes('3gp') || formats.includes('3g2') || formats.includes('mj2') || formats.includes('ipod')) {
+                return 'm4a';
+            }
+        }
+
+        return null;
+    },
     get_media_info: async function (file) {
         var command = ""
         if (process.env.NODE_ENV === 'online'){
@@ -327,15 +1139,23 @@ const tool = {
             const { stdout, stderr } = await execPromise(command);
 
             const info = JSON.parse(stdout);
-            // Get file type info
-            const stream = info.streams[0];
+            const streams = info.streams || [];
             const format = info.format;
+            const videoStream = streams.find(stream => stream.codec_type === 'video');
+            const audioStream = streams.find(stream => stream.codec_type === 'audio');
+            const hasVideo = Boolean(videoStream);
+            const hasAudio = Boolean(audioStream);
+            const primaryStream = videoStream || audioStream || streams[0] || {};
+            const extension = this.getExtensionFromFormat(format?.format_name, hasVideo) || this.getExtensionFromCodec(primaryStream.codec_name);
+
             return {
                 success: true,
-                type: stream.codec_type, // 'audio' or 'video'
-                codec: stream.codec_name,
+                type: hasVideo ? 'video' : (hasAudio ? 'audio' : primaryStream.codec_type),
+                codec: primaryStream.codec_name,
                 format: format.format_name,
-                extension: this.getExtensionFromCodec(stream.codec_name)
+                extension: extension,
+                hasVideo: hasVideo,
+                hasAudio: hasAudio
             };
         } catch (error) {
             console.log(error)
@@ -431,8 +1251,6 @@ const tool = {
         var filepath = path.join(downloadDir, filename);
         
         try {
-            // Download video with progress tracking
-            const rateLimit = 100 * (1024 * 1024); // 0.5MB/s limit
             let response
             if (sourceUrl && (sourceUrl.includes('youtube.com') || sourceUrl.includes('youtu.be'))) {
                 let xxx = await tool.yt_dlp_audio(sourceUrl)
@@ -455,80 +1273,48 @@ const tool = {
                 
                 return xxx
             } else {
-                response = await axios({
-                    method: 'get',
-                    url: url,
-                    responseType: 'stream',
-                    headers: {
-                        'Accept': '*/*',
-                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36 Edg/136.0.0.0'
-                    },
-                    timeout: 600000,
-                    maxContentLength: Infinity,
-                    maxBodyLength: Infinity,
+                const downloadResult = await this.downloadWithResume(url, filepath, {
+                    'Accept': '*/*',
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36 Edg/136.0.0.0'
+                }, {
+                    label: 'video'
                 });
+                response = { headers: downloadResult.headers };
+                filepath = downloadResult.filepath;
             }
-            if (!filetool.is_video(response.headers['content-type'])) {
-                throw new Error('视频链接无效！请查看视频教程：【https://www.bilibili.com/video/BV169TizqE58】');
+            const contentType = response.headers['content-type'];
+            console.log("下载格式", contentType);
+
+            let mediaInfo = this.getMediaInfoFromContentType(contentType);
+            // 部分 CDN 会返回 application/octet-stream，这里回退到 ffprobe 检测实际媒体类型。
+            if (!mediaInfo.confident || !mediaInfo.is_video) {
+                const probedInfo = await this.get_media_info(filepath);
+                if (!probedInfo.success || probedInfo.type !== 'video') {
+                    throw new Error('视频链接无效！请查看视频教程：【https://www.bilibili.com/video/BV169TizqE58】');
+                }
+
+                mediaInfo = {
+                    extension: probedInfo.extension || 'mp4',
+                    is_video: true,
+                    is_audio: false,
+                    confident: true
+                };
             }
             
-            const totalSize = parseInt(response.headers['content-length'], 10);
-            let downloadedSize = 0;
-            let lastTime = Date.now();
-            let bytesThisSecond = 0;
+            const totalSize = this.getFileSizeSafe(filepath);
+            console.log(`视频下载成功，视频大小：${this.bytesToMB(totalSize)}MB`)
+            filepath = this.renameFileWithExtension(filepath, mediaInfo.extension || 'mp4');
+            filename = path.basename(filepath);
+            console.log(`视频保存成功，新的文件名：${filename}`);
 
-            const writer = fs.createWriteStream(filepath);
-            const throttle = new Throttle({ rate: rateLimit });
-
-            // 监听 throttled 数据流
-            // throttle.on('data', (chunk) => {
-            //     downloadedSize += chunk.length;
-            //     bytesThisSecond += chunk.length;
-
-            //     const now = Date.now();
-            //     const timeDiff = now - lastTime;
-
-            //     if (timeDiff >= 1000) {
-            //         const speed = bytesThisSecond / (timeDiff / 1000);
-            //         const progress = (downloadedSize / totalSize) * 100;
-            //         console.log(`Download progress: ${progress.toFixed(2)}%, Speed: ${(speed / 1024 / 1024).toFixed(2)} MB/s`);
-
-            //         bytesThisSecond = 0;
-            //         lastTime = now;
-            //     }
-            // });
-
-            // 替换 pipe 流为带节流的流
-            response.data.pipe(throttle).pipe(writer);
-
-            return new Promise((resolve, reject) => {
-                writer.on('finish', () => {
-                    console.log(`视频下载成功，视频大小：${this.bytesToMB(totalSize)}MB`)
-                     this.get_media_info(filepath)
-                        .then(info => {
-                            if (!info.success) {
-                                return reject(new Error(info.error));
-                            }
-                            if (info.success) {
-                                const newPath = filepath.replace(/\.[^.]+$/, `.${info.extension}`);
-                                fs.renameSync(filepath, newPath);
-                                filepath = newPath;
-                                filename = path.basename(filepath);
-                                console.log(`视频转换成功，新的文件名：${filename}`);
-                            }
-
-                            resolve({
-                                success: true,
-                                filepath: filepath,
-                                filename: filename,
-                                size: this.bytesToMB(totalSize)
-                            });
-                        })
-                        .catch(error => reject(error));
-                    });
-
-                writer.on('error', reject);
-            });
+            return {
+                success: true,
+                filepath: filepath,
+                filename: filename,
+                size: this.bytesToMB(totalSize),
+                is_video: true,
+                is_audio: false
+            };
 
         } catch (error) {
             console.error('Error downloading video:', error, " video url:", url);
@@ -578,6 +1364,23 @@ const tool = {
             ...isf
         }
 
+        // Check if URL is from devtool.uk downloads directory
+        if (url.includes('devtool.uk') && url.includes('/downloads/')) {
+            let filename = path.basename(url);
+            let filepath = path.join(downloadDir, filename);
+            if (fs.existsSync(filepath)) {
+                const ext = path.extname(filename);
+                return {
+                    success: true,
+                    isLocalFile: true,
+                    filepath: filepath,
+                    filename: filename,
+                    is_video: ext === '.mp4' || ext === '.webm' || ext === '.mov' || ext === '.avi',
+                    is_audio: ext === '.mp3' || ext === '.wav' || ext === '.aac' || ext === '.ogg' || ext === '.m4a',
+                };
+            }
+        }
+
 
         // Generate filename with timestamp and extension
         const timestamp = new Date().getTime();
@@ -585,80 +1388,52 @@ const tool = {
         var filepath = path.join(downloadDir, filename);
         
         try {
-            // Download video with progress tracking
-            const rateLimit = 100 * (1024 * 1024); // 0.5MB/s limit
-            let response = await axios({
-                method: 'get',
-                url: url,
-                responseType: 'stream',
-                headers: {
-                    'Accept': '*/*',
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36 Edg/136.0.0.0'
-                },
-                timeout: 600000,
-                maxContentLength: Infinity,
-                maxBodyLength: Infinity,
+            const downloadResult = await this.downloadWithResume(url, filepath, {
+                'Accept': '*/*',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36 Edg/136.0.0.0'
+            }, {
+                label: 'file'
             });
+            let response = { headers: downloadResult.headers };
+            filepath = downloadResult.filepath;
+            const contentTypeMediaInfo = this.getMediaInfoFromContentType(response.headers['content-type']);
+            const urlExtensionMediaInfo = this.getMediaInfoFromExtension(path.extname(new URL(url).pathname));
             
-            const totalSize = parseInt(response.headers['content-length'], 10);
-            let downloadedSize = 0;
-            let lastTime = Date.now();
-            let bytesThisSecond = 0;
+            const totalSize = this.getFileSizeSafe(filepath);
+            console.log(`文件下载成功，文件大小：${this.bytesToMB(totalSize)}MB`)
+            const inferredMediaInfo = contentTypeMediaInfo.confident ? contentTypeMediaInfo : urlExtensionMediaInfo;
 
-            const writer = fs.createWriteStream(filepath);
-            const throttle = new Throttle({ rate: rateLimit });
+            if (inferredMediaInfo.confident) {
+                filepath = this.renameFileWithExtension(filepath, inferredMediaInfo.extension);
+                filename = path.basename(filepath);
+                console.log(`文件保存成功，新的文件名：${filename}`);
 
-            // 监听 throttled 数据流
-            // throttle.on('data', (chunk) => {
-            //     downloadedSize += chunk.length;
-            //     bytesThisSecond += chunk.length;
+                return {
+                    success: true,
+                    filepath: filepath,
+                    filename: filename,
+                    size: this.bytesToMB(totalSize),
+                    is_video: inferredMediaInfo.is_video,
+                    is_audio: inferredMediaInfo.is_audio,
+                };
+            }
 
-            //     const now = Date.now();
-            //     const timeDiff = now - lastTime;
+            const info = await this.get_media_info(filepath)
+            if (!info.success) {
+                throw new Error(info.error);
+            }
+            filepath = this.renameFileWithExtension(filepath, info.extension);
+            filename = path.basename(filepath);
+            console.log(`文件保存成功，新的文件名：${filename}`);
 
-            //     if (timeDiff >= 1000) {
-            //         const speed = bytesThisSecond / (timeDiff / 1000);
-            //         const progress = (downloadedSize / totalSize) * 100;
-            //         console.log(`Download progress: ${progress.toFixed(2)}%, Speed: ${(speed / 1024 / 1024).toFixed(2)} MB/s`);
-
-            //         bytesThisSecond = 0;
-            //         lastTime = now;
-            //     }
-            // });
-
-            // 替换 pipe 流为带节流的流
-            response.data.pipe(throttle).pipe(writer);
-
-            return new Promise((resolve, reject) => {
-                writer.on('finish', () => {
-                    console.log(`文件下载成功，文件大小：${this.bytesToMB(totalSize)}MB`)
-                     this.get_media_info(filepath)
-                        .then(info => {
-                            if (!info.success) {
-                                return reject(new Error(info.error));
-                            }
-                            if (info.success) {
-                                const newPath = filepath + `.${info.extension}`;
-                                fs.renameSync(filepath, newPath);
-                                filepath = newPath;
-                                filename = path.basename(filepath);
-                                console.log(`文件保存成功，新的文件名：${filename}`);
-                            }
-
-                            resolve({
-                                success: true,
-                                filepath: filepath,
-                                filename: filename,
-                                size: this.bytesToMB(totalSize),
-                                is_video: info.type === 'video',
-                                is_audio: info.type === 'audio',
-                            });
-                        })
-                        .catch(error => reject(error));
-                    });
-
-                writer.on('error', reject);
-            });
+            return {
+                success: true,
+                filepath: filepath,
+                filename: filename,
+                size: this.bytesToMB(totalSize),
+                is_video: info.type === 'video',
+                is_audio: info.type === 'audio',
+            };
 
         } catch (error) {
             console.error('Error downloading file:', error, " file url:", url);
@@ -682,27 +1457,22 @@ const tool = {
         var filepath = path.join(downloadDir, filename);
 
         try {
-            // Download video with progress tracking
-            const response = await axios({
-                method: 'get',
-                url: audio_url,
-                responseType: 'stream', 
-                headers: {
-                    'Accept': '*/*',
-                    'sec-ch-ua': '"Chromium";v="137", "Not/A)Brand";v="24", "Google Chrome";v="137"',
-                    'sec-ch-ua-mobile': '?0',
-                    'sec-ch-ua-platform': '"Windows"',
-                    'sec-fetch-dest': 'document',
-                    'sec-fetch-mode': 'navigate', 
-                    'sec-fetch-site': 'none',
-                    'sec-fetch-user': '?1',
-                    'upgrade-insecure-requests': '1',
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36',
-                },
-                timeout: 600000,
-                maxContentLength: Infinity,
-                maxBodyLength: Infinity,
+            const downloadResult = await this.downloadWithResume(audio_url, filepath, {
+                'Accept': '*/*',
+                'sec-ch-ua': '"Chromium";v="137", "Not/A)Brand";v="24", "Google Chrome";v="137"',
+                'sec-ch-ua-mobile': '?0',
+                'sec-ch-ua-platform': '"Windows"',
+                'sec-fetch-dest': 'document',
+                'sec-fetch-mode': 'navigate', 
+                'sec-fetch-site': 'none',
+                'sec-fetch-user': '?1',
+                'upgrade-insecure-requests': '1',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36',
+            }, {
+                label: 'audio'
             });
+            const response = { headers: downloadResult.headers, status: downloadResult.status };
+            filepath = downloadResult.filepath;
 
             console.log(`开始下载音频：${audio_url}`)
             console.log(`状态码：${response.status}`)
@@ -710,58 +1480,22 @@ const tool = {
             if (!filetool.is_audio(response.headers['content-type'])) {
                 throw new Error('音频链接无效！');
             }
+            const mediaInfo = this.getMediaInfoFromContentType(response.headers['content-type']);
 
-            // Get total size
-            const totalSize = parseInt(response.headers['content-length'], 10);
-            let downloadedSize = 0;
+            const totalSize = this.getFileSizeSafe(filepath);
+            filepath = this.renameFileWithExtension(filepath, mediaInfo.extension || 'mp3');
+            filename = path.basename(filepath);
+            console.log(`音频保存成功，新的文件名：${filename}`);
 
-            // Create write stream
-            const writer = fs.createWriteStream(filepath);
-
-            // Pipe the response to the file while tracking progress
-            response.data.on('data', (chunk) => {
-                downloadedSize += chunk.length;
-                const progress = (downloadedSize / totalSize) * 100;
-                // console.log(`Download progress: ${progress.toFixed(2)}%`);
-            });
-
-            response.data.pipe(writer);
-
-            return new Promise((resolve, reject) => {
-                writer.on('finish', () => {
-
-                 this.get_media_info(filepath)
-                        .then(info => {
-                            if (!info.success) {
-                                return reject(new Error(info.error));
-                            }
-                            if (info.success) {
-                                const newPath = filepath.replace(/\.[^.]+$/, `.${info.extension}`);
-                                fs.renameSync(filepath, newPath);
-                                filepath = newPath;
-                                filename = path.basename(filepath);
-                                console.log(`音频转换成功，新的文件名：${filename}`,newPath,info);
-                            }
-
-                            resolve({
-                                success: true,
-                                filepath: filepath,
-                                filename: filename,
-                                size: this.bytesToMB(totalSize)
-                            });
-                        })
-                        .catch(error => reject(error));
-                    });
-
-                writer.on('error', reject);
-            });
+            return {
+                success: true,
+                filepath: filepath,
+                filename: filename,
+                size: this.bytesToMB(totalSize)
+            };
 
         } catch (error) {
             console.error('Error downloading audio:', error);
-            // 如果下载失败，删除临时文件
-            fs.unlink(filepath, (err) => {
-                if (err) console.error('Error deleting audio file:', err);
-            });
             return {
                 success: false,
                 error: error.message
@@ -952,8 +1686,18 @@ const tool = {
      * @returns 
      */
     audio_format_convert: async function (input_file, output_type) {
-        const output_file = `${input_file}.${output_type}`
-        const command = `ffmpeg -i ${input_file} ${output_file}`;
+        // Strip existing extension and append the target format
+        const extname = path.extname(input_file);
+        const basename = extname ? input_file.slice(0, -extname.length) : input_file;
+        const output_file = `${basename}.${output_type}`;
+
+        // If input and output are the same file (same path after normalisation), skip conversion
+        if (path.resolve(input_file) === path.resolve(output_file)) {
+            return {success: true, filepath: input_file};
+        }
+
+        // Use -y to overwrite, and increase analyzeduration/probesize for files with missing headers
+        const command = `ffmpeg -y -analyzeduration 10000000 -probesize 10000000 -i ${input_file} ${output_file}`;
 
         try {
             // Execute ffmpeg command
@@ -967,7 +1711,7 @@ const tool = {
                 if (err) throw err
             });
              fs.unlink(output_file,(err) => {
-                if (err) throw err
+                // ignore if output file doesn't exist
             });
             return {success:false, error: error.message};
         }

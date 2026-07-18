@@ -1,0 +1,14 @@
+# Dependencies are installed reproducibly inside the image.
+node_modules
+
+# Runtime state and secrets stay outside the application image.
+.env
+downloads
+network.log
+*.log
+
+# Source-control and agent workspace files are not application runtime input.
+.git
+.gitignore
+harness
+graphify-out

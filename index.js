@@ -1,9 +1,9 @@
 import express from 'express';
+import './utils/loadEnv.js';
 import axios from 'axios';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import fs from 'fs';
 import { execFile } from 'child_process';
-import { JSDOM } from 'jsdom';
 import { URL,fileURLToPath } from 'url';
 import unkey from './utils/unkey.js'
 import { dirname } from 'path';
@@ -12,13 +12,69 @@ import crypto from 'crypto';
 import qs from 'querystring'; // 用于将参数编码为 x-www-form-urlencoded 格式
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
+import commonUtils from './utils/commonUtils.js';
+import thirdPartyUsed from "./utils/thirdPartyUsed.js";
+import navigationRoutes from './routes/navigationRoutes.js';
+import { attachAxiosRateLimitLogger } from './utils/axiosInterceptors.js';
+import { logHttpRequest } from './utils/networkLogger.js';
+import { getNetworkDashboardMetrics } from './utils/networkAnalytics.js';
+import {
+    createGracefulShutdown,
+    createHealthHandler,
+    createReadinessHandler,
+} from './utils/appLifecycle.js';
+import { createApiAccessHelpers } from './utils/apiAccess.js';
+import { extract_html_conent, extract_html_conent_standard } from './utils/htmlContent.js';
+import { deployStaticZip } from './utils/staticZipDeployment.js';
+import { createDeploymentHandler } from './utils/deploymentRoute.js';
+import { calc_ba_zi, calc_zi_wei, points } from './utils/bazi.js';
+import netdiskapi from './utils/netdiskapi.js';
+import tool from './utils/tool.js';
+import * as aimlapi from './utils/ThirdParrtyApi/aimlapi.js';
+import * as lemonfoxai from './utils/ThirdParrtyApi/lemonfoxai.js';
+import evolink from './utils/ThirdParrtyApi/evolink.ai.js';
+import coze from './utils/ThirdParrtyApi/coze.js';
+import cozecom from './utils/ThirdParrtyApi/cozecom.js';
+import browserless, { getQingGuoProxy, Webshare_PROXY_PASS, Webshare_PROXY_USER } from './utils/ThirdParrtyApi/browserless.js';
+import CloudFlareApi from './utils/ThirdParrtyApi/cloudflare.js';
+import feishu from './utils/ThirdParrtyApi/feishu.js';
+import tencentapi from './utils/ThirdParrtyApi/tencentapi.js';
+import firecrawlTool from './utils/ThirdParrtyApi/firecrawl.js';
+
+attachAxiosRateLimitLogger(axios);
 
 const app = express();
 const port = 3000;
 const environment = process.env.NODE_ENV || 'development';
+const globalBodyLimit = process.env.REQUEST_BODY_LIMIT || '500mb';
+const downloadsDir = path.resolve(path.join(__dirname, 'downloads'));
 
-app.use(express.json())
-app.use(express.text())
+app.use(express.json({ limit: globalBodyLimit }))
+app.use(express.text({ limit: globalBodyLimit }))
+
+app.get('/healthz', createHealthHandler());
+app.get('/readyz', createReadinessHandler({ redis }));
+
+app.use((req, res, next) => {
+    const startTime = Date.now();
+    const requestPath = req.originalUrl || req.url;
+    const method = req.method;
+
+    res.on('finish', () => {
+        const durationMs = Date.now() - startTime;
+        logHttpRequest({
+            method,
+            path: requestPath,
+            status: res.statusCode,
+            durationMs,
+            ip: req.ip,
+        });
+    });
+
+    next();
+})
+
+app.use(navigationRoutes)
 
 // 设置模板引擎配置 (必须在路由之前)
 app.set('view engine', 'ejs')
@@ -27,55 +83,35 @@ app.set('views', path.join(__dirname, 'views'))
 const proxyUrl = `http://${Webshare_PROXY_USER}:${Webshare_PROXY_PASS}@p.webshare.io:80`;
 const agent = new HttpsProxyAgent(proxyUrl);
 
-app.get('/', (req, res) => {
-    res.send('Hello World!')
-})
-app.get('/limit', (req, res) => {
-    res.send('达到用量限制，获取更多使用次数，请联系作者购买API Key，微信：xiaowu_azt')
-})
-app.get('/video', (req, res) => {
-
-    // Then in the /video route handler:
-    res.render('video', {
-        title: 'Video Page',
-        message: 'This is a simple video page template.',
-        videoUrl: "https://rr5---sn-oguesn6s.googlevideo.com/videoplayback?expire=1750889534&ei=3h9caKX5JoWtvcAPron58Ak&ip=43.163.224.99&id=o-AOc5_gHFhTV_NSZeu1ESoiaRLV6eYToR0a0wrIoUvNk3&itag=18&source=youtube&requiressl=yes&xpc=EgVo2aDSNQ%3D%3D&met=1750867934%2C&mh=Gx&mm=31%2C26&mn=sn-oguesn6s%2Csn-npoldn76&ms=au%2Conr&mv=m&mvi=5&pl=19&rms=au%2Cau&initcwndbps=823750&siu=1&bui=AY1jyLNcjqSo0Di3dmWLP4LgTPCokoRh-S_p9H71i1KoocQixuWucU0l2fJlOS0AnHWf_-dfrg&spc=l3OVKdVizwBRFpykXVrN6s6ej09s7k1yQJXB_TfOCsJ8L72MjiMIFHnbEtf0d_rw3L08-qs0xuIFZkKDmg0LdQ&vprv=1&svpuc=1&mime=video%2Fmp4&ns=eArLBwbrvTSbhx3azAiLoHQQ&rqh=1&cnr=14&ratebypass=yes&dur=56.331&lmt=1728511369250850&mt=1750867532&fvip=1&fexp=51355912&c=WEB&sefc=1&txp=1218224&n=JFmffu_x5sZiuQ&sparams=expire%2Cei%2Cip%2Cid%2Citag%2Csource%2Crequiressl%2Cxpc%2Csiu%2Cbui%2Cspc%2Cvprv%2Csvpuc%2Cmime%2Cns%2Crqh%2Ccnr%2Cratebypass%2Cdur%2Clmt&lsparams=met%2Cmh%2Cmm%2Cmn%2Cms%2Cmv%2Cmvi%2Cpl%2Crms%2Cinitcwndbps&lsig=APaTxxMwRgIhAIvNhcLbuGZg7-8s_gMuNI_ubSywGqBU5DcF8rFCADwaAiEAo134M2uWJHtLvhwgefh4T77MX3xXty4SQPF24rfmFo8%3D&sig=AJfQdSswRAIgUdh9vNxNOgVK26lXWrolrgxKicL8hhcMaLPsVtEnfx4CIEQ7UqtA8Wt-84-0m9xaGJTewgKiX6uKQopAuYeVDOP0"
-    })
-})
-
-app.get('/cozechatsdk', (req, res) => {
-
-    // Then in the /video route handler:
-    res.render('cozechatsdk', {
-        title: 'Video Page',
-        message: 'This is a simple video page template.',
-        videoUrl: "https://rr5---sn-oguesn6s.googlevideo.com/videoplayback?expire=1750889534&ei=3h9caKX5JoWtvcAPron58Ak&ip=43.163.224.99&id=o-AOc5_gHFhTV_NSZeu1ESoiaRLV6eYToR0a0wrIoUvNk3&itag=18&source=youtube&requiressl=yes&xpc=EgVo2aDSNQ%3D%3D&met=1750867934%2C&mh=Gx&mm=31%2C26&mn=sn-oguesn6s%2Csn-npoldn76&ms=au%2Conr&mv=m&mvi=5&pl=19&rms=au%2Cau&initcwndbps=823750&siu=1&bui=AY1jyLNcjqSo0Di3dmWLP4LgTPCokoRh-S_p9H71i1KoocQixuWucU0l2fJlOS0AnHWf_-dfrg&spc=l3OVKdVizwBRFpykXVrN6s6ej09s7k1yQJXB_TfOCsJ8L72MjiMIFHnbEtf0d_rw3L08-qs0xuIFZkKDmg0LdQ&vprv=1&svpuc=1&mime=video%2Fmp4&ns=eArLBwbrvTSbhx3azAiLoHQQ&rqh=1&cnr=14&ratebypass=yes&dur=56.331&lmt=1728511369250850&mt=1750867532&fvip=1&fexp=51355912&c=WEB&sefc=1&txp=1218224&n=JFmffu_x5sZiuQ&sparams=expire%2Cei%2Cip%2Cid%2Citag%2Csource%2Crequiressl%2Cxpc%2Csiu%2Cbui%2Cspc%2Cvprv%2Csvpuc%2Cmime%2Cns%2Crqh%2Ccnr%2Cratebypass%2Cdur%2Clmt&lsparams=met%2Cmh%2Cmm%2Cmn%2Cms%2Cmv%2Cmvi%2Cpl%2Crms%2Cinitcwndbps&lsig=APaTxxMwRgIhAIvNhcLbuGZg7-8s_gMuNI_ubSywGqBU5DcF8rFCADwaAiEAo134M2uWJHtLvhwgefh4T77MX3xXty4SQPF24rfmFo8%3D&sig=AJfQdSswRAIgUdh9vNxNOgVK26lXWrolrgxKicL8hhcMaLPsVtEnfx4CIEQ7UqtA8Wt-84-0m9xaGJTewgKiX6uKQopAuYeVDOP0"
-    })
-})
-
 import redis from './utils/redisClient.js';
 import search1api from './utils/search1api.js';
 import zyte from './utils/zyte.js';
-import { th_bilibili, th_youtube, th_xiaohongshu } from './utils/tikhub.io.js';
+import aitoken from './utils/ThirdParrtyApi/aitoken.js';
+import hermesAgent from './utils/ThirdParrtyApi/hermes-agent.js';
+import { th_bilibili, th_youtube, th_xiaohongshu,th_wechat_media,th_wechat_channels,th_douyin,th_tiktok,th_twitter,th_douyin_billboard } from './utils/tikhub.io.js';
+import { ve_seedream_5_0_lite, ve_web_search, ve_contents_generations_tasks } from './utils/volcengine.io.js';
 import {qweather_tool}  from './utils/qwether.js';
-// 从 Redis 中获取用户使用量
-async function getUsage(key) {
-    let value = await redis.get(key);
-    if (value === null) {
-        // 不存在，创建 key 并设置初始值
-        const now = new Date();
-        const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        const secondsSinceMidnight = Math.floor((now - midnight) / 1000);
-        await redis.set(key, 0, 'EX', secondsSinceMidnight);
-        value = 0;
-        console.log(`键 ${key} 不存在，已创建并初始化为 0`);
-    } else {
-        console.log(`键 ${key} 已存在，当前值为 ${value}`);
-    }
-    return value;
-}
+import { tv_search } from './utils/tavily.js';
 
-// 从维基百科搜索条目
+const unkeyApiId = "api_413Kmmitqy3qaDo4";
+
+const {
+    canSearchGoogle,
+    canUseHtmlParse,
+    dailyUse,
+    verifyApiAccess,
+    consumeApiCredits,
+    chargeApiCreditsAtomically,
+} = createApiAccessHelpers({
+    redis,
+    unkey,
+    commonUtils,
+    environment,
+    tool,
+    unkeyApiId,
+});
+
+
 app.post('/zh_wikipedia/search_item', async (req, res) => {
     const { item } = req.body;
 
@@ -154,41 +190,118 @@ app.post('/en_wikipedia/get_item_content', async (req, res) => {
     }
 })
 
-// 判断是否可使用 Google 搜索
-async function canSearchGoogle(key) {
-    const value = await redis.get(key);
-    if (value === null) {
-        // 不存在，创建 key 并设置初始值
-        const now = new Date();
-        const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        const secondsSinceMidnight = Math.floor((now - midnight) / 1000);
-        console.log("创建key:", key, "初始值为0，过期时间为", secondsSinceMidnight);
-        await redis.set(key, 0, 'EX', 60 * 60);
-        return true
-    }else{
-        return false;
-    }
-}
+app.post('/gpt-image-2/generate', async (req, res) => {
+    const { prompt, images, api_key } = req.body || {};
+    const cost = 3;
+    let entryImageMeta = [];
 
-// 判断是否可使用 HTML解析 功能
-async function canUseHtmlParse(key) {
-    if(environment === "online"){
-        const usage = await getUsage(key);
-        if (usage >= 3) {
-            return false
+    if (!prompt || !prompt.trim()) {
+        return res.status(400).json({ success: false, error: 'prompt 不能为空' });
+    }
+    if (images && !Array.isArray(images)) {
+        return res.status(400).json({ success: false, error: 'images 必须是数组' });
+    }
+    if (!api_key || !api_key.toString().trim()) {
+        return res.status(400).json({ success: false, error: commonUtils.MESSAGE.TOKEN_EMPTY });
+    }
+
+    if (images) {
+        for (const [index, imageUrl] of images.entries()) {
+            try {
+                const parsed = new URL(imageUrl);
+                entryImageMeta.push({
+                    index: index + 1,
+                    host: parsed.host,
+                    fileName: path.basename(parsed.pathname) || '(no-name)'
+                });
+            } catch {
+                return res.status(400).json({ success: false, error: `第 ${index + 1} 个 images 不是合法 URL` });
+            }
         }
     }
-    return true;
-}
-async function dailyUse(key) {
-    const value = await redis.get(key);
-    if (value === null) {
-        await redis.set(key, 0, 'EX', 60 * 60);
-        return true
-    }else{
-        return false;
+
+    console.log('[gpt_image_2_generate] entry payload summary:', {
+        imageCount: entryImageMeta.length,
+        images: entryImageMeta,
+        hasPrompt: Boolean(prompt && prompt.trim())
+    });
+
+    const access = await verifyApiAccess({
+        apiKey: api_key,
+        freeKey: null,
+        freeCheck: async () => false,
+        requiredCredits: cost,
+        freeDeniedResponse: {
+            code: -1,
+            msg: commonUtils.MESSAGE.TOKEN_EXPIRED
+        }
+    });
+    if (!access.ok) {
+        return res.status(403).json({ success: false, error: access.response?.msg || commonUtils.MESSAGE.TOKEN_EXPIRED });
     }
-}
+
+    const charge = await chargeApiCreditsAtomically({
+        apiKey: api_key,
+        cost,
+        metadata: { action: 'gpt_image_2_generate' },
+    });
+    if (!charge.ok) {
+        return res.status(403).json({ success: false, error: commonUtils.MESSAGE.TOKEN_NO_TIMES });
+    }
+
+    const tempFiles = [];
+    try {
+        let rawResult;
+        if (images && images.length > 0) {
+            const downloaded = await Promise.all(
+                images.map((imageUrl, index) => tool.downloadImageUrlToTempFile(imageUrl, index))
+            );
+            tempFiles.push(...downloaded);
+            console.log('[gpt_image_2_generate] download summary:', {
+                downloadedCount: downloaded.length,
+                files: downloaded.map((f, i) => ({ index: i + 1, fileName: path.basename(f) }))
+            });
+
+            const imageStreams = downloaded.map((file) => fs.createReadStream(file));
+            console.log('[gpt_image_2_generate] stream summary:', {
+                streamCount: imageStreams.length,
+                files: imageStreams.map((s, i) => ({ index: i + 1, path: path.basename(s.path) }))
+            });
+            rawResult = await aitoken.gpt_image_2_edit(imageStreams, null, prompt.trim());
+        } else {
+            rawResult = await aitoken.gpt_image_2(prompt.trim());
+        }
+
+        console.log('原始接口返回结果:', rawResult);
+
+        const item = rawResult?.data?.[0] || {};
+        let savedDownloadUrl = null;
+
+        if (item.b64_json) {
+            const savedFile = await tool.saveBase64ImageToDownloads(item.b64_json, 'gpt-image-2');
+            savedDownloadUrl = `${req.protocol}://${req.get('host')}/downloads/${savedFile.fileName}`;
+        } else if (item.url) {
+            const localFilePath = await tool.downloadImageUrlToTempFile(item.url, 0);
+            const fileName = path.basename(localFilePath);
+            savedDownloadUrl = `${req.protocol}://${req.get('host')}/downloads/${fileName}`;
+        }
+
+        const finalData = savedDownloadUrl || item.url || null;
+        return res.json({
+            code: 0,
+            msg: "Success",
+            data: finalData,
+            remote_url: item.url || null,
+            download_url: savedDownloadUrl
+        });
+    } catch (error) {
+        console.error('Error in /gpt-image-2/generate:', error);
+        const apiMsg = error?.response?.data?.error?.message || error?.response?.data?.message || error.message;
+        return res.status(500).json({ success: false, error: `生成失败: ${apiMsg}` });
+    } finally {
+        await Promise.all(tempFiles.map((file) => fs.promises.unlink(file).catch(() => null)));
+    }
+});
 
 app.post('/jina_reader', async (req, res) => {
 
@@ -224,111 +337,6 @@ app.post('/jina_reader', async (req, res) => {
 })
 
 
-function htmlToQuerySelector(htmlString) {
-    // 为了保证解析正确，我们将传入的 html 包裹在 <body> 中
-    const dom = new JSDOM(`<body>${htmlString}</body>`);
-    const body = dom.window.document.body;
-  
-    let selectorParts = [];
-    let element = body.firstElementChild;
-    
-    // 遍历嵌套的每一级标签
-    while (element) {
-      let part = element.tagName.toLowerCase();
-      
-      // 如果存在 class，则添加到选择器中
-      if (element.className) {
-        // 多个 class 按空白字符拆分
-        const classes = element.className.trim().split(/\s+/);
-        classes.forEach(cls => {
-          part += `.${cls}`;
-        });
-      }
-      
-      // 对除了 class 的其他属性，添加 [attr="value"] 形式
-      Array.from(element.attributes).forEach(attr => {
-        if (attr.name === 'class') return; // 已处理
-        part += `[${attr.name}="${attr.value}"]`;
-      });
-      
-      selectorParts.push(part);
-      // 假设输入为嵌套结构，取第一个子元素继续
-      element = element.firstElementChild;
-    }
-    
-    // 拼接成一个选择器，空格表示后代选择器
-    return selectorParts.join(' ');
-}
-
-function extract_html_conent(HtmlContent,xpath,selector){
-
-    const dom = new JSDOM(HtmlContent);
-    const { document, window } = dom.window;
-
-    let result_list = [];
-
-    if (xpath) {
-        const result = document.evaluate(
-            xpath, 
-            document, 
-            null, 
-            window.XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, // 使用 window.XPathResult
-            null
-        );
-        // Iterate over the results
-        for (let i = 0; i < result.snapshotLength; i++) {
-            const element = result.snapshotItem(i);
-            result_list.push({ htmlContent: element.outerHTML });
-        }
-    } else if (selector) {
-        const domSelector = selector;
-        const parserSelector = htmlToQuerySelector(domSelector);
-        console.log(parserSelector)
-        result_list = Array.from(document.querySelectorAll(parserSelector)).map(element => {
-            return { htmlContent: element.outerHTML };
-        }); 
-    }
-
-    console.log(`提取到的内容数量: ${result_list.length}`);
-    
-    return result_list
-}
-
-//标准版：根据selector和xpath选择元素
-function extract_html_conent_standard(HtmlContent,xpath,selector){
-
-    const dom = new JSDOM(HtmlContent);
-    const { document, window } = dom.window;
-
-    let result_list = [];
-
-    if (xpath) {
-        const result = document.evaluate(
-            xpath, 
-            document, 
-            null, 
-            window.XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, // 使用 window.XPathResult
-            null
-        );
-        // Iterate over the results
-        for (let i = 0; i < result.snapshotLength; i++) {
-            const element = result.snapshotItem(i);
-            result_list.push({ htmlContent: element.outerHTML });
-        }
-    } else if (selector) {
-        // 直接用 selector 作为 CSS 选择器，无需转换
-        result_list = Array.from(document.querySelectorAll(selector)).map(element => {
-            return { htmlContent: element.outerHTML };
-        });
-    }else{
-        result_list.push({ htmlContent: HtmlContent });
-    }
-
-    console.log(`提取到的内容数量: ${result_list.length}`);
-    
-    return result_list
-}
-
 app.post('/parse_html', async (req, res) => {
     let { url, selector, xpath, api_key, actions } = req.body;
     if (!url) {
@@ -353,34 +361,19 @@ app.post('/parse_html', async (req, res) => {
     if (actions) {
         return await zyteExtract(req, res);
     }
-    const api_id = "api_413Kmmitqy3qaDo4";
-
     //免费版的key
     const free_key = "html_parser_" + req.headers['user-identity']
-    if(api_key){
-        //付费版
-        const { keyId, valid, remaining, code } = await unkey.verifyKey(api_id, api_key, 0);
-        if (!valid) {
-            return res.send({
-                code: -1,
-                msg: 'API Key 无效或已过期，请检查后重试！'
-            }); 
+    const access = await verifyApiAccess({
+        apiKey: api_key,
+        freeKey: free_key,
+        freeCheck: canUseHtmlParse,
+        freeDeniedResponse: {
+            code: -1,
+            msg: commonUtils.MESSAGE.FREE_KEY_EXPIRED_3
         }
-        if (remaining == 0) {
-            return res.send({
-                code: -1,
-                msg: 'API Key 使用次数已用完，请联系作者续费！'
-            }); 
-        }
-    }else{
-        //免费版
-        const canParse = await canUseHtmlParse(free_key);
-        if (!canParse) {
-            return res.send({
-                code: -1,
-                msg: '免费版每天限量3次，付费可以解锁更多次数，请联系作者！【B站:小吴爱折腾】'
-            }); 
-        }
+    });
+    if (!access.ok) {
+        return res.send(access.response);
     }
 
     try {
@@ -394,12 +387,15 @@ app.post('/parse_html', async (req, res) => {
 
         let msg = "";
         if (api_key) {
-            //付费版
-            const { remaining } = await unkey.verifyKey(api_id, api_key, 1, {url:url, selector:selector, xpath:xpath});
-            msg = `API Key 剩余调用次数：${remaining}`;
+            const remaining = await consumeApiCredits({
+                apiKey: api_key,
+                cost: 1,
+                metadata: tool.sanitizeUsageMetadata({ url, selector, xpath })
+            });
+            msg = `API Key 剩余积分：${remaining}`;
         }else{
             await redis.incr(free_key);//每次调用增加一次
-            msg = `今日免费使用次数：${3 - await getUsage(free_key)}`;
+            msg = `今日免费剩余积分：${3 - await tool.getUsage(free_key)}`;
         }
 
         return res.send({
@@ -416,6 +412,12 @@ app.post('/parse_html', async (req, res) => {
         })
     }
 })
+
+app.post('/deployment', createDeploymentHandler({
+    deployStaticZip,
+    downloadsDir,
+    publicBaseUrl: 'https://static.devtool.uk/static-releases',
+}))
 
 app.post('/wyy/hot_comment', async (req, res) => {
 
@@ -434,173 +436,83 @@ app.post('/wyy/hot_comment', async (req, res) => {
     
 })
 
-app.post('/openai-hub/chat/completions', async (req, res) => {
-    const { model, system_prompt, user_prompt, temperature, api_key} = req.body;
-
-    if (!model) {
-        return res.status(400).send('Invalid input: "model" is required');
-    }
-
-    if (!system_prompt && !user_prompt) {
-        return res.status(400).send('Invalid input: "system_prompt" or "user_prompt" is required');
-    }
-
-    if (!api_key) {
-        return res.status(400).send('Invalid input: "api_key" is required');
-    }
-
-    const messages = [{
-        role: 'system',
-        content: system_prompt || 'You are a helpful assistant.'
-    }, {
-        role: 'user',
-        content: user_prompt || 'Hello, how can you help me?'   
-    }];
-
-    try {
-        const response = await axios.post(
-            'https://api.openai-hub.com/v1/chat/completions',
-            {
-                model,
-                messages,
-                temperature: temperature || 0.8 // 默认值为 0.8
-            },
-            {
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${api_key}` // 替换为您的 API 密钥
-                }
-            }
-        );
-
-        res.send({
-            code: 0,
-            msg: 'Success',
-            data: response.data
-        });
-    } catch (error) {
-        console.error(`Error calling OpenAI API: ${error.message}`);
-        res.status(500).send(`Error calling OpenAI API: ${error.message}`);
-    }
-});
-
 
 app.post('/google/search/web', async (req, res) => {
     const { q, api_key} = req.body;
     // var api_id = "api_41vHKzNmXf5xx23f"; //原有的 api_id 
     var api_id = ""; 
-   
+    let final_remaining = null;
     if (!q) {
         return res.status(400).send('Invalid input: "q" is required');
     }
-
-    //免费版的key
-    const free_key = 'google_'+req.headers['user-identity']
-    if (api_key) {
-        // 验证虚拟浏览器的api_id 新key
-        const newKey = "api_413Kmmitqy3qaDo4";
-        //原有的key
-        const oldKey = "api_41vHKzNmXf5xx23f" 
-        const { keyI, valid, remaining, code } = await unkey.verifyKey(newKey, api_key, 0);
-        if(!valid){
-            api_id = oldKey
-            const { keyId, valid, remaining, code } = await unkey.verifyKey(oldKey, api_key, 0);
-             if (!valid) {
-                return res.send({
-                    code: -1,
-                    msg: 'API Key 无效或已过期，请检查后重试！'
-                }); 
-            }
-            if(remaining === 0) {
-                return res.send({
-                    code: -1,
-                    msg: 'API Key 使用次数已用完，请联系作者续费！'
-                }); 
-            }
-        }else{
-            api_id = newKey
-            if(remaining === 0) {
-                return res.send({
-                    code: -1,
-                    msg: 'API Key 使用次数已用完，请联系作者续费！'
-                }); 
-            }
+    res.setTimeout(140000, () => {
+        if (!res.headersSent) {
+            res.status(504).send({ code: -1, msg: 'Request Timeout' });
         }
-                // if (!valid) {
-        //     return res.send({
-        //         code: -1,
-        //         msg: 'API Key 无效或已过期，请检查后重试！'
-        //     }); 
-        // }
-        // if (remaining == 0) {
-        //     return res.send({
-        //         code: -1,
-        //         msg: 'API Key 使用次数已用完，请联系作者续费！'
-        //     }); 
-        // }
-       
-    }else{
-        const canSearch = await canSearchGoogle(free_key);
-        if (!canSearch) {
-            console.log(`用户 ${req.headers['user-identity']} 的免费版 Google 搜索次数已用完`);
-            return res.send({
-                code: 0,
-                msg: '为了保证付费用户的使用体验，免费用户有使用频率限制，请联系作者购买api_key！【B站:小吴爱折腾】',
-                data: [{
-                    'title': '免费用户有频率限制，1小时内使用1次，付费购买api_key，请联系作者！【B站:小吴爱折腾】',
-                    'link': 'https://space.bilibili.com/396762480',
-                    'snippet': '免费用户有频率限制，1小时内使用1次，付费购买api_key，请联系作者！【B站:小吴爱折腾】'
-                }]
-            }); 
-        }
-    }
-   
-    // search1api.search(q).then(async (data) => {
-    //     let msg = "";
-    //     if (api_key) {
-    //         //付费版
-    //         const { remaining } = await unkey.verifyKey(api_id, api_key, 1);
-    //         msg = `API Key 剩余调用次数：${remaining}`;
-    //     }else{
-    //         msg = `今日免费使用次数用完，付费购买API KEY可解锁更多次数，请联系作者！【B站:小吴爱折腾】`;
-    //     }
-    //     return res.send({
-    //         code: 0,
-    //         msg: msg,
-    //         data: data.results
-    //     });
-    // })
-
+    });
     try {
-        const html = await browserless.google_search(q)
-        const dom = new JSDOM(html);
-        const { document, window } = dom.window;
-        const selector = "div.gsc-result"
-        const result_list = Array.from(document.querySelectorAll(selector)).map(element => {
-            const a = element.querySelector('a.gs-title');
-            const div = element.querySelector('div.gs-snippet');
-            return {
-                snippet: div ? div.textContent.trim() : null,
-                link: a ? a.href : null,
-                title: a ? a.textContent.trim() : null
-            };
-        }).filter(item => item.link !== null); // 过滤掉不符合要求的项
+        // --- 逻辑分流：付费 Key 验证 vs 免费限流 ---
+        if (api_key) {
+            const NEW_KEY_ID = "api_413Kmmitqy3qaDo4";
+            const OLD_KEY_ID = "api_41vHKzNmXf5xx23f";
 
+            // 尝试新 Key
+            let check = await unkey.verifyKey(NEW_KEY_ID, api_key, 0);
+            api_id = NEW_KEY_ID;
+            // 如果新 Key 无效，尝试旧 Key
+            if (!check.valid) {
+                check = await unkey.verifyKey(OLD_KEY_ID, api_key, 0);
+                api_id = OLD_KEY_ID;
+            }
+            // 最终校验结果处理
+            if (!check.valid) {
+                return res.send({ code: -1, msg: commonUtils.MESSAGE.TOKEN_EXPIRED });
+            }
+            if (check.remaining <= 0) {
+                return res.send({ code: -1, msg: commonUtils.MESSAGE.TOKEN_NO_TIMES });
+            }
+            final_remaining = check.remaining;
+        }else{
+            // 免费版逻辑
+            const userIdent = req.headers['user-identity'] ? `${req.ip}_${req.headers['user-identity']}` : req.ip;
+            const free_key = 'google_' + userIdent;
+            const canSearch = await canSearchGoogle(free_key);
+            if (!canSearch) {
+                if (req.headers['user-identity'] !== 'c4ca4238a0b923820dcc509a6f75849b') {
+                    console.log(`用户 ${req.headers['user-identity']} 的免费版 Google 搜索次数已用完`);
+                }
+                return res.send({
+                    code: 0,
+                    msg: "为了保证付费用户的使用体验，免费用户有使用频率限制。详情：https://devtool.uk/plugin",
+                    data: [{
+                        'title': commonUtils.MESSAGE.FREE_API_HOUR_USE_LIMIT,
+                        'link': commonUtils.MESSAGE.HELP_LINK,
+                        'snippet': commonUtils.MESSAGE.FREE_API_HOUR_USE_LIMIT
+                    }]
+                }); 
+            }
+        }
 
-        let msg = '为了保证付费用户的使用体验，对免费用户进行了访问频率限制，购买API_KEY，联系作者【B站:小吴爱折腾】';
+        const searchData = await search1api.search(q);
+        const result_list = Array.isArray(searchData?.results) ? searchData.results : [];
+
+        let msg = '';
         if (api_key) {
             //付费版
             const { remaining } = await unkey.verifyKey(api_id, api_key, 1);
-            msg = `API Key 剩余调用次数：${remaining}`;
+            msg = `API Key 剩余积分：${remaining}`;
         }
-
-        return res.send({
-            code: 0,
-            msg: msg,
-            data: result_list
-        });
+        if (!res.headersSent) {
+            await redis.incr('google_search_requests');
+            return res.send({
+                code: 0,
+                msg: msg,
+                data: result_list
+            });
+        }
     } catch (err) {
         console.error(`Error searching Google: ${err.message}`);
+        if(!res.headersSent){
         return res.send({
             code: -1,
             msg: 'failure',
@@ -611,9 +523,11 @@ app.post('/google/search/web', async (req, res) => {
             }]
         });
     }
-
-
+    }
 })
+
+// Tavily 智能搜索 API
+app.post('/tavily/search', tv_search.search.bind(tv_search));
 
 // zyte解析网页内容
 async function zyteExtract(req, res) {
@@ -628,35 +542,20 @@ async function zyteExtract(req, res) {
         screenshot = false;
     }
 
-    //unkey的api_id
-    const unkey_api_id = "api_413Kmmitqy3qaDo4";
     //免费版的redis_key，用于限制用户的使用次数
     const free_key = "html_parser_" + req.headers['user-identity']
-    if(api_key){
-        //付费版
-        const { keyId, valid, remaining, code } = await unkey.verifyKey(unkey_api_id, api_key, 0);
-        if (!valid) {
-            return res.send({
-                code: -1,
-                msg: 'API Key 无效或已过期，请检查后重试！'
-            }); 
+    const access = await verifyApiAccess({
+        apiKey: api_key,
+        freeKey: free_key,
+        freeCheck: canUseHtmlParse,
+        freeDeniedResponse: {
+            code: -1,
+            msg: commonUtils.MESSAGE.FREE_KEY_EXPIRED_3,
+            data: [{ htmlContent: commonUtils.MESSAGE.FREE_KEY_EXPIRED_3 }]
         }
-        if (remaining == 0) {
-            return res.send({
-                code: -1,
-                msg: 'API Key 使用次数已用完，请联系作者续费！'
-            }); 
-        }
-    }else{
-        //免费版
-        const canParse = await canUseHtmlParse(free_key);
-        if (!canParse) {
-            return res.send({
-                code: -1,
-                msg: '免费版每天限量3次，付费可以解锁更多次数，请联系作者！【B站:小吴爱折腾】',
-                data: [{ htmlContent: "免费版每天限量3次，付费可以解锁更多次数，请联系作者！【B站:小吴爱折腾】" }]
-            }); 
-        }
+    });
+    if (!access.ok) {
+        return res.send(access.response);
     }
 
     try {
@@ -708,12 +607,15 @@ async function zyteExtract(req, res) {
         }
 
         if (api_key) {
-            //付费版
-            const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
-            msg += ` API Key 剩余调用次数：${remaining}`;
+            const remaining = await consumeApiCredits({
+                apiKey: api_key,
+                cost: 1,
+                metadata: tool.sanitizeUsageMetadata({ url, selector, xpath })
+            });
+            msg += ` API Key 剩余积分：${remaining}`;
         }else{
             await redis.incr(free_key);//每次调用增加一次
-            msg = `今日免费使用次数：${3 - await getUsage(free_key)}`;
+            msg = `今日免费剩余积分：${3 - await tool.getUsage(free_key)}`;
         }
         
         return res.send({
@@ -743,23 +645,22 @@ app.post('/download_video', async (req, res) => {
         const free_key = "FreeVideoDownload_" + req.headers['user-identity']
         var left_time = 0
 
-        const unkey_api_id = "api_413Kmmitqy3qaDo4";
-        if (api_key) {
-            const { keyId, valid, remaining, code } = await unkey.verifyKey(unkey_api_id, api_key, 0);
-            if (!valid) {
-                return res.send({
-                    msg: 'API Key 无效或已过期，请检查后重试！'
-                }); 
+        const access = await verifyApiAccess({
+            apiKey: api_key,
+            freeKey: free_key,
+            freeCheck: tool.canUseFreeVideoDownload,
+            freeDeniedResponse: {
+                code: -1,
+                msg: commonUtils.MESSAGE.FREE_KEY_EXPIRED_1
             }
-            if (remaining == 0) {
-                return res.send({
-                    msg: 'API Key 使用次数已用完，请联系作者续费！'
-                }); 
-            }
-        }else{
+        });
+        if (!access.ok) {
+            return res.send(access.response);
+        }
+
+        if (!api_key) {
             left_time = await redis.get(free_key)
             if (!left_time || isNaN(left_time)) left_time = 1
-            if (left_time <= 0) throw new QuotaExceededError("每天免费使用1次，如果您想继续使用，联系作者付费购买更多次数【vx：xiaowu_azt】【B站：小吴爱折腾】")
         }
 
         //查询直链
@@ -781,9 +682,12 @@ app.post('/download_video', async (req, res) => {
         
         var msg = ""
         if (api_key) {
-            //付费版
-            const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
-            msg = `解析成功，API Key 剩余调用次数：${remaining}`;
+            const remaining = await consumeApiCredits({
+                apiKey: api_key,
+                cost: 1,
+                metadata: { action: 'download_video' }
+            });
+            msg = `解析成功，API Key 剩余积分：${remaining}`;
         }else{
             await redis.set(free_key, Number(left_time)-1, 'EX', tool.getSecondsToMidnight()); // 每次调用减少一次
             msg = `解析成功`;
@@ -806,42 +710,33 @@ app.post('/download_video', async (req, res) => {
 
 app.post('/get_sitemap', async (req, res) => {
     const { url, api_key } = req.body;
-    const unkey_api_id = "api_413Kmmitqy3qaDo4";
     if (!url) {
         return res.status(400).send('Invalid input: "url" is required');
     }
 
-    //==验证==
     const redis_key = req.headers['user-identity'] ? 'get_sitemap_'+req.headers['user-identity'] : 'get_sitemap';
-    const value = await redis.get(redis_key);
-    if (value === null) {
-        const now = new Date();
-        const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        const secondsSinceMidnight = Math.floor((now - midnight) / 1000);
-        await redis.set(redis_key, 0, 'EX', secondsSinceMidnight);
-    }else{
-        if(!api_key){
-            return res.send({msg: "维护成本大，每天免费使用1次，购买api_key解锁更多次数，需要请请联系作者【B站：小吴爱折腾】"})
-        }else{
-            const { keyId, valid, remaining, code } = await unkey.verifyKey(unkey_api_id, api_key, 0);
-            if (!valid) {
-                return res.send({
-                    msg: 'API Key 无效或已过期，请检查后重试！'
-                }); 
-            }
-            if (remaining == 0) {
-                return res.send({
-                    msg: 'API Key 使用次数已用完，请联系作者续费！'
-                }); 
-            }
+    const access = await verifyApiAccess({
+        apiKey: api_key,
+        freeKey: redis_key,
+        freeCheck: tool.canUseSitemapFreeOnce,
+        freeDeniedResponse: {
+            code: -1,
+            msg: commonUtils.MESSAGE.FREE_KEY_EXPIRED_1
         }
+    });
+    if (!access.ok) {
+        return res.send({ msg: access.response?.msg || commonUtils.MESSAGE.FREE_KEY_EXPIRED_1 });
     }
     
     const sitemap = await search1api.sitemap(url);
     var msg = null
     if (api_key) {
-        const { remaining } = await unkey.verifyKey(unkey_api_id, api_key, 1);
-        msg = `API Key 剩余调用次数：${remaining}`;
+        const remaining = await consumeApiCredits({
+            apiKey: api_key,
+            cost: 1,
+            metadata: { action: 'get_sitemap' }
+        });
+        msg = `API Key 剩余积分：${remaining}`;
     }
     return res.send({
         code: 0,
@@ -849,6 +744,8 @@ app.post('/get_sitemap', async (req, res) => {
         data: sitemap
     });
 })
+
+app.post('/crawl', th_wechat_media.fetch_mp_article_detail_html.bind(th_wechat_media));
 
 //生成zyte点击元素的代码
 app.post('/web/click', async (req, res) => {
@@ -861,6 +758,7 @@ app.post('/web/click', async (req, res) => {
         msg: 'Success',
         data: zyte.gen_click_code(type, value)
     });
+
 })
 
 //生成zyte等待元素出现的代码
@@ -878,7 +776,7 @@ app.post('/web/waitForSelector', async (req, res) => {
 
 //zyte等待
 app.post('/web/waitForTimeout', async (req, res) => {
-const { timeout } = req.body;
+    const { timeout } = req.body;
     if (!timeout) {
         return res.status(400).send('Invalid input: "timeout" are required');
     }
@@ -903,76 +801,105 @@ app.post('/web/inputText', async (req, res) => {
 });
 
 app.post('/bilibili/subtitle', th_bilibili.fetch_one_video_v2);
+app.post('/bilibili/fetch_user_post_videos', th_bilibili.fetch_user_post_videos);
+app.post('/bilibili/fetch_video_comments', th_bilibili.fetch_video_comments);
+app.post('/volcengine/seedream/5.0-lite/generate-image', ve_seedream_5_0_lite.generate_image);
+app.post('/volcengine/web-search', ve_web_search.web_search);
+app.post('/volcengine/contents/generations/tasks', ve_contents_generations_tasks.create_task);
+app.get('/volcengine/contents/generations/tasks/:task_id', ve_contents_generations_tasks.get_task);
+app.post('/youtube/get_channel_videos_v2', th_youtube.get_channel_videos_v2);
 app.post('/xiaohongshu/home_notes', th_xiaohongshu.fetch_home_notes);
 app.post('/xiaohongshu/search_notes_v2', th_xiaohongshu.search_notes_v2);
 app.post('/xiaohongshu/get_note_info_v1', th_xiaohongshu.get_note_info_v1);
+app.post('/wechat_search/v2/fetch_search', th_wechat_media.fetch_universal_search);
+// 通过公众号用户id获取文章
+app.post('/wx_gzh/get_user_articles', th_wechat_media.get_wechat_mp_article_list);
+
+// 搜索微信公众号文章
+app.post('/wx_gzh/fetch_search_article', th_wechat_media.fetch_search_article);
+
+//抖音获取用户主页作品数据
+app.post('/douyin/fetch_user_post_videos', th_douyin.fetch_user_post_videos);
+
+//抖音获取用户主页作品数据（V3原始结果）
+app.post('/douyin/fetch_user_post_videos_v3', th_douyin.fetch_user_post_videos_v3);
+
+//抖音综合搜索
+app.post('/douyin/fetch_general_search_v1', th_douyin.fetch_general_search_v1);
+
+//抖音视频搜索
+app.post('/douyin/fetch_video_search_v2', th_douyin.fetch_video_search_v2);
+
+//抖音综合搜索
+app.post('/douyin/comments', th_douyin.fetch_video_comments);
+
+//抖音上升热点榜
+app.post('/douyin/billboard/fetch_hot_rise_list', th_douyin_billboard.fetch_hot_rise_list);
+
+//抖音同城热点榜
+app.post('/douyin/billboard/fetch_hot_city_list', th_douyin_billboard.fetch_hot_city_list);
+
+//TikTok 通过作品ID获取评论
+app.post('/tiktok/fetch_post_comment', th_tiktok.fetch_post_comment);
+
+//TikTok 获取指定用户信息
+app.post('/tiktok/handler_user_profile', th_tiktok.handler_user_profile);
+app.get('/tiktok/handler_user_profile', th_tiktok.handler_user_profile);
+
+//TikTok 获取用户主页作品数据 V3
+app.post('/tiktok/fetch_user_post_videos_v3', th_tiktok.fetch_user_post_videos_v3);
+app.get('/tiktok/fetch_user_post_videos_v3', th_tiktok.fetch_user_post_videos_v3);
+
+//Twitter 获取单个推文详情
+app.post('/twitter/fetch_tweet_detail', th_twitter.fetch_tweet_detail);
+
+//Twitter 搜索
+app.post('/twitter/fetch_search_timeline', th_twitter.fetch_search_timeline);
+
+
+// // 获取公众号文章详情JSON
+// app.post('/wx_gzh/fetch_mp_article_detail_json', th_wechat_media.fetch_mp_article_detail_json);
+//
+// // 获取公众号文章详情html
+// app.post('/wx_gzh/fetch_mp_article_detail_html', th_wechat_media.fetch_mp_article_detail_html);
+//
+// // 获取公众号文章阅读量
+// app.post('/wx_gzh/fetch_mp_article_read_count', th_wechat_media.fetch_mp_article_read_count);
+//
+// // 获取微信公众号文章评论列表
+// app.post('/wx_gzh/fetch_mp_article_comment_list', th_wechat_media.fetch_mp_article_comment_list);
+//
+// // 获取微信公众号长链接转短链接
+// app.post('/wx_gzh/mp_url_long2short', th_wechat_media.mp_url_long2short);
+//
+// // 微信视频号搜索
+// app.post('/wx_sph/search_videos_by_keyword', th_wechat_channels.search_videos_by_keyword);
+//
+// //微信视频号视频详情
+// app.post('/wx_sph/fetch_video_detail', th_wechat_channels.fetch_video_detail);
+//
+// //微信视频号主页
+// app.post('/wx_sph/fetch_home_page', th_wechat_channels.fetch_home_page);
+//
+// //微信视频号热门话题
+// app.post('/wx_sph/fetch_hot_words', th_wechat_channels.fetch_hot_words);
+
+
 app.post("/qweather/history_weather",qweather_tool.get_history_weather)
 
 app.post("/qweather/city_weather_code",qweather_tool.get_city_weather_code)
+// 计算八字
+app.post('/bazi/calc_ba_zi', calc_ba_zi.calc_ba_zi)
 
-app.post('/redis/get_string', async (req, res) => {
-    const { key } = req.body;
-    if (!key) {
-        return res.status(400).send('Invalid input: "key" is required');
-    }
-    const value = await redis.get(key);
-    return res.send({
-        code: 0,
-        msg: 'Success',
-        data: value
-    });
-})
-app.post('/redis/set_string', async (req, res) => {
-    const { key, value } = req.body;
-    if (!key || !value) {
-        return res.status(400).send('Invalid input: "key" and "value" is required');
-    }
-    await redis.set(key, value, 'EX', 60*60*24);
-    return res.send({
-        code: 0,
-        msg: 'Success',
-        data: value
-    });
-})
-app.post('/redis/keys', async (req, res) => {
-    const { pattern } = req.body;
-    if (!pattern) {
-        return res.status(400).send('Invalid input: "pattern" is required');
-    }
-    const keys = await redis.keys(pattern);
-    return res.send({
-        code: 0,
-        msg: 'Success',
-        data: keys
-    });
-})
+// 计算紫薇
+app.post('/bazi/calc_astro', calc_zi_wei.calc_zi_wei)
 
-app.post('/redis/del_keys', async (req, res) => {
-    const { pattern } = req.body;
-    if (!pattern) {
-        return res.status(400).send('Invalid input: "pattern" is required');
-    }
-    const keys = await redis.keys(pattern);
-    if (keys.length > 0) {
-        await Promise.all(keys.map(key => redis.del(key)));
-    }
-
-    return res.send({
-        code: 0,
-        msg: 'Success',
-        data: keys
-    });
-})
-
-
-app.post('/redis/del', async (req, res) => {
-    const { key } = req.body;
-    await redis.del(key)
-    return res.send({
-        code: 0,
-        msg: 'Success'
-    });
-})
+// 计算积分
+app.post('/bazi/points', points.calc_points)
+/**
+ * api调用coze工作流
+ */
+app.post("/workflow/run",coze.workflow_run)
 
 function extract_pdf_url(url) {
     try {
@@ -990,7 +917,35 @@ function extract_pdf_url(url) {
         }
 }
 
+async function validateUrl(url) {
+    // 1. 基础格式校验
+    let parsed;
+    try {
+        parsed = new URL(url);
+    } catch {
+        throw new Error(`URL 格式无效: ${url}`);
+    }
+    if (!['http:', 'https:'].includes(parsed.protocol)) {
+        throw new Error(`URL 协议不支持，仅允许 http/https: ${url}`);
+    }
+    // 2. 可访问性校验（HEAD 请求，超时 10s）
+    try {
+        await axios.head(url, { timeout: 10000, maxRedirects: 5 });
+    } catch (err) {
+        const status = err.response?.status;
+        if (status) {
+            throw new Error(`URL 不可访问，HTTP 状态码: ${status}`);
+        }
+        throw new Error(`URL 不可访问: ${err.message}`);
+    }
+}
+
 async function downloadPdf(url, path) {
+    if (!url || typeof url !== 'string') {
+        throw new Error(`Invalid PDF URL: ${JSON.stringify(url)}`);
+    }
+    // 基础校验 + 可访问性检测
+    await validateUrl(url);
     // 检查是否是viewer URL
     if (url.includes('viewer.html')) {
         const pdfUrl = extract_pdf_url(url);
@@ -1019,8 +974,8 @@ async function downloadPdf(url, path) {
 
 app.post('/pdf2img', async (req, res) => {
     const { url } = req.body;
-    if (!url) {
-        return res.status(400).send('Invalid input: "url" is required');
+    if (!url || typeof url !== 'string' || !url.startsWith('http')) {
+        return res.status(400).send('Invalid input: "url" must be a valid HTTP URL string');
     }
     const randomString = [...Array(16)].map(() => Math.random().toString(36)[2]).join('');
     await downloadPdf(url, `./downloads/${randomString}.pdf`).then(() => {
@@ -1079,22 +1034,781 @@ app.post('/download_pdf', async (req, res) => {
 
 })
 
-import netdiskapi from './utils/netdiskapi.js';
-import  tool from './utils/tool.js';
-import * as aimlapi from './utils/ThirdParrtyApi/aimlapi.js';
-import * as lemonfoxai from './utils/ThirdParrtyApi/lemonfoxai.js';
-import { QuotaExceededError } from './utils/CustomError.js';
-import coze from './utils/ThirdParrtyApi/coze.js';
-import cozecom from './utils/ThirdParrtyApi/cozecom.js';
-import browserless, { getQingGuoProxy, Webshare_PROXY_PASS, Webshare_PROXY_USER } from './utils/ThirdParrtyApi/browserless.js';
-import feishu from './utils/ThirdParrtyApi/feishu.js';
-import tencentapi from './utils/ThirdParrtyApi/tencentapi.js';
-import firecrawlTool from './utils/ThirdParrtyApi/firecrawl.js';
+
+const persistentDownloadsDir = path.resolve(path.join(downloadsDir, 'persistent'));
+const uploadChunksDir = path.resolve(path.join(downloadsDir, '.upload_chunks'));
+const fileTransferStorageMap = {
+    temp: {
+        key: 'temp',
+        label: '临时文件',
+        dir: downloadsDir,
+        publicPrefix: '/downloads',
+    },
+    persistent: {
+        key: 'persistent',
+        label: '永久文件',
+        dir: persistentDownloadsDir,
+        publicPrefix: '/downloads/persistent',
+    },
+};
+
+const sanitizeStoragePathSegment = (value = '') => {
+    const safeValue = String(value || '').trim().replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 160);
+    return safeValue || '';
+};
+
+const normalizeFileTransferStorage = (rawStorage, { allowAll = false } = {}) => {
+    const normalized = String(rawStorage || '').trim().toLowerCase();
+    if (allowAll && normalized === 'all') {
+        return 'all';
+    }
+    return normalized === 'persistent' ? 'persistent' : 'temp';
+};
+
+const getFileTransferStorageConfig = (rawStorage, options = {}) => {
+    const storageKey = normalizeFileTransferStorage(rawStorage, options);
+    if (storageKey === 'all') {
+        return null;
+    }
+    return fileTransferStorageMap[storageKey] || fileTransferStorageMap.temp;
+};
+
+const buildStorageRelativePath = (storageKey, fileName) => {
+    const safeName = sanitizeUploadFileName(fileName);
+    return storageKey === 'persistent' ? `persistent/${safeName}` : safeName;
+};
+
+const buildTrackedFileKey = (relativePath = '') => String(relativePath || '')
+    .split('/')
+    .map((part) => sanitizeStoragePathSegment(part))
+    .filter(Boolean)
+    .join('__');
+
+const getFilePublicUrl = (req, fileName, storageKey = 'temp') => {
+    const storage = getFileTransferStorageConfig(storageKey);
+    const encodedName = encodeURIComponent(sanitizeUploadFileName(fileName));
+    return `https://${req.get('host')}${storage.publicPrefix}/${encodedName}`;
+};
+
+const buildFileAccessCountKey = (relativePath) => `file_transfer:access_count:${buildTrackedFileKey(relativePath)}`;
+const buildFileAccessHourKey = (relativePath, hourId) => `file_transfer:access_hour:${buildTrackedFileKey(relativePath)}:${hourId}`;
+
+const formatHourId = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hour = String(date.getHours()).padStart(2, '0');
+    return `${year}${month}${day}${hour}`;
+};
+
+const getLast24HourIds = () => {
+    const result = [];
+    const now = new Date();
+    now.setMinutes(0, 0, 0);
+    for (let i = 23; i >= 0; i -= 1) {
+        const point = new Date(now.getTime() - i * 60 * 60 * 1000);
+        result.push(formatHourId(point));
+    }
+    return result;
+};
+
+const sanitizeUploadFileName = (rawName = '') => {
+    let decodedName = String(rawName || '').trim();
+    try {
+        decodedName = decodeURIComponent(decodedName);
+    } catch (_) {
+        decodedName = String(rawName || '').trim();
+    }
+    const baseName = path.basename(decodedName);
+    const safeName = baseName.replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 160);
+    return safeName || 'upload.bin';
+};
+
+const buildSafeUploadTarget = (fileName, rawStorage = 'temp') => {
+    const storage = getFileTransferStorageConfig(rawStorage);
+    const safeName = sanitizeUploadFileName(fileName);
+    const parsedExt = path.extname(safeName).slice(0, 16);
+    const baseName = path.basename(safeName, parsedExt).replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 80) || 'upload';
+    const ext = path.extname(safeName).slice(0, 16);
+    const uniqueFileName = `${baseName}-${Date.now()}-${crypto.randomBytes(4).toString('hex')}${ext || parsedExt}`;
+    const targetPath = path.resolve(path.join(storage.dir, uniqueFileName));
+
+    if (!targetPath.startsWith(`${storage.dir}${path.sep}`)) {
+        throw new Error('非法文件路径');
+    }
+
+    return {
+        storage: storage.key,
+        fileName: uniqueFileName,
+        filePath: targetPath,
+        relativePath: buildStorageRelativePath(storage.key, uniqueFileName),
+    };
+};
+
+const sanitizeUploadSessionId = (rawId = '') => {
+    const safeId = String(rawId || '').replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 96);
+    return safeId || '';
+};
+
+const buildChunkSessionDir = (uploadId) => {
+    const safeUploadId = sanitizeUploadSessionId(uploadId);
+    if (!safeUploadId) {
+        throw new Error('非法 uploadId');
+    }
+
+    const sessionDir = path.resolve(path.join(uploadChunksDir, safeUploadId));
+    if (!sessionDir.startsWith(`${uploadChunksDir}${path.sep}`)) {
+        throw new Error('非法分片路径');
+    }
+    return {
+        safeUploadId,
+        sessionDir,
+    };
+};
+
+const buildSafeExistingFilePath = (fileName, rawStorage = 'temp') => {
+    const storage = getFileTransferStorageConfig(rawStorage);
+    const safeName = sanitizeUploadFileName(fileName);
+    const filePath = path.resolve(path.join(storage.dir, safeName));
+
+    if (!filePath.startsWith(`${storage.dir}${path.sep}`)) {
+        throw new Error('非法文件路径');
+    }
+
+    return {
+        storage: storage.key,
+        fileName: safeName,
+        filePath,
+        relativePath: buildStorageRelativePath(storage.key, safeName),
+    };
+};
+
+const migrateFileAccessStats = async (sourceRelativePath, targetRelativePath) => {
+    if (!sourceRelativePath || !targetRelativePath || sourceRelativePath === targetRelativePath) {
+        return;
+    }
+
+    const totalSourceKey = buildFileAccessCountKey(sourceRelativePath);
+    const totalTargetKey = buildFileAccessCountKey(targetRelativePath);
+    const hourIds = getLast24HourIds();
+    const sourceHourKeys = hourIds.map((hourId) => buildFileAccessHourKey(sourceRelativePath, hourId));
+    const targetHourKeys = hourIds.map((hourId) => buildFileAccessHourKey(targetRelativePath, hourId));
+
+    const [sourceTotalRaw, targetTotalRaw, sourceHoursRaw, targetHoursRaw] = await Promise.all([
+        redis.get(totalSourceKey),
+        redis.get(totalTargetKey),
+        sourceHourKeys.length > 0 ? redis.mget(sourceHourKeys) : [],
+        targetHourKeys.length > 0 ? redis.mget(targetHourKeys) : [],
+    ]);
+
+    const sourceTotal = Number.parseInt(String(sourceTotalRaw || '0'), 10);
+    const targetTotal = Number.parseInt(String(targetTotalRaw || '0'), 10);
+    const multi = redis.multi();
+
+    multi.set(totalTargetKey, String((Number.isNaN(sourceTotal) ? 0 : sourceTotal) + (Number.isNaN(targetTotal) ? 0 : targetTotal)));
+    multi.del(totalSourceKey);
+
+    hourIds.forEach((hourId, index) => {
+        const sourceValue = Number.parseInt(String(sourceHoursRaw?.[index] || '0'), 10);
+        const targetValue = Number.parseInt(String(targetHoursRaw?.[index] || '0'), 10);
+        const merged = (Number.isNaN(sourceValue) ? 0 : sourceValue) + (Number.isNaN(targetValue) ? 0 : targetValue);
+        const targetHourKey = targetHourKeys[index];
+        const sourceHourKey = sourceHourKeys[index];
+
+        if (merged > 0) {
+            multi.set(targetHourKey, String(merged));
+            multi.expire(targetHourKey, 60 * 60 * 48);
+        }
+        multi.del(sourceHourKey);
+    });
+
+    await multi.exec();
+};
+
+const listStorageFiles = async (req, storage, searchKeyword = '') => {
+    const keyword = String(searchKeyword || '').trim().toLowerCase();
+    await fs.promises.mkdir(storage.dir, { recursive: true });
+    const entries = await fs.promises.readdir(storage.dir, { withFileTypes: true });
+    const files = [];
+
+    for (const entry of entries) {
+        if (!entry.isFile()) {
+            continue;
+        }
+
+        const fileName = entry.name;
+        if (keyword && !fileName.toLowerCase().includes(keyword)) {
+            continue;
+        }
+
+        const fullPath = path.join(storage.dir, fileName);
+        const stats = await fs.promises.stat(fullPath);
+        const createdAt = stats.birthtimeMs > 0 ? stats.birthtime : stats.mtime;
+        const relativePath = buildStorageRelativePath(storage.key, fileName);
+
+        files.push({
+            name: fileName,
+            storage: storage.key,
+            storageLabel: storage.label,
+            relativePath,
+            size: stats.size,
+            fileType: path.extname(fileName).replace('.', '').toLowerCase() || 'no_ext',
+            createdAt: createdAt.toISOString(),
+            updatedAt: stats.mtime.toISOString(),
+            url: getFilePublicUrl(req, fileName, storage.key),
+        });
+    }
+
+    return files;
+};
+
+const listDownloadFiles = async (req, searchKeyword = '', rawStorage = 'all') => {
+    const storageKey = normalizeFileTransferStorage(rawStorage, { allowAll: true });
+    const storages = storageKey === 'all'
+        ? Object.values(fileTransferStorageMap)
+        : [getFileTransferStorageConfig(storageKey)];
+    const files = [];
+
+    for (const storage of storages) {
+        const storageFiles = await listStorageFiles(req, storage, searchKeyword);
+        files.push(...storageFiles);
+    }
+
+    if (files.length === 0) {
+        return files;
+    }
+
+    const hourIds = getLast24HourIds();
+    const hourKeyCountPerFile = hourIds.length;
+
+    try {
+        const accessKeys = files.map((item) => buildFileAccessCountKey(item.relativePath));
+        const rawCounts = await redis.mget(accessKeys);
+
+        const flat24hKeys = [];
+        files.forEach((item) => {
+            hourIds.forEach((hourId) => {
+                flat24hKeys.push(buildFileAccessHourKey(item.relativePath, hourId));
+            });
+        });
+
+        const raw24hCounts = flat24hKeys.length > 0 ? await redis.mget(flat24hKeys) : [];
+
+        files.forEach((item, index) => {
+            const totalCount = Number.parseInt(String(rawCounts?.[index] || '0'), 10);
+            item.accessCount = Number.isNaN(totalCount) ? 0 : totalCount;
+
+            const start = index * hourKeyCountPerFile;
+            const end = start + hourKeyCountPerFile;
+            const hourlyCounts = raw24hCounts.slice(start, end);
+            const access24h = hourlyCounts.reduce((sum, value) => {
+                const n = Number.parseInt(String(value || '0'), 10);
+                return sum + (Number.isNaN(n) ? 0 : n);
+            }, 0);
+            item.access24h = access24h;
+        });
+    } catch (error) {
+        files.forEach((item) => {
+            item.accessCount = 0;
+            item.access24h = 0;
+        });
+        console.error('Error reading file access counts:', error.message);
+    }
+
+    return files;
+};
+
+const getLast15DaysCreatedStats = (files) => {
+    const now = new Date();
+    const counts = new Map();
+    const dayKeys = [];
+
+    for (let i = 14; i >= 0; i -= 1) {
+        const day = new Date(now);
+        day.setHours(0, 0, 0, 0);
+        day.setDate(day.getDate() - i);
+        const key = day.toISOString().slice(0, 10);
+        dayKeys.push(key);
+        counts.set(key, 0);
+    }
+
+    files.forEach((file) => {
+        const date = new Date(file.createdAt);
+        date.setHours(0, 0, 0, 0);
+        const key = date.toISOString().slice(0, 10);
+        if (counts.has(key)) {
+            counts.set(key, (counts.get(key) || 0) + 1);
+        }
+    });
+
+    return dayKeys.map((date) => ({
+        date,
+        count: counts.get(date) || 0,
+    }));
+};
+
+const getTypeStats = (files) => {
+    const map = new Map();
+    files.forEach((file) => {
+        const type = file.fileType || 'no_ext';
+        map.set(type, (map.get(type) || 0) + 1);
+    });
+
+    return Array.from(map.entries())
+        .map(([type, count]) => ({ type, count }))
+        .sort((a, b) => b.count - a.count);
+};
+
+const sortFiles = (files, sortBy, sortOrder) => {
+    const direction = sortOrder === 'asc' ? 1 : -1;
+    const sorted = [...files];
+
+    sorted.sort((a, b) => {
+        if (sortBy === 'size') {
+            return (a.size - b.size) * direction;
+        }
+        if (sortBy === 'name') {
+            return a.name.localeCompare(b.name, 'zh-Hans-CN') * direction;
+        }
+        if (sortBy === 'createdAt') {
+            return (new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()) * direction;
+        }
+        return (new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime()) * direction;
+    });
+
+    return sorted;
+};
+
+app.get('/network-dashboard/metrics', async (req, res) => {
+    try {
+        const windowMinutes = Number.parseInt(String(req.query.windowMinutes || '1440'), 10);
+        const topN = Number.parseInt(String(req.query.topN || '8'), 10);
+        const slowN = Number.parseInt(String(req.query.slowN || '10'), 10);
+        const scanLimit = Number.parseInt(String(req.query.scanLimit || '5000'), 10);
+
+        const data = await getNetworkDashboardMetrics({
+            windowMinutes,
+            topN,
+            slowN,
+            scanLimit,
+            tag: String(req.query.tag || ''),
+            level: String(req.query.level || ''),
+            method: String(req.query.method || ''),
+            pathContains: String(req.query.pathContains || ''),
+        });
+
+        return res.send({
+            code: 0,
+            msg: 'success',
+            data,
+        });
+    } catch (error) {
+        console.error('Error in /network-dashboard/metrics:', error.message);
+        return res.status(500).send({
+            code: -1,
+            msg: '网络日志分析失败',
+        });
+    }
+});
+
+app.get('/file-transfer/files', async (req, res) => {
+    try {
+        await fs.promises.mkdir(downloadsDir, { recursive: true });
+        await fs.promises.mkdir(persistentDownloadsDir, { recursive: true });
+        const storage = normalizeFileTransferStorage(req.query.storage, { allowAll: true });
+        const allFiles = await listDownloadFiles(req, req.query.search, storage);
+        const fileType = String(req.query.fileType || 'all').trim().toLowerCase();
+        const sortBy = ['updatedAt', 'size', 'name', 'createdAt'].includes(String(req.query.sortBy))
+            ? String(req.query.sortBy)
+            : 'updatedAt';
+        const sortOrder = String(req.query.sortOrder || 'desc').toLowerCase() === 'asc' ? 'asc' : 'desc';
+
+        const filteredFiles = fileType === 'all'
+            ? allFiles
+            : allFiles.filter((item) => item.fileType === fileType);
+
+        const files = sortFiles(filteredFiles, sortBy, sortOrder);
+        const parsedPage = Number.parseInt(String(req.query.page || '1'), 10);
+        const parsedPageSize = Number.parseInt(String(req.query.pageSize || '20'), 10);
+        const page = Number.isNaN(parsedPage) || parsedPage < 1 ? 1 : parsedPage;
+        const pageSize = Number.isNaN(parsedPageSize) || parsedPageSize < 1
+            ? 20
+            : Math.min(parsedPageSize, 100);
+        const total = files.length;
+        const topNParsed = Number.parseInt(String(req.query.topN || '8'), 10);
+        const topN = Number.isNaN(topNParsed) || topNParsed < 1 ? 8 : Math.min(topNParsed, 20);
+        const totalAccess24h = allFiles.reduce((sum, item) => sum + Number(item.access24h || 0), 0);
+        const hotTopN = [...allFiles]
+            .sort((a, b) => {
+                const byTotal = Number(b.accessCount || 0) - Number(a.accessCount || 0);
+                if (byTotal !== 0) {
+                    return byTotal;
+                }
+                return Number(b.access24h || 0) - Number(a.access24h || 0);
+            })
+            .slice(0, topN)
+            .map((item) => ({
+                name: item.name,
+                fileType: item.fileType,
+                size: item.size,
+                accessCount: item.accessCount || 0,
+                access24h: item.access24h || 0,
+                url: item.url,
+                updatedAt: item.updatedAt,
+            }));
+        const recent15Days = getLast15DaysCreatedStats(allFiles);
+        const totalPages = Math.max(1, Math.ceil(total / pageSize));
+        const safePage = Math.min(page, totalPages);
+        const startIndex = (safePage - 1) * pageSize;
+        const pagedFiles = files.slice(startIndex, startIndex + pageSize);
+
+        return res.send({
+            code: 0,
+            msg: 'success',
+            data: {
+                total,
+                page: safePage,
+                pageSize,
+                totalPages,
+                files: pagedFiles,
+                storage,
+                fileType,
+                sortBy,
+                sortOrder,
+                typeStats: getTypeStats(allFiles),
+                recent15Days,
+                recent30Days: recent15Days,
+                accessStats: {
+                    totalAccess24h,
+                },
+                hotTopN,
+            },
+        });
+    } catch (error) {
+        console.error('Error listing files in /file-transfer/files:', error.message);
+        return res.status(500).send({
+            code: -1,
+            msg: '文件列表获取失败',
+        });
+    }
+});
+
+app.delete('/file-transfer/file', async (req, res) => {
+    const rawName = req.query.filename || req.body?.filename;
+    const storage = normalizeFileTransferStorage(req.query.storage || req.body?.storage);
+    if (!rawName) {
+        return res.status(400).send({
+            code: -1,
+            msg: 'filename 不能为空',
+        });
+    }
+
+    try {
+        const { fileName, filePath } = buildSafeExistingFilePath(rawName, storage);
+        await fs.promises.access(filePath, fs.constants.F_OK);
+        await fs.promises.unlink(filePath);
+        return res.send({
+            code: 0,
+            msg: 'success',
+            data: { name: fileName, storage },
+        });
+    } catch (error) {
+        if (error.code === 'ENOENT') {
+            return res.status(404).send({
+                code: -1,
+                msg: '文件不存在',
+            });
+        }
+        console.error('Error deleting file in /file-transfer/file:', error.message);
+        return res.status(500).send({
+            code: -1,
+            msg: '文件删除失败',
+        });
+    }
+});
+
+app.post('/file-transfer/file/promote', async (req, res) => {
+    const rawName = req.query.filename || req.body?.filename;
+    const sourceStorage = normalizeFileTransferStorage(req.query.storage || req.body?.storage);
+
+    if (!rawName) {
+        return res.status(400).send({
+            code: -1,
+            msg: 'filename 不能为空',
+        });
+    }
+
+    if (sourceStorage !== 'temp') {
+        return res.status(400).send({
+            code: -1,
+            msg: '仅支持将临时文件转为永久文件',
+        });
+    }
+
+    try {
+        const source = buildSafeExistingFilePath(rawName, 'temp');
+        const target = buildSafeExistingFilePath(rawName, 'persistent');
+
+        await fs.promises.access(source.filePath, fs.constants.F_OK);
+        await fs.promises.mkdir(persistentDownloadsDir, { recursive: true });
+
+        try {
+            await fs.promises.access(target.filePath, fs.constants.F_OK);
+            return res.status(409).send({
+                code: -1,
+                msg: '永久目录已存在同名文件',
+            });
+        } catch (targetError) {
+            if (targetError.code !== 'ENOENT') {
+                throw targetError;
+            }
+        }
+
+        await fs.promises.rename(source.filePath, target.filePath);
+        try {
+            await migrateFileAccessStats(source.relativePath, target.relativePath);
+        } catch (redisError) {
+            console.error('Error migrating file access stats during promote:', redisError.message);
+        }
+
+        const stats = await fs.promises.stat(target.filePath);
+        const createdAt = stats.birthtimeMs > 0 ? stats.birthtime : stats.mtime;
+
+        return res.send({
+            code: 0,
+            msg: 'success',
+            data: {
+                name: target.fileName,
+                storage: 'persistent',
+                relativePath: target.relativePath,
+                size: stats.size,
+                createdAt: createdAt.toISOString(),
+                updatedAt: stats.mtime.toISOString(),
+                url: getFilePublicUrl(req, target.fileName, 'persistent'),
+            },
+        });
+    } catch (error) {
+        if (error.code === 'ENOENT') {
+            return res.status(404).send({
+                code: -1,
+                msg: '文件不存在',
+            });
+        }
+        console.error('Error promoting file in /file-transfer/file/promote:', error.message);
+        return res.status(500).send({
+            code: -1,
+            msg: '转为永久文件失败',
+        });
+    }
+});
+
+app.post('/file-transfer/upload', express.raw({ type: '*/*', limit: globalBodyLimit }), async (req, res) => {
+    const contentType = String(req.headers['content-type'] || '').toLowerCase();
+    if (contentType.includes('application/json') || contentType.includes('text/plain')) {
+        return res.status(400).send({
+            code: -1,
+            msg: '请使用二进制上传方式',
+        });
+    }
+
+    if (!Buffer.isBuffer(req.body) || req.body.length === 0) {
+        return res.status(400).send({
+            code: -1,
+            msg: '文件内容不能为空',
+        });
+    }
+
+    const rawFileName = req.query.filename || req.headers['x-file-name'] || 'upload.bin';
+    const storage = normalizeFileTransferStorage(req.query.storage);
+
+    try {
+        const storageConfig = getFileTransferStorageConfig(storage);
+        await fs.promises.mkdir(storageConfig.dir, { recursive: true });
+        const { fileName, filePath, relativePath } = buildSafeUploadTarget(rawFileName, storage);
+        await fs.promises.writeFile(filePath, req.body);
+        const stats = await fs.promises.stat(filePath);
+
+        return res.send({
+            code: 0,
+            msg: 'success',
+            data: {
+                name: fileName,
+                storage,
+                relativePath,
+                size: stats.size,
+                updatedAt: stats.mtime.toISOString(),
+                url: getFilePublicUrl(req, fileName, storage),
+            },
+        });
+    } catch (error) {
+        console.error('Error uploading file in /file-transfer/upload:', error.message);
+        return res.status(500).send({
+            code: -1,
+            msg: '文件上传失败',
+        });
+    }
+});
+
+app.post('/file-transfer/upload/chunk', express.raw({ type: '*/*', limit: globalBodyLimit }), async (req, res) => {
+    const uploadId = req.query.uploadId;
+    const rawFileName = req.query.filename || req.headers['x-file-name'] || 'upload.bin';
+    const storage = normalizeFileTransferStorage(req.query.storage);
+    const rawIndex = Number.parseInt(String(req.query.index || '0'), 10);
+    const rawTotalChunks = Number.parseInt(String(req.query.totalChunks || '0'), 10);
+
+    if (!Buffer.isBuffer(req.body) || req.body.length === 0) {
+        return res.status(400).send({
+            code: -1,
+            msg: '分片内容不能为空',
+        });
+    }
+
+    if (Number.isNaN(rawIndex) || rawIndex < 0 || Number.isNaN(rawTotalChunks) || rawTotalChunks < 1) {
+        return res.status(400).send({
+            code: -1,
+            msg: '分片参数不合法',
+        });
+    }
+
+    try {
+        await fs.promises.mkdir(uploadChunksDir, { recursive: true });
+        const { safeUploadId, sessionDir } = buildChunkSessionDir(uploadId);
+        await fs.promises.mkdir(sessionDir, { recursive: true });
+
+        const safeName = sanitizeUploadFileName(rawFileName);
+        const metaPath = path.join(sessionDir, 'meta.json');
+        const partPath = path.join(sessionDir, `${rawIndex}.part`);
+
+        await fs.promises.writeFile(
+            metaPath,
+            JSON.stringify({
+                uploadId: safeUploadId,
+                fileName: safeName,
+                storage,
+                totalChunks: rawTotalChunks,
+                updatedAt: new Date().toISOString(),
+            }),
+            'utf8',
+        );
+        await fs.promises.writeFile(partPath, req.body);
+
+        return res.send({
+            code: 0,
+            msg: 'success',
+            data: {
+                uploadId: safeUploadId,
+                index: rawIndex,
+                totalChunks: rawTotalChunks,
+                size: req.body.length,
+            },
+        });
+    } catch (error) {
+        console.error('Error uploading chunk in /file-transfer/upload/chunk:', error.message);
+        return res.status(500).send({
+            code: -1,
+            msg: '分片上传失败',
+        });
+    }
+});
+
+app.post('/file-transfer/upload/complete', async (req, res) => {
+    const uploadId = req.body?.uploadId || req.query.uploadId;
+    const rawFileName = req.body?.filename || req.query.filename || 'upload.bin';
+    const storage = normalizeFileTransferStorage(req.body?.storage || req.query.storage);
+    const parsedTotalChunks = Number.parseInt(String(req.body?.totalChunks || req.query.totalChunks || '0'), 10);
+
+    if (Number.isNaN(parsedTotalChunks) || parsedTotalChunks < 1) {
+        return res.status(400).send({
+            code: -1,
+            msg: 'totalChunks 不合法',
+        });
+    }
+
+    try {
+        const storageConfig = getFileTransferStorageConfig(storage);
+        await fs.promises.mkdir(storageConfig.dir, { recursive: true });
+        const { sessionDir } = buildChunkSessionDir(uploadId);
+        const { fileName, filePath, relativePath } = buildSafeUploadTarget(rawFileName, storage);
+
+        for (let i = 0; i < parsedTotalChunks; i += 1) {
+            const partPath = path.join(sessionDir, `${i}.part`);
+            await fs.promises.access(partPath, fs.constants.F_OK);
+        }
+
+        await fs.promises.writeFile(filePath, Buffer.alloc(0));
+        for (let i = 0; i < parsedTotalChunks; i += 1) {
+            const partPath = path.join(sessionDir, `${i}.part`);
+            const partBuffer = await fs.promises.readFile(partPath);
+            await fs.promises.appendFile(filePath, partBuffer);
+        }
+
+        await fs.promises.rm(sessionDir, { recursive: true, force: true });
+        const stats = await fs.promises.stat(filePath);
+
+        return res.send({
+            code: 0,
+            msg: 'success',
+            data: {
+                uploadId: sanitizeUploadSessionId(uploadId),
+                name: fileName,
+                storage,
+                relativePath,
+                size: stats.size,
+                updatedAt: stats.mtime.toISOString(),
+                url: getFilePublicUrl(req, fileName, storage),
+            },
+        });
+    } catch (error) {
+        console.error('Error completing upload in /file-transfer/upload/complete:', error.message);
+        return res.status(500).send({
+            code: -1,
+            msg: '分片合并失败',
+        });
+    }
+});
+
+const createFileAccessTrackMiddleware = () => (req, res, next) => {
+    const decodedPath = (() => {
+        try {
+            return decodeURIComponent(String(req.path || ''));
+        } catch (_) {
+            return String(req.path || '');
+        }
+    })();
+
+    const relativePath = String(decodedPath || '')
+        .split(/[\\/]+/)
+        .map((part) => sanitizeStoragePathSegment(part))
+        .filter(Boolean)
+        .join('/');
+    if (!relativePath) {
+        return next();
+    }
+
+    const accessKey = buildFileAccessCountKey(relativePath);
+    const hourKey = buildFileAccessHourKey(relativePath, formatHourId(new Date()));
+
+    res.on('finish', () => {
+        if (res.statusCode >= 200 && res.statusCode < 400) {
+            redis.multi()
+                .incr(accessKey)
+                .incr(hourKey)
+                .expire(hourKey, 60 * 60 * 48)
+                .exec()
+                .catch((error) => {
+                    console.error('Error incrementing file access count:', error.message);
+                });
+        }
+    });
+
+    next();
+};
 
 // 静态资源服务
 app.use('/images', express.static(path.join(__dirname, 'images')));
-app.use('/audio', express.static(path.join(__dirname, 'downloads')));
-app.use('/downloads', express.static(path.join(__dirname, 'downloads')));
+app.use('/assets', express.static(path.join(__dirname, 'assets')));
+app.use('/audio', createFileAccessTrackMiddleware(), express.static(path.join(__dirname, 'downloads')));
+app.use('/downloads', createFileAccessTrackMiddleware(), express.static(path.join(__dirname, 'downloads')));
 
 app.post('/xpan/search', netdiskapi.search)
 app.post('/xpan/get_dlink', netdiskapi.get_dlink)
@@ -1102,6 +1816,10 @@ app.post('/xpan/get_access_token', netdiskapi.get_access_token)
 app.post('/xpan/refresh_token', netdiskapi.refresh_token)
 app.post('/xpan/filemetainfo', netdiskapi.filemetainfo)
 app.get('/xpan/download', netdiskapi.download)
+
+app.post('/evolink/images/generations', evolink.generate_image);
+app.get('/evolink/tasks/:task_id', evolink.get_task_detail_handler);
+app.get('/evolink/credits', evolink.get_credits_handler);
 
 //生成重定向链接
 app.post('/tts_to_mp3', async (req, res) => {
@@ -1194,7 +1912,6 @@ app.post('/video2audio', async (req, res) => {
         const convert = await tool.video_to_audio(download.filepath)
         if (!convert.success) throw new Error(convert.error);
 
-        const protocol = req.headers['x-forwarded-proto'] || req.protocol;
         return res.send({
             "code": 0,
             "msg": "success",
@@ -1239,60 +1956,78 @@ app.post('/cozecom/linkreader', async (req, res) => {
 
 app.post('/whisper/speech-to-text', async (req, res) => {
     let {url,language,api_key,cache} = req.body
+    const webVersionHint = '可访问网页版使用字幕解析功能：https://devtool.uk/video-transcript';
     if (!url) {
          return res.status(400).send('Invalid input: "url" is required');
     }
-    if (!language){
-        language="chinese"
-    }
-    if (cache===null){
+    // if (!language){
+    //     language="zh"
+    // }
+    if (cache === null || cache === undefined){
         cache = true; // 默认读取缓存
     }
 
-    const free_key = "FreeASR_" + req.headers['user-identity']//免费版的key
+    if (!api_key) {
+        return res.send({
+            code: -1,
+            msg: `${commonUtils.MESSAGE.TOKEN_EMPTY}，${webVersionHint}`
+        });
+    }
+
     const lock_key = "asr:lock:" + req.headers['user-identity']//并发锁
-    var left_time = await redis.get(free_key)//免费版剩余次数
-    if (!left_time || isNaN(left_time)) left_time = 1
+    const calcCreditsBySeconds = (seconds) => {
+        const safeSeconds = Number.isFinite(seconds) && seconds > 0 ? seconds : 0;
+        return Math.max(1, Math.ceil(safeSeconds / 60));
+    };
+    const calcCreditsFromVtt = (vtt) => {
+        if (!vtt || typeof vtt !== 'string') return 1;
+        const reg = /(\d{2}):(\d{2}):(\d{2})\.(\d{3})/g;
+        let maxSeconds = 0;
+        let match;
+        while ((match = reg.exec(vtt)) !== null) {
+            const seconds = Number(match[1]) * 3600 + Number(match[2]) * 60 + Number(match[3]) + Number(match[4]) / 1000;
+            if (seconds > maxSeconds) maxSeconds = seconds;
+        }
+        return calcCreditsBySeconds(maxSeconds);
+    };
+
+    let videoPath = null;
+    let audioPath = null;
 
     try{
 
         var videoLink = tool.extract_url(url)
-        if (!videoLink) throw new Error("无法解析此链接，本插件支持快手/抖音/小红书/B站/Youtube/tiktok，有问题联系作者【vx：xiaowu_azt】")
+        if (!videoLink) throw new Error(commonUtils.MESSAGE.VIDEO_PARSE_ERROR)
         if (!(videoLink.includes('www.youtube.com') || videoLink.includes('youtu.be') || videoLink.includes('xiaohongshu.com'))) {
             videoLink = tool.remove_query_param(videoLink)
         }
+        // 统一缓存key使用预处理后的链接，避免读取与写入不一致导致缓存失效
+        videoLink = await tool.url_preprocess(videoLink)
+        const transcriptionCacheKey = "transcription_v2_" + videoLink;
         
-        if (!api_key) {
-            if (left_time <= 0) throw new QuotaExceededError("每天免费使用1次，如果您想继续使用，联系作者购买api_key【vx：xiaowu_azt】更多扣子教程，可以关注【B站：小吴爱折腾】")
-            const lock_ttl = await redis.ttl(lock_key)
-            if(lock_ttl > 0) {
-                throw new Error(`上一个任务还在处理中，剩余${lock_ttl}秒`)
-            }
-        }else{
-            const { keyId, valid, remaining, code } = await unkey.verifyKey("api_413Kmmitqy3qaDo4", api_key, 0);
-            if (!valid) {
-                return res.send({
-                    code: -1,
-                    msg: 'API Key 无效或已过期，请检查后重试！'
-                }); 
-            }
-            if (remaining == 0) {
-                return res.send({
-                    code: -1,
-                    msg: 'API Key 使用次数已用完，请联系作者续费！'
-                }); 
-            }
+        const { keyId, valid, remaining, code } = await unkey.verifyKey("api_413Kmmitqy3qaDo4", api_key, 0);
+        if (!valid) {
+            return res.send({
+                code: -1,
+                msg: `${commonUtils.MESSAGE.TOKEN_EXPIRED}，${webVersionHint}`
+            }); 
         }
-        
+        if (remaining == 0) {
+            return res.send({
+                code: -1,
+                msg: `${commonUtils.MESSAGE.TOKEN_NO_TIMES}，${webVersionHint}`
+            }); 
+        }
 
-        var transcription = await redis.get("transcription_"+videoLink)
+        let creditsToConsume = 1;
+        let usedCache = false;
+        var transcription = await redis.get(transcriptionCacheKey)
         if (transcription && cache){
+            usedCache = true;
             
             transcription = JSON.parse(transcription)
         }else{
             
-            //链接预处理（av转bv）
-            videoLink = await tool.url_preprocess(videoLink)
             let retries = 3;
             let XiaZaiTool;
             while (retries > 0) {
@@ -1311,67 +2046,57 @@ app.post('/whisper/speech-to-text', async (req, res) => {
             //下载mp4文件
             const download = await tool.download_video(downloadUrl,url)
             if (!download.success) throw new Error(download.error);
+            videoPath = download.filepath;
+
+            const durationResult = await tool.getMediaDuration(download.filepath);
+            if (!durationResult.success || !Number.isFinite(durationResult.duration)) {
+                throw new Error("无法获取视频时长，请稍后重试");
+            }
+            creditsToConsume = calcCreditsBySeconds(durationResult.duration);
+            if (remaining < creditsToConsume) {
+                throw new Error(`余额不足：当前视频预计消耗 ${creditsToConsume} 点，剩余 ${remaining} 点`);
+            }
+
             let convert;
             if (!download.is_audio){
                 //mp4转mp3
                 convert = await tool.video_to_audio(download.filepath)
                 if (!convert.success) throw new Error(convert.error);
+                audioPath = convert.outputFile;
             }else{
                 convert = {
                     outputFile: download.filepath
                 }
+                audioPath = download.filepath;
             }
 
-            const protocol = req.headers['x-forwarded-proto'] || req.protocol;
-            // var audio_url = `${protocol}://coze-js-api-noproxy.devtool.uk/audio/${path.basename(convert.outputFile)}`
-            var audio_url = `${protocol}://${req.get('host')}/audio/${path.basename(convert.outputFile)}`
-            // audio_url = "https://coze-js-api.devtool.uk/audio/audio_1749559334235.mp3"
             //语音转文字
             console.log("开始生成字幕")
-            let result = await coze.generate_video_caption(audio_url)
-            transcription = JSON.parse(result.content).output
-            
-            // Check if content_chunks exists, if not retry once
-            if (!transcription) {
-                console.log("No content_chunks found, retrying...第一次重试")
-                result = await coze.generate_video_caption(audio_url)
-                transcription = JSON.parse(result.content).output
-                if(!transcription) {
-                    console.log("No content_chunks found, retrying...第二次重试")
-                    result = await coze.generate_video_caption(audio_url)
-                    transcription = JSON.parse(result.content).output
-                    if(!transcription) {
-                        throw new Error("字幕生成失败，可能是视频时长太长，或者服务器压力太大，请稍后再试！")
-                    }
-                }
+            const whisperResult = await CloudFlareApi.run_whisper(convert.outputFile, language)
+            transcription = whisperResult.result
+            if (!transcription || !transcription.text) {
+                throw new Error("字幕生成失败，可能是视频时长太长，或者服务器压力太大，请稍后再试！")
             }
     
-            await redis.set("transcription_"+videoLink, JSON.stringify(transcription), "EX", 3600 * 24 * 60)
+            await redis.set(transcriptionCacheKey, JSON.stringify(transcription), "EX", 3600 * 24 * 60)
             await redis.del(lock_key)//关闭并发锁
             console.log("字幕生成结束")
         }
 
-        // 生成SRT内容
-        const srt = transcription.content_chunks.map((item, index) => {
-            const start = tool.format_SRT_timestamp(item.start_time);
-            const end = tool.format_SRT_timestamp(item.start_time);
-            return `${index + 1}\n${start} --> ${end}\n${item.text}\n`;
-        }).join('\n');
         const data = {
-            text:transcription.content,
-            srt:srt
+            text: transcription.text,
+            srt: ''
         }
         
         var msg = ""
-        if (api_key) {
-            //付费版
-            const { remaining } = await unkey.verifyKey("api_413Kmmitqy3qaDo4", api_key, 1);
-            msg = `API Key 剩余调用次数：${remaining}`;
-        }else{
-            //免费版
-            left_time = left_time - 1
-            await redis.set(free_key, left_time, 'EX', tool.getSecondsToMidnight()); // 每次调用减少一次
-            msg = `今日免费使用次数：${left_time}`;
+        if (!usedCache) {
+            const { valid: consumeValid, remaining: finalRemaining } = await unkey.verifyKey("api_413Kmmitqy3qaDo4", api_key, creditsToConsume);
+            if (!consumeValid) {
+                throw new Error(commonUtils.MESSAGE.TOKEN_EXPIRED);
+            }
+            msg = `API Key 剩余积分：${finalRemaining}`;
+        } else {
+            msg = `API Key 剩余积分：${remaining}`;
         }
 
         return res.send({
@@ -1382,20 +2107,174 @@ app.post('/whisper/speech-to-text', async (req, res) => {
     }catch(error){
         console.error(error)
         await redis.del(lock_key)
-        if (error instanceof QuotaExceededError) {
-            return res.send({
-                'code': 0,
-                'msg': '抱歉，达到用量限制',
-                'data': {
-                    "text": error.message,
-                    "srt": "1\n00:00:00,000 --> 00:00:03,480\n" + error.message
+        return res.send({
+            'code': -1,
+            'msg': `${error.message}，${webVersionHint}`
+        });
+    } finally {
+        // 清理临时文件
+        const filesToClean = videoPath === audioPath
+            ? [videoPath]
+            : [videoPath, audioPath];
+        for (const filePath of filesToClean) {
+            if (filePath && fs.existsSync(filePath)) {
+                fs.unlink(filePath, (err) => {
+                    if (err) console.error('Error deleting temporary file:', err.message);
+                });
+            }
+        }
+    }
+})
+
+app.post('/cloudflare/run_whisper', async (req, res) => {
+    const { url, language } = req.body;
+
+    if (!url) {
+        return res.status(400).send('Invalid input: "url" is required');
+    }
+
+    let audioPath = null;
+    let shouldCleanup = false;
+
+    try {
+        const download = await tool.download_file(url);
+        if (!download.success) {
+            throw new Error(download.error);
+        }
+        if (!download.is_audio) {
+            throw new Error('仅支持音频链接');
+        }
+
+        audioPath = download.filepath;
+        shouldCleanup = !download.isLocalFile;
+
+        const data = await CloudFlareApi.run_whisper(audioPath, language);
+
+        return res.send({
+            code: 0,
+            msg: 'Success',
+            data: data
+        });
+    } catch (error) {
+        console.error(`Error calling Cloudflare Whisper: ${error.message}`);
+        return res.send({
+            code: -1,
+            msg: error.message,
+            data: null
+        });
+    } finally {
+        if (shouldCleanup && audioPath && fs.existsSync(audioPath)) {
+            fs.unlink(audioPath, (unlinkError) => {
+                if (unlinkError) {
+                    console.error('Error deleting temporary audio file:', unlinkError.message);
                 }
             });
+        }
+    }
+})
+
+app.post('/transcribe-douyin', async (req, res) => {
+    let { url, language, api_key } = req.body;
+    if (!url) {
+        return res.status(400).send('Invalid input: "url" is required');
+    }
+    if (!language) {
+        language = 'zh';
+    }
+
+    if (!api_key) {
+        return res.send({
+            code: -1,
+            msg: commonUtils.MESSAGE.TOKEN_EMPTY,
+            data: null
+        });
+    }
+
+    const access = await verifyApiAccess({
+        apiKey: api_key,
+        freeKey: null,
+        freeCheck: async () => false,
+        freeDeniedResponse: {
+            code: -1,
+            msg: commonUtils.MESSAGE.TOKEN_EXPIRED,
+            data: null
+        }
+    });
+    if (!access.ok) {
+        return res.send({
+            ...access.response,
+            data: null
+        });
+    }
+
+    let videoPath = null;
+    let audioPath = null;
+
+    try {
+        // 1. 提取并清理抖音链接
+        let videoLink = tool.extract_url(url);
+        if (!videoLink) throw new Error("无法解析此链接，请输入有效的抖音分享链接");
+        videoLink = tool.remove_query_param(videoLink);
+
+        // 2. 获取视频直链
+        videoLink = await tool.url_preprocess(videoLink);
+        let retries = 3;
+        let XiaZaiTool;
+        while (retries > 0) {
+            XiaZaiTool = await tool.get_video_url(videoLink);
+            if (XiaZaiTool.success) break;
+            retries--;
+            if (retries > 0) {
+                await new Promise(resolve => setTimeout(resolve, 2000));
+            }
+        }
+        if (!XiaZaiTool.success) throw new Error(XiaZaiTool.data);
+        const downloadUrl = XiaZaiTool.data.video_url;
+
+        // 3. 下载视频
+        const download = await tool.download_video(downloadUrl, url);
+        if (!download.success) throw new Error(download.error);
+        videoPath = download.filepath;
+
+        // 4. 视频转音频
+        if (download.is_audio) {
+            const convertResult = await tool.audio_format_convert(videoPath, 'mp3');
+            if (!convertResult.success) throw new Error(convertResult.error);
+            audioPath = convertResult.filepath;
         } else {
-            return res.send({
-                'code': -1,
-                'msg': error.message
-            });
+            const convertResult = await tool.video_to_audio(videoPath);
+            if (!convertResult.success) throw new Error(convertResult.error);
+            audioPath = convertResult.outputFile;
+        }
+
+        // 5. 语音转字幕
+        const data = await CloudFlareApi.run_whisper(audioPath, language);
+        const remaining = await consumeApiCredits({
+            apiKey: api_key,
+            cost: 1,
+            metadata: { action: 'transcribe_douyin' }
+        });
+
+        return res.send({
+            code: 0,
+            msg: `success, API Key 剩余积分：${remaining}`,
+            data: data
+        });
+    } catch (error) {
+        console.error(`Error in /transcribe-douyin: ${error.message}`);
+        return res.send({
+            code: -1,
+            msg: error.message,
+            data: null
+        });
+    } finally {
+        // 清理临时文件
+        for (const filePath of [videoPath, audioPath]) {
+            if (filePath && fs.existsSync(filePath)) {
+                fs.unlink(filePath, (err) => {
+                    if (err) console.error('Error deleting temp file:', err.message);
+                });
+            }
         }
     }
 })
@@ -1426,34 +2305,19 @@ app.post('/explorer', async (req, res) => {
         cookie = await tool.gen_cookie(cookie,domain,path)
     }
     
-    const api_id = "api_413Kmmitqy3qaDo4";
-
     //免费版的key
     const free_key = "html_parser_" + req.headers['user-identity']
-    if(api_key){
-        //付费版
-        const { keyId, valid, remaining, code } = await unkey.verifyKey(api_id, api_key, 0);
-        if (!valid) {
-            return res.send({
-                code: -1,
-                msg: 'API Key 无效或已过期，请检查后重试！'
-            }); 
+    const access = await verifyApiAccess({
+        apiKey: api_key,
+        freeKey: free_key,
+        freeCheck: canUseHtmlParse,
+        freeDeniedResponse: {
+            code: -1,
+            msg: commonUtils.MESSAGE.FREE_KEY_EXPIRED_3
         }
-        if (remaining == 0) {
-            return res.send({
-                code: -1,
-                msg: 'API Key 使用次数已用完，请联系作者续费！'
-            }); 
-        }
-    }else{
-        // 免费版
-        const canParse = await canUseHtmlParse(free_key);
-        if (!canParse) {
-            return res.send({
-                code: -1,
-                msg: '免费版每天限量3次，付费可以解锁更多次数，请联系作者！【B站:小吴爱折腾】'
-            }); 
-        }
+    });
+    if (!access.ok) {
+        return res.send(access.response);
     }
 
     try {
@@ -1466,12 +2330,15 @@ app.post('/explorer', async (req, res) => {
 
         let msg = "";
         if (api_key) {
-            //付费版
-            const { remaining } = await unkey.verifyKey(api_id, api_key, 1, { url: url, selector: selector, xpath: xpath});
-            msg = `API Key 剩余调用次数：${remaining}`;
+            const remaining = await consumeApiCredits({
+                apiKey: api_key,
+                cost: 1,
+                metadata: tool.sanitizeUsageMetadata({ url, selector, xpath })
+            });
+            msg = `API Key 剩余积分：${remaining}`;
         }else{
             await redis.incr(free_key);//每次调用增加一次
-            msg = `今日免费使用次数：${3 - await getUsage(free_key)}`;
+            msg = `今日免费剩余积分：${3 - await tool.getUsage(free_key)}`;
         }
 
         return res.send({
@@ -1586,7 +2453,7 @@ app.post("/flfg", async (req, res) => {
         // 为每个对象的 url 字段加上域名前缀
         let law_list = []
         let doc_urls = [] //需要解析的文件url
-        if (Array.isArray(data.result.data)) {
+        if (data.result && Array.isArray(data.result.data)) {
             law_list = await Promise.all(data.result.data.map(async (item) => {
                 if (item.url) {
                     const doc_url = 'https://flk.npc.gov.cn/' + item.url.replace(/^(\.\/|\/)+/, '');
@@ -1598,12 +2465,12 @@ app.post("/flfg", async (req, res) => {
 
         return res.send({
             code: 0,
-            msg: '本插件后期将收费，关注【B站：小吴爱折腾】，以防失联',
+            msg: commonUtils.MESSAGE.PLUGIN_NEED_PAY,
             data: {
             'list': law_list,
-            'totalSizes': data.result.totalSizes,
-            'page': data.result.page,
-            'size': data.result.size
+            'totalSizes': data.result?.totalSizes,
+            'page': data.result?.page,
+            'size': data.result?.size
             }
         })
     } catch (error) {
@@ -1735,6 +2602,57 @@ app.post("/page", async (req, res) => {
     }
 })
 
+app.post('/browser/close', async (req, res) => {
+    const { browserId } = req.body;
+    if (!browserId) {
+        return res.status(400).send('Invalid input: "browserId" is required');
+    }
+
+    try {
+        const closed = await browserless.close_browser(browserId);
+        return res.send({
+            code: closed ? 0 : -1,
+            msg: closed ? 'success' : 'browserId not found',
+        });
+    } catch (err) {
+        return res.send({
+            code: -1,
+            msg: err.message,
+        });
+    }
+});
+
+app.post('/browser/close_all', async (req, res) => {
+    try {
+        const closed = await browserless.close_all_browsers();
+        return res.send({
+            code: 0,
+            msg: 'success',
+            data: { closed },
+        });
+    } catch (err) {
+        return res.send({
+            code: -1,
+            msg: err.message,
+        });
+    }
+});
+
+app.get('/browser/sessions', (req, res) => {
+    try {
+        return res.send({
+            code: 0,
+            msg: 'success',
+            data: browserless.browser_stats(),
+        });
+    } catch (err) {
+        return res.send({
+            code: -1,
+            msg: err.message,
+        });
+    }
+});
+
 //专利查询
 app.post("/zlcx", async (req, res) => {
     let {keyword, api_key} = req.body
@@ -1745,37 +2663,23 @@ app.post("/zlcx", async (req, res) => {
     //     page = 1
     // }
 
-    const api_id = "api_413Kmmitqy3qaDo4";
     //免费版的key
     const free_key = "zlcx_" + req.headers['user-identity']
-    if(api_key){
-        //付费版
-        const { keyId, valid, remaining, code } = await unkey.verifyKey(api_id, api_key, 0);
-        if (!valid) {
-            return res.send({
-                code: -1,
-                msg: 'API Key 无效或已过期，请检查后重试！'
-            }); 
+    const access = await verifyApiAccess({
+        apiKey: api_key,
+        freeKey: free_key,
+        freeCheck: dailyUse,
+        freeDeniedResponse: {
+            code: -1,
+            msg: commonUtils.MESSAGE.FREE_API_USE_LIMIT,
+            data: [{
+                "title": "API_KEY可以通用于本人开发的所有插件",
+                "link": commonUtils.MESSAGE.HELP_LINK
+            }]
         }
-        if (remaining == 0) {
-            return res.send({
-                code: -1,
-                msg: 'API Key 使用次数已用完，请联系作者续费！'
-            }); 
-        }
-    }else{
-        //免费版
-        const canParse = await dailyUse(free_key);
-        if (!canParse) {
-            return res.send({
-                code: -1,
-                msg: '本插件访问量大，为了保证付费用户的使用体验，本插件对免费用户进行了访问频率限制，购买API_KEY，联系作者【B站:小吴爱折腾】',
-                data: [{
-                    "title": "API_KEY可以通用于本人开发的所有插件",
-                    "link": "https://space.bilibili.com/396762480"
-                }]
-            }); 
-        }
+    });
+    if (!access.ok) {
+        return res.send(access.response);
     }
 
     try {
@@ -1874,25 +2778,74 @@ app.post("/cn_explorer", async (req, res) => {
 
 app.post("/ai_online_answer", async (req, res) => {
 
-    let { q } = req.body;
+    let { q, query } = req.body;
+    const originalStatus = res.status.bind(res);
+    const originalSend = res.send.bind(res);
+    let capturedStatusCode = 200;
+    let capturedPayload = null;
 
     try {
+        const normalizedQuery = query || q;
+        const delegatedReq = {
+            ...req,
+            body: {
+                ...req.body,
+                query: normalizedQuery
+            }
+        };
 
-        const data = await tencentapi.ai_online_answer(req.headers['user-identity'], q)
+        res.status = function (code) {
+            capturedStatusCode = code;
+            return res;
+        };
 
-        return res.send({
-            code: 0,
-            msg: 'Success',
-            data: data
-        })
+        res.send = function (payload) {
+            capturedPayload = payload;
+            return payload;
+        };
+
+        await tv_search.search(delegatedReq, res);
+
+        res.status = originalStatus;
+        res.send = originalSend;
+
+        if (typeof capturedPayload === 'string') {
+            return res.status(capturedStatusCode).send(capturedPayload);
+        }
+
+        const rawData = capturedPayload?.data || {};
+        const rawResults = Array.isArray(rawData.results) ? rawData.results : [];
+        const searchData = rawResults.map((item) => ({
+            title: item?.title || '',
+            url: item?.url || ''
+        }));
+
+        if (capturedPayload?.code === 0) {
+            return res.status(capturedStatusCode).send({
+                code: 0,
+                data: {
+                    answer: rawData.answer || '',
+                    search_data: searchData
+                },
+                msg: 'Success'
+            });
+        }
+
+        return res.status(capturedStatusCode).send(capturedPayload || {
+            code: -1,
+            msg: 'failure',
+            data: null
+        });
     } catch (error) {
         console.error(`Error: ${error}`);
-
         return res.send({
             code: -1,
             msg: 'failure',
             data: null
         })
+    } finally {
+        res.status = originalStatus;
+        res.send = originalSend;
     }
     
 })
@@ -1996,37 +2949,23 @@ app.post("/gzh_search", async (req, res) => {
     //     page = 1
     // }
 
-    const api_id = "api_413Kmmitqy3qaDo4";
     //免费版的key
     const free_key = "gzh_search_" + req.headers['user-identity']
-    if(api_key){
-        //付费版
-        const { keyId, valid, remaining, code } = await unkey.verifyKey(api_id, api_key, 0);
-        if (!valid) {
-            return res.send({
-                code: -1,
-                msg: 'API Key 无效或已过期，请检查后重试！'
-            }); 
+    const access = await verifyApiAccess({
+        apiKey: api_key,
+        freeKey: free_key,
+        freeCheck: dailyUse,
+        freeDeniedResponse: {
+            code: -1,
+            msg: commonUtils.MESSAGE.FREE_API_USE_LIMIT,
+            data: [{
+                "title": "为了保证付费用户的使用体验，本插件对免费用户进行了访问频率限制",
+                "href": commonUtils.MESSAGE.HELP_LINK
+            }]
         }
-        if (remaining == 0) {
-            return res.send({
-                code: -1,
-                msg: 'API Key 使用次数已用完，请联系作者续费！'
-            }); 
-        }
-    }else{
-        //免费版
-        const canParse = await dailyUse(free_key);
-        if (!canParse) {
-            return res.send({
-                code: -1,
-                msg: '本插件访问量大，免费用户限制使用频率，如需稳定使用请付费购买API_KEY【B站:小吴爱折腾】',
-                data: [{
-                    "title": "为了保证付费用户的使用体验，本插件对免费用户进行了访问频率限制",
-                    "href": "https://space.bilibili.com/396762480"
-                }]
-            }); 
-        }
+    });
+    if (!access.ok) {
+        return res.send(access.response);
     }
 
     try {
@@ -2041,11 +2980,13 @@ app.post("/gzh_search", async (req, res) => {
 
         const { data } = await axios.request(options);
 
-        let msg = '为了保证付费用户的使用体验，本插件对免费用户进行了访问频率限制，购买API_KEY，联系作者【B站:小吴爱折腾】';
+        let msg = commonUtils.MESSAGE.FREE_API_USE_LIMIT;
         if (api_key) {
-            //付费版
-            const { remaining } = await unkey.verifyKey(api_id, api_key, 1);
-            msg = `API Key 剩余调用次数：${remaining}`;
+            const remaining = await consumeApiCredits({
+                apiKey: api_key,
+                cost: 1
+            });
+            msg = `API Key 剩余积分：${remaining}`;
         }
 
         return res.send({
@@ -2063,38 +3004,6 @@ app.post("/gzh_search", async (req, res) => {
     }   
 })
 
-app.get('/jipiao', async (req, res) => {
-    let {from, to, date} = req.query
-
-    try {
-        const data = await browserless.jipiao_search()
-        return res.send({
-            code: 0,
-            msg: 'success',
-            data: data
-        })
-    }catch (error) {
-        console.error(`Error: ${error}`);
-        return res.send({
-            code: -1,
-            msg: error.message,
-            data: null
-        })
-    }
-})
-
-app.get('/vpn/get_proxy', async (req, res) => {
-    try {
-        const response = await axios.get('https://dl.jisusub.cc/api/v1/client/subscribe?token=9c79dac17d0e23088411f0674035798d', {
-            responseType: 'text'
-        });
-        console.log(response.data)
-        res.send(response.data);
-    } catch (error) {
-        console.error(error);
-        res.status(500).send('Failed to fetch proxy data');
-    }
-})
 
 app.post('/extract-element-from-html', async (req, res) => {
      let { htmlContent, xpath, selector } = req.body;
@@ -2122,7 +3031,14 @@ app.post('/extract-element-from-html', async (req, res) => {
     }
 })
 
+// 三方接口请求api_key验证和减扣次数
+app.post('/thirdParty/verifyKey',thirdPartyUsed.key_used)
 
-app.listen(port, () => {
+
+const server = app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
-})
+});
+
+const shutdown = createGracefulShutdown({ server });
+process.once('SIGTERM', shutdown);
+process.once('SIGINT', shutdown);

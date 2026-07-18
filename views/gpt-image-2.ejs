@@ -1,0 +1,1320 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <% const pageSeo = (typeof seo !== 'undefined' && seo) ? seo : {}; %>
+  <% const pageVisitorCount = (typeof visitorCount !== 'undefined' && visitorCount !== null) ? visitorCount : 0; %>
+  <% const payload = (typeof pageData !== 'undefined' && pageData) ? pageData : { stats: {}, categories: [], items: [], latestXPrompts: [], links: {}, pagination: { pageSize: 12 } }; %>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= pageSeo.title || 'GPT-Image-2 提示词画廊' %></title>
+  <meta name="description" content="<%= pageSeo.description || 'GPT-Image-2 提示词与案例画廊' %>" />
+  <meta name="keywords" content="<%= pageSeo.keywords || 'gpt-image-2,提示词,画廊,AI绘图' %>" />
+  <meta name="robots" content="index,follow,max-image-preview:large" />
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="zh_CN" />
+  <meta property="og:title" content="<%= pageSeo.title || 'GPT-Image-2 提示词画廊' %>" />
+  <meta property="og:description" content="<%= pageSeo.description || 'GPT-Image-2 提示词与案例画廊' %>" />
+  <meta property="og:url" content="<%= pageSeo.url || '' %>" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="<%= pageSeo.title || 'GPT-Image-2 提示词画廊' %>" />
+  <meta name="twitter:description" content="<%= pageSeo.description || 'GPT-Image-2 提示词与案例画廊' %>" />
+
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Noto+Sans+SC:wght@300;400;500;700&display=swap");
+
+    :root {
+      --ink:       #07090f;
+      --ink-1:     #0d1020;
+      --ink-2:     #141828;
+      --ink-3:     #1c2236;
+      --teal:      #00e0c8;
+      --teal-dim:  rgba(0,224,200,0.14);
+      --teal-line: rgba(0,224,200,0.42);
+      --amber:     #f0b941;
+      --amber-dim: rgba(240,185,65,0.14);
+      --snow:      #f2f7ff;
+      --mist:      #8b9bb8;
+      --fog:       #3d4c66;
+      --glass:     rgba(18,24,46,0.72);
+      --glass-2:   rgba(10,15,28,0.90);
+      --border:    rgba(255,255,255,0.072);
+      --border-hi: rgba(0,224,200,0.40);
+      --r-sm:      10px;
+      --r-md:      16px;
+      --r-lg:      24px;
+      --sh:        0 20px 60px rgba(0,0,0,0.55);
+      --sh-teal:   0 0 36px rgba(0,224,200,0.16);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      min-height: 100vh;
+      font-family: "Noto Sans SC", "Microsoft YaHei", sans-serif;
+      color: var(--snow);
+      background-color: var(--ink);
+      background-image:
+        radial-gradient(ellipse 70% 45% at 80% 0%,    rgba(0,100,255,0.13)  0%, transparent 60%),
+        radial-gradient(ellipse 55% 50% at 10% 100%,  rgba(0,224,200,0.09)  0%, transparent 55%),
+        radial-gradient(ellipse 40% 35% at 60% 55%,   rgba(80,30,120,0.09)  0%, transparent 60%);
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      opacity: 0.55;
+    }
+
+    body::after {
+      content: "";
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background: repeating-linear-gradient(
+        to bottom, transparent 0px, transparent 3px,
+        rgba(0,0,0,0.04) 3px, rgba(0,0,0,0.04) 4px
+      );
+    }
+
+    /* ── Layout ── */
+    .wrap {
+      position: relative; z-index: 1;
+      width: min(1380px, 100% - 32px);
+      margin: 0 auto;
+      padding: 36px 0 80px;
+      display: flex; flex-direction: column; gap: 24px;
+    }
+
+    /* ── Topbar ── */
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 24px;
+      background: var(--glass);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      backdrop-filter: blur(16px);
+      gap: 16px; flex-wrap: wrap;
+    }
+
+    .topbar-brand { display: flex; align-items: center; gap: 12px; }
+
+    .brand-dot {
+      width: 9px; height: 9px; border-radius: 50%;
+      background: var(--teal);
+      box-shadow: 0 0 8px var(--teal);
+      animation: blink 2.6s ease-in-out infinite;
+    }
+
+    @keyframes blink {
+      0%,100% { opacity: 1; transform: scale(1); }
+      50%      { opacity: 0.45; transform: scale(0.8); }
+    }
+
+    .brand-name {
+      font-family: "Syne", sans-serif; font-size: 15px; font-weight: 800;
+      letter-spacing: 2.5px; text-transform: uppercase; color: var(--snow);
+    }
+
+    .brand-sub {
+      font-size: 10px; letter-spacing: 1.8px; color: var(--teal);
+      text-transform: uppercase; margin-top: 2px;
+    }
+
+    .topbar-links { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+    .tl-btn {
+      text-decoration: none; font-size: 12px; letter-spacing: 0.5px;
+      color: var(--mist); padding: 7px 14px;
+      border: 1px solid var(--border); border-radius: 999px;
+      transition: color .2s, border-color .2s, background .2s;
+    }
+
+    .tl-btn:hover {
+      color: var(--teal); border-color: var(--teal-line); background: var(--teal-dim);
+    }
+
+    .visitor-chip {
+      font-size: 12px; color: var(--mist);
+      padding: 7px 14px; border: 1px solid var(--border); border-radius: 999px;
+    }
+
+    .visitor-chip b { color: var(--amber); font-family: "Syne", sans-serif; font-weight: 700; }
+
+    /* ── Hero ── */
+    .hero {
+      display: block;
+      gap: 28px; align-items: start;
+      padding: 44px 40px 36px;
+      background: var(--glass);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      position: relative; overflow: hidden;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute; right: -100px; top: -100px;
+      width: 460px; height: 460px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(0,224,200,0.11) 0%, transparent 62%);
+      pointer-events: none;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--teal-line) 50%, transparent);
+    }
+
+    .hero-tag {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 11px; letter-spacing: 2.5px; text-transform: uppercase;
+      color: var(--teal); font-family: "Syne", sans-serif;
+      border: 1px solid var(--teal-line); border-radius: 999px;
+      padding: 6px 16px; margin-bottom: 22px;
+    }
+
+    .hero-tag::before {
+      content: ""; width: 6px; height: 6px; border-radius: 50%;
+      background: var(--teal); flex-shrink: 0;
+    }
+
+    .hero-h1 {
+      font-family: "Syne", sans-serif;
+      font-size: clamp(34px, 5vw, 68px);
+      font-weight: 800; line-height: 1.0; letter-spacing: -1.5px;
+      color: var(--snow);
+    }
+
+    .hero-h1 em { font-style: normal; color: var(--teal); }
+
+    .hero-desc {
+      margin-top: 18px; font-size: 14px; line-height: 1.9;
+      color: var(--mist); max-width: 640px;
+    }
+
+    .stats-strip {
+      display: flex; margin-top: 30px;
+      border: 1px solid var(--border); border-radius: var(--r-md); overflow: hidden;
+    }
+
+    .s-item {
+      flex: 1; padding: 16px 20px;
+      border-right: 1px solid var(--border);
+      background: rgba(255,255,255,0.022);
+    }
+
+    .s-item:last-child { border-right: none; }
+
+    .s-val {
+      font-family: "Syne", sans-serif;
+      font-size: clamp(22px, 2.8vw, 34px);
+      font-weight: 800; line-height: 1; color: var(--snow);
+    }
+
+    .s-val.c-teal  { color: var(--teal); }
+    .s-val.c-amber { color: var(--amber); }
+
+    .s-lbl {
+      margin-top: 5px; font-size: 11px; letter-spacing: 0.9px;
+      color: var(--fog); text-transform: uppercase;
+    }
+
+    .hero-aside { padding-top: 8px; }
+
+    .aside-title {
+      font-size: 10px; letter-spacing: 2px; color: var(--fog);
+      text-transform: uppercase; margin-bottom: 14px;
+    }
+
+    .aside-links { display: flex; flex-direction: column; gap: 10px; }
+
+    .aside-link {
+      display: flex; align-items: center; justify-content: space-between;
+      text-decoration: none; font-size: 13px; color: var(--mist);
+      padding: 10px 14px;
+      border: 1px solid var(--border); border-radius: var(--r-sm);
+      background: rgba(255,255,255,0.022);
+      transition: color .2s, border-color .2s, background .2s;
+    }
+
+    .aside-link:hover { color: var(--teal); border-color: var(--teal-line); background: var(--teal-dim); }
+
+    .aside-link-arr { font-size: 11px; opacity: 0.5; }
+
+    /* ── Controls ── */
+    .controls {
+      padding: 20px 24px;
+      background: var(--glass);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      backdrop-filter: blur(14px);
+      display: flex; flex-direction: column; gap: 14px;
+    }
+
+    .search-row { display: flex; gap: 10px; }
+
+    .search-wrap { flex: 1; position: relative; }
+
+    .s-icon {
+      position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+      color: var(--fog); font-size: 15px; pointer-events: none;
+    }
+
+    .search-input {
+      width: 100%; padding: 12px 16px 12px 44px;
+      background: var(--ink-2); border: 1px solid var(--border);
+      border-radius: 999px; color: var(--snow);
+      font-family: inherit; font-size: 14px; outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+
+    .search-input::placeholder { color: var(--fog); }
+
+    .search-input:focus {
+      border-color: var(--teal-line);
+      box-shadow: 0 0 0 3px rgba(0,224,200,0.09);
+    }
+
+    .clear-btn {
+      padding: 12px 20px; border-radius: 999px;
+      border: 1px solid var(--border); background: rgba(255,255,255,0.036);
+      color: var(--mist); font-family: inherit; font-size: 13px; cursor: pointer;
+      transition: all .2s;
+    }
+
+    .clear-btn:hover {
+      border-color: rgba(240,185,65,0.4); color: var(--amber); background: var(--amber-dim);
+    }
+
+    .chips-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+    .chips-lbl {
+      font-size: 10px; letter-spacing: 1.8px; text-transform: uppercase;
+      color: var(--fog); flex-shrink: 0;
+    }
+
+    .chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 7px 15px; border-radius: 999px;
+      border: 1px solid var(--border); background: transparent;
+      color: var(--mist); font-family: inherit; font-size: 13px;
+      cursor: pointer; transition: all .18s;
+    }
+
+    .chip:hover { border-color: var(--teal-line); color: var(--snow); background: var(--teal-dim); }
+
+    .chip.active {
+      background: var(--teal); border-color: var(--teal);
+      color: var(--ink); font-weight: 700;
+    }
+
+    .chip .cnt { font-size: 11px; opacity: 0.65; }
+    .chip.active .cnt { opacity: 0.75; }
+
+    .meta-row {
+      display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap;
+      font-size: 12px; color: var(--fog);
+      padding-top: 6px; border-top: 1px solid var(--border);
+    }
+
+    /* ── Section head ── */
+    .sec-head {
+      display: flex; align-items: center; gap: 14px; margin-bottom: 4px;
+    }
+
+    .sec-title {
+      font-family: "Syne", sans-serif; font-size: 19px; font-weight: 700;
+      letter-spacing: -0.2px; white-space: nowrap;
+    }
+
+    .sec-rule {
+      flex: 1; height: 1px;
+      background: linear-gradient(90deg, var(--border), transparent);
+    }
+
+    /* ── Gallery ── */
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(258px, 1fr));
+      gap: 16px;
+    }
+
+    .card {
+      border: 1px solid var(--border); border-radius: var(--r-md);
+      background: var(--glass-2); overflow: hidden;
+      display: grid; grid-template-rows: 210px 1fr;
+      transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-3px);
+      border-color: var(--border-hi);
+      box-shadow: var(--sh-teal);
+    }
+
+    .card:hover .thumb { transform: scale(1.05); }
+
+    .thumb-wrap { position: relative; overflow: hidden; background: var(--ink-3); }
+
+    .thumb {
+      width: 100%; height: 100%; object-fit: cover; display: block;
+      transition: transform .32s ease;
+    }
+
+    .card-num {
+      position: absolute; top: 10px; left: 10px;
+      font-family: "Syne", sans-serif; font-size: 10px; font-weight: 700;
+      color: var(--teal); letter-spacing: 0.8px;
+      background: rgba(7,9,15,0.80);
+      border: 1px solid var(--teal-line);
+      border-radius: 6px; padding: 4px 8px;
+    }
+
+    .card-body {
+      padding: 14px 16px 16px;
+      display: flex; flex-direction: column; gap: 6px;
+    }
+
+    .card-title { font-size: 14px; font-weight: 500; line-height: 1.5; color: var(--snow); }
+
+    .card-cat { font-size: 12px; color: var(--fog); }
+
+    .card-acts { display: flex; gap: 8px; margin-top: auto; padding-top: 8px; }
+
+    .act-btn {
+      flex: 1; padding: 8px 10px; border-radius: var(--r-sm);
+      border: 1px solid var(--border); background: rgba(255,255,255,0.03);
+      color: var(--mist); font-family: inherit; font-size: 12px;
+      cursor: pointer; transition: all .18s; text-align: center;
+    }
+
+    .act-btn:hover {
+      border-color: var(--teal-line); color: var(--teal); background: var(--teal-dim);
+    }
+
+    .act-btn.c-act:hover {
+      border-color: rgba(240,185,65,0.4); color: var(--amber); background: var(--amber-dim);
+    }
+
+    .empty {
+      grid-column: 1/-1; padding: 52px 24px; text-align: center;
+      color: var(--fog); border: 1px dashed var(--border);
+      border-radius: var(--r-md); font-size: 14px;
+    }
+
+    /* ── Load more ── */
+    .load-area {
+      display: flex; flex-direction: column; align-items: center; gap: 10px;
+      padding: 28px 0 0;
+    }
+
+    .load-btn {
+      padding: 12px 40px; border-radius: 999px;
+      border: 1px solid var(--border-hi); background: transparent;
+      color: var(--teal); font-family: "Syne", sans-serif;
+      font-size: 14px; font-weight: 600; letter-spacing: 0.5px;
+      cursor: pointer; transition: background .2s, box-shadow .2s;
+    }
+
+    .load-btn:hover { background: var(--teal-dim); box-shadow: var(--sh-teal); }
+
+    .load-tip { font-size: 12px; color: var(--fog); }
+
+    /* ── X section ── */
+    .x-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(258px, 1fr));
+      gap: 14px;
+    }
+
+    .x-card {
+      border: 1px solid var(--border); border-radius: var(--r-md);
+      background: var(--glass-2); overflow: hidden;
+      transition: border-color .2s;
+    }
+
+    .x-card:hover { border-color: var(--border-hi); }
+
+    .x-thumb { width: 100%; height: 150px; object-fit: cover; display: block; background: var(--ink-3); }
+
+    .x-body { padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 6px; }
+
+    .x-name { font-size: 13px; font-weight: 500; color: var(--snow); line-height: 1.45; min-height: 38px; }
+
+    .x-meta { font-size: 11px; color: var(--fog); }
+
+    .x-copy {
+      margin-top: 4px; padding: 8px 10px; border-radius: var(--r-sm);
+      border: 1px solid var(--border); background: transparent;
+      color: var(--mist); font-family: inherit; font-size: 12px;
+      cursor: pointer; text-align: left; transition: all .18s;
+    }
+
+    .x-copy:hover {
+      border-color: rgba(240,185,65,0.4); color: var(--amber); background: var(--amber-dim);
+    }
+
+    /* ── Footer ── */
+    .footer {
+      text-align: center; font-size: 12px; color: var(--fog);
+      padding-top: 8px; letter-spacing: 0.5px;
+    }
+    .footer-visitors { color: var(--mist); }
+    .footer-visitors strong { color: var(--teal); }
+
+    /* ── Modal ── */
+    .modal {
+      position: fixed; inset: 0; z-index: 50;
+      display: none; align-items: center; justify-content: center;
+      background: rgba(4,6,12,0.84); backdrop-filter: blur(8px); padding: 16px;
+    }
+
+    .modal.open { display: flex; }
+
+    .modal-card {
+      width: min(1040px, 100%); max-height: 90vh; overflow: auto;
+      border: 1px solid var(--border-hi); border-radius: var(--r-lg);
+      background: var(--ink-1);
+      display: grid; grid-template-columns: minmax(260px,40%) 1fr; gap: 0;
+      box-shadow: var(--sh), var(--sh-teal);
+    }
+
+    .modal-left {
+      padding: 24px; border-right: 1px solid var(--border);
+      display: flex; flex-direction: column; gap: 14px;
+    }
+
+    .modal-img {
+      width: 100%; border-radius: var(--r-md);
+      background: var(--ink-3); border: 1px solid var(--border);
+    }
+
+    .modal-right { padding: 28px 28px 24px; display: flex; flex-direction: column; gap: 12px; }
+
+    .modal-title { font-family: "Syne", sans-serif; font-size: 22px; font-weight: 700; line-height: 1.25; }
+
+    .modal-meta {
+      font-size: 13px; color: var(--mist);
+      padding-bottom: 12px; border-bottom: 1px solid var(--border);
+    }
+
+    .p-lbl { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--fog); }
+
+    .prompt-box {
+      flex: 1; padding: 16px; border: 1px solid var(--border);
+      border-radius: var(--r-md); background: rgba(0,0,0,0.22);
+      color: var(--snow); font-size: 14px; line-height: 1.85;
+      white-space: pre-wrap; word-break: break-word;
+      overflow-y: auto; max-height: 280px;
+    }
+
+    .modal-acts { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    .mbtn {
+      padding: 10px 18px; border-radius: var(--r-sm);
+      border: 1px solid var(--border); font-family: inherit; font-size: 13px;
+      cursor: pointer; color: var(--snow); transition: all .18s;
+    }
+
+    .mbtn-p { border-color: var(--teal-line); background: var(--teal-dim); color: var(--teal); }
+    .mbtn-p:hover { background: rgba(0,224,200,0.24); }
+
+    .mbtn-g { background: rgba(255,255,255,0.038); }
+    .mbtn-g:hover { border-color: var(--border-hi); }
+
+    .mbtn-c { border-color: rgba(240,185,65,0.32); color: var(--amber); background: var(--amber-dim); }
+    .mbtn-c:hover { background: rgba(240,185,65,0.22); }
+
+    .copy-state { font-size: 12px; color: var(--amber); min-height: 18px; }
+
+    /* ── Generate Modal ── */
+    .gen-modal {
+      position: fixed; inset: 0; z-index: 60;
+      display: none; align-items: center; justify-content: center;
+      background: rgba(4,6,12,0.88); backdrop-filter: blur(12px); padding: 16px;
+    }
+
+    .gen-modal.open { display: flex; animation: fadeIn .18s ease; }
+
+    @keyframes fadeIn { from { opacity:0 } to { opacity:1 } }
+
+    .gen-card {
+      width: min(780px, 100%); max-height: 92vh; overflow-y: auto;
+      border: 1px solid var(--border-hi); border-radius: var(--r-lg);
+      background: linear-gradient(180deg, rgba(13,16,32,0.98) 0%, rgba(10,14,28,0.98) 100%);
+      box-shadow: var(--sh), var(--sh-teal);
+      display: flex; flex-direction: column; gap: 0;
+    }
+
+    .gen-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 24px 0;
+    }
+
+    .gen-title-wrap { display: flex; flex-direction: column; gap: 3px; }
+
+    .gen-title {
+      font-family: "Syne", sans-serif; font-size: 17px; font-weight: 700;
+      color: var(--snow); letter-spacing: 0.3px;
+    }
+
+    .gen-title em { font-style: normal; color: var(--teal); margin-left: 6px; font-size: 13px; font-weight: 400; }
+
+    .gen-item-name {
+      font-size: 11px; color: var(--mist); letter-spacing: 0.3px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 320px;
+    }
+
+    .gen-mode-chip {
+      font-size: 10px; letter-spacing: 1.2px; text-transform: uppercase;
+      padding: 5px 12px; border-radius: 999px; border: 1px solid;
+      font-family: "Syne", sans-serif; font-weight: 600; white-space: nowrap;
+    }
+
+    .gen-mode-chip.free  { color: #a6b6d3; border-color: rgba(166,182,211,0.36); background: rgba(166,182,211,0.12); }
+    .gen-mode-chip.paid  { color: var(--teal);  border-color: var(--teal-line);     background: var(--teal-dim); }
+
+    .gen-close {
+      width: 32px; height: 32px; border-radius: 50%;
+      border: 1px solid var(--border); background: transparent;
+      color: var(--mist); cursor: pointer; font-size: 16px;
+      display: flex; align-items: center; justify-content: center;
+      transition: all .18s;
+    }
+
+    .gen-close:hover { border-color: var(--amber); color: var(--amber); background: var(--amber-dim); }
+
+    .gen-body { padding: 20px 24px 24px; display: flex; flex-direction: column; gap: 18px; }
+
+    .gen-field { display: flex; flex-direction: column; gap: 7px; }
+
+    .gen-lbl {
+      font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--mist);
+    }
+
+    .gen-textarea {
+      background: rgba(5,9,20,0.82); border: 1px solid rgba(139,155,184,0.24);
+      border-radius: var(--r-md); color: var(--snow);
+      font-family: "Noto Sans SC", sans-serif; font-size: 14px; line-height: 1.8;
+      padding: 14px 16px; resize: vertical; min-height: 110px;
+      transition: border-color .18s, box-shadow .18s;
+    }
+
+    .gen-textarea:focus {
+      outline: none; border-color: var(--teal-line);
+      box-shadow: 0 0 0 2px rgba(0,224,200,0.16);
+    }
+    .gen-textarea::placeholder { color: #7b8dab; }
+
+    .gen-apikey-input {
+      background: rgba(5,9,20,0.82); border: 1px solid rgba(139,155,184,0.24);
+      border-radius: var(--r-md); color: var(--snow);
+      font-family: "Noto Sans SC", monospace; font-size: 13px;
+      padding: 11px 16px; width: 100%;
+      transition: border-color .18s, box-shadow .18s; letter-spacing: 0.3px;
+    }
+
+    .gen-apikey-input:focus {
+      outline: none; border-color: var(--amber);
+      box-shadow: 0 0 0 2px rgba(240,185,65,0.16);
+    }
+    .gen-apikey-input::placeholder { color: #7b8dab; }
+
+    .gen-api-note {
+      margin-top: 6px;
+      font-size: 12px;
+      line-height: 1.6;
+      color: #9fb1cd;
+    }
+
+    .gen-api-note a {
+      color: #ffcc66;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    /* reference image upload zone */
+    .gen-upload-zone {
+      border: 1.5px dashed rgba(139,155,184,0.28); border-radius: var(--r-md);
+      background: rgba(8,12,24,0.68); padding: 16px 20px;
+      display: flex; align-items: center; gap: 14px;
+      cursor: pointer; transition: border-color .18s, background .18s;
+      position: relative; overflow: hidden;
+    }
+
+    .gen-upload-zone:hover { border-color: var(--teal-line); background: var(--teal-dim); }
+    .gen-upload-zone.has-file { border-color: rgba(0,224,200,0.62); background: rgba(0,224,200,0.08); }
+
+    .gen-upload-icon { font-size: 24px; flex-shrink: 0; opacity: 0.88; color: #c9d6ed; }
+
+    .gen-upload-text { display: flex; flex-direction: column; gap: 2px; }
+    .gen-upload-title { font-size: 13px; color: var(--snow); font-weight: 500; }
+    .gen-upload-hint { font-size: 11px; color: #8ea2c2; }
+
+    .gen-upload-preview {
+      width: 54px; height: 54px; border-radius: var(--r-sm);
+      object-fit: cover; border: 1px solid var(--border-hi);
+      flex-shrink: 0; margin-left: auto; display: none;
+    }
+
+    .gen-upload-input {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer; font-size: 0;
+    }
+
+    .gen-upload-clear {
+      margin-left: auto; padding: 5px 12px; border-radius: var(--r-sm);
+      border: 1px solid rgba(240,185,65,0.32); background: var(--amber-dim);
+      color: var(--amber); font-size: 11px; cursor: pointer; display: none;
+      transition: all .18s;
+    }
+
+    .gen-upload-clear:hover { background: rgba(240,185,65,0.22); }
+
+    .gen-actions { display: flex; align-items: center; gap: 10px; }
+
+    .gen-submit {
+      flex: 1; padding: 14px 0; border-radius: var(--r-md);
+      border: none;
+      background: linear-gradient(135deg, #00e0c8 0%, #0089d6 100%);
+      color: #07090f; font-family: "Syne", sans-serif;
+      font-size: 14px; font-weight: 700; letter-spacing: 0.5px;
+      cursor: pointer; transition: opacity .18s, box-shadow .18s;
+    }
+
+    .gen-submit:hover { opacity: 0.9; box-shadow: 0 0 28px rgba(0,224,200,0.35); }
+    .gen-submit:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; }
+
+    .gen-cancel {
+      padding: 14px 20px; border-radius: var(--r-md);
+      border: 1px solid rgba(139,155,184,0.28); background: rgba(139,155,184,0.06);
+      color: #c4d1e6; font-family: inherit; font-size: 14px;
+      cursor: pointer; transition: all .18s;
+    }
+
+    .gen-cancel:hover { border-color: #8ea2c2; color: var(--snow); background: rgba(139,155,184,0.14); }
+
+    .gen-status {
+      font-size: 12px; min-height: 16px;
+      display: flex; align-items: center; gap: 6px;
+    }
+
+    .gen-status.running { color: var(--teal); }
+    .gen-status.error   { color: #f06060; }
+    .gen-status.ok      { color: #62d76a; }
+    .gen-status a {
+      color: #ffcc66;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+      margin-left: 4px;
+    }
+
+    /* loading spinner */
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .gen-spinner {
+      display: inline-block; width: 12px; height: 12px; border-radius: 50%;
+      border: 2px solid rgba(0,224,200,0.3); border-top-color: var(--teal);
+      animation: spin .7s linear infinite;
+    }
+
+    /* result area */
+    .gen-result {
+      border-top: 1px solid var(--border); padding: 20px 24px 24px;
+      display: none; flex-direction: column; gap: 14px;
+    }
+
+    .gen-result.visible { display: flex; }
+
+    .gen-result-lbl { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--mist); }
+
+    .gen-result-img {
+      width: 100%; border-radius: var(--r-md);
+      border: 1px solid var(--border-hi); background: var(--ink-3);
+      max-height: 480px; object-fit: contain;
+    }
+
+    .gen-result-acts { display: flex; gap: 8px; }
+
+    .gen-dl-btn {
+      padding: 10px 18px; border-radius: var(--r-sm);
+      border: 1px solid var(--teal-line); background: var(--teal-dim);
+      color: var(--teal); font-family: inherit; font-size: 13px;
+      cursor: pointer; transition: all .18s; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
+    }
+
+    .gen-dl-btn:hover { background: rgba(0,224,200,0.24); }
+
+    /* card generate button */
+    .act-btn.g-act {
+      border-color: rgba(0,224,200,0.35); color: var(--teal);
+      background: var(--teal-dim);
+    }
+
+    .act-btn.g-act:hover { background: rgba(0,224,200,0.22); border-color: var(--teal); }
+
+    /* ── Responsive ── */
+    @media (max-width: 960px) {
+      .hero { grid-template-columns: 1fr; }
+      .hero-aside { display: none; }
+      .stats-strip { flex-wrap: wrap; }
+      .s-item { flex: 0 0 50%; }
+      .modal-card { grid-template-columns: 1fr; }
+      .modal-left { border-right: none; border-bottom: 1px solid var(--border); }
+      .modal-img { max-height: 45vw; object-fit: contain; }
+    }
+
+    @media (max-width: 620px) {
+      .wrap { padding: 16px 0 60px; }
+      .hero { padding: 28px 20px; }
+      .hero-h1 { letter-spacing: -0.8px; }
+      .controls { padding: 16px 16px; }
+      .gallery { grid-template-columns: 1fr 1fr; }
+      .search-row { flex-wrap: wrap; }
+      .search-wrap { flex: 0 0 100%; }
+    }
+
+    @media (max-width: 420px) {
+      .gallery { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+
+    <section class="hero">
+      <div>
+        <span class="hero-tag">Prompt Engineering · Gallery</span>
+        <h1 class="hero-h1">AWESOME<br /><em>GPT-IMAGE-2</em></h1>
+        <p class="hero-desc">
+          精选提示词画廊，支持分类筛选、全文搜索、弹窗预览与一键复制。
+          涵盖电商、海报、UI、摄影等多场景实战案例。
+        </p>
+        <div class="stats-strip">
+          <div class="s-item">
+            <div class="s-val c-teal" id="statTotal"><%= payload.stats.totalPrompts || 0 %></div>
+            <div class="s-lbl">提示词</div>
+          </div>
+          <div class="s-item">
+            <div class="s-val"><%= payload.stats.totalCategories || 0 %></div>
+            <div class="s-lbl">分类</div>
+          </div>
+          <div class="s-item">
+            <div class="s-val c-amber"><%= payload.stats.latestXPrompts || 0 %></div>
+            <div class="s-lbl">X 精选</div>
+          </div>
+          <div class="s-item">
+            <div class="s-val" style="font-size:18px;padding-top:5px"><%= payload.stats.model || '—' %></div>
+            <div class="s-lbl">模型</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="controls" aria-label="筛选控制区">
+      <div class="search-row">
+        <div class="search-wrap">
+          <span class="s-icon">⌕</span>
+          <input id="searchInput" class="search-input" type="text"
+            placeholder="搜索标题、分类或提示词关键词…" aria-label="搜索提示词" autocomplete="off" />
+        </div>
+        <button id="clearFilter" class="clear-btn" type="button">清空</button>
+      </div>
+      <div class="chips-row">
+        <span class="chips-lbl">分类</span>
+        <div id="categoryGroup" style="display:contents" aria-label="分类筛选"></div>
+      </div>
+      <div class="meta-row">
+        <span id="resultMeta">加载中…</span>
+        <span id="activeMeta">全部</span>
+      </div>
+    </section>
+
+    <section aria-live="polite">
+      <div class="sec-head">
+        <h2 class="sec-title">提示词画廊</h2>
+        <div class="sec-rule"></div>
+      </div>
+      <div id="gallery" class="gallery"></div>
+      <div class="load-area">
+        <button id="loadMoreBtn" class="load-btn" type="button">加载更多</button>
+        <div id="loadTip" class="load-tip"></div>
+        <div id="lazySentinel" aria-hidden="true"></div>
+      </div>
+    </section>
+
+    <section aria-label="最新 X Prompt">
+      <div class="sec-head">
+        <h2 class="sec-title">最新 X Prompt</h2>
+        <div class="sec-rule"></div>
+      </div>
+      <div id="xGrid" class="x-grid"></div>
+    </section>
+
+    <p class="footer">
+      GPT-Image-2 Prompt Gallery &nbsp;·&nbsp; <%= new Date().toISOString().slice(0,10) %>
+      &nbsp;·&nbsp; <span class="footer-visitors">👁 已有 <strong><%= pageVisitorCount.toLocaleString() %></strong> 人访问</span>
+    </p>
+  </div>
+
+  <div id="genModal" class="gen-modal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="genTitle">
+    <div class="gen-card">
+      <div class="gen-header">
+        <div class="gen-title-wrap">
+          <div class="gen-title">立即生图<em>GPT-IMAGE-2</em></div>
+          <div id="genItemName" class="gen-item-name"></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span id="genModeChip" class="gen-mode-chip free">无密钥模式</span>
+          <button class="gen-close" id="genCloseBtn" type="button" aria-label="关闭">✕</button>
+        </div>
+      </div>
+      <div class="gen-body">
+        <div class="gen-field">
+          <label class="gen-lbl" for="genPrompt">Prompt 提示词</label>
+          <textarea id="genPrompt" class="gen-textarea" rows="5" placeholder="描述你想要生成的图像…"></textarea>
+        </div>
+        <div class="gen-field">
+          <span class="gen-lbl">参考图（可选）— 上传后将进行图像编辑</span>
+          <div class="gen-upload-zone" id="genUploadZone">
+            <span class="gen-upload-icon">🖼</span>
+            <div class="gen-upload-text">
+              <span class="gen-upload-title">点击上传或拖拽参考图</span>
+              <span class="gen-upload-hint">支持 JPG / PNG / WEBP，建议正方形</span>
+            </div>
+            <img id="genPreview" class="gen-upload-preview" src="" alt="参考图预览" />
+            <button id="genClearImg" class="gen-upload-clear" type="button">移除</button>
+            <input id="genFileInput" class="gen-upload-input" type="file" accept="image/png,image/jpeg,image/webp" />
+          </div>
+        </div>
+        <div class="gen-field">
+          <label class="gen-lbl" for="genApiKey">API Key（可选）— 填写后使用密钥额度生成</label>
+          <input id="genApiKey" class="gen-apikey-input" type="text" autocomplete="off" spellcheck="false" />
+          <p class="gen-api-note">没有密钥仅可试用一次。购买密钥：<a href="https://devtool.uk/plugin" target="_blank" rel="noopener noreferrer">https://devtool.uk/plugin</a></p>
+        </div>
+        <div class="gen-actions">
+          <button id="genSubmitBtn" class="gen-submit" type="button">✦ 立即生成</button>
+          <button id="genCancelBtn" class="gen-cancel" type="button">取消</button>
+        </div>
+        <div id="genStatus" class="gen-status"></div>
+      </div>
+      <div id="genResult" class="gen-result">
+        <span class="gen-result-lbl">生成结果</span>
+        <img id="genResultImg" class="gen-result-img" src="" alt="AI 生成图像" />
+        <div class="gen-result-acts">
+          <button id="genDownloadBtn" class="gen-dl-btn" type="button">⬇ 下载图片</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="detailModal" class="modal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="modalTitle">
+    <div class="modal-card">
+      <div class="modal-left">
+        <img id="modalImage" class="modal-img" src="" alt="提示词示例预览图" loading="lazy" />
+      </div>
+      <div class="modal-right">
+        <h3 id="modalTitle" class="modal-title"></h3>
+        <p id="modalMeta" class="modal-meta"></p>
+        <span class="p-lbl">Prompt</span>
+        <div id="modalPrompt" class="prompt-box"></div>
+        <div class="modal-acts">
+          <button id="copyPromptBtn" class="mbtn mbtn-p" type="button">复制提示词</button>
+          <button id="copyTitleBtn" class="mbtn mbtn-g" type="button">复制标题</button>
+          <button id="closeModalBtn" class="mbtn mbtn-c" type="button">关闭</button>
+        </div>
+        <p id="copyState" class="copy-state"></p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const data = <%- JSON.stringify(payload).replace(/</g, '\\u003c') %>;
+
+    const state = {
+      query: '', category: 'all',
+      pageSize: Number(data.pagination && data.pagination.pageSize) || 12,
+      page: 1, currentResults: [], modalItem: null, copying: false
+    };
+
+    const searchInput    = document.getElementById('searchInput');
+    const clearFilterBtn = document.getElementById('clearFilter');
+    const categoryGroup  = document.getElementById('categoryGroup');
+    const resultMeta     = document.getElementById('resultMeta');
+    const activeMeta     = document.getElementById('activeMeta');
+    const galleryEl      = document.getElementById('gallery');
+    const loadMoreBtn    = document.getElementById('loadMoreBtn');
+    const loadTip        = document.getElementById('loadTip');
+    const lazySentinel   = document.getElementById('lazySentinel');
+    const xGrid          = document.getElementById('xGrid');
+    const modal          = document.getElementById('detailModal');
+    const modalTitle     = document.getElementById('modalTitle');
+    const modalMeta      = document.getElementById('modalMeta');
+    const modalPrompt    = document.getElementById('modalPrompt');
+    const modalImage     = document.getElementById('modalImage');
+    const copyPromptBtn  = document.getElementById('copyPromptBtn');
+    const copyTitleBtn   = document.getElementById('copyTitleBtn');
+    const closeModalBtn  = document.getElementById('closeModalBtn');
+    const copyState      = document.getElementById('copyState');
+
+    const genModal       = document.getElementById('genModal');
+    const genItemName    = document.getElementById('genItemName');
+    const genModeChip    = document.getElementById('genModeChip');
+    const genPromptTA    = document.getElementById('genPrompt');
+    const genApiKeyInput = document.getElementById('genApiKey');
+    const genFileInput   = document.getElementById('genFileInput');
+    const genUploadZone  = document.getElementById('genUploadZone');
+    const genPreview     = document.getElementById('genPreview');
+    const genClearImg    = document.getElementById('genClearImg');
+    const genSubmitBtn   = document.getElementById('genSubmitBtn');
+    const genCancelBtn   = document.getElementById('genCancelBtn');
+    const genCloseBtn    = document.getElementById('genCloseBtn');
+    const genStatus      = document.getElementById('genStatus');
+    const genResult      = document.getElementById('genResult');
+    const genResultImg   = document.getElementById('genResultImg');
+    const genDownloadBtn = document.getElementById('genDownloadBtn');
+
+    let genImageBase64 = null;
+    let genRunning = false;
+
+    function updateModeChip() {
+      const hasKey = genApiKeyInput.value.trim().length > 0;
+      genModeChip.textContent = hasKey ? '付费模式 · -3积分' : '无密钥模式';
+      genModeChip.className = `gen-mode-chip ${hasKey ? 'paid' : 'free'}`;
+    }
+
+    function buildGenerateErrorHtml(message) {
+      const buyUrl = 'https://devtool.uk/plugin';
+      if (!message) return '✕ 生成失败，请稍后重试';
+      if (message.includes('免费试用次数已用完') || message.includes('API Key 积分已用完')) {
+        return `✕ ${message}，请前往 <a href="${buyUrl}" target="_blank" rel="noopener noreferrer">${buyUrl}</a> 购买密钥`;
+      }
+      return `✕ ${message}`;
+    }
+
+    function openGenModal(item) {
+      if (!item) return;
+      genPromptTA.value = item.prompt || '';
+      // DO NOT reset api_key — persist it across modal opens
+      genImageBase64 = null;
+      genPreview.style.display = 'none';
+      genClearImg.style.display = 'none';
+      genUploadZone.classList.remove('has-file');
+      genStatus.textContent = '';
+      genStatus.className = 'gen-status';
+      genResult.classList.remove('visible');
+      genResultImg.src = '';
+      genResultImg._currentSrc = null;
+      genSubmitBtn.disabled = false;
+      genItemName.textContent = item.title ? `# ${item.id} · ${item.title}` : '';
+      updateModeChip();
+      genModal.classList.add('open');
+      genModal.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeGenModal() {
+      if (genRunning) return;
+      genModal.classList.remove('open');
+      genModal.setAttribute('aria-hidden', 'true');
+    }
+
+    function setGenStatus(type, msg, showSpinner) {
+      genStatus.className = `gen-status ${type}`;
+      genStatus.innerHTML = showSpinner
+        ? `<span class="gen-spinner"></span> ${msg}`
+        : msg;
+    }
+
+    async function runGenerate() {
+      if (genRunning) return;
+      const prompt = genPromptTA.value.trim();
+      if (!prompt) { setGenStatus('error', '请填写提示词'); return; }
+      genRunning = true;
+      genSubmitBtn.disabled = true;
+      genResult.classList.remove('visible');
+      setGenStatus('running', '正在生成，请稍候（约 15–40 秒）…', true);
+
+      try {
+        const body = { prompt };
+        if (genImageBase64) body.imageBase64 = genImageBase64;
+        const apiKey = genApiKeyInput.value.trim();
+        if (apiKey) body.api_key = apiKey;
+        const resp = await fetch('/api/gpt-image-2/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        const json = await resp.json();
+        if (!json.success) throw new Error(json.error || '生成失败');
+
+        let src = json.imageUrl;
+        if (!src && json.b64Image) src = `data:image/png;base64,${json.b64Image}`;
+        if (!src) throw new Error('未返回图像数据');
+
+        genResultImg.src = src;
+        genResultImg._currentSrc = src;
+        genResult.classList.add('visible');
+        setGenStatus('ok', '✓ 生成成功');
+      } catch (err) {
+        setGenStatus('error', buildGenerateErrorHtml(err.message));
+      } finally {
+        genRunning = false;
+        genSubmitBtn.disabled = false;
+      }
+    }
+
+    function attachGenModalEvents() {
+      genCloseBtn.addEventListener('click', closeGenModal);
+      genCancelBtn.addEventListener('click', closeGenModal);
+      genModal.addEventListener('click', (ev) => { if (ev.target === genModal) closeGenModal(); });
+
+      genApiKeyInput.addEventListener('input', updateModeChip);
+
+      genDownloadBtn.addEventListener('click', async () => {
+        const src = genResultImg._currentSrc;
+        if (!src) return;
+        try {
+          if (src.startsWith('data:')) {
+            const a = document.createElement('a');
+            a.href = src; a.download = 'gpt-image-2.png';
+            a.click();
+          } else {
+            const resp = await fetch(src);
+            const blob = await resp.blob();
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = 'gpt-image-2.png';
+            a.click();
+            setTimeout(() => URL.revokeObjectURL(url), 60000);
+          }
+        } catch { window.open(src, '_blank'); }
+      });
+
+      genFileInput.addEventListener('change', () => {
+        const file = genFileInput.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          genImageBase64 = ev.target.result;
+          genPreview.src = genImageBase64;
+          genPreview.style.display = 'block';
+          genClearImg.style.display = 'inline-block';
+          genUploadZone.classList.add('has-file');
+        };
+        reader.readAsDataURL(file);
+      });
+
+      // drag-and-drop
+      genUploadZone.addEventListener('dragover', (ev) => { ev.preventDefault(); genUploadZone.classList.add('has-file'); });
+      genUploadZone.addEventListener('dragleave', () => { if (!genImageBase64) genUploadZone.classList.remove('has-file'); });
+      genUploadZone.addEventListener('drop', (ev) => {
+        ev.preventDefault();
+        const file = ev.dataTransfer.files?.[0];
+        if (!file || !file.type.startsWith('image/')) return;
+        const reader = new FileReader();
+        reader.onload = (ev2) => {
+          genImageBase64 = ev2.target.result;
+          genPreview.src = genImageBase64;
+          genPreview.style.display = 'block';
+          genClearImg.style.display = 'inline-block';
+          genUploadZone.classList.add('has-file');
+        };
+        reader.readAsDataURL(file);
+      });
+
+      genClearImg.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        genImageBase64 = null;
+        genFileInput.value = '';
+        genPreview.src = '';
+        genPreview.style.display = 'none';
+        genClearImg.style.display = 'none';
+        genUploadZone.classList.remove('has-file');
+      });
+
+      genSubmitBtn.addEventListener('click', runGenerate);
+      genPromptTA.addEventListener('keydown', (ev) => {
+        if ((ev.ctrlKey || ev.metaKey) && ev.key === 'Enter') runGenerate();
+      });
+    }
+
+    function buildCategoryChips() {
+      const cats = Array.isArray(data.categories) ? data.categories : [];
+      categoryGroup.innerHTML = cats.map((cat) => {
+        const a = cat.id === state.category;
+        return `<button class="chip${a?' active':''}" data-type="category" data-id="${e(cat.id)}" type="button">${e(cat.name)}<span class="cnt">${Number(cat.count||0)}</span></button>`;
+      }).join('');
+    }
+
+    function buildTagChips() {}
+
+    function applyFilter() {
+      const src = Array.isArray(data.items) ? data.items : [];
+      const q = state.query.trim().toLowerCase();
+      state.currentResults = src.filter((item) => {
+        if (state.category !== 'all' && item.categoryId !== state.category) return false;
+        if (!q) return true;
+        const corpus = [item.title, item.categoryName, item.prompt, ...(item.tags||[])].filter(Boolean).join(' ').toLowerCase();
+        return corpus.includes(q);
+      });
+      renderGallery();
+      updateMeta();
+    }
+
+    function renderGallery() {
+      const end = state.page * state.pageSize;
+      const shown = state.currentResults.slice(0, end);
+      if (shown.length === 0) {
+        galleryEl.innerHTML = '<div class="empty">没有匹配结果，尝试清空筛选或更换关键词。</div>';
+      } else {
+        galleryEl.innerHTML = shown.map((item) =>
+          `<article class="card" data-item-id="${e(item.id)}">
+            <div class="thumb-wrap">
+              <img class="thumb" src="${e(item.image)}" alt="${e(item.title)}" loading="lazy" referrerpolicy="no-referrer"/>
+              <span class="card-num">${e(item.id)}</span>
+            </div>
+            <div class="card-body">
+              <h3 class="card-title">${e(item.title)}</h3>
+              <p class="card-cat">${e(item.categoryName)}</p>
+              <div class="card-acts">
+                <button class="act-btn" data-action="preview" data-id="${e(item.id)}" type="button">查看详情</button>
+                <button class="act-btn g-act" data-action="generate" data-id="${e(item.id)}" type="button">立即生图</button>
+              </div>
+            </div>
+          </article>`).join('');
+      }
+      const hasMore = end < state.currentResults.length;
+      loadMoreBtn.style.display = hasMore ? 'inline-block' : 'none';
+      loadTip.textContent = hasMore
+        ? `已显示 ${shown.length} / ${state.currentResults.length}`
+        : `全部 ${state.currentResults.length} 条已显示`;
+    }
+
+    function updateMeta() {
+      const cat = (data.categories||[]).find((c) => c.id === state.category);
+      resultMeta.textContent = `共 ${state.currentResults.length} 条`;
+      activeMeta.textContent = `${cat ? cat.name : '全部'}${state.query ? ' · "'+state.query+'"' : ''}`;
+      const el = document.getElementById('statTotal');
+      if (el) el.textContent = String(state.currentResults.length || 0);
+    }
+
+    function renderXPrompts() {
+      const list = Array.isArray(data.latestXPrompts) ? data.latestXPrompts : [];
+      if (!list.length) { xGrid.innerHTML = '<div class="empty">暂无最新 X Prompt 数据</div>'; return; }
+      xGrid.innerHTML = list.map((item) =>
+        `<article class="x-card">
+          <img class="x-thumb" src="${e(item.image||'')}" alt="${e(item.title||'X Prompt')}" loading="lazy" referrerpolicy="no-referrer"/>
+          <div class="x-body">
+            <h3 class="x-name">${e(item.title||'—')}</h3>
+            <p class="x-meta">${e(item.author||'—')} · ${e(item.date||'—')}</p>
+            <p class="x-meta">点赞 ${Number(item.likes||0)} · 转推 ${Number(item.reposts||0)}</p>
+            <button class="x-copy" type="button" data-x-copy="${e(item.id||'')}">复制这条 X Prompt</button>
+          </div>
+        </article>`).join('');
+    }
+
+    function getItemById(id) {
+      return (data.items||[]).find((it) => String(it.id) === String(id)) || null;
+    }
+
+    function openModal(item) {
+      if (!item) return;
+      state.modalItem = item;
+      modalTitle.textContent = item.title || '—';
+      modalMeta.textContent = `#${item.id||'—'}  ·  ${item.categoryName||'—'}`;
+      modalPrompt.textContent = item.prompt || '—';
+      modalImage.src = item.image || '';
+      modalImage.alt = item.title || '预览';
+      copyState.textContent = '';
+      modal.classList.add('open');
+      modal.setAttribute('aria-hidden','false');
+    }
+
+    function closeModal() {
+      modal.classList.remove('open');
+      modal.setAttribute('aria-hidden','true');
+      state.modalItem = null;
+    }
+
+    async function copyText(text, hint) {
+      if (!text || state.copying) return;
+      state.copying = true;
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(text);
+        } else {
+          const ta = document.createElement('textarea');
+          ta.value = text; ta.setAttribute('readonly','');
+          ta.style.cssText = 'position:fixed;left:-9999px';
+          document.body.appendChild(ta); ta.select();
+          document.execCommand('copy'); document.body.removeChild(ta);
+        }
+        copyState.textContent = `✓  已复制：${hint}`;
+      } catch { copyState.textContent = '复制失败，请手动选取。'; }
+      finally { state.copying = false; }
+    }
+
+    function e(raw) {
+      return String(raw)
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    }
+
+    function attachEvents() {
+      searchInput.addEventListener('input', (ev) => { state.query = ev.target.value||''; state.page=1; applyFilter(); });
+
+      clearFilterBtn.addEventListener('click', () => {
+        state.query=''; state.category='all'; state.page=1;
+        searchInput.value=''; buildCategoryChips(); applyFilter();
+      });
+
+      categoryGroup.addEventListener('click', (ev) => {
+        const btn = ev.target.closest('[data-type="category"]');
+        if (!btn) return;
+        state.category = btn.getAttribute('data-id')||'all'; state.page=1;
+        buildCategoryChips(); applyFilter();
+      });
+
+      galleryEl.addEventListener('click', (ev) => {
+        const btn = ev.target.closest('[data-action]');
+        if (!btn) return;
+        const item = getItemById(btn.getAttribute('data-id'));
+        if (!item) return;
+        if (btn.getAttribute('data-action')==='preview') openModal(item);
+        if (btn.getAttribute('data-action')==='generate') openGenModal(item);
+      });
+
+      xGrid.addEventListener('click', (ev) => {
+        const btn = ev.target.closest('[data-x-copy]');
+        if (!btn) return;
+        const id = btn.getAttribute('data-x-copy');
+        const p = (data.latestXPrompts||[]).find((it)=>it.id===id);
+        if (p) copyText(p.prompt||'', `X Prompt ${p.author||''}`);
+      });
+
+      loadMoreBtn.addEventListener('click', () => {
+        if (state.page * state.pageSize < state.currentResults.length) { state.page++; renderGallery(); }
+      });
+
+      copyPromptBtn.addEventListener('click', () => { if (state.modalItem) copyText(state.modalItem.prompt||'', `${state.modalItem.id} 提示词`); });
+      copyTitleBtn.addEventListener('click',  () => { if (state.modalItem) copyText(state.modalItem.title||'',  `${state.modalItem.id} 标题`); });
+      closeModalBtn.addEventListener('click', closeModal);
+      modal.addEventListener('click', (ev) => { if (ev.target===modal) closeModal(); });
+      document.addEventListener('keydown', (ev) => { if (ev.key==='Escape' && modal.classList.contains('open')) closeModal(); });
+
+      if ('IntersectionObserver' in window) {
+        const obs = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting && state.page * state.pageSize < state.currentResults.length) { state.page++; renderGallery(); }
+          });
+        }, { rootMargin:'120px' });
+        obs.observe(lazySentinel);
+      }
+    }
+
+    function init() { buildCategoryChips(); renderXPrompts(); applyFilter(); attachEvents(); attachGenModalEvents(); }
+    init();
+  </script>
+</body>
+</html>

@@ -1,7 +1,10 @@
 import { getWebAuthenticationUrl, getWebOAuthToken, refreshOAuthToken, CozeAPI } from '@coze/api';
 import redis from '../redisClient.js';  // 注意：引入redis时也需要添加.js扩展名
 import axios from 'axios';
+import commonUtils from '../commonUtils.js';
+import unkey from '../unkey.js';
 
+const unkey_api_id = "api_413Kmmitqy3qaDo4"
 
 const config = {
     "client_type": "web",
@@ -27,6 +30,7 @@ function timestampToDatetime(timestamp) {
     return new Date(timestamp * 1000).toLocaleString();
 }
 
+const personal_key = "pat_LFKXTpOajVc0AXlu0SM7zTppJv8yHOtlQpdxWkC5J3Xp3amTR2acHX0di0l8Dv9z"
 
 const AuthUrl = `https://www.coze.cn/api/permission/oauth2/authorize?response_type=code&client_id=02946235786684291985716943699095.app.coze&redirect_uri=http://localhost:3000/coze-auth-callback&state=1294848`
 
@@ -36,7 +40,7 @@ const coze = {
         if(!access_token){
             const refresh_token = await redis.get("coze_api_refresh_token")
             access_token = await this.refresh_token(refresh_token)
-            
+
         }
         console.log(access_token)
         const apiClient = new CozeAPI({
@@ -110,7 +114,7 @@ const coze = {
             console.error("Failed to refresh token:", error);
             return ""
         }
-        
+
     },
     generate_video_caption: async function (url, retried = false) {
         console.log("audio地址：", url)
@@ -157,7 +161,75 @@ const coze = {
             console.error("Failed to generate video caption:", error);
             throw error;
         }
-}
+    },
+
+    /**
+     * 工作流主运行接口
+     */
+    workflow_run: async  (req, res) => {
+        const { workflow: workflow_name, api_key, parameters = {} } = req.body;
+
+        if (!workflow_name) return res.send({ code: -1, msg: "工作流名称不能为空！" });
+        if (!api_key) return res.send({ code: -1, msg: commonUtils.MESSAGE.TOKEN_EMPTY });
+
+        try {
+            const check = await unkey.verifyKey(unkey_api_id, api_key, 0);
+            if (!check.valid) return res.send({ code: -1, msg: commonUtils.MESSAGE.TOKEN_EXPIRED });
+            if (check.remaining <= 0) return res.send({ code: -1, msg: commonUtils.MESSAGE.TOKEN_NO_TIMES });
+
+            const workflow_id = await commonUtils.get_one_workflow_id_from_bitable(workflow_name);
+
+            // 【核心修复】：使用 coze 直接调用，避免 this 指向错误
+            coze._runBackgroundWorkflow(workflow_id, parameters, api_key).catch(e => {
+                console.error("[Fatal] 后台任务启动器异常:", e.message);
+            });
+
+            return res.send({ 
+                code: 200, 
+                msg: "运行中，请稍后",
+                data: {
+                    status: "processing",
+                    workflow: workflow_name,
+                    remaining_before: check.remaining
+                }
+            });
+
+        } catch (error) {
+            console.error("Workflow Run 入口异常:", error.message);
+            return res.send({ 
+                code: -1, 
+                msg: error.message || commonUtils.MESSAGE.SERVER_ERROR 
+            });
+        }
+    },
+
+    /**
+     * 内部异步处理线程
+     */
+    _runBackgroundWorkflow: async function (workflow_id, parameters, api_key) {
+        try {
+            // 这里同样建议使用 coze.getAccessToken() 替代 this.getAccessToken()
+            const finalAuth = `Bearer ${personal_key}`;
+
+            const response = await axios({
+                method: 'post',
+                url: 'https://api.coze.cn/v1/workflow/run',
+                timeout: 180000,
+                headers: {
+                    'Authorization': finalAuth,
+                    'Content-Type': 'application/json'
+                },
+                data: { workflow_id, parameters }
+            });
+
+            if (response.data.code === 0) {
+                const consume = await unkey.verifyKey(unkey_api_id, api_key, 1);
+                console.log(`[Success] 执行成功，扣费完成`);
+            }
+        } catch (error) {
+            console.error(`[Background Task Failed]`, error.message);
+        }
+    }
 }
 
 export default coze

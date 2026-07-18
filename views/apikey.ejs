@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>API Key 查询</title>
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Noto+Sans+SC:wght@400;600&display=swap");
+
+    :root {
+      --bg-0: #060811;
+      --bg-1: #0a1430;
+      --bg-2: #13274f;
+      --cyan: #3df5ff;
+      --cyan-dim: rgba(61,245,255,0.15);
+      --panel: rgba(8,20,50,0.72);
+      --panel-border: rgba(96,137,255,0.35);
+      --text-main: #dff9ff;
+      --text-sub: #91aac7;
+      --green: #3dffa0;
+      --red: #ff5f6d;
+      --yellow: #ffd166;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      min-height: 100vh;
+      font-family: "Noto Sans SC", "Microsoft YaHei", sans-serif;
+      color: var(--text-main);
+      background:
+        radial-gradient(circle at 80% 10%, rgba(79,159,255,0.22), transparent 38%),
+        radial-gradient(circle at 15% 80%, rgba(0,255,230,0.16), transparent 42%),
+        linear-gradient(145deg, var(--bg-0), var(--bg-1) 50%, var(--bg-2));
+    }
+
+    /* ── layout ── */
+    .page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+
+    /* ── header ── */
+    .logo {
+      font-family: "Orbitron", sans-serif;
+      font-size: 1.5rem;
+      letter-spacing: .12em;
+      color: var(--cyan);
+      text-shadow: 0 0 18px rgba(61,245,255,.55);
+      margin-bottom: .4rem;
+    }
+    .subtitle {
+      color: var(--text-sub);
+      font-size: .88rem;
+      margin-bottom: 2.4rem;
+      letter-spacing: .04em;
+    }
+
+    /* ── card ── */
+    .card {
+      width: 100%;
+      max-width: 480px;
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 16px;
+      padding: 2rem 2rem 2.2rem;
+      backdrop-filter: blur(14px);
+      box-shadow: 0 8px 48px rgba(0,0,0,.5), 0 0 0 1px rgba(61,245,255,.06) inset;
+    }
+
+    .card label {
+      display: block;
+      font-size: .8rem;
+      color: var(--text-sub);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      margin-bottom: .5rem;
+    }
+
+    .input-wrap {
+      position: relative;
+      margin-bottom: 1.2rem;
+    }
+
+    .input-wrap input {
+      width: 100%;
+      padding: .75rem 1rem;
+      background: rgba(255,255,255,.05);
+      border: 1px solid var(--panel-border);
+      border-radius: 10px;
+      color: var(--text-main);
+      font-size: .95rem;
+      font-family: "Noto Sans SC", monospace;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .input-wrap input:focus {
+      border-color: var(--cyan);
+      box-shadow: 0 0 0 3px rgba(61,245,255,.15);
+    }
+    .input-wrap input::placeholder { color: #4c5e76; }
+
+    .btn {
+      width: 100%;
+      padding: .8rem;
+      background: linear-gradient(135deg, #1a6fff, #00d4ff);
+      border: none;
+      border-radius: 10px;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      letter-spacing: .06em;
+      transition: opacity .2s, transform .1s;
+    }
+    .btn:hover { opacity: .88; }
+    .btn:active { transform: scale(.98); }
+    .btn:disabled { opacity: .4; cursor: not-allowed; }
+
+    /* ── result panel ── */
+    #result {
+      margin-top: 1.6rem;
+      display: none;
+    }
+
+    .badge-row {
+      display: flex;
+      gap: .6rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.2rem;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: .35rem;
+      padding: .3rem .75rem;
+      border-radius: 999px;
+      font-size: .78rem;
+      font-weight: 600;
+      letter-spacing: .05em;
+    }
+    .badge.valid   { background: rgba(61,255,160,.12); color: var(--green); border: 1px solid rgba(61,255,160,.3); }
+    .badge.invalid { background: rgba(255,95,109,.12); color: var(--red);   border: 1px solid rgba(255,95,109,.3); }
+    .badge.enabled { background: rgba(61,245,255,.12); color: var(--cyan);  border: 1px solid rgba(61,245,255,.3); }
+    .badge.disabled{ background: rgba(255,209,102,.12);color: var(--yellow);border: 1px solid rgba(255,209,102,.3);}
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .75rem;
+    }
+
+    .info-item {
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(96,137,255,.2);
+      border-radius: 10px;
+      padding: .8rem 1rem;
+    }
+    .info-item .label {
+      font-size: .7rem;
+      color: var(--text-sub);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      margin-bottom: .3rem;
+    }
+    .info-item .value {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text-main);
+      word-break: break-all;
+    }
+    .info-item .value.highlight { color: var(--cyan); }
+    .info-item .value.credits   { color: var(--green); font-size: 1.4rem; }
+
+    .meta-row {
+      margin-top: .9rem;
+      font-size: .72rem;
+      color: #4c5e76;
+      text-align: right;
+      letter-spacing: .04em;
+    }
+
+    /* ── error ── */
+    .error-box {
+      margin-top: 1rem;
+      padding: .75rem 1rem;
+      background: rgba(255,95,109,.1);
+      border: 1px solid rgba(255,95,109,.3);
+      border-radius: 10px;
+      color: var(--red);
+      font-size: .88rem;
+      display: none;
+    }
+
+    /* ── visitor count ── */
+    .visitor-count {
+      font-size: .78rem;
+      color: #4c5e76;
+      margin-bottom: 1.6rem;
+      letter-spacing: .06em;
+    }
+    .visitor-count span {
+      color: var(--cyan);
+      font-weight: 600;
+    }
+
+    /* ── spinner ── */
+    .spinner {
+      display: inline-block;
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      vertical-align: middle;
+      margin-right: .4rem;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── renew link ── */
+    .renew-link {
+      margin-top: 1.2rem;
+      text-align: center;
+      font-size: .82rem;
+      color: var(--text-sub);
+    }
+    .renew-link a {
+      color: var(--cyan);
+      text-decoration: none;
+      font-weight: 600;
+      border-bottom: 1px solid rgba(61,245,255,.35);
+      transition: color .2s, border-color .2s;
+    }
+    .renew-link a:hover { color: #fff; border-color: #fff; }
+  </style>
+</head>
+<body>
+<div class="page">
+  <div class="logo">API KEY 查询</div>
+  <div class="subtitle">输入您的 API Key，查询账户余额与状态</div>
+  <div class="visitor-count">累计访问 <span id="vcNum"><%= visitorCount %></span> 次</div>
+
+  <div class="card">
+    <label for="keyInput">您的 API Key</label>
+    <div class="input-wrap">
+      <input id="keyInput" type="text" autocomplete="off" spellcheck="false" />
+    </div>
+    <button class="btn" id="queryBtn" onclick="queryKey()">查 询</button>
+
+    <div class="error-box" id="errorBox"></div>
+
+    <div id="result">
+      <div class="badge-row" id="badgeRow"></div>
+      <div class="info-grid" id="infoGrid"></div>
+      <div class="meta-row" id="metaRow"></div>
+    </div>
+    <div class="renew-link">
+      额度不足？<a href="https://devtool.uk/plugin" target="_blank" rel="noopener noreferrer">立即购买 / 续费 →</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  async function queryKey() {
+    const key = document.getElementById('keyInput').value.trim();
+    const btn = document.getElementById('queryBtn');
+    const errorBox = document.getElementById('errorBox');
+    const result = document.getElementById('result');
+
+    errorBox.style.display = 'none';
+    result.style.display = 'none';
+
+    if (!key) {
+      showError('请先输入 API Key');
+      return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>查询中...';
+
+    try {
+      const resp = await fetch('/apikey/query', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key })
+      });
+
+      const json = await resp.json();
+
+      if (!resp.ok || json.error) {
+        showError(json.error || '查询失败，请检查 Key 是否正确');
+        return;
+      }
+
+      renderResult(json);
+    } catch (e) {
+      showError('网络错误，请稍后重试');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '查 询';
+    }
+  }
+
+  function renderResult(json) {
+    const data = json.data || {};
+    const meta = json.meta || {};
+
+    // badges
+    const badgeRow = document.getElementById('badgeRow');
+    badgeRow.innerHTML = '';
+    if (data.valid !== undefined) {
+      const b = document.createElement('span');
+      b.className = 'badge ' + (data.valid ? 'valid' : 'invalid');
+      b.textContent = data.valid ? '✓ 有效' : '✗ 无效';
+      badgeRow.appendChild(b);
+    }
+    if (data.enabled !== undefined) {
+      const b = document.createElement('span');
+      b.className = 'badge ' + (data.enabled ? 'enabled' : 'disabled');
+      b.textContent = data.enabled ? '已启用' : '已禁用';
+      badgeRow.appendChild(b);
+    }
+    if (data.code) {
+      const b = document.createElement('span');
+      b.className = 'badge enabled';
+      b.textContent = data.code;
+      badgeRow.appendChild(b);
+    }
+
+    // info grid
+    const grid = document.getElementById('infoGrid');
+    grid.innerHTML = '';
+
+    const items = [
+      { label: '账户名称', value: data.name || '—', cls: '' },
+      { label: '剩余额度', value: data.credits !== undefined ? data.credits : (data.remaining !== undefined ? data.remaining : '—'), cls: 'credits' },
+      { label: 'Key ID', value: data.keyId || '—', cls: 'highlight' },
+    ];
+
+    // include any extra fields from data
+    const known = new Set(['code','credits','remaining','enabled','keyId','name','valid']);
+    for (const [k, v] of Object.entries(data)) {
+      if (!known.has(k)) {
+        items.push({ label: k, value: String(v), cls: '' });
+      }
+    }
+
+    items.forEach(({ label, value, cls }) => {
+      grid.innerHTML += `
+        <div class="info-item">
+          <div class="label">${escHtml(label)}</div>
+          <div class="value ${cls}">${escHtml(String(value))}</div>
+        </div>`;
+    });
+
+    // meta
+    const metaRow = document.getElementById('metaRow');
+    metaRow.textContent = meta.requestId ? `Request ID: ${meta.requestId}` : '';
+
+    document.getElementById('result').style.display = 'block';
+  }
+
+  function showError(msg) {
+    const box = document.getElementById('errorBox');
+    box.textContent = msg;
+    box.style.display = 'block';
+  }
+
+  function escHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // enter key
+  document.getElementById('keyInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') queryKey();
+  });
+</script>
+</body>
+</html>
